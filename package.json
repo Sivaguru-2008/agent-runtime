@@ -1,0 +1,28 @@
+{
+  "name": "agent-runtime-observability-platform",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Runtime and observability infrastructure for autonomous AI agents.",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:integration": "npm run test:integration -w apps/api",
+    "test:integration:bench": "npm run test:integration:bench -w apps/api",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "google-auth-library": "^10.6.2"
+  }
+}

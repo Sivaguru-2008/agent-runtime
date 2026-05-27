@@ -1,0 +1,560 @@
+{
+  "generatedAt": "2026-05-27T11:07:31.639Z",
+  "environment": {
+    "enabled": false,
+    "nodeEnv": "test",
+    "envFile": null
+  },
+  "chaosResultsStartedAt": "2026-05-26T08:12:24.065Z",
+  "chaosResultsUpdatedAt": "2026-05-27T10:22:35.295Z",
+  "score": {
+    "passed": 25,
+    "failed": 0,
+    "unverified": 0,
+    "total": 25,
+    "score100": 100,
+    "grade": "A",
+    "certified": true
+  },
+  "verdicts": [
+    {
+      "key": "phase1.1.latencySpikes",
+      "phase": 1,
+      "label": "Redis latency spikes — queue still drains",
+      "status": "pass",
+      "durationMs": 10646,
+      "thresholds": {
+        "drainComplete": {
+          "observed": 30,
+          "required": "== 30",
+          "pass": true
+        },
+        "depthZero": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        },
+        "faultsFired": {
+          "observed": 20,
+          "required": "> 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase1.2.disconnectStorm",
+      "phase": 1,
+      "label": "Redis disconnect storms — every job delivered",
+      "status": "pass",
+      "durationMs": 1390,
+      "thresholds": {
+        "deliveredAll": {
+          "observed": 20,
+          "required": "== 20",
+          "pass": true
+        },
+        "depthZero": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        },
+        "faultsFired": {
+          "observed": 10,
+          "required": "> 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase1.3.pubsubDrop",
+      "phase": 1,
+      "label": "Redis partial pub/sub failure — loss observable, bus survives",
+      "status": "pass",
+      "durationMs": 1080,
+      "notes": "Validates the visibility of partial pub/sub failure. Production must compensate via the persisted event store; the bus is best-effort.",
+      "thresholds": {
+        "lossMatchesDrops": {
+          "observed": 9,
+          "required": ">= dropped (publisher loss visible to subscriber)",
+          "pass": true
+        },
+        "atLeastSomeDelivered": {
+          "observed": 11,
+          "required": "> 0",
+          "pass": true
+        },
+        "atLeastOneDropped": {
+          "observed": 9,
+          "required": "> 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase1.4.delayedAck",
+      "phase": 1,
+      "label": "Redis delayed acks — no duplicate, no receipt leak",
+      "status": "pass",
+      "durationMs": 181,
+      "thresholds": {
+        "noDuplicateDelivery": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        },
+        "noReceiptLeak": {
+          "observed": 0,
+          "required": "== 0 (every ack removed its inflight entry)",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase1.5.recoveryAfterReconnect",
+      "phase": 1,
+      "label": "Redis queue recovery after reconnect",
+      "status": "pass",
+      "durationMs": 454,
+      "thresholds": {
+        "deliveredAll": {
+          "observed": 15,
+          "required": "== 15",
+          "pass": true
+        },
+        "depthZero": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase2.1.transientDisconnect",
+      "phase": 2,
+      "label": "Postgres transient disconnect → recovery",
+      "status": "pass",
+      "durationMs": 22,
+      "thresholds": {
+        "faultObservedChars": {
+          "observed": 55,
+          "required": "> 0 (disconnect surfaced as non-empty error message)",
+          "pass": true
+        },
+        "recovery": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "noLeak": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase2.2.statementTimeoutExhaustion",
+      "phase": 2,
+      "label": "Postgres statement_timeout exhaustion — pool intact",
+      "status": "pass",
+      "durationMs": 279,
+      "thresholds": {
+        "tripsHit": {
+          "observed": 8,
+          "required": ">= 5",
+          "pass": true
+        },
+        "recovers": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "noLeak": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase2.3.poolStarvation",
+      "phase": 2,
+      "label": "Postgres pool starvation under load — drains, no leak",
+      "status": "pass",
+      "durationMs": 73,
+      "thresholds": {
+        "allFulfilled": {
+          "observed": 12,
+          "required": "== 12",
+          "pass": true
+        },
+        "waitingObserved": {
+          "observed": 9,
+          "required": "> 0 (saturated pool produced a queue)",
+          "pass": true
+        },
+        "noLeak": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase2.4.recoveryAfterClear",
+      "phase": 2,
+      "label": "Postgres recovery after fault clears",
+      "status": "pass",
+      "durationMs": 58,
+      "thresholds": {
+        "cleanSteadyState": {
+          "observed": 5,
+          "required": "== 5",
+          "pass": true
+        },
+        "noLeak": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase2.5.noLeakedClients",
+      "phase": 2,
+      "label": "Postgres compound fault burst — no client leak",
+      "status": "pass",
+      "durationMs": 164,
+      "thresholds": {
+        "noLeak": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase3.1.killMidExecution",
+      "phase": 3,
+      "label": "Worker kill mid-execution — lease reclaimable",
+      "status": "pass",
+      "durationMs": 40,
+      "thresholds": {
+        "reclaimed": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase3.2.leaseFencing",
+      "phase": 3,
+      "label": "Worker lease fencing correctness",
+      "status": "pass",
+      "durationMs": 29,
+      "thresholds": {
+        "deadCannotRenew": {
+          "observed": 0,
+          "required": "== 0 (dead worker must not renew after reclaim)",
+          "pass": true
+        },
+        "freshAcquired": {
+          "observed": 1,
+          "required": "== 1 (fresh worker acquires)",
+          "pass": true
+        },
+        "attemptIncreased": {
+          "observed": 2,
+          "required": "> 1 (fencing increments attempt)",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase3.3.poisonPill",
+      "phase": 3,
+      "label": "Worker poison-pill → DLQ",
+      "status": "pass",
+      "durationMs": 91,
+      "thresholds": {
+        "attemptsExhausted": {
+          "observed": 4,
+          "required": ">= 4",
+          "pass": true
+        },
+        "dlqEntryPresent": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "dlqAttemptCount": {
+          "observed": 4,
+          "required": ">= 4",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase3.4.replayRecovery",
+      "phase": 3,
+      "label": "Worker replay recovery via fresh acquire",
+      "status": "pass",
+      "durationMs": 31,
+      "notes": "Replay-from-checkpoint requires a Checkpoint row written by the prior attempt; tested in integration/replayDeterminism. This phase asserts the lease handoff is sound.",
+      "thresholds": {
+        "freshHolds": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "attemptCounterCarried": {
+          "observed": 2,
+          "required": ">= 2 (carries from prior worker)",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase3.5.noDuplicateCommit",
+      "phase": 3,
+      "label": "Worker no-duplicate-commit under contention",
+      "status": "pass",
+      "durationMs": 140,
+      "thresholds": {
+        "exactlyOneOwner": {
+          "observed": 1,
+          "required": "== 1 (exactly one worker holds the lease)",
+          "pass": true
+        },
+        "noErrors": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase4.1.reconnectStorm",
+      "phase": 4,
+      "label": "SSE reconnect storm — dedupe holds, bounded memory",
+      "status": "pass",
+      "durationMs": 2,
+      "thresholds": {
+        "uniqueEmits": {
+          "observed": 1600,
+          "required": "== 1600 (every distinct sequence emitted exactly once)",
+          "pass": true
+        },
+        "bounded": {
+          "observed": 512,
+          "required": "<= 512",
+          "pass": true
+        },
+        "duplicatesSeen": {
+          "observed": 6515,
+          "required": "> 0 (storm produced overlap)",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase4.2.droppedTokenStream",
+      "phase": 4,
+      "label": "SSE dropped tokens — resume fills gap deterministically",
+      "status": "pass",
+      "durationMs": 0,
+      "thresholds": {
+        "gapFilled": {
+          "observed": 5,
+          "required": "== 5 (filled 4,5,6,9,10)",
+          "pass": true
+        },
+        "duplicatesSuppressed": {
+          "observed": 2,
+          "required": ">= 2 (replay covered 7,8 too)",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase4.3.partialReplayBuffer",
+      "phase": 4,
+      "label": "SSE partial replay buffer — no drop/duplicate",
+      "status": "pass",
+      "durationMs": 0,
+      "thresholds": {
+        "newAccepted": {
+          "observed": 10,
+          "required": "== 10 (21..30 are new)",
+          "pass": true
+        },
+        "oldSuppressed": {
+          "observed": 4,
+          "required": "== 4 (5,6,7,8 still in window)",
+          "pass": true
+        },
+        "outOfOrderCount": {
+          "observed": 5,
+          "required": ">= 0 (counter advances on each accepted seq < hwm)",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase4.4.dedupeCorrectness",
+      "phase": 4,
+      "label": "SSE dedup correctness",
+      "status": "pass",
+      "durationMs": 0,
+      "thresholds": {
+        "acceptedOnce": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "duplicatesSeen": {
+          "observed": 49,
+          "required": "== 49",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase4.5.eventualConsistency",
+      "phase": 4,
+      "label": "SSE eventual consistency across subscribers",
+      "status": "pass",
+      "durationMs": 66,
+      "thresholds": {
+        "converged": {
+          "observed": 0,
+          "required": "== 0 (subscribers see the same set)",
+          "pass": true
+        },
+        "subsAcrossN": {
+          "observed": 200,
+          "required": "== 200",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase5.1.queueSaturation",
+      "phase": 5,
+      "label": "Load shedding — backpressure raised over threshold",
+      "status": "pass",
+      "durationMs": 184,
+      "thresholds": {
+        "depthOverThreshold": {
+          "observed": 25,
+          "required": "> 20",
+          "pass": true
+        },
+        "backpressureRaised": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase5.2.responseShape",
+      "phase": 5,
+      "label": "Load shedding — 503 response shape contract",
+      "status": "pass",
+      "durationMs": 1,
+      "thresholds": {
+        "hasDepth": {
+          "observed": 125,
+          "required": "== 125",
+          "pass": true
+        },
+        "hasThreshold": {
+          "observed": 100,
+          "required": "== 100",
+          "pass": true
+        },
+        "retryAfterPositive": {
+          "observed": 2,
+          "required": ">= 1",
+          "pass": true
+        },
+        "retryAfterBounded": {
+          "observed": 2,
+          "required": "<= 60",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase5.3.retryAfterFormula",
+      "phase": 5,
+      "label": "Load shedding — Retry-After bounded + monotone",
+      "status": "pass",
+      "durationMs": 1,
+      "thresholds": {
+        "bounded": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "monotone": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        },
+        "saturates": {
+          "observed": 1,
+          "required": "== 1",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase5.4.noCascadingCrash",
+      "phase": 5,
+      "label": "Load shedding — no cascading crash",
+      "status": "pass",
+      "durationMs": 998,
+      "thresholds": {
+        "depthCallsAllSucceeded": {
+          "observed": 0,
+          "required": "== 0",
+          "pass": true
+        },
+        "drainedFully": {
+          "observed": 25,
+          "required": "== 25",
+          "pass": true
+        },
+        "postStormEnqueueVisible": {
+          "observed": 1,
+          "required": ">= 1",
+          "pass": true
+        }
+      }
+    },
+    {
+      "key": "phase5.5.tenantFairness",
+      "phase": 5,
+      "label": "Load shedding — tenant FIFO baseline (no starvation)",
+      "status": "pass",
+      "durationMs": 909,
+      "notes": "Current implementation is single-LIST FIFO (Redis LPUSH/BRPOP). Fairness here means 'no tenant starves in a finite drain' — it does NOT mean weighted-fair queuing across tenants under sustained load. Per-tenant quotas and rate-limits enforce upstream fairness; the queue itself is FIFO.",
+      "thresholds": {
+        "noStarvation": {
+          "observed": 15,
+          "required": "== 15 (every tenant fully drained)",
+          "pass": true
+        },
+        "balanced": {
+          "observed": 0,
+          "required": "== 0 over finite window",
+          "pass": true
+        }
+      }
+    }
+  ],
+  "residualFailureModes": []
+}

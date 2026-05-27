@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  --background: 210 18% 8%;
+  --foreground: 210 18% 94%;
+  --muted: 212 16% 15%;
+  --muted-foreground: 212 10% 64%;
+  --border: 212 14% 22%;
+  --input: 212 14% 22%;
+  --ring: 186 94% 42%;
+  --card: 214 18% 11%;
+  --card-foreground: 210 18% 94%;
+  --primary: 186 94% 42%;
+  --primary-foreground: 210 18% 8%;
+  --warning: 38 94% 58%;
+  --critical: 0 78% 63%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+body {
+  margin: 0;
+}
+
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: rgba(148, 163, 184, 0.55);
+  --xy-edge-stroke-width-default: 1.4;
+  --xy-controls-button-background-color: hsl(var(--card));
+  --xy-controls-button-color: hsl(var(--foreground));
+  --xy-controls-button-border-color: hsl(var(--border));
+  --xy-minimap-background-color: hsl(var(--card));
+}
+
+.react-flow__node {
+  font-family: inherit;
+}
