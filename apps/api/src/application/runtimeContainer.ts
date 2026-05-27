@@ -23,7 +23,6 @@ import { PersistedEventPublisher } from "../infrastructure/events/persistedEvent
 import { OutboxDispatcher } from "../infrastructure/events/outboxDispatcher.js";
 import { RedisEventBus } from "../infrastructure/events/redisEventBus.js";
 import { RedisStreamsEventBus } from "../infrastructure/events/redisStreamsEventBus.js";
-import { InMemoryStreamEventBus } from "../infrastructure/events/inMemoryStreamEventBus.js";
 // InMemoryEventStore remains imported because the EventStore selection still
 // branches on EVENT_STORE_DRIVER independently of PERSISTENCE_DRIVER. The
 // other in-memory repositories are now supplied by the PersistenceLayer.
@@ -342,6 +341,18 @@ export async function createRuntimeContainer(
     pgPoolStatsTimer.unref?.();
   }
 
+  // Event bus selection. Strict three-way:
+  //   - redis-streams : production multi-process (RUNTIME_MODE=distributed)
+  //   - redis         : pubsub-style cluster (no consumer-group durability)
+  //   - memory        : single-process (the default)
+  //
+  // Sprint Stabilization — the previous code had a fourth branch that
+  // selected InMemoryStreamEventBus when RUNTIME_MODE=distributed and
+  // EVENT_BUS_DRIVER=memory. That combination is rejected by loadConfig
+  // (see shared/config.ts: RUNTIME_MODE=distributed requires
+  // EVENT_BUS_DRIVER=redis-streams), so the branch was unreachable in
+  // production and no test constructed a container with it. Removed to
+  // collapse the dispatch to the three real choices.
   let eventBus: EventBus;
   let streamBus: StreamEventBus | undefined;
   if (overrides.eventBus) {
@@ -352,10 +363,6 @@ export async function createRuntimeContainer(
     streamBus = streams;
   } else if (config.EVENT_BUS_DRIVER === "redis") {
     eventBus = new RedisEventBus(config.REDIS_URL!);
-  } else if (config.RUNTIME_MODE === "distributed") {
-    const streams = new InMemoryStreamEventBus();
-    eventBus = streams;
-    streamBus = streams;
   } else {
     eventBus = new InMemoryEventBus();
   }
@@ -1037,29 +1044,37 @@ export async function createRuntimeContainer(
     "runtime container ready"
   );
 
-  let outboxDispatcher: OutboxDispatcher;
+  // Outbox dispatcher is a Postgres-only construct: it drains the
+  // `event_outbox` table and re-publishes rows that were committed but not
+  // yet seen by the in-memory event bus (e.g., a crash between the txn
+  // commit and the bus publish). With memory-mode persistence there is no
+  // outbox table, so the previous fallback `new OutboxDispatcher(publisher,
+  // eventBus)` was constructed but never ticked — it existed as a dead
+  // field on the container. Leave it undefined in memory mode.
+  let outboxDispatcher: OutboxDispatcher | undefined;
   let outboxTimer: NodeJS.Timeout | undefined;
 
-  const isOutboxEnabled = config.ENABLE_OUTBOX_DISPATCH !== false && config.PERSISTENCE_DRIVER === "postgres";
+  const isOutboxEnabled =
+    config.ENABLE_OUTBOX_DISPATCH !== false &&
+    config.PERSISTENCE_DRIVER === "postgres" &&
+    persistence.pg !== undefined;
 
   if (isOutboxEnabled && persistence.pg) {
-    outboxDispatcher = new OutboxDispatcher(
+    const dispatcher = new OutboxDispatcher(
       publisher,
       eventBus,
       persistence.pg,
       logger
     );
+    outboxDispatcher = dispatcher;
     // Poll every 1 second in Postgres mode to drain the outbox
     outboxTimer = setInterval(() => {
-      outboxDispatcher.tick().catch((err) => {
+      dispatcher.tick().catch((err) => {
         logger.error({ err }, "OutboxDispatcher polling tick failed");
       });
     }, 1000);
     outboxTimer.unref?.();
     logger.info("[outbox] database-backed Event Outbox Dispatcher loop started");
-  } else {
-    outboxDispatcher = new OutboxDispatcher(publisher, eventBus);
-    logger.info("[outbox] memory-backed Event Outbox Dispatcher initialized");
   }
 
   return {
