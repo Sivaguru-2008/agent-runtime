@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,10 +18,13 @@ jobs:
           node-version: 22
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Run Tests
+      - name: Unit Tests
         run: npm test
+
+      - name: Integration Tests
+        run: npm run test:integration
