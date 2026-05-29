@@ -1,6 +1,22 @@
 export type AgentState = "CREATED" | "IDLE" | "RUNNING" | "STOPPING" | "STOPPED" | "FAILED" | "DEGRADED";
 export type RuntimeStatus = "OFFLINE" | "READY" | "BUSY" | "STOPPING" | "ERROR";
-export type ExecutionStatus = "QUEUED" | "RUNNING" | "FAILED" | "COMPLETED" | "CANCELLED";
+export type ExecutionStatus =
+  | "CREATION"
+  | "SCHEDULING"
+  | "LEASE_ACQUISITION"
+  | "RUNNING"
+  | "SIDE_EFFECT_PENDING"
+  | "REPLAYING"
+  | "RECOVERING"
+  | "COMMITTED"
+  | "COMPLETED"
+  | "FAILED"
+  | "AMBIGUOUS"
+  | "RECONCILIATION_REQUIRED"
+  | "DEAD_LETTERED"
+  | "EXPIRED"
+  | "QUEUED"
+  | "CANCELLED";
 export type ExecutionStepType = "PLANNING" | "MEMORY_RETRIEVAL" | "TOOL_CALL" | "MODEL_GENERATION" | "RETRY" | "COMPLETION";
 export type ExecutionStepStatus = "STARTED" | "COMPLETED" | "FAILED";
 export type MemoryType = "EPISODIC" | "TASK_HISTORY" | "SEMANTIC_REFERENCE";
@@ -112,3 +128,29 @@ export interface ToolCallRecord {
   durationMs?: number;
   createdAt: string;
 }
+
+export interface ReplayExternalityRecord {
+  id: string;
+  executionId: string;
+  stepSequence: number;
+  type: string; // PLANNING, MEMORY_RETRIEVAL, TOOL_CALL, MODEL_GENERATION, RETRY, etc.
+  timestamp: string;
+  
+  // Tool inputs/outputs, side-effect metadata
+  toolName?: string;
+  toolInput?: Record<string, unknown>;
+  toolOutput?: Record<string, unknown>;
+  sideEffectMetadata?: Record<string, unknown>;
+  
+  // LLM outputs, provider responses
+  prompt?: string;
+  llmOutput?: Record<string, unknown>;
+  providerResponse?: Record<string, unknown>;
+  
+  // Randomness seeds, retry/replay metadata
+  randomnessSeed?: string;
+  retryAttempt?: number;
+  retryMetadata?: Record<string, unknown>;
+  replayMetadata?: Record<string, unknown>;
+}
+

@@ -229,9 +229,9 @@ describe.skipIf(!harness)("PostgresExecutionRepository.saveFenced", () => {
     const leaseAfter = await leases!.getByExecution(executionId);
     if (saveOutcome === "COMMITTED") {
       // The write went through because the writer held the lock first.
-      // Then the reclaim ran and set status away from ACTIVE.
+      // Then the reclaim ran and set status away from LEASED/active.
       expect(persisted?.output).toEqual({ writer: "original" });
-      expect(leaseAfter?.status).not.toBe("ACTIVE");
+      expect(leaseAfter?.status).not.toBe("LEASED");
     } else {
       // FENCED: write was rejected by the CTE. Whatever the seed row was,
       // it must NOT carry the stale output.

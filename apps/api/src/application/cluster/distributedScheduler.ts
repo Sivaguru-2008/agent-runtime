@@ -45,6 +45,11 @@ import type { ExecutionJobQueue } from "../../domain/jobQueue.js";
 import type pino from "pino";
 import { injectTraceContext } from "../../infrastructure/telemetry/tracing.js";
 import { acquireFencingToken, assertCanWrite } from "../../infrastructure/reliability/splitBrainGuard.js";
+import { assertTransition, isAmbiguityError, assertRuntimeInvariant, FAILURE_CODES, type RuntimeFailureCategory } from "../../runtime/canonicalSemantics.js";
+import { RetryCoordinator } from "../../runtime/retry/retryCoordinator.js";
+import { InMemoryRetryCoordinationStore } from "../../runtime/retry/inMemoryRetryStore.js";
+import { DistributedRecoveryOrchestrator } from "../../runtime/recovery/recoveryOrchestrator.js";
+import { InMemoryRecoveryCoordinationStore } from "../../runtime/recovery/inMemoryRecoveryStore.js";
 
 export interface DispatchInput {
   agent: Agent;
@@ -95,7 +100,33 @@ export class DistributedScheduler {
     private readonly config: SchedulerConfig,
     private readonly deadLetterQueue: DeadLetterQueue,
     private readonly heartbeatWorker: LeaseHeartbeatWorker,
-    private readonly logger: pino.Logger
+    private readonly logger: pino.Logger,
+    /**
+     * Single-flight retry coordinator. Optional so existing call sites/tests
+     * need no change; defaults to a process-local in-memory instance. The
+     * scheduler uses it to serialize and throttle recovery sweeps (RT3) and to
+     * block recovery from overlapping an active replay (RT4). Cross-process
+     * recovery serialization is also enforced durably by the lease store's
+     * takeoverRecovery CAS; this is the in-process policy + canonical state layer.
+     */
+    private readonly coordinator: RetryCoordinator = new RetryCoordinator(new InMemoryRetryCoordinationStore()),
+    /**
+     * Canonical distributed-recovery orchestrator. Optional so existing call
+     * sites/tests need no change; defaults to a process-local in-memory
+     * instance. It sits ABOVE the retry coordinator: the retry coordinator
+     * gates recovery as a retry-coordination concern (RT3/RT4), while the
+     * orchestrator classifies the recovery strategy (crash / replay /
+     * reconcile / dead-letter), drives the canonical recovery lifecycle
+     * (RECOVERY_PENDING → RECOVERING/REPLAY_RECOVERING/RECONCILING →
+     * RECOVERY_COMPLETED/ABORTED), arbitrates a single owner per execution by
+     * monotonic recovery epoch, applies recovery backpressure, and enforces the
+     * REC1..REC9 recovery invariants. Cross-process ownership transfer is still
+     * the durable lease's takeoverRecovery CAS; this is the in-process policy +
+     * canonical state layer that composes it.
+     */
+    private readonly orchestrator: DistributedRecoveryOrchestrator = new DistributedRecoveryOrchestrator(
+      new InMemoryRecoveryCoordinationStore()
+    )
   ) {}
 
   /**
@@ -187,11 +218,38 @@ export class DistributedScheduler {
     });
 
     if (!lease) {
+      if (job.execution.parentExecutionId) {
+        assertRuntimeInvariant(
+          "RP3",
+          false,
+          `Replay ownership collision: another worker already holds the active lease for replay execution '${job.execution.id}'`
+        );
+      }
       // Another worker holds this lease — that worker will execute the job.
       return;
     }
 
     assertCanWrite(held);
+
+    const currentExec = await this.executions.getById(job.execution.id);
+    if (currentExec) {
+      if (currentExec.status === "COMPLETED" || currentExec.status === "FAILED" || currentExec.status === "DEAD_LETTERED" || currentExec.status === "CANCELLED") {
+        // Deduplicate: already finished!
+        await this.safeReleaseLease(job, "dedup");
+        return;
+      }
+      assertTransition(currentExec.id, currentExec.status, "LEASE_ACQUISITION");
+      currentExec.status = "LEASE_ACQUISITION";
+      currentExec.updatedAt = toIso(this.clock.now());
+      await this.executions.saveFenced(currentExec, {
+        executionId: job.execution.id,
+        leaseId: lease.leaseId,
+        leaseEpoch: lease.attempt,
+        workerId: this.config.workerId,
+        expiration: lease.expiresAt,
+        attempt: lease.attempt
+      });
+    }
 
     // ─── Poison-pill check ───────────────────────────────────────────────────
     // `lease.attempt` increments in Postgres on every acquire (including
@@ -206,6 +264,17 @@ export class DistributedScheduler {
       const execution = await this.executions.getById(job.execution.id);
       const lastError = execution?.failure?.message ?? "unknown (exceeded max attempts without recorded failure)";
       const now = this.clock.now();
+
+      if (execution) {
+        assertTransition(execution.id, execution.status, "DEAD_LETTERED");
+        execution.status = "DEAD_LETTERED";
+        execution.updatedAt = toIso(now);
+        await this.executions.saveFenced(execution, {
+          executionId: job.execution.id,
+          workerId: this.config.workerId,
+          attempt: lease.attempt
+        }).catch(() => this.executions.save(execution));
+      }
 
       await this.publisher.publish(
         this.eventFactory.create({
@@ -286,15 +355,24 @@ export class DistributedScheduler {
         context: job.context,
         workerId: this.config.workerId,
         validateLease: (executionId: string) =>
-          this.leases.validateFencing(executionId, this.config.workerId, fencingToken),
+          this.leases.validateFencing(
+            executionId,
+            this.config.workerId,
+            fencingToken,
+            lease.leaseId,
+            lease.expiresAt
+          ),
         // Authoritative fencing — threaded into every status-mutating
         // durable write. The adapter rejects writes whose token does not
         // match the live lease, closing the TOCTOU window that the advisory
         // validateLease() above cannot.
         fence: {
           executionId: job.execution.id,
+          leaseId: lease.leaseId,
+          leaseEpoch: lease.attempt,
           workerId: this.config.workerId,
-          attempt: fencingToken
+          expiration: lease.expiresAt,
+          attempt: lease.attempt
         }
       });
 
@@ -308,15 +386,21 @@ export class DistributedScheduler {
         });
       }
     } catch (err) {
-      // The engine can throw FencingViolationError (lease lost while executing)
-      // or any other unexpected error. Both are logged and emitted as events.
-      // We do NOT re-throw — the job slot must be freed in the finally block
-      // and the process must not crash.
-      this.logger.error(
-        { err, executionId: job.execution.id, workerId: this.config.workerId },
-        "runJob: execution engine threw — job failed visibly"
-      );
       const isFencing = err instanceof Error && err.name === "FencingViolationError";
+      const isAmbiguity = isAmbiguityError(err);
+      
+      if (isAmbiguity) {
+        this.logger.warn(
+          { executionId: job.execution.id, err: err instanceof Error ? err.message : String(err) },
+          "runJob: ambiguous side effect detected; execution quarantined"
+        );
+      } else {
+        this.logger.error(
+          { err, executionId: job.execution.id, workerId: this.config.workerId },
+          "runJob: execution engine threw — job failed visibly"
+        );
+      }
+      
       if (isFencing) {
         await this.publisher
           .publish(
@@ -334,7 +418,7 @@ export class DistributedScheduler {
             })
           )
           .catch(() => undefined);
-      } else {
+      } else if (!isAmbiguity) {
         await this.publisher
           .publish(
             this.eventFactory.create({
@@ -403,7 +487,7 @@ export class DistributedScheduler {
   async recover(): Promise<number> {
     // TASK D1: Split-brain sweep fencing: only the active region performs recovery sweeps.
     const held = acquireFencingToken();
-    const reclaimed = await this.leases.reclaimExpired(this.clock.now());
+    const reclaimed = await this.leases.reclaimExpired(this.clock.now(), 10);
     if (reclaimed.length === 0) return 0;
 
     assertCanWrite(held);
@@ -447,8 +531,103 @@ export class DistributedScheduler {
   private async recoverOne(lease: ExecutionLease, heldFencing: { token: number; regionId: string }): Promise<void> {
     assertCanWrite(heldFencing);
 
+    // ─── Recovery serialization + throttle gate (RT3 + RT4) ────────────────
+    // Bound concurrent recovery sweeps and refuse to recover an execution whose
+    // replay coordination is active. takeoverRecovery below is the durable CAS
+    // that picks the single winner across processes; this in-process gate adds
+    // throttling, replay/recovery overlap rejection, and the canonical retry
+    // state. The prospective epoch matches the attempt takeoverRecovery mints.
+    const prospectiveEpoch = lease.attempt + 1;
+    const gate = await this.coordinator.requestRecovery({
+      executionId: lease.executionId,
+      recoveryWorkerId: this.config.workerId,
+      ownerEpoch: prospectiveEpoch
+    });
+    if (gate.decision !== "ADMITTED") {
+      this.logger.warn(
+        { executionId: lease.executionId, decision: gate.decision, reason: gate.reason },
+        "recover: skipping recovery — not admitted by coordinator (serialized/throttled/replay-overlap)"
+      );
+      return;
+    }
+
+    try {
+      // ─── Canonical distributed-recovery orchestration ────────────────────
+      // Classify the recovery strategy, arbitrate a single owner by monotonic
+      // recovery epoch, apply recovery backpressure, and drive the canonical
+      // recovery lifecycle. Only an explicit re-drive decision proceeds to the
+      // durable takeover + re-enqueue; ambiguous (RECONCILE), exhausted
+      // (ABORTED), already-concluded (COMPLETED), and contended (BLOCKED /
+      // ALREADY_OWNED) classifications are deliberately NOT blindly re-driven —
+      // that is the REC3 reconciliation-bypass and REC4 stale-ownership guard.
+      const snapshot = await this.executions.getById(lease.executionId);
+      const failureCategory = this.classifyFailureCategory(snapshot?.failure?.code);
+      const decision = await this.orchestrator.orchestrateRecovery({
+        executionId: lease.executionId,
+        recoveryWorkerId: this.config.workerId,
+        ownerEpoch: prospectiveEpoch,
+        executionStatus: snapshot?.status ?? "RECOVERING",
+        ...(failureCategory ? { failureCategory } : {}),
+        ...(snapshot?.parentExecutionId ? { parentExecutionId: snapshot.parentExecutionId } : {}),
+        attemptCount: lease.attempt,
+        maxAttempts: this.config.maxPoisonPillAttempts
+      });
+
+      try {
+        if (decision.decision === "RECOVER" || decision.decision === "REPLAY_RECOVER") {
+          const handedOff = await this.recoverOneAdmitted(lease, heldFencing);
+          if (handedOff) {
+            await this.orchestrator.completeRecovery({
+              executionId: lease.executionId,
+              workerId: this.config.workerId,
+              ownerEpoch: prospectiveEpoch
+            });
+          }
+        } else {
+          this.logger.warn(
+            { executionId: lease.executionId, decision: decision.decision, state: decision.state, reason: decision.reason },
+            "recover: orchestrator routed recovery off the re-drive path (reconcile/abort/blocked/owned/completed)"
+          );
+        }
+      } finally {
+        decision.release();
+      }
+    } finally {
+      gate.release();
+    }
+  }
+
+  /**
+   * Map a persisted `Execution.failure.code` onto the canonical runtime failure
+   * taxonomy. The code is stamped from `FAILURE_CODES` at failure time, so a
+   * round-trip is exact; anything unrecognized is treated as "no classification"
+   * (the orchestrator then falls back to plain crash recovery).
+   */
+  private classifyFailureCategory(code: string | undefined): RuntimeFailureCategory | undefined {
+    if (code && Object.prototype.hasOwnProperty.call(FAILURE_CODES, code)) {
+      return code as RuntimeFailureCategory;
+    }
+    return undefined;
+  }
+
+  private async recoverOneAdmitted(lease: ExecutionLease, heldFencing: { token: number; regionId: string }): Promise<boolean> {
+    // Atomically transition the lease status to RECOVERY_OWNED to serialize recovery takeover.
+    const recoveryLease = await this.leases.takeoverRecovery(
+      lease.executionId,
+      this.config.workerId,
+      this.clock.now(),
+      this.config.leaseTtlMs
+    );
+    if (!recoveryLease) {
+      this.logger.warn(
+        { executionId: lease.executionId },
+        "recover: skipping recovery takeover — already claimed by another recovery coordinator"
+      );
+      return false;
+    }
+
     const execution = await this.executions.getById(lease.executionId);
-    if (!execution || execution.status === "COMPLETED" || execution.status === "FAILED") return;
+    if (!execution || execution.status === "COMPLETED" || execution.status === "FAILED" || execution.status === "DEAD_LETTERED") return false;
 
     // Skip executions already in the DLQ — they exceeded the poison-pill
     // threshold and must not be re-enqueued without operator intervention.
@@ -458,11 +637,11 @@ export class DistributedScheduler {
         { executionId: lease.executionId },
         "recover: skipping DLQ execution — requires operator intervention to replay"
       );
-      return;
+      return false;
     }
 
     const agent = await this.agents.getById(execution.agentId);
-    if (!agent) return;
+    if (!agent) return false;
 
     // TASK B1+B2: Recovery context hydration & correlation / causation chaining
     // Query the EventStore to fetch the last event associated with this execution, and chain
@@ -482,6 +661,28 @@ export class DistributedScheduler {
         };
 
     assertCanWrite(heldFencing);
+
+    assertTransition(execution.id, execution.status, "RECOVERING");
+    execution.status = "RECOVERING";
+    execution.updatedAt = toIso(this.clock.now());
+
+    // Use saveFenced with the recovery fencing token to enforce serialized recovery state transition!
+    const fence = {
+      executionId: execution.id,
+      leaseId: recoveryLease.leaseId,
+      leaseEpoch: recoveryLease.attempt,
+      workerId: this.config.workerId,
+      expiration: recoveryLease.expiresAt,
+      attempt: recoveryLease.attempt
+    };
+    const outcome = await this.executions.saveFenced(execution, fence);
+    if (outcome === "FENCED") {
+      this.logger.error(
+        { executionId: execution.id },
+        "recover: failed to save RECOVERING transition because recovery lease was fenced"
+      );
+      return false;
+    }
 
     await this.publisher.publish(
       this.eventFactory.create({
@@ -525,5 +726,6 @@ export class DistributedScheduler {
       // sole consumer (back-compat with cluster.test.ts).
       this.enqueue({ agent, execution, task: execution.input, context });
     }
+    return true;
   }
 }

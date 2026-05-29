@@ -117,7 +117,7 @@ describe("worker lifecycle", () => {
     const result = await lifecycle.sweep();
     expect(result.reclaimedLeases).toBe(1);
     const lease = await leases.getByExecution("exec-1");
-    expect(lease?.status).toBe("RECLAIMED");
+    expect(lease?.status).toBe("INVALIDATED");
   });
 });
 

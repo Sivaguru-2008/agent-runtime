@@ -1,5 +1,5 @@
 import type { ExecutionCheckpoint, ExecutionLease, RuntimeWorker } from "./cluster.js";
-import type { Agent, Execution, ExecutionStep, MemoryRecord, TokenUsage, ToolCallRecord } from "./model.js";
+import type { Agent, Execution, ExecutionStep, MemoryRecord, TokenUsage, ToolCallRecord, ReplayExternalityRecord } from "./model.js";
 import type {
   AgentHandoff,
   AgentRole,
@@ -41,6 +41,8 @@ export type DomainEventType =
   | "EXECUTION_LEASE_RECLAIMED"
   | "EXECUTION_CHECKPOINT_WRITTEN"
   | "EXECUTION_RESUMED"
+  | "EXECUTION_RECONCILIATION_REQUIRED"
+  | "EXECUTION_RECONCILIATION_RESOLVED"
   // --- Phase 2: reliability hardening ---
   // Poison-pill: execution exceeded max attempt threshold → moved to DLQ
   | "EXECUTION_POISON_PILL_DETECTED"
@@ -81,6 +83,7 @@ export type DomainEventType =
   | "REPLAY_FRAME_EMITTED"
   | "REPLAY_BRANCH_CREATED"
   | "REPLAY_DIVERGENCE_DETECTED"
+  | "REPLAY_LIFECYCLE_TRANSITIONED"
   // Phase C: snapshot integrity validation. Raised when the SnapshotStore
   // detects a stored snapshot whose integrityHash does not match a recompute
   // over its { graph, eventSequence, frameIndex } projection. Used by recovery
@@ -126,7 +129,9 @@ export type DomainEventType =
   | "PLANNER_VALIDATION_PASSED"
   | "PLANNER_VALIDATION_FAILED"
   | "COGNITION_RECOVERY_TRIGGERED"
-  | "COGNITION_ORCHESTRATION_DECISION";
+  | "COGNITION_RECOVERY_TRIGGERED"
+  | "COGNITION_ORCHESTRATION_DECISION"
+  | "EXTERNALITY_RECORDED";
 
 
 export interface EventMetadata {
@@ -174,6 +179,7 @@ export type ExecutionLeasedEvent = DomainEvent<{ lease: ExecutionLease }>;
 export type ExecutionLeaseReclaimedEvent = DomainEvent<{ lease: ExecutionLease; reason: string }>;
 export type ExecutionCheckpointEvent = DomainEvent<{ checkpoint: ExecutionCheckpoint }>;
 export type ExecutionResumedEvent = DomainEvent<{ executionId: string; fromSequence: number; workerId: string }>;
+export type ExternalityRecordedEvent = DomainEvent<{ externality: ReplayExternalityRecord }>;
 
 // --- Sprint Next event payloads ---
 
@@ -379,4 +385,3 @@ export type ConfidenceCriticalEvent = DomainEvent<{
   confidenceScore: number;
   requireEscalation: boolean;
 }>;
-

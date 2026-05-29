@@ -42,7 +42,7 @@
 import type { EventStore, ExecutionRepository } from "../../domain/ports.js";
 import type { WorkerRegistry, LeaseStore, CheckpointStore, DeadLetterQueue } from "../../domain/clusterPorts.js";
 import type { DomainEvent } from "../../domain/events.js";
-import type { RuntimeWorker, ExecutionLease, ExecutionCheckpoint } from "../../domain/cluster.js";
+import { isActiveLease, type RuntimeWorker, type ExecutionLease, type ExecutionCheckpoint } from "../../domain/cluster.js";
 import type { DistributedScheduler } from "../cluster/distributedScheduler.js";
 import { ObservabilityQueries } from "./observabilityQueries.js";
 
@@ -401,8 +401,8 @@ export class OperatorQueries {
     const workerId = lease?.workerId ?? checkpoint?.workerId ?? ((events.find(e => e.payload && (e.payload as any).workerId)?.payload as any)?.workerId as string | undefined);
 
     // Heartbeat freshness calculations
-    const heartbeatFreshnessMs = lease && lease.status === "ACTIVE" 
-      ? Math.max(0, new Date(lease.expiresAt).getTime() - Date.now()) 
+    const heartbeatFreshnessMs = lease && isActiveLease(lease.status)
+      ? Math.max(0, new Date(lease.expiresAt).getTime() - Date.now())
       : undefined;
 
     // Cancellation status calculations

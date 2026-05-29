@@ -142,7 +142,20 @@ export function createPersistenceLayer(config: PersistenceFactoryConfig): Persis
       eventStore.setLeaseStore(leases);
     }
     const memory = new InMemoryMemoryRepository(leases);
-    const executions = new InMemoryExecutionRepository(leases, memory, eventStore);
+    // Phase A: checkpoint writes must be fence-guarded for parity with the
+    // Postgres adapter. Wire the lease store so writeFenced() rejects stale
+    // workers at the in-memory layer the same way Postgres rejects them at
+    // the SQL layer. Unfenced write() remains available for unleased
+    // operator paths (pause/resume routes) and unit-test contexts.
+    const checkpoints = new InMemoryCheckpointStore(leases);
+    // The repository owns checkpoint persistence: ExecutionEngine.writeCheckpoint
+    // routes through commitTransition so the execution row, the checkpoint, and
+    // the EXECUTION_CHECKPOINT_WRITTEN event commit atomically (invariant P1),
+    // mirroring the single-transaction Postgres path. The checkpoint store MUST
+    // be the same instance exposed as `checkpoints` below — recovery and cluster
+    // queries read from it. Omitting it here silently dropped every checkpoint in
+    // memory mode after the write path moved off the standalone CheckpointStore.
+    const executions = new InMemoryExecutionRepository(leases, memory, eventStore, checkpoints);
     return {
       driver: "memory",
       eventStore,
@@ -157,12 +170,7 @@ export function createPersistenceLayer(config: PersistenceFactoryConfig): Persis
       failureSignals: new InMemoryFailureSignalStore(),
       workers: new InMemoryWorkerRegistry(),
       leases,
-      // Phase A: checkpoint writes must be fence-guarded for parity with the
-      // Postgres adapter. Wire the lease store so writeFenced() rejects stale
-      // workers at the in-memory layer the same way Postgres rejects them at
-      // the SQL layer. Unfenced write() remains available for unleased
-      // operator paths (pause/resume routes) and unit-test contexts.
-      checkpoints: new InMemoryCheckpointStore(leases),
+      checkpoints,
       replayCertifications: new InMemoryReplayCertificationStore(),
       async close() {
         // no-op for in-memory

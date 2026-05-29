@@ -46,9 +46,8 @@ export class PostgresWorkerRegistry implements WorkerRegistry {
     const { rows } = await this.client.query<WorkerRow>(
       `update runtime_workers
           set load = $2,
-              last_heartbeat_at = $3,
-              status = case when status = 'LOST' then 'READY' else status end
-          where id = $1
+              last_heartbeat_at = $3
+          where id = $1 and status not in ('LOST', 'STOPPED')
           returning *`,
       [workerId, JSON.stringify(load), toIso(new Date())]
     );

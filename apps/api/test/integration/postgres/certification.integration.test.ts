@@ -62,7 +62,7 @@ describe.skipIf(!CERT_GATE)("Enterprise Runtime Certification Suite", () => {
     const lease1 = await leases.acquire(makeLeaseInput({ executionId: execId, workerId: w1 }));
     expect(lease1).toBeDefined();
     expect(lease1?.workerId).toBe(w1);
-    expect(lease1?.status).toBe("ACTIVE");
+    expect(lease1?.status).toBe("LEASED");
 
     // Second worker attempts acquisition of same active execution; must be skipped/returned undefined
     const lease2 = await leases.acquire(makeLeaseInput({ executionId: execId, workerId: w2 }));

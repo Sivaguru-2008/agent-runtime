@@ -32,6 +32,13 @@
 
 import type { ToolExecutor } from "../domain/ports.js";
 import type { ToolCallDedupStore } from "../domain/toolDedup.js";
+import {
+  InvariantViolation,
+  assertRuntimeInvariant,
+  AmbiguityDetectedError
+} from "./canonicalSemantics.js";
+import type { FenceProtocol, FenceOwner } from "./fence/fenceProtocol.js";
+import { IdempotencyPolicyEnforcer } from "./policyEnforcer.js";
 
 /**
  * Surfaced when the canonical fence protocol detects an args-hash
@@ -41,7 +48,7 @@ import type { ToolCallDedupStore } from "../domain/toolDedup.js";
  * this error and re-invoke the tool, because that would silently fire
  * a different side effect than the recorded one.
  */
-export class ReplayDivergenceError extends Error {
+export class ReplayDivergenceError extends InvariantViolation {
   readonly name = "ReplayDivergenceError";
   constructor(
     readonly idempotencyKey: string,
@@ -50,7 +57,8 @@ export class ReplayDivergenceError extends Error {
   ) {
     super(
       `replay divergence: args drift detected for key ${idempotencyKey} ` +
-        `(recorded=${recordedArgsHash} observed=${observedArgsHash})`
+        `(recorded=${recordedArgsHash} observed=${observedArgsHash})`,
+      "S3"
     );
   }
 }
@@ -61,10 +69,10 @@ export class ReplayDivergenceError extends Error {
  * engine treats this as a clean surrender — the new owner will retry
  * with the same idempotency key and the remote service will dedupe.
  */
-export class FenceLostError extends Error {
+export class FenceLostError extends InvariantViolation {
   readonly name = "FenceLostError";
   constructor(readonly idempotencyKey: string) {
-    super(`fence lost during tool call: ${idempotencyKey}`);
+    super(`fence lost during tool call: ${idempotencyKey}`, "L2");
   }
 }
 
@@ -83,6 +91,17 @@ export interface DedupingToolExecutorOptions {
    * at warn severity. If absent, console.warn is used.
    */
   logger?: { warn: (msg: string, ctx?: Record<string, unknown>) => void };
+  /**
+   * Canonical fence protocol (docs/specs/fence-state-machine.md). When
+   * supplied AND a call carries the full fence coordinates (idempotencyKey,
+   * numeric attempt, stepSeq, argsHash), the executor routes through the
+   * explicit fence state machine instead of the legacy dedup path: the side
+   * effect is guarded by a durable PENDING→EXECUTING→COMMITTED transition with
+   * mandatory ownership validation. Absent ⇒ legacy dedup behaviour unchanged.
+   */
+  fence?: FenceProtocol;
+  /** Worker id used as the fence ownership claimant when a call omits one. */
+  defaultWorkerId?: string;
 }
 
 type ToolInput = Parameters<ToolExecutor["execute"]>[0];
@@ -91,7 +110,9 @@ export class DedupingToolExecutor implements ToolExecutor {
   private readonly pollIntervalMs: number;
   private readonly pollTimeoutMs: number;
   private readonly failClosedOnStoreError: boolean;
-  private readonly resolveTenantId?: (input: { agentId: string; executionId: string }) => string;
+  private readonly resolveTenantId: ((input: { agentId: string; executionId: string }) => string) | undefined;
+  private readonly fence: FenceProtocol | undefined;
+  private readonly defaultWorkerId: string;
   private readonly log: (msg: string, ctx?: Record<string, unknown>) => void;
 
   constructor(
@@ -103,6 +124,8 @@ export class DedupingToolExecutor implements ToolExecutor {
     this.pollTimeoutMs = opts.pollTimeoutMs ?? 60_000;
     this.failClosedOnStoreError = opts.failClosedOnStoreError ?? false;
     this.resolveTenantId = opts.resolveTenantId;
+    this.fence = opts.fence;
+    this.defaultWorkerId = opts.defaultWorkerId ?? "unknown";
     const logger = opts.logger;
     this.log = logger?.warn?.bind(logger)
       ?? ((msg: string, ctx?: Record<string, unknown>) => {
@@ -113,9 +136,49 @@ export class DedupingToolExecutor implements ToolExecutor {
 
   async execute(input: ToolInput): Promise<Record<string, unknown>> {
     const idempotencyKey = (input as { idempotencyKey?: string }).idempotencyKey;
-    const attempt = (input as { attempt?: number }).attempt ?? 1;
+    const rawAttempt = (input as { attempt?: number }).attempt;
+    const attempt = rawAttempt ?? 1;
     const stepSeq = (input as { stepSeq?: number }).stepSeq;
     const argsHash = (input as { argsHash?: string }).argsHash;
+
+    const hasFence = !!(
+      this.fence &&
+      idempotencyKey &&
+      typeof rawAttempt === "number" &&
+      stepSeq !== undefined &&
+      argsHash
+    );
+
+    // Enforce capability validation middleware before proceeding to any execution
+    IdempotencyPolicyEnforcer.validateExecutionSafety(input.toolName, {
+      hasFence,
+      operatorApproved: (input as any).operatorApproved === true
+    });
+
+    // ─── Canonical fence path (docs/specs/fence-state-machine.md) ───
+    // Engage the explicit fence state machine only when a FenceProtocol is
+    // wired AND the call carries the full fence coordinates. Every external
+    // side effect on this path is guarded by a durable, ownership-validated
+    // PENDING→EXECUTING→COMMITTED transition. Calls missing any coordinate
+    // fall through to the legacy dedup path unchanged.
+    if (
+      this.fence &&
+      idempotencyKey &&
+      typeof rawAttempt === "number" &&
+      stepSeq !== undefined &&
+      argsHash
+    ) {
+      return this.executeFenced(input, {
+        fence: this.fence,
+        idempotencyKey,
+        stepSeq,
+        argsHash,
+        owner: {
+          workerId: (input as { workerId?: string }).workerId ?? this.defaultWorkerId,
+          attempt: rawAttempt
+        }
+      });
+    }
 
     if (!idempotencyKey) {
       // Legacy / non-dedupable caller — pass through unchanged.
@@ -126,6 +189,13 @@ export class DedupingToolExecutor implements ToolExecutor {
       agentId: input.agentId,
       executionId: input.executionId
     }) ?? "system";
+
+    assertRuntimeInvariant(
+      "P2",
+      typeof tenantId === "string" && tenantId.length > 0,
+      "Tenant ID must be non-empty string for tool execution isolation",
+      { executionId: input.executionId, idempotencyKey }
+    );
 
     let begin;
     try {
@@ -247,6 +317,130 @@ export class DedupingToolExecutor implements ToolExecutor {
       }
       throw toolErr;
     }
+  }
+
+  /**
+   * Canonical fence-state-machine execution path. Drives the side effect
+   * through the explicit lifecycle so that:
+   *   • F1 — the side effect fires only after a durable PENDING→EXECUTING.
+   *   • F2 — every transition validates ownership (claimant attempt).
+   *   • F3 — a committed/reconciled fence short-circuits, never re-fires.
+   *   • F4 — a stale claimant's transitions are rejected, surrender cleanly.
+   *   • F6 — replay/retry resolve through the fence; arg drift surfaces.
+   */
+  private async executeFenced(
+    input: ToolInput,
+    ctx: {
+      fence: FenceProtocol;
+      idempotencyKey: string;
+      stepSeq: number;
+      argsHash: string;
+      owner: FenceOwner;
+    }
+  ): Promise<Record<string, unknown>> {
+    const { fence, idempotencyKey, stepSeq, argsHash, owner } = ctx;
+    const tenantId = this.resolveTenantId?.({
+      agentId: input.agentId,
+      executionId: input.executionId
+    }) ?? "system";
+
+    const resolved = await fence.reserveOrResolve({
+      fenceId: idempotencyKey,
+      executionId: input.executionId,
+      stepSeq,
+      tenantId,
+      toolName: input.toolName,
+      idempotencyKey,
+      argsHash,
+      owner
+    });
+
+    switch (resolved.kind) {
+      case "RESOLVED_COMMITTED":
+        // F3/F6 — a prior call already committed this exact step. Return the
+        // recorded output; the external side effect is NOT re-dispatched.
+        return resolved.output;
+      case "ARG_DRIFT":
+        // F6 — replay/retry carried drifted args. Refuse silent re-execution.
+        throw new ReplayDivergenceError(
+          idempotencyKey,
+          resolved.recordedArgsHash,
+          resolved.observedArgsHash
+        );
+      case "AMBIGUOUS":
+        // S3 — a prior in-flight call lost its fence; the outcome is unknown.
+        // Surface for reconciliation; do NOT execute.
+        throw new AmbiguityDetectedError({
+          executionId: input.executionId,
+          toolName: input.toolName,
+          args: input.args,
+          idempotencyKey,
+          stepSequence: stepSeq
+        });
+      case "RECONCILING":
+        this.log("fence under reconciliation by another owner — surrendering", {
+          idempotencyKey,
+          toolName: input.toolName
+        });
+        throw new FenceLostError(idempotencyKey);
+      case "IN_FLIGHT":
+        // A same-attempt sibling holds the in-flight call. The remote
+        // idempotency key dedupes; we surrender and let the holder commit.
+        this.log("fence in-flight under sibling at same attempt — surrendering", {
+          idempotencyKey,
+          toolName: input.toolName
+        });
+        throw new FenceLostError(idempotencyKey);
+      case "STALE":
+        // F4 — we are a zombie (older attempt than the fence owner).
+        this.log("fence owned by newer attempt — surrendering", {
+          idempotencyKey,
+          toolName: input.toolName
+        });
+        throw new FenceLostError(idempotencyKey);
+      case "RESERVED":
+        break;
+    }
+
+    // F1 — transition the durable fence PENDING→EXECUTING BEFORE any dispatch.
+    // beginSideEffect throws StaleFenceOwnerError if we no longer own it.
+    const begun = await fence.beginSideEffect({ fenceId: idempotencyKey, claimant: owner });
+    assertRuntimeInvariant(
+      "F1",
+      begun.fence.state === "EXECUTING",
+      "fence must be EXECUTING before a side effect is dispatched",
+      { idempotencyKey, state: begun.fence.state }
+    );
+
+    let output: Record<string, unknown>;
+    try {
+      output = await this.inner.execute(input);
+    } catch (toolErr) {
+      const message = toolErr instanceof Error ? toolErr.message : String(toolErr);
+      const failed = await fence.fail({ fenceId: idempotencyKey, claimant: owner, error: message });
+      if (failed.outcome === "FENCED") {
+        // We lost the lease mid-call; a new owner is reconciling. Surrender.
+        this.log("fence lost during failing tool call — surrendering", {
+          idempotencyKey,
+          toolName: input.toolName
+        });
+        throw new FenceLostError(idempotencyKey);
+      }
+      throw toolErr;
+    }
+
+    // F2/F4 — commit requires EXACT ownership. If the lease flipped during the
+    // call the commit is FENCED: the new owner moved us to AMBIGUOUS and will
+    // reconcile with the same idempotency key (remote dedupes). Surrender.
+    const committed = await fence.commit({ fenceId: idempotencyKey, claimant: owner, output });
+    if (committed.outcome === "FENCED") {
+      this.log("fence lost during tool call — surrendering to reconciler", {
+        idempotencyKey,
+        toolName: input.toolName
+      });
+      throw new FenceLostError(idempotencyKey);
+    }
+    return output;
   }
 
   /**

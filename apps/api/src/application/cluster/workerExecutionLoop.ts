@@ -43,6 +43,19 @@ import type { LeaseHeartbeatWorker } from "../../infrastructure/cluster/leaseHea
 import { createId } from "../../shared/id.js";
 import { propagation, context as otelContext } from "@opentelemetry/api";
 import { withSpan } from "../../infrastructure/telemetry/tracing.js";
+import {
+  assertRetryAllowed,
+  assertTransition,
+  classifyRuntimeFailure,
+  isAmbiguityError,
+  assertRuntimeInvariant,
+  assertCanonicalOwnershipConsistency,
+  type FailureType
+} from "../../runtime/canonicalSemantics.js";
+import { RetryCoordinator } from "../../runtime/retry/retryCoordinator.js";
+import { InMemoryRetryCoordinationStore } from "../../runtime/retry/inMemoryRetryStore.js";
+
+
 
 export interface WorkerExecutionLoopConfig {
   workerId: string;
@@ -82,7 +95,17 @@ export class WorkerExecutionLoop {
     private readonly deadLetterQueue: DeadLetterQueue,
     private readonly heartbeatWorker: LeaseHeartbeatWorker,
     private readonly logger: pino.Logger,
-    private readonly config: WorkerExecutionLoopConfig
+    private readonly config: WorkerExecutionLoopConfig,
+    /**
+     * Single-flight retry coordinator. Optional so existing call sites and
+     * tests need no change; when omitted, a process-local in-memory coordinator
+     * is constructed. Production wires a shared instance via runtimeContainer so
+     * every retry/recovery decision on this process passes one canonical gate
+     * (RT1..RT8). Cross-process serialization remains provided by the durable
+     * lease store; this layer adds in-process single-flight, arbitration,
+     * storm/backpressure, and the canonical retry state model.
+     */
+    private readonly coordinator: RetryCoordinator = new RetryCoordinator(new InMemoryRetryCoordinationStore())
   ) {}
 
   inFlightCount(): number {
@@ -274,16 +297,88 @@ export class WorkerExecutionLoop {
     });
 
     if (!lease) {
+      if (job.executionSnapshot?.parentExecutionId) {
+        assertRuntimeInvariant(
+          "RP3",
+          false,
+          `Replay ownership collision: another worker already holds the active lease for replay execution '${job.executionId}'`
+        );
+      }
       // Another worker holds the lease — give the queue back to itself.
       // We ack so the message doesn't re-deliver; the winner is responsible.
       await this.jobQueue.ack(receiptId).catch(() => undefined);
       return;
     }
 
+    // ─── CA3 / F7 — ownership is established from the DURABLE lease ────────────
+    // The fencing token used for every downstream write is derived from this
+    // Postgres-minted lease, never from the Redis job envelope (job.attempt /
+    // job.executionSnapshot are transport hints with no ownership authority).
+    // Assert the freshly-acquired lease is canonically consistent before any
+    // mutation: a drifted durable lease (lease_epoch != fencing_token !=
+    // ownership_version != attempt, or a mismatched worker_identity) would let
+    // an OR-style ownership check resurrect a stale epoch. Fail closed here,
+    // at the boundary, rather than mid-side-effect.
+    assertCanonicalOwnershipConsistency(lease, {
+      executionId: job.executionId,
+      site: "worker.lease-acquire"
+    });
+
+    const currentExec = await this.executions.getById(job.executionId);
+    if (currentExec) {
+      if (currentExec.status === "COMPLETED" || currentExec.status === "FAILED" || currentExec.status === "DEAD_LETTERED" || currentExec.status === "CANCELLED") {
+        // Deduplicate: already finished!
+        await this.jobQueue.ack(receiptId).catch(() => undefined);
+        await this.safeReleaseLease(job.executionId, "dedup");
+        return;
+      }
+      assertTransition(currentExec.id, currentExec.status, "LEASE_ACQUISITION");
+      currentExec.status = "LEASE_ACQUISITION";
+      currentExec.updatedAt = toIso(this.clock.now());
+      await this.executions.saveFenced(currentExec, {
+        executionId: job.executionId,
+        leaseId: lease.leaseId,
+        leaseEpoch: lease.attempt,
+        workerId: this.config.workerId,
+        expiration: lease.expiresAt,
+        attempt: lease.attempt
+      });
+    }
+
     // ─── Poison-pill: too many lease attempts → DLQ ───────────────────────
     if (lease.attempt > this.config.maxAttempts) {
       await this.poisonPill(job, lease.attempt, receiptId);
       await this.safeReleaseLease(job.executionId, "poison-pill");
+      return;
+    }
+
+    // ─── Exclusive execution ownership (RT2 + RT8) ─────────────────────────
+    // Become the sole retry owner of this execution before re-driving it. The
+    // claim is keyed on the durable lease epoch and validates the fence first,
+    // so a stale/zombie worker (lower epoch, or a lease lost between acquire and
+    // claim) surrenders rather than corrupting concurrent execution. This is the
+    // structural enforcement of "only one retry may own execution at a time" and
+    // "a retry never takes ownership without fence validation".
+    const claimMode = job.executionSnapshot?.parentExecutionId ? "replay" : "normal";
+    const claim = await this.coordinator.claimExecution({
+      executionId: job.executionId,
+      workerId: this.config.workerId,
+      ownerEpoch: lease.attempt,
+      mode: claimMode,
+      ...(job.executionSnapshot?.parentExecutionId ? { parentExecutionId: job.executionSnapshot.parentExecutionId } : {}),
+      validateFence: () =>
+        this.leases.validateFencing(job.executionId, this.config.workerId, lease.attempt, lease.leaseId, lease.expiresAt)
+    });
+    if (claim.outcome !== "OWNED") {
+      // Another owner holds (or is reconciling) this execution, or our fence is
+      // already invalid. Surrender cleanly: ack so the message does not
+      // re-deliver, release the lease, and let the legitimate owner finish.
+      this.logger.warn(
+        { executionId: job.executionId, workerId: this.config.workerId, claim: claim.outcome },
+        "executeJob: surrendering execution — retry ownership not granted"
+      );
+      await this.jobQueue.ack(receiptId).catch(() => undefined);
+      await this.safeReleaseLease(job.executionId, `claim-${claim.outcome.toLowerCase()}`);
       return;
     }
 
@@ -314,6 +409,7 @@ export class WorkerExecutionLoop {
 
     const fencingToken = lease.attempt;
     let outcome: "success" | "fence-lost" | "error" = "success";
+    let ambiguous = false;
     let errorMessage = "";
 
     try {
@@ -329,13 +425,22 @@ export class WorkerExecutionLoop {
         context: job.context,
         workerId: this.config.workerId,
         validateLease: (executionId) =>
-          this.leases.validateFencing(executionId, this.config.workerId, fencingToken),
+          this.leases.validateFencing(
+            executionId,
+            this.config.workerId,
+            fencingToken,
+            lease.leaseId,
+            lease.expiresAt
+          ),
         // Authoritative fencing — see DistributedScheduler.runJob for
         // rationale. saveFenced/addFenced inside the engine consult this
         // token to reject stale-worker writes deterministically.
         fence: {
           executionId: job.executionId,
+          leaseId: lease.leaseId,
+          leaseEpoch: lease.attempt,
           workerId: this.config.workerId,
+          expiration: lease.expiresAt,
           attempt: fencingToken
         },
         signal: controller.signal,
@@ -369,17 +474,36 @@ export class WorkerExecutionLoop {
           });
         }
 
-        if (completed.status === "FAILED" && completed.failure?.recoverable !== false) {
-          // The engine handled the failure by writing an EXECUTION_FAILED record.
-          // We still want one more retry pass at the queue level when recoverable.
+        if (completed.status === "FAILED") {
           errorMessage = completed.failure?.message ?? "execution failed";
           outcome = "error";
+          if (completed.failure?.recoverable === false) {
+            // Non-recoverable terminal failure. Force maxAttempts to dead-letter immediately.
+            lease.attempt = this.config.maxAttempts;
+          }
         }
       }
     } catch (err) {
       const isFencing = err instanceof Error && err.name === "FencingViolationError";
+      const isAmbiguity = isAmbiguityError(err);
       errorMessage = err instanceof Error ? err.message : String(err);
-      outcome = isFencing ? "fence-lost" : "error";
+      
+      if (isAmbiguity) {
+        outcome = "success"; // Quarantine: do not retry or poison-pill. Ack queue message.
+        ambiguous = true;
+        this.logger.warn(
+          { executionId: job.executionId, err: errorMessage },
+          "executeJob: ambiguous side effect detected; execution quarantined in RECONCILIATION_REQUIRED state"
+        );
+      } else {
+        const failureRec = classifyRuntimeFailure(err);
+        if (failureRec.recoverable === false) {
+          outcome = "error";
+          lease.attempt = this.config.maxAttempts;
+        } else {
+          outcome = isFencing ? "fence-lost" : "error";
+        }
+      }
 
       if (isFencing) {
         await this.publisher
@@ -398,7 +522,7 @@ export class WorkerExecutionLoop {
             })
           )
           .catch(() => undefined);
-      } else {
+      } else if (!isAmbiguity) {
         this.logger.error(
           { err, executionId: job.executionId, workerId: this.config.workerId },
           "executeJob: engine threw"
@@ -428,14 +552,26 @@ export class WorkerExecutionLoop {
     }
 
     if (outcome === "success") {
+      // RT7 — an ambiguous side effect quarantines the coordination behind
+      // reconciliation; a clean success concludes (settles) it. Either way no
+      // further retry of this execution will be coordinated until the gate
+      // changes.
+      if (ambiguous) {
+        await this.coordinator
+          .enterReconciliation(job.executionId, this.config.workerId, job.attempt, claimMode)
+          .catch(() => undefined);
+      } else {
+        await this.coordinator.settle(job.executionId, this.config.workerId, job.attempt).catch(() => undefined);
+      }
       await this.jobQueue.ack(receiptId).catch(() => undefined);
       return;
     }
 
     if (outcome === "fence-lost") {
-      // Winner holds the new lease — they own the result. We drop the queue
-      // message: re-delivering would generate spurious second attempts on a
-      // job that another worker is already processing.
+      // Winner holds the new lease — they own the result and the coordination.
+      // We leave the coordinator untouched (the new owner's claimExecution at a
+      // higher epoch takes over) and drop the queue message: re-delivering would
+      // generate spurious second attempts on a job another worker is processing.
       await this.jobQueue.ack(receiptId).catch(() => undefined);
       return;
     }
@@ -443,6 +579,21 @@ export class WorkerExecutionLoop {
     // Transient error — retry with exponential backoff if attempts remain.
     const nextAttempt = job.attempt + 1;
     const remainingAttempts = this.config.maxAttempts - lease.attempt;
+
+    try {
+      const exec = await this.executions.getById(job.executionId);
+      const failureType = exec?.failure?.code as FailureType | undefined;
+      assertRetryAllowed(failureType, job.executionId);
+    } catch (assertErr) {
+      this.logger.error({ err: assertErr }, "Unsafe retry assertion failed — dead-lettering execution");
+      await this.poisonPill(
+        { ...job, attempt: nextAttempt, priorFailures: job.priorFailures + 1 },
+        lease.attempt,
+        receiptId,
+        assertErr instanceof Error ? assertErr.message : String(assertErr)
+      );
+      return;
+    }
     if (remainingAttempts <= 0) {
       await this.poisonPill(
         { ...job, attempt: nextAttempt, priorFailures: job.priorFailures + 1 },
@@ -453,7 +604,50 @@ export class WorkerExecutionLoop {
       return;
     }
 
-    const delayMs = this.computeBackoff(nextAttempt);
+    // ─── Single-flight retry admission (RT1/RT5/RT6/RT7 + arbitration) ─────
+    // A failed attempt is where duplicate retries, storms, and reconciliation
+    // bypasses are born. Route the re-enqueue decision through the coordinator
+    // so it is admitted at most once, shed under load, blocked behind
+    // reconciliation, or escalated to dead-letter — never blindly re-enqueued.
+    const baseBackoff = this.computeBackoff(nextAttempt);
+    const exec = await this.executions.getById(job.executionId);
+    const failureType = exec?.failure?.code as FailureType | undefined;
+    const decision = await this.coordinator.requestRetry({
+      executionId: job.executionId,
+      requesterWorkerId: this.config.workerId,
+      attempt: nextAttempt,
+      ...(failureType ? { failureType } : {}),
+      mode: claimMode,
+      ...(job.executionSnapshot?.parentExecutionId ? { parentExecutionId: job.executionSnapshot.parentExecutionId } : {}),
+      backoffMs: baseBackoff
+    });
+
+    if (decision.decision === "ABORTED") {
+      // Non-retryable — escalate to the dead-letter queue.
+      await this.poisonPill(
+        { ...job, attempt: nextAttempt, priorFailures: job.priorFailures + 1 },
+        lease.attempt,
+        receiptId,
+        decision.reason
+      );
+      return;
+    }
+
+    if (decision.decision === "DEDUPED" || decision.decision === "RECONCILE_REQUIRED") {
+      // A duplicate retry is already coordinated, or the execution is quarantined
+      // for reconciliation. Either way this delivery must NOT spawn a second
+      // retry — drop the message without re-enqueue.
+      this.logger.warn(
+        { executionId: job.executionId, attempt: nextAttempt, decision: decision.decision, reason: decision.reason },
+        "executeJob: retry suppressed by coordinator — not re-enqueued"
+      );
+      await this.jobQueue.ack(receiptId).catch(() => undefined);
+      return;
+    }
+
+    // ADMITTED or BLOCKED → re-enqueue. BLOCKED uses the coordinator's extended
+    // backoff (backpressure/storm shedding by delay, never by dropping work).
+    const delayMs = decision.effectiveBackoffMs;
     const updatedJob: ExecutionJob = {
       ...job,
       attempt: nextAttempt,
@@ -470,7 +664,7 @@ export class WorkerExecutionLoop {
             executionId: job.executionId,
             attempt: nextAttempt,
             delayMs,
-            reason: errorMessage
+            reason: decision.decision === "BLOCKED" ? `${errorMessage} (shed: ${decision.reason})` : errorMessage
           },
           context: job.context
         })
@@ -503,6 +697,17 @@ export class WorkerExecutionLoop {
       execution?.failure?.message ??
       "unknown (exceeded max attempts without recorded failure)";
     const now = this.clock.now();
+
+    if (execution) {
+      assertTransition(execution.id, execution.status, "DEAD_LETTERED");
+      execution.status = "DEAD_LETTERED";
+      execution.updatedAt = toIso(now);
+      await this.executions.saveFenced(execution, {
+        executionId: job.executionId,
+        workerId: this.config.workerId,
+        attempt: leaseAttempt
+      }).catch(() => this.executions.save(execution));
+    }
 
     await this.publisher.publish(
       this.eventFactory.create({
@@ -549,6 +754,9 @@ export class WorkerExecutionLoop {
         context: job.context
       })
     );
+    // Terminalize the retry coordination — no further retry will be coordinated
+    // for a dead-lettered execution (RT5: a terminal coordination is absorbing).
+    await this.coordinator.abort(job.executionId, `dead-lettered: ${resolvedError}`, this.config.workerId, job.attempt).catch(() => undefined);
     await this.jobQueue.ack(receiptId).catch(() => undefined);
   }
 

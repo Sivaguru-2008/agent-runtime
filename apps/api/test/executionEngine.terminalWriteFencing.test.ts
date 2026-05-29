@@ -15,7 +15,7 @@ import { DeterministicModelProvider } from "../src/runtime/mockModelProvider.js"
 import { BuiltInToolExecutor } from "../src/runtime/toolRegistry.js";
 import type { DomainEvent } from "../src/domain/events.js";
 import type { Agent, Execution, MemoryRecord } from "../src/domain/model.js";
-import type { ExecutionRepository, MemoryRepository, CommitTerminalInput } from "../src/domain/ports.js";
+import type { ExecutionRepository, MemoryRepository, CommitTerminalInput, CommitTransitionInput } from "../src/domain/ports.js";
 import type { FencingToken, FencedWriteOutcome } from "../src/domain/clusterPorts.js";
 
 /**
@@ -67,6 +67,15 @@ class ReclaimOnSaveExecutionRepository implements ExecutionRepository {
       await this.leases.reclaimByWorker(this.workerId, this.clock.now());
     }
     return this.inner.commitTerminal(input);
+  }
+  async commitTransition(input: CommitTransitionInput): Promise<FencedWriteOutcome> {
+    if (input.execution.status === this.trigger.status) {
+      await this.leases.reclaimByWorker(this.workerId, this.clock.now());
+    }
+    return this.inner.commitTransition(input);
+  }
+  async detectPartialCommit(executionId: string): Promise<{ isConsistent: boolean; actualStatus: Execution["status"]; lastEventSeq?: number; error?: string }> {
+    return this.inner.detectPartialCommit(executionId);
   }
   isOutboxEnabled(): boolean {
     return false;

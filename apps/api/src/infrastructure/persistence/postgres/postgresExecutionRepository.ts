@@ -28,11 +28,14 @@
  */
 
 import type { Execution } from "../../../domain/model.js";
-import type { ExecutionRepository, CommitTerminalInput } from "../../../domain/ports.js";
+import type { ExecutionRepository, CommitTerminalInput, CommitTransitionInput } from "../../../domain/ports.js";
 import type { FencingToken, FencedWriteOutcome } from "../../../domain/clusterPorts.js";
 import type { PgClient } from "./pgClient.js";
 import { deriveEventLinks } from "../eventLinkage.js";
 import { isValidUuid, generateDeterministicUuid, createId } from "../../../shared/id.js";
+import { FencingViolationError } from "../../../runtime/executionEngine.js";
+import { assertTransition } from "../../../runtime/canonicalSemantics.js";
+import type { DomainEvent } from "../../../domain/events.js";
 
 
 interface ExecutionRow {
@@ -53,7 +56,28 @@ interface ExecutionRow {
 export class PostgresExecutionRepository implements ExecutionRepository {
   constructor(private readonly db: PgClient) {}
 
-  async save(execution: Execution): Promise<void> {
+  async save(execution: Execution, fence?: FencingToken): Promise<void> {
+    if (fence) {
+      const outcome = await this.saveFenced(execution, fence);
+      if (outcome === "FENCED") {
+        throw new FencingViolationError(execution.id, fence.workerId);
+      }
+      return;
+    }
+
+    const isLeasedState = execution.status !== "CREATION" && execution.status !== "SCHEDULING" && execution.status !== "QUEUED";
+    if (isLeasedState) {
+      const { rows } = await this.db.query(
+        `select 1 from execution_leases 
+          where execution_id = $1 
+            and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
+            and expires_at > now()`,
+        [execution.id]
+      );
+      if (rows.length > 0) {
+        throw new FencingViolationError(execution.id, "unknown-unfenced-active-lease");
+      }
+    }
     // C-1 fail-closed: every execution row must carry an explicit tenant_id.
     // AgentRuntime.runTask stamps it from the authenticated request context;
     // the scheduler/recovery path threads the same tenant through the
@@ -124,10 +148,20 @@ export class PostgresExecutionRepository implements ExecutionRepository {
          select 1 as ok
            from execution_leases
           where execution_id = $13
-            and worker_id    = $14
-            and attempt      = $15
-            and status       = 'ACTIVE'
-            and expires_at   > $16
+            and (worker_id    = $14 and coalesce(worker_identity, worker_id) = $14)
+            and (attempt      = $15
+                 and coalesce(fencing_token, attempt)     = $15
+                 and coalesce(lease_epoch, attempt)       = $15
+                 and coalesce(ownership_version, attempt) = $15)
+            and (
+              $17::text is null
+              or lease_id is null
+              or lease_id = $17
+            )
+            and (
+              ((status = 'LEASED' or status = 'RENEWING') and expires_at > $16)
+              or (status = 'RECOVERY_OWNED' and expires_at > $16 and $18 = 'RECOVERING')
+            )
           for update
        )
        insert into executions (
@@ -161,7 +195,9 @@ export class PostgresExecutionRepository implements ExecutionRepository {
         fence.executionId,
         fence.workerId,
         fence.attempt,
-        nowIso
+        nowIso,
+        fence.leaseId,
+        execution.status
       ]
     );
     return rows.length === 1 ? "COMMITTED" : "FENCED";
@@ -190,6 +226,36 @@ export class PostgresExecutionRepository implements ExecutionRepository {
   }
 
   async commitTerminal(input: CommitTerminalInput): Promise<FencedWriteOutcome> {
+    return this.commitTransition({
+      execution: input.execution,
+      events: [input.event],
+      memoryRecord: input.memoryRecord,
+      checkpoint: input.checkpoint && input.checkpointSequence !== undefined ? {
+        phase: input.execution.status === "COMPLETED" ? "COMPLETION" : "PLANNING",
+        sequence: input.checkpointSequence,
+        state: input.checkpoint
+      } : undefined,
+      fence: input.fence
+    });
+  }
+
+  private validateRepositoryTransition(executionId: string, from: any, to: any): void {
+    if (from === to) return;
+    const terminalFrom = from === "COMPLETED" || from === "FAILED" || from === "DEAD_LETTERED" || from === "CANCELLED";
+    const terminalTo = to === "COMPLETED" || to === "FAILED" || to === "DEAD_LETTERED" || to === "CANCELLED";
+    if (terminalFrom) {
+      if (from === "FAILED" && (to === "LEASE_ACQUISITION" || to === "DEAD_LETTERED")) {
+        return;
+      }
+      throw new Error(`Illegal execution state transition out of terminal state: '${from}' -> '${to}' for execution '${executionId}'`);
+    }
+    if (terminalTo) {
+      return;
+    }
+    assertTransition(executionId, from, to);
+  }
+
+  async commitTransition(input: CommitTransitionInput): Promise<FencedWriteOutcome> {
     const execution = input.execution;
     const tenantId = assertTenantId(execution.tenantId, "executions", execution.id);
     const nowIso = new Date().toISOString();
@@ -201,20 +267,42 @@ export class PostgresExecutionRepository implements ExecutionRepository {
           `select attempt 
              from execution_leases
             where execution_id = $1
-              and worker_id    = $2
-              and attempt      = $3
-              and status       = 'ACTIVE'
+              and (worker_id    = $2 and coalesce(worker_identity, worker_id) = $2)
+              and (attempt      = $3
+                   and coalesce(fencing_token, attempt)     = $3
+                   and coalesce(lease_epoch, attempt)       = $3
+                   and coalesce(ownership_version, attempt) = $3)
+              and (
+                $5::text is null
+                or lease_id is null
+                or lease_id = $5
+              )
+              and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
               and expires_at   > $4
             for update`,
           [
             input.fence.executionId,
             input.fence.workerId,
             input.fence.attempt,
-            nowIso
+            nowIso,
+            input.fence.leaseId
           ]
         );
         if (fenceRows.length === 0) {
           return "FENCED";
+        }
+      }
+
+      // Transactional Validation Hook: Repository Write Status Transition
+      const { rows: existingRows } = await tx.query<{ status: string }>(
+        `select status from executions where id = $1`,
+        [execution.id]
+      );
+      if (existingRows[0]) {
+        const from = existingRows[0].status as any;
+        const to = execution.status;
+        if (from !== to) {
+          this.validateRepositoryTransition(execution.id, from, to);
         }
       }
 
@@ -248,7 +336,7 @@ export class PostgresExecutionRepository implements ExecutionRepository {
         ]
       );
 
-      // 3. Insert memory record if TASK_HISTORY is provided
+      // 3. Insert memory record if provided
       if (input.memoryRecord) {
         const rec = input.memoryRecord;
         const memoryTenantId = assertTenantId(rec.tenantId, "memory_records", rec.id);
@@ -274,62 +362,87 @@ export class PostgresExecutionRepository implements ExecutionRepository {
         );
       }
 
-      // 4. Save terminal event to event store DDL
-      const event = input.event;
-      const mappedAggregateId = isValidUuid(event.aggregateId)
-        ? event.aggregateId
-        : generateDeterministicUuid(event.aggregateId);
+      // 4. Save events to event store and event outbox
+      if (input.events && input.events.length > 0) {
+        for (const event of input.events) {
+          // Transactional Validation Hook: Outbox Commit Event Properties
+          assertTenantId(event.metadata?.tenantId ?? execution.tenantId, "events", event.id);
 
-      const eventResult = await tx.query<{ sequence: string }>(
-        `insert into events (id, type, aggregate_id, aggregate_type, version, timestamp, payload, metadata, idempotency_key)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         on conflict (idempotency_key) do nothing
-         returning sequence`,
-        [
-          event.id,
-          event.type,
-          mappedAggregateId,
-          event.aggregateType,
-          event.version,
-          event.timestamp,
-          JSON.stringify(event.payload),
-          JSON.stringify(event.metadata),
-          event.metadata.idempotencyKey
-        ]
-      );
+          const mappedAggregateId = isValidUuid(event.aggregateId)
+            ? event.aggregateId
+            : generateDeterministicUuid(event.aggregateId);
 
-      let sequence: number;
-      if (eventResult.rows.length === 0) {
-        const existing = await tx.query<{ sequence: string }>(
-          `select sequence from events where idempotency_key = $1`,
-          [event.metadata.idempotencyKey]
-        );
-        sequence = Number(existing.rows[0]?.sequence ?? 0);
-      } else {
-        sequence = Number(eventResult.rows[0]?.sequence ?? 0);
+          const eventResult = await tx.query<{ sequence: string }>(
+            `insert into events (id, type, aggregate_id, aggregate_type, version, timestamp, payload, metadata, idempotency_key)
+             values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+             on conflict (idempotency_key) do nothing
+             returning sequence`,
+            [
+              event.id,
+              event.type,
+              mappedAggregateId,
+              event.aggregateType,
+              event.version,
+              event.timestamp,
+              JSON.stringify(event.payload),
+              JSON.stringify(event.metadata),
+              event.metadata.idempotencyKey
+            ]
+          );
+
+          let sequence: number;
+          if (eventResult.rows.length === 0) {
+            const existing = await tx.query<{ sequence: string }>(
+              `select sequence from events where idempotency_key = $1`,
+              [event.metadata.idempotencyKey]
+            );
+            sequence = Number(existing.rows[0]?.sequence ?? 0);
+          } else {
+            sequence = Number(eventResult.rows[0]?.sequence ?? 0);
+          }
+
+          // Write execution and cognition event link tables
+          const links = deriveEventLinks(event);
+          for (const link of links.executions) {
+            await tx.query(
+              `insert into event_execution_links (event_sequence, execution_id, link_kind)
+               values ($1, $2, $3)
+               on conflict do nothing`,
+              [sequence, link.executionId, link.kind]
+            );
+          }
+          for (const cognitionId of links.cognitions) {
+            await tx.query(
+              `insert into event_cognition_links (event_sequence, cognition_id)
+               values ($1, $2)
+               on conflict do nothing`,
+              [sequence, cognitionId]
+            );
+          }
+
+          // Insert event into event_outbox
+          const outboxId = createId();
+          await tx.query(
+            `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, original_timestamp)
+             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9)
+             on conflict (idempotency_key) do nothing`,
+            [
+              outboxId,
+              event.id,
+              execution.id,
+              event.type,
+              JSON.stringify(event.payload),
+              JSON.stringify(event.metadata),
+              sequence,
+              event.metadata.idempotencyKey,
+              event.timestamp
+            ]
+          );
+        }
       }
 
-      // Write execution and cognition event link tables
-      const links = deriveEventLinks(event);
-      for (const link of links.executions) {
-        await tx.query(
-          `insert into event_execution_links (event_sequence, execution_id, link_kind)
-           values ($1, $2, $3)
-           on conflict do nothing`,
-          [sequence, link.executionId, link.kind]
-        );
-      }
-      for (const cognitionId of links.cognitions) {
-        await tx.query(
-          `insert into event_cognition_links (event_sequence, cognition_id)
-           values ($1, $2)
-           on conflict do nothing`,
-          [sequence, cognitionId]
-        );
-      }
-
-      // Save terminal checkpoint if present
-      if (input.checkpoint && input.checkpointSequence !== undefined) {
+      // 5. Save checkpoint if present
+      if (input.checkpoint) {
         const checkpointId = createId();
         await tx.query(
           `insert into execution_checkpoints (id, execution_id, worker_id, sequence, phase, state, created_at)
@@ -342,38 +455,93 @@ export class PostgresExecutionRepository implements ExecutionRepository {
             checkpointId,
             execution.id,
             input.fence?.workerId ?? "local",
-            input.checkpointSequence,
-            execution.status === "COMPLETED" ? "COMPLETION" : "PLANNING",
-            JSON.stringify(input.checkpoint),
+            input.checkpoint.sequence,
+            input.checkpoint.phase,
+            JSON.stringify(input.checkpoint.state),
             nowIso
           ]
         );
       }
 
-      // 5. Insert event into event_outbox
-      //    Audit CRITICAL-3: persist event.timestamp into original_timestamp
-      //    so the OutboxDispatcher rebroadcasts the original wall time, not
-      //    the dispatch time. Migration 0011 adds the column.
-      const outboxId = createId();
-      await tx.query(
-        `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, original_timestamp)
-         values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9)
-         on conflict (idempotency_key) do nothing`,
-        [
-          outboxId,
-          event.id,
-          execution.id,
-          event.type,
-          JSON.stringify(event.payload),
-          JSON.stringify(event.metadata),
-          sequence,
-          event.metadata.idempotencyKey,
-          event.timestamp
-        ]
-      );
-
       return "COMMITTED";
     });
+  }
+
+  async detectPartialCommit(executionId: string): Promise<{
+    isConsistent: boolean;
+    actualStatus: Execution["status"];
+    lastEventSeq?: number;
+    error?: string;
+  }> {
+    const execution = await this.getById(executionId);
+    if (!execution) {
+      return { isConsistent: true, actualStatus: "CREATION" };
+    }
+
+    // Get the last event type from events table linked to this execution
+    const { rows: eventRows } = await this.db.query<{ type: string; sequence: string }>(
+      `select e.type, e.sequence
+         from events e
+         join event_execution_links l on l.event_sequence = e.sequence
+         where l.execution_id = $1
+         order by e.sequence desc
+         limit 1`,
+      [executionId]
+    );
+
+    const lastEvent = eventRows[0];
+    const actualStatus = execution.status;
+
+    if (actualStatus === "COMPLETED") {
+      if (!lastEvent || lastEvent.type !== "EXECUTION_COMPLETED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: lastEvent ? Number(lastEvent.sequence) : undefined,
+          error: `Partial commit anomaly: execution is marked COMPLETED but last event in log is ${
+            lastEvent ? lastEvent.type : "NONE"
+          }`
+        };
+      }
+    }
+
+    if (actualStatus === "FAILED") {
+      if (!lastEvent || lastEvent.type !== "EXECUTION_FAILED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: lastEvent ? Number(lastEvent.sequence) : undefined,
+          error: `Partial commit anomaly: execution is marked FAILED but last event in log is ${
+            lastEvent ? lastEvent.type : "NONE"
+          }`
+        };
+      }
+    }
+
+    if (lastEvent) {
+      if (lastEvent.type === "EXECUTION_COMPLETED" && actualStatus !== "COMPLETED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: Number(lastEvent.sequence),
+          error: `Partial commit anomaly: event log terminates at EXECUTION_COMPLETED but execution status is ${actualStatus}`
+        };
+      }
+      if (lastEvent.type === "EXECUTION_FAILED" && actualStatus !== "FAILED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: Number(lastEvent.sequence),
+          error: `Partial commit anomaly: event log terminates at EXECUTION_FAILED but execution status is ${actualStatus}`
+        };
+      }
+    }
+
+    return {
+      isConsistent: true,
+      actualStatus,
+      lastEventSeq: lastEvent ? Number(lastEvent.sequence) : undefined
+    };
   }
 
   isOutboxEnabled(): boolean {

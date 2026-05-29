@@ -31,6 +31,7 @@ import type {
   ToolCallDedupStore
 } from "../../src/domain/toolDedup.js";
 import type { ToolExecutor } from "../../src/domain/ports.js";
+import { sideEffectCapabilityRegistry } from "../../src/runtime/canonicalSemantics.js";
 
 interface FakeRow {
   status: ToolCallDedupRecord["status"];
@@ -208,6 +209,10 @@ describe("fence-protocol invariants", () => {
   let exec: DedupingToolExecutor;
 
   beforeEach(() => {
+    // CAP1: the executor validates a capability declaration for every tool
+    // before any dedup/fence decision. These tests exercise the legacy dedup
+    // path with a synthetic non-idempotent tool, so declare it explicitly.
+    sideEffectCapabilityRegistry.register("fake-tool", "NON_IDEMPOTENT");
     store = new FakeDedupStore();
     tool = new CountingTool();
     exec = makeExecutor(store, tool);

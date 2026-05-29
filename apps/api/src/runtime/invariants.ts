@@ -1,28 +1,12 @@
-/**
- * V3 — Strict runtime invariants.
- *
- * What this is:
- *   A library of small, fast checks that assert non-trivial runtime
- *   guarantees. They are called from `assertProductionInvariants()`
- *   on the production boot path AND from a dedicated CI test
- *   (test/invariants/) so a regression that violates a contract trips
- *   the build before a release goes out.
- *
- * Why a module rather than inline asserts:
- *   - The same invariants are checked from server.ts AND
- *     workerProcess.ts, so duplicating them inline drifts.
- *   - The CI suite runs the invariants against fakes to ensure they
- *     correctly REJECT misconfiguration, not just accept the happy path.
- */
-
 import type { AppConfig } from "../shared/config.js";
+import {
+  InvariantViolation,
+  assertRuntimeInvariant,
+  INVARIANT_REGISTRY
+} from "./canonicalSemantics.js";
 
-export class InvariantViolation extends Error {
-  readonly code = "INVARIANT_VIOLATION" as const;
-  constructor(message: string, public readonly invariant: string) {
-    super(`[invariant:${invariant}] ${message}`);
-  }
-}
+export { InvariantViolation, assertRuntimeInvariant, INVARIANT_REGISTRY };
+export type { InvariantId } from "./canonicalSemantics.js";
 
 export interface InvariantContext {
   config: AppConfig;
@@ -37,12 +21,6 @@ export interface InvariantContext {
 type InvariantCheck = (ctx: InvariantContext) => void;
 
 const checks: Record<string, InvariantCheck> = {
-  /**
-   * Production must have AUTH_ENABLED and DATABASE_URL — already enforced
-   * by loadConfig, but re-checked here so a future refactor that breaks
-   * loadConfig surfaces immediately at the boot invariants instead of
-   * silently shipping.
-   */
   "production-auth-and-db": (ctx) => {
     if (ctx.config.NODE_ENV !== "production") return;
     if (!ctx.config.AUTH_ENABLED) {
@@ -59,10 +37,6 @@ const checks: Record<string, InvariantCheck> = {
     }
   },
 
-  /**
-   * Production must use the strict tenant guard. A permissive guard in
-   * production is a cross-tenant data leak.
-   */
   "production-strict-tenant-guard": (ctx) => {
     if (ctx.config.NODE_ENV !== "production") return;
     if (!ctx.tenantGuardStrict) {
@@ -73,11 +47,6 @@ const checks: Record<string, InvariantCheck> = {
     }
   },
 
-  /**
-   * Job-queue visibility timeout must be at least the execution lease TTL.
-   * Re-deriving the check here makes a future config refactor obvious if it
-   * accidentally drops the constraint.
-   */
   "queue-visibility-vs-lease": (ctx) => {
     if (ctx.config.JOB_QUEUE_VISIBILITY_MS < ctx.config.EXECUTION_LEASE_TTL_MS) {
       throw new InvariantViolation(
@@ -88,10 +57,6 @@ const checks: Record<string, InvariantCheck> = {
     }
   },
 
-  /**
-   * Distributed mode requires the worker role split — combined-mode in
-   * distributed deployments would re-introduce the single-machine race.
-   */
   "distributed-role-split": (ctx) => {
     if (ctx.config.RUNTIME_MODE !== "distributed") return;
     if (ctx.config.RUNTIME_ROLE === "combined") {
@@ -102,10 +67,6 @@ const checks: Record<string, InvariantCheck> = {
     }
   },
 
-  /**
-   * Distributed mode requires the redis-streams event bus AND redis job
-   * queue — otherwise API and workers cannot reach each other.
-   */
   "distributed-bus-and-queue": (ctx) => {
     if (ctx.config.RUNTIME_MODE !== "distributed") return;
     if (ctx.config.EVENT_BUS_DRIVER !== "redis-streams") {
@@ -122,10 +83,6 @@ const checks: Record<string, InvariantCheck> = {
     }
   },
 
-  /**
-   * Staging and production must NOT use the in-memory persistence driver —
-   * cognition/replay state would vanish on restart.
-   */
   "non-memory-persistence": (ctx) => {
     const env = ctx.config.NODE_ENV;
     if (env !== "production" && env !== "staging") return;
@@ -138,10 +95,6 @@ const checks: Record<string, InvariantCheck> = {
   }
 };
 
-/**
- * Run every invariant check. Throws on the FIRST violation so the boot
- * sequence fails loudly with the most informative error.
- */
 export function assertProductionInvariants(ctx: InvariantContext): void {
   for (const [name, check] of Object.entries(checks)) {
     try {
@@ -156,11 +109,6 @@ export function assertProductionInvariants(ctx: InvariantContext): void {
   }
 }
 
-/**
- * Used by the test suite to enumerate every invariant name without invoking
- * the checks. The CI test then calls each one with a context tailored to
- * exercise both happy-path and rejection-path.
- */
 export function listInvariants(): string[] {
   return Object.keys(checks);
 }

@@ -40,7 +40,7 @@ class StubLeaseStore implements LeaseStore {
       acquiredAt: input.now.toISOString(),
       renewedAt: input.now.toISOString(),
       expiresAt: new Date(input.now.getTime() + input.ttlMs).toISOString(),
-      status: "ACTIVE",
+      status: "LEASED",
       attempt: 1
     };
   }
@@ -54,7 +54,7 @@ class StubLeaseStore implements LeaseStore {
           acquiredAt: now.toISOString(),
           renewedAt: now.toISOString(),
           expiresAt: new Date(now.getTime() + ttlMs).toISOString(),
-          status: "ACTIVE",
+          status: "LEASED",
           attempt: 1
         };
       case "rejected":
@@ -67,6 +67,7 @@ class StubLeaseStore implements LeaseStore {
   async release(): Promise<ExecutionLease | undefined> { return undefined; }
   async reclaimExpired(): Promise<ExecutionLease[]> { return []; }
   async reclaimByWorker(): Promise<ExecutionLease[]> { return []; }
+  async takeoverRecovery(): Promise<ExecutionLease | undefined> { return undefined; }
   async getByExecution(): Promise<ExecutionLease | undefined> { return undefined; }
   async listActive(): Promise<ExecutionLease[]> { return []; }
   async validateFencing(): Promise<boolean> { return true; }
@@ -107,7 +108,7 @@ function leaseFor(executionId: string, remainingMs = 50): ExecutionLease {
     acquiredAt: now.toISOString(),
     renewedAt: now.toISOString(),
     expiresAt: new Date(now.getTime() + remainingMs).toISOString(),
-    status: "ACTIVE",
+    status: "LEASED",
     attempt: 1
   };
 }

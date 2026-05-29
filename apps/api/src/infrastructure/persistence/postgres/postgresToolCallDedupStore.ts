@@ -4,17 +4,6 @@
  * Backs the `tool_call_dedup` table introduced by migration 0010. The hot
  * path is a single UPSERT on the primary key (idempotency_key); see
  * domain/toolDedup.ts for the contract.
- *
- * Stale-IN_FLIGHT handling:
- *   A worker can crash between beginCall() and markCompleted/markFailed,
- *   leaving an IN_FLIGHT row that no one will ever finalize. To avoid
- *   forever-polling siblings, beginCall() treats an IN_FLIGHT row whose
- *   age exceeds `staleInFlightMs` as a poison record and atomically
- *   replaces it with a fresh FIRST_CALL marker — the new caller becomes
- *   the executor and any genuinely-still-running prior caller's
- *   markCompleted will fail to land (the row identity has shifted via
- *   created_at). This is acceptable because a "running >TTL" caller is
- *   either dead or so slow that its completion would be a re-run anyway.
  */
 
 import type { PgClient } from "./pgClient.js";
@@ -46,17 +35,6 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
   }
 
   async beginCall(input: ToolCallDedupBegin): Promise<BeginCallMode> {
-    // Canonical fence protocol §3 (docs/specs/fence-protocol.md):
-    //
-    // When the caller supplies argsHash + stepSeq, this UPSERT also records
-    // them on first reserve, and on a follow-up `beginCall` with the same
-    // key, the SELECT branch compares the recorded args_hash against the
-    // current one. Mismatch surfaces as ARG_DRIFT (invariant I5) instead
-    // of silently continuing — the engine treats that as a replay
-    // divergence and refuses to execute.
-    //
-    // The CTE shape is unchanged structurally from the pre-0015 query;
-    // it only adds three columns to the INSERT/RETURNING.
     const { rows } = await this.db.query<{
       status: "IN_FLIGHT" | "RESERVED" | "COMPLETED" | "SUCCEEDED" | "FAILED";
       output: Record<string, unknown> | null;
@@ -67,15 +45,9 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
       `with attempted_insert as (
          insert into tool_call_dedup
            (idempotency_key, execution_id, agent_id, tool_name, attempt, status, tenant_id,
-            step_seq, args_hash, fence_token_at_reserve)
-         values ($1, $2, $3, $4, $5, 'RESERVED', $6, $8, $9, $10)
+            step_seq, args_hash, fence_token_at_reserve, lease_epoch, fencing_token, ownership_version, worker_identity)
+         values ($1, $2, $3, $4, $5, 'RESERVED', $6, $8, $9, $10, $10, $10, $10, 'unknown')
          on conflict (idempotency_key) do update set
-           -- Reclaim stale IN_FLIGHT/RESERVED slots: prior worker that took
-           -- the lock died before recording terminal status. We re-stamp
-           -- the row so this caller becomes the new executor.
-           -- COMPLETED / SUCCEEDED / FAILED rows are untouched because the
-           -- WHERE excludes them — those paths are surfaced to the caller
-           -- via the SELECT branch below.
            status                  = 'RESERVED',
            execution_id            = excluded.execution_id,
            agent_id                = excluded.agent_id,
@@ -87,7 +59,11 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
            last_error              = null,
            step_seq                = excluded.step_seq,
            args_hash               = excluded.args_hash,
-           fence_token_at_reserve  = excluded.fence_token_at_reserve
+           fence_token_at_reserve  = excluded.fence_token_at_reserve,
+           lease_epoch             = excluded.lease_epoch,
+           fencing_token           = excluded.fencing_token,
+           ownership_version       = excluded.ownership_version,
+           worker_identity         = excluded.worker_identity
          where tool_call_dedup.status in ('IN_FLIGHT','RESERVED')
            and tool_call_dedup.created_at < (now() - ($7 || ' milliseconds')::interval)
          returning status, output, created_at, args_hash, true as was_inserted
@@ -115,19 +91,12 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
 
     const row = rows[0];
     if (!row) {
-      // Defensive: the UPSERT should always return at least one row.
-      // Falling back to FIRST_CALL is safe — the caller executes and the
-      // markCompleted/markFailed call will UPSERT the row.
       return { mode: "FIRST_CALL" };
     }
 
     if (row.was_inserted) {
       return { mode: "FIRST_CALL" };
     }
-    // Args drift detection (invariant I5). We only check when both the
-    // caller and the recorded row carry an args_hash — legacy rows from
-    // before migration 0015 will have NULL, and we keep their behaviour
-    // unchanged (silent retry) to avoid stranding pre-0015 IN_FLIGHT rows.
     if (input.argsHash && row.args_hash && row.args_hash !== input.argsHash) {
       return {
         mode: "ARG_DRIFT",
@@ -139,9 +108,6 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
       return { mode: "RETURN_CACHED", output: row.output };
     }
     if (row.status === "FAILED") {
-      // A previously-failed call is NOT cached — the caller should retry
-      // (the policy of "should I retry?" lives in the engine, not here).
-      // Treat this as a fresh FIRST_CALL by re-stamping the row in-place.
       await this.db.query(
         `update tool_call_dedup
             set status     = 'RESERVED',
@@ -152,7 +118,10 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
                 attempt    = $2,
                 step_seq               = coalesce($3, step_seq),
                 args_hash              = coalesce($4, args_hash),
-                fence_token_at_reserve = coalesce($5, fence_token_at_reserve)
+                fence_token_at_reserve = coalesce($5, fence_token_at_reserve),
+                lease_epoch             = coalesce($5, lease_epoch),
+                fencing_token           = coalesce($5, fencing_token),
+                ownership_version       = coalesce($5, ownership_version)
           where idempotency_key = $1`,
         [
           input.idempotencyKey,
@@ -164,7 +133,6 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
       );
       return { mode: "FIRST_CALL" };
     }
-    // IN_FLIGHT / RESERVED and not stale → sibling is running; poll.
     const sinceMs = Date.now() - new Date(row.created_at).getTime();
     return { mode: "POLL_FOR_RESULT", sinceMs };
   }
@@ -194,16 +162,6 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
     );
   }
 
-  /**
-   * Fence-aware completion. Re-reads `execution_leases.attempt` inside the
-   * same UPDATE as the dedup write, aborting when it no longer matches the
-   * expected token. Implements invariant I4 from docs/specs/fence-protocol.md.
-   *
-   * Returns COMMITTED on success, FENCED when the lease has been reclaimed
-   * (stale worker, MUST surrender). The implementation uses a CTE so the
-   * lease check and the dedup write are a single statement — no
-   * read-then-write window.
-   */
   async markCompletedFenced(input: {
     idempotencyKey: string;
     executionId: string;
@@ -215,8 +173,11 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
          select 1
            from execution_leases
           where execution_id = $2
-            and attempt      = $3
-            and status       = 'ACTIVE'
+            and (attempt      = $3
+                 and coalesce(fencing_token, attempt)     = $3
+                 and coalesce(lease_epoch, attempt)       = $3
+                 and coalesce(ownership_version, attempt) = $3)
+            and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
             and expires_at   > now()
           for share
        )
@@ -250,8 +211,11 @@ export class PostgresToolCallDedupStore implements ToolCallDedupStore {
          select 1
            from execution_leases
           where execution_id = $2
-            and attempt      = $3
-            and status       = 'ACTIVE'
+            and (attempt      = $3
+                 and coalesce(fencing_token, attempt)     = $3
+                 and coalesce(lease_epoch, attempt)       = $3
+                 and coalesce(ownership_version, attempt) = $3)
+            and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
             and expires_at   > now()
           for share
        )

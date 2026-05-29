@@ -59,9 +59,27 @@ export class ObservabilityQueries {
       },
       executions: {
         total: executions.length,
-        running: executions.filter((execution) => execution.status === "RUNNING" || execution.status === "QUEUED").length,
-        failed: executions.filter((execution) => execution.status === "FAILED").length,
-        completed: executions.filter((execution) => execution.status === "COMPLETED").length
+        running: executions.filter((execution) =>
+          execution.status === "CREATION" ||
+          execution.status === "SCHEDULING" ||
+          execution.status === "LEASE_ACQUISITION" ||
+          execution.status === "RUNNING" ||
+          execution.status === "SIDE_EFFECT_PENDING" ||
+          execution.status === "REPLAYING" ||
+          execution.status === "RECOVERING" ||
+          execution.status === "COMMITTED" ||
+          execution.status === "QUEUED"
+        ).length,
+        failed: executions.filter((execution) =>
+          execution.status === "FAILED" ||
+          execution.status === "AMBIGUOUS" ||
+          execution.status === "RECONCILIATION_REQUIRED" ||
+          execution.status === "DEAD_LETTERED" ||
+          execution.status === "EXPIRED"
+        ).length,
+        completed: executions.filter((execution) =>
+          execution.status === "COMPLETED"
+        ).length
       },
       tokens: executions.reduce(
         (total, execution) => ({

@@ -23,10 +23,42 @@ export interface RuntimeWorker {
   metadata?: Record<string, unknown>;
 }
 
-export type LeaseStatus = "ACTIVE" | "RELEASED" | "EXPIRED" | "RECLAIMED";
+export type LeaseStatus =
+  | "LEASE_PENDING"
+  | "LEASED"
+  | "RENEWING"
+  | "EXPIRED"
+  | "INVALIDATED"
+  | "TRANSFERRED"
+  | "RECOVERY_OWNED";
+
+/**
+ * Lease statuses under which a worker is the live, authoritative owner and
+ * may mutate durable state. LEASE_PENDING is deliberately excluded: a pending
+ * lease has not yet been confirmed as owned, so it must not be treated as an
+ * active fence holder.
+ */
+export const ACTIVE_LEASE_STATUSES: ReadonlySet<LeaseStatus> = new Set<LeaseStatus>([
+  "LEASED",
+  "RENEWING",
+  "RECOVERY_OWNED"
+]);
+
+export function isActiveLease(status: LeaseStatus): boolean {
+  return ACTIVE_LEASE_STATUSES.has(status);
+}
 
 export interface ExecutionLease {
   executionId: string;
+  leaseId?: string;
+  leaseEpoch?: number;
+  lease_epoch?: number;
+  fencingToken?: number;
+  fencing_token?: number;
+  ownershipVersion?: number;
+  ownership_version?: number;
+  workerIdentity?: string;
+  worker_identity?: string;
   workerId: string;
   acquiredAt: string;
   expiresAt: string;

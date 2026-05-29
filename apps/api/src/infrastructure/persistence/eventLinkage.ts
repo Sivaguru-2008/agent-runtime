@@ -52,11 +52,11 @@ export function deriveEventLinks(event: DomainEvent): {
   const payload = event.payload as Record<string, unknown>;
 
   add(readPath(payload, ["execution", "id"]), "EXECUTION");
-  add(readPath(payload, ["execution", "parentExecutionId"]), "EXECUTION");
   add(readPath(payload, ["step", "executionId"]), "EXECUTION");
   add(readPath(payload, ["toolCall", "executionId"]), "EXECUTION");
   add(readPath(payload, ["replayExecutionId"]), "EXECUTION");
-  add(readPath(payload, ["parentExecutionId"]), "EXECUTION");
+  // Do not link parentExecutionId — child replay/lifecycle events must not
+  // appear in the parent's execution log (breaks replay watermark semantics).
   add(readPath(payload, ["executionId"]), "RESUME");
 
   // Cognition node / graph events carry an executionId nested under the node

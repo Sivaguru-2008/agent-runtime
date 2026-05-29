@@ -31,6 +31,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import type { ToolExecutor } from "../domain/ports.js";
 import { throwIfAborted, composeAbortSignals } from "../providers/retry.js";
+export { isReplaySafeTool, isToolSafe } from "./canonicalSemantics.js";
 
 export interface ToolRegistryConfig {
   /** Brave Search API key. Falls back to DuckDuckGo when absent. */

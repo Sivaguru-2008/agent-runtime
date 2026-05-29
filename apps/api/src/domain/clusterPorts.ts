@@ -6,7 +6,9 @@ import type { DeadLetterEntry, ExecutionCheckpoint, ExecutionLease, RuntimeWorke
  * authoritatively mutate durable state. The token is captured at lease-
  * acquisition time and threaded through every state-mutating write. The
  * durable store rejects writes whose token does not match the live lease
- * (worker_id + attempt + status='ACTIVE' + expires_at > now()).
+ * (worker_id + canonical epoch (attempt == fencing_token == lease_epoch ==
+ * ownership_version, fail-closed AND) + status in ('LEASED','RENEWING',
+ * 'RECOVERY_OWNED') + expires_at > now()).
  *
  * Why this exists:
  *   Advisory fencing (a SELECT against the lease store, then an unconditional
@@ -24,9 +26,19 @@ import type { DeadLetterEntry, ExecutionCheckpoint, ExecutionLease, RuntimeWorke
  *   future lease — the new lease will have attempt = old + 1.
  */
 export interface FencingToken {
-  executionId: string;
-  workerId: string;
-  attempt: number;
+  readonly executionId: string;
+  readonly leaseId?: string;
+  readonly leaseEpoch?: number;
+  readonly lease_epoch?: number;
+  readonly fencingToken?: number;
+  readonly fencing_token?: number;
+  readonly ownershipVersion?: number;
+  readonly ownership_version?: number;
+  readonly workerIdentity?: string;
+  readonly worker_identity?: string;
+  readonly workerId: string;
+  readonly expiration?: string;
+  readonly attempt: number;
 }
 
 /**
@@ -63,8 +75,9 @@ export interface LeaseStore {
   acquire(input: AcquireLeaseInput): Promise<ExecutionLease | undefined>;
   renew(executionId: string, workerId: string, now: Date, ttlMs: number): Promise<ExecutionLease | undefined>;
   release(executionId: string, workerId: string, now: Date): Promise<ExecutionLease | undefined>;
-  reclaimExpired(now: Date): Promise<ExecutionLease[]>;
+  reclaimExpired(now: Date, limit?: number): Promise<ExecutionLease[]>;
   reclaimByWorker(workerId: string, now: Date): Promise<ExecutionLease[]>;
+  takeoverRecovery(executionId: string, workerId: string, now: Date, ttlMs: number): Promise<ExecutionLease | undefined>;
   getByExecution(executionId: string): Promise<ExecutionLease | undefined>;
   listActive(): Promise<ExecutionLease[]>;
   /**
@@ -74,7 +87,7 @@ export interface LeaseStore {
    * Returns `false` if the lease was reclaimed, expired, or taken by another
    * worker — the caller must abort the in-progress execution immediately.
    */
-  validateFencing(executionId: string, workerId: string, fencingToken: number): Promise<boolean>;
+  validateFencing(executionId: string, workerId: string, fencingToken: number, leaseId?: string, expiration?: string): Promise<boolean>;
 }
 
 export interface CheckpointStore {

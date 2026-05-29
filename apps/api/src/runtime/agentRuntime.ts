@@ -6,6 +6,7 @@ import { toIso } from "../shared/clock.js";
 import { BackpressureError, ConflictError, NotFoundError } from "../shared/errors.js";
 import { createId } from "../shared/id.js";
 import type { Agent, Execution, MemoryPolicy, ModelConfig, ToolConfig } from "../domain/model.js";
+import { assertTransition } from "./canonicalSemantics.js";
 import type { AgentRepository, ExecutionRepository } from "../domain/ports.js";
 import type { DistributedScheduler } from "../application/cluster/distributedScheduler.js";
 import type { ExecutionEngine } from "./executionEngine.js";
@@ -184,13 +185,20 @@ export class AgentRuntime {
     const execution: Execution = {
       id: createId(),
       agentId,
-      status: "QUEUED",
+      status: "CREATION",
       input: task,
       tokenUsage: { prompt: 0, completion: 0, total: 0 },
       startedAt: now,
       updatedAt: now,
       tenantId: execTenantId
     };
+
+    assertTransition(execution.id, "CREATION", "SCHEDULING");
+    execution.status = "SCHEDULING";
+    execution.updatedAt = toIso(this.clock.now());
+    assertTransition(execution.id, "SCHEDULING", "QUEUED");
+    execution.status = "QUEUED";
+    execution.updatedAt = toIso(this.clock.now());
 
     await this.executions.save(execution);
     await this.publisher.publish(
@@ -253,7 +261,7 @@ export class AgentRuntime {
             traceContext: Object.keys(traceCarrier).length > 0 ? traceCarrier : undefined
           };
           await this.jobQueue!.enqueue(job);
-          return execution;
+          return { ...execution };
         }
       );
       return enqueued;
@@ -261,7 +269,7 @@ export class AgentRuntime {
 
     if (this.scheduler) {
       this.scheduler.enqueue({ agent: busy, execution, task, context });
-      return execution;
+      return { ...execution };
     }
 
     const completed = await this.engine.execute({ agent: busy, execution, task, context });
@@ -286,7 +294,7 @@ export class AgentRuntime {
       id: createId(),
       agentId: agent.id,
       parentExecutionId: original.id,
-      status: "QUEUED",
+      status: "CREATION",
       input: original.input,
       tokenUsage: { prompt: 0, completion: 0, total: 0 },
       startedAt: now,
@@ -298,6 +306,13 @@ export class AgentRuntime {
       tenantId:
         original.tenantId ?? contextTenantId(context) ?? agent.tenantId ?? "system"
     };
+
+    assertTransition(replay.id, "CREATION", "SCHEDULING");
+    replay.status = "SCHEDULING";
+    replay.updatedAt = toIso(this.clock.now());
+    assertTransition(replay.id, "SCHEDULING", "QUEUED");
+    replay.status = "QUEUED";
+    replay.updatedAt = toIso(this.clock.now());
 
     await this.executions.save(replay);
     await this.publisher.publish(
@@ -338,7 +353,7 @@ export class AgentRuntime {
           "agent.id": agent.id,
           "execution.id": replay.id,
           "execution.attempt": 1,
-          "execution.replay": true
+          "messaging.replay": true
         },
         async () => {
           const traceCarrier: Record<string, string> = {};
@@ -357,7 +372,7 @@ export class AgentRuntime {
             traceContext: Object.keys(traceCarrier).length > 0 ? traceCarrier : undefined
           };
           await this.jobQueue!.enqueue(job);
-          return replay;
+          return { ...replay };
         }
       );
       return enqueued;
@@ -365,7 +380,7 @@ export class AgentRuntime {
 
     if (this.scheduler) {
       this.scheduler.enqueue({ agent, execution: replay, task: replay.input, context });
-      return replay;
+      return { ...replay };
     }
 
     if (process.env.ALLOW_UNFENCED_REPLAY !== "true") {

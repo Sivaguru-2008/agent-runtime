@@ -98,6 +98,7 @@ export class ReplayDivergenceDetector {
         divergent: false,
         firstDivergentFrame: null,
         reason: "NONE",
+        classification: "EQUIVALENT",
         narrative: "First certification — no prior baseline to compare against",
         detectedAt: toIso(this.clock.now())
       };
@@ -111,6 +112,7 @@ export class ReplayDivergenceDetector {
         divergent: true,
         firstDivergentFrame: null,
         reason: "WORKFLOW_VERSION",
+        classification: "NON_RECONSTRUCTABLE",
         narrative: `Workflow version changed: ${expected.workflowVersion} → ${actual.workflowVersion} (replays across versions are not comparable)`,
         detectedAt: toIso(this.clock.now())
       };
@@ -124,6 +126,7 @@ export class ReplayDivergenceDetector {
         divergent: false,
         firstDivergentFrame: null,
         reason: "NONE",
+        classification: "EQUIVALENT",
         narrative: `Replay matches baseline across ${actual.frameDigests.length} frame(s)`,
         detectedAt: toIso(this.clock.now())
       };
@@ -137,6 +140,7 @@ export class ReplayDivergenceDetector {
         divergent: true,
         firstDivergentFrame: firstDivergentIndex(expected.frameDigests, actual.frameDigests),
         reason: "EVENT_COUNT",
+        classification: "DIVERGED",
         narrative: `Event log size changed: ${expected.eventCount} → ${actual.eventCount} event(s) — either appended out-of-band or trimmed`,
         detectedAt: toIso(this.clock.now())
       };
@@ -150,6 +154,7 @@ export class ReplayDivergenceDetector {
       divergent: true,
       firstDivergentFrame: idx,
       reason: "FRAME_DIGEST",
+      classification: "DIVERGED",
       narrative:
         idx === null
           ? "Chain hash diverged but no per-frame divergence found — likely a digest implementation drift"

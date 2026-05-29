@@ -26,8 +26,11 @@ export interface EventStore {
    *
    * Contract: the event is persisted ONLY if a row exists in
    * `execution_leases` whose `execution_id=fence.executionId`,
-   * `worker_id=fence.workerId`, `attempt=fence.attempt`, `status='ACTIVE'`,
-   * and `expires_at > now()` — verified inside the SAME transaction as the
+   * `worker_id=fence.workerId`, the canonical epoch matches
+   * `fence.attempt` (attempt == fencing_token == lease_epoch ==
+   * ownership_version, fail-closed AND), `status in
+   * ('LEASED','RENEWING','RECOVERY_OWNED')`, and `expires_at > now()` —
+   * verified inside the SAME transaction as the
    * INSERT, with a row-level SHARE lock on the lease row that holds until
    * COMMIT. A stale worker whose lease was reclaimed CANNOT slip an event
    * past this gate, because the row it would be locking is either gone,
@@ -80,8 +83,20 @@ export interface CommitTerminalInput {
   fence?: FencingToken;
 }
 
+export interface CommitTransitionInput {
+  execution: Execution;
+  checkpoint?: {
+    phase: string;
+    sequence: number;
+    state: Record<string, unknown>;
+  };
+  events?: DomainEvent[];
+  memoryRecord?: MemoryRecord;
+  fence?: FencingToken;
+}
+
 export interface ExecutionRepository {
-  save(execution: Execution): Promise<void>;
+  save(execution: Execution, fence?: FencingToken): Promise<void>;
   /**
    * Fence-guarded variant of save(). The durable write commits ONLY if the
    * supplied token still matches a live, active, unexpired lease on the
@@ -101,6 +116,24 @@ export interface ExecutionRepository {
    * Returns FENCED if the lease fence is violated at execution time.
    */
   commitTerminal(input: CommitTerminalInput): Promise<FencedWriteOutcome>;
+  /**
+   * Generic atomic transition commit.
+   * Executes fence verification, execution status update, optional checkpoint write,
+   * optional events + outbox insertions, and optional memory records in a single database transaction.
+   * Enforces that outbox writes are atomic with execution commits and deterministic event ordering.
+   */
+  commitTransition(input: CommitTransitionInput): Promise<FencedWriteOutcome>;
+  /**
+   * Evaluates the execution state against the persistent event log.
+   * If a divergence is found (e.g. status is COMPLETED but terminal event is missing),
+   * returns isConsistent = false with forensics.
+   */
+  detectPartialCommit(executionId: string): Promise<{
+    isConsistent: boolean;
+    actualStatus: Execution["status"];
+    lastEventSeq?: number;
+    error?: string;
+  }>;
   /**
    * Check if the database-backed outbox is enabled for this repository.
    * If true, terminal events can be safely queued in the outbox and dispatched
@@ -192,5 +225,13 @@ export interface ToolExecutor {
      * absent, drift detection is disabled for this call.
      */
     argsHash?: string;
+    /**
+     * Fence state machine (docs/specs/fence-state-machine.md) — the worker
+     * identity that, together with `attempt`, forms the fence ownership
+     * claimant. When the executor is wired with a FenceProtocol, ownership of
+     * every fence transition is checked against (workerId, attempt). Optional
+     * for back-compat; defaults to the executor's configured worker id.
+     */
+    workerId?: string;
   }): Promise<Record<string, unknown>>;
 }

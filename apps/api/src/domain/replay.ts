@@ -273,6 +273,13 @@ export interface ReplayCertification {
   capturedAt: string;
 }
 
+export type ReplayDivergenceClassification =
+  | "EQUIVALENT"
+  | "ACCEPTABLE_VARIANCE"
+  | "DIVERGED"
+  | "UNSAFE_DIVERGENCE"
+  | "NON_RECONSTRUCTABLE";
+
 /**
  * Diagnostic produced when the divergence detector finds a mismatch between
  * two certifications of the same execution. `firstDivergentFrame` is the
@@ -297,7 +304,43 @@ export interface ReplayDivergence {
     | "NONE"
     | "EVENT_COUNT"
     | "FRAME_DIGEST"
-    | "WORKFLOW_VERSION";
+    | "WORKFLOW_VERSION"
+    | "BRANCH_DRIFT"
+    | "TOOL_MISMATCH"
+    | "ORDER_MISMATCH"
+    | "LLM_INCONSISTENCY"
+    | "MISSING_EXTERNALITY"
+    | "TIMING_INCONSISTENCY";
+  classification: ReplayDivergenceClassification;
   narrative: string;
   detectedAt: string;
 }
+
+
+export type ReplaySafetyClassification =
+  | "replay-safe"        // Read-only/idempotent tool or pure step (safe to run live in replay)
+  | "replay-equivalent"  // Replay is fully byte-equivalent to original events
+  | "replay-diverged"    // Replay has branched/drifted from original events
+  | "replay-unsafe";     // Replay tried to call state-mutating/non-idempotent tool live (blocked)
+
+export {
+  REPLAY_LIFECYCLE_STATES,
+  REPLAY_LIFECYCLE_TRANSITIONS,
+  type ReplayLifecycleStatus,
+  type ReplayDivergenceReason,
+  IllegalReplayLifecycleTransitionError,
+  assertReplayLifecycleTransition,
+  mapLifecycleToSafetyClassification,
+  isReplayTerminalLifecycle
+} from "../runtime/replay/replayLifecycle.js";
+
+export {
+  REPLAY_GUARANTEES,
+  REPLAY_NON_GUARANTEES,
+  DETERMINISTIC_BOUNDARIES,
+  PROBABILISTIC_BOUNDARIES,
+  stepsObservablyEquivalent
+} from "../runtime/replay/replayEquivalentSemantics.js";
+
+export { ReplaySandboxViolationError } from "../runtime/canonicalSemantics.js";
+export type { ReplaySessionState } from "../runtime/replay/replayExecutionCoordinator.js";

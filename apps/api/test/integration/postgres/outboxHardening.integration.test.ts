@@ -67,8 +67,9 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
 
     // 2. Prepare mock active lease in Postgres
     await harness!.pg.query(
-      `insert into execution_leases (execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt)
-       values ($1, 'w1', $2, $2, $3, 'ACTIVE', 1)`,
+      `insert into execution_leases (execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt,
+                                     lease_epoch, fencing_token, ownership_version, worker_identity)
+       values ($1, 'w1', $2, $2, $3, 'LEASED', 1, 1, 1, 1, 'w1')`,
       [execId, nowIso, new Date(Date.now() + 60000).toISOString()]
     );
 
@@ -154,8 +155,9 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
 
     // Fence has attempt = 2 in DB, but worker uses attempt = 1 (stale)
     await harness!.pg.query(
-      `insert into execution_leases (execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt)
-       values ($1, 'w1', $2, $2, $3, 'ACTIVE', 2)`,
+      `insert into execution_leases (execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt,
+                                     lease_epoch, fencing_token, ownership_version, worker_identity)
+       values ($1, 'w1', $2, $2, $3, 'LEASED', 2, 2, 2, 2, 'w1')`,
       [execId, nowIso, new Date(Date.now() + 60000).toISOString()]
     );
 
@@ -206,8 +208,9 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
 
     // Seed lease
     await harness!.pg.query(
-      `insert into execution_leases (execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt)
-       values ($1, 'w1', $2, $2, $3, 'ACTIVE', 1)`,
+      `insert into execution_leases (execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt,
+                                     lease_epoch, fencing_token, ownership_version, worker_identity)
+       values ($1, 'w1', $2, $2, $3, 'LEASED', 1, 1, 1, 1, 'w1')`,
       [execId, nowIso, new Date(Date.now() + 60000).toISOString()]
     );
 

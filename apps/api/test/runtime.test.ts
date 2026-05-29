@@ -81,9 +81,9 @@ describe("agent runtime API", () => {
 
     expect(taskResponse.statusCode).toBe(202);
     const execution = taskResponse.json();
-    // True-distributed topology: the API enqueues the task and returns
-    // QUEUED immediately. A worker (running in-process here because
-    // RUNTIME_ROLE=combined) completes the execution asynchronously.
+    // True-distributed topology: the API enqueues the task and returns the
+    // QUEUED execution immediately. A worker (running in-process here because
+    // RUNTIME_ROLE=combined) leases and completes the execution asynchronously.
     expect(execution.status).toBe("QUEUED");
 
     // Wait for the embedded worker loop to complete the execution.

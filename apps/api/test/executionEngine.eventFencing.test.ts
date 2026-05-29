@@ -323,9 +323,9 @@ describe("ExecutionEngine — execution-scoped event fencing (audit Task 1)", ()
     expect(types).not.toContain("EXECUTION_FAILED");
 
     // The publisher's diagnostic counter sink MUST have been invoked at
-    // least once for a MODEL_COMPLETED rejection — this is what operators
+    // least once for a EXTERNALITY_RECORDED rejection — this is what operators
     // alert on. The audit's primary signal.
-    const modelRejections = rejectionCounters.filter((r) => r.eventType === "MODEL_COMPLETED");
+    const modelRejections = rejectionCounters.filter((r) => r.eventType === "EXTERNALITY_RECORDED");
     expect(modelRejections.length).toBeGreaterThan(0);
     expect(modelRejections[0]!.executionId).toBe(execution.id);
     expect(modelRejections[0]!.workerId).toBe("worker-stale");
@@ -334,7 +334,7 @@ describe("ExecutionEngine — execution-scoped event fencing (audit Task 1)", ()
     // Structured log breadcrumb present too — gives the trace id for
     // forensic correlation without polluting the durable event log.
     const modelLogs = logCalls.filter((l) =>
-      l.message === "event.fence_rejected" && l.context.eventType === "MODEL_COMPLETED"
+      l.message === "event.fence_rejected" && l.context.eventType === "EXTERNALITY_RECORDED"
     );
     expect(modelLogs.length).toBeGreaterThan(0);
 

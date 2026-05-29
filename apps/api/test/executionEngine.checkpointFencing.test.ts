@@ -261,7 +261,6 @@ describe("ExecutionEngine — stale-worker checkpoint write surrenders without s
 
     const leases = new InMemoryLeaseStore();
     const memory = new InMemoryMemoryRepository(leases);
-    const executions = new InMemoryExecutionRepository(leases, memory);
     const inner = new InMemoryCheckpointStore(leases);
     const checkpoints = new ReclaimOnCheckpointWriteStore(
       inner,
@@ -270,6 +269,11 @@ describe("ExecutionEngine — stale-worker checkpoint write surrenders without s
       clock,
       triggerPhase
     );
+    // writeCheckpoint now commits the checkpoint atomically through
+    // commitTransition, so the repository — not the engine — owns the durable
+    // checkpoint write. Wire the same fence-injecting store into the repository
+    // so the stale-fence rejection fires inside the transactional commit.
+    const executions = new InMemoryExecutionRepository(leases, memory, undefined, checkpoints);
 
     const engine = new ExecutionEngine(
       eventFactory,
@@ -341,8 +345,8 @@ describe("ExecutionEngine — stale-worker checkpoint write surrenders without s
     });
     const leases = new InMemoryLeaseStore();
     const memory = new InMemoryMemoryRepository(leases);
-    const executions = new InMemoryExecutionRepository(leases, memory);
     const checkpoints = new InMemoryCheckpointStore(leases);
+    const executions = new InMemoryExecutionRepository(leases, memory, undefined, checkpoints);
 
     const engine = new ExecutionEngine(
       eventFactory,

@@ -1,16 +1,142 @@
 import type { EventFactory, EventContext } from "../infrastructure/events/eventFactory.js";
-import type { PersistedEventPublisher } from "../infrastructure/events/persistedEventPublisher.js";
+import { IdempotencyPolicyEnforcer } from "./policyEnforcer.js";
+import { PersistedEventPublisher } from "../infrastructure/events/persistedEventPublisher.js";
 import { withSpan } from "../infrastructure/telemetry/tracing.js";
 import type { Clock } from "../shared/clock.js";
-import { toIso } from "../shared/clock.js";
+import { toIso, FrozenClock } from "../shared/clock.js";
 import { createId } from "../shared/id.js";
-import { canonicalize, deterministicId, syncFingerprint } from "../shared/determinism.js";
+import { canonicalize, deterministicId, syncFingerprint, seededRandom } from "../shared/determinism.js";
 import type { DomainEvent, DomainEventType } from "../domain/events.js";
 import type { ExecutionCheckpoint } from "../domain/cluster.js";
 import type { CheckpointStore, FencingToken } from "../domain/clusterPorts.js";
 import type { Agent, Execution, ExecutionStep, MemoryRecord, ToolCallRecord } from "../domain/model.js";
-import type { ExecutionRepository, MemoryRepository, ModelProvider, ToolExecutor } from "../domain/ports.js";
+import type { EventStore, ExecutionRepository, MemoryRepository, ModelProvider, ToolExecutor, CommitTransitionInput } from "../domain/ports.js";
 import { throwIfAborted } from "../providers/retry.js";
+import {
+  assertRuntimeInvariant,
+  assertTransition,
+  classifyRuntimeFailure,
+  isReplaySafeTool,
+  InvariantViolation,
+  resolveExecutionStartStatus,
+  validateFencingMonotonicity,
+  validateFencingToken
+} from "./canonicalSemantics.js";
+import { ReplayExecutionCoordinator } from "./replay/replayExecutionCoordinator.js";
+import { assertDeterministicReconstructionBoundary } from "./replay/replayAssertions.js";
+import { CentralizedReplayEnforcer } from "./replay/replayEnforcer.js";
+import { AsyncLocalStorage } from "node:async_hooks";
+import {
+  SandboxedEventStore,
+  SandboxedExecutionRepository,
+  SandboxedMemoryRepository,
+  SandboxedEventPublisher,
+  SandboxedToolExecutor
+} from "./replay/replaySandbox.js";
+
+export interface DeterministicExecutionContext {
+  executionId: string;
+  stepType: ExecutionStep["type"];
+  clock: Clock;
+  random: () => number;
+  allowUntracked?: boolean;
+}
+
+export const deterministicStorage = new AsyncLocalStorage<DeterministicExecutionContext>();
+
+export function runWithUntrackedAllowed<T>(fn: () => T): T {
+  const store = deterministicStorage.getStore();
+  if (store) {
+    const originalValue = store.allowUntracked;
+    store.allowUntracked = true;
+    try {
+      return fn();
+    } finally {
+      store.allowUntracked = originalValue;
+    }
+  }
+  return fn();
+}
+
+export async function runWithUntrackedAllowedAsync<T>(fn: () => Promise<T>): Promise<T> {
+  const store = deterministicStorage.getStore();
+  if (store) {
+    const originalValue = store.allowUntracked;
+    store.allowUntracked = true;
+    try {
+      return await fn();
+    } finally {
+      store.allowUntracked = originalValue;
+    }
+  }
+  return await fn();
+}
+
+// Monkey-patch global Math.random and Date to capture and block untracked nondeterminism inside steps
+const originalRandom = Math.random;
+const originalDate = Date;
+const originalDateNow = Date.now;
+
+Math.random = function patchedRandom() {
+  const store = deterministicStorage.getStore();
+  if (store && !store.allowUntracked) {
+    throw new InvariantViolation(
+      `Untracked Nondeterminism Detected: Unsafe usage of Math.random() inside execution step '${store.stepType}' for execution '${store.executionId}'. Steps must use the injected 'step.random()' or seeded PRNG.`,
+      "S_UNSAFE_REPLAY"
+    );
+  }
+  return originalRandom();
+};
+
+const PatchedDate: any = function (...args: any[]) {
+  const store = deterministicStorage.getStore();
+  if (store && !store.allowUntracked) {
+    throw new InvariantViolation(
+      `Untracked Nondeterminism Detected: Unsafe usage of global Date inside execution step '${store.stepType}' for execution '${store.executionId}'. Steps must use the injected 'step.clock' or clock port.`,
+      "S_UNSAFE_REPLAY"
+    );
+  }
+  if (new.target) {
+    return new (originalDate as any)(...args);
+  }
+  return (originalDate as any)(...args);
+};
+
+PatchedDate.prototype = originalDate.prototype;
+Object.getOwnPropertyNames(originalDate).forEach((prop) => {
+  if (prop !== "prototype" && prop !== "name") {
+    Object.defineProperty(PatchedDate, prop, {
+      value: (originalDate as any)[prop],
+      writable: true,
+      configurable: true,
+      enumerable: true
+    });
+  }
+});
+
+PatchedDate.now = function patchedNow() {
+  const store = deterministicStorage.getStore();
+  if (store && !store.allowUntracked) {
+    throw new InvariantViolation(
+      `Untracked Nondeterminism Detected: Unsafe usage of Date.now() inside execution step '${store.stepType}' for execution '${store.executionId}'. Steps must use the injected 'step.clock.now()' or clock port.`,
+      "S_UNSAFE_REPLAY"
+    );
+  }
+  return originalDateNow();
+};
+
+Date = PatchedDate as any;
+
+
+export interface SandboxContext {
+  publisher: PersistedEventPublisher;
+  executions: ExecutionRepository;
+  memory: MemoryRepository;
+  tools: ToolExecutor;
+}
+
+export const sandboxStorage = new AsyncLocalStorage<SandboxContext>();
+
 
 /**
  * Sentinel thrown by the fenced-publish helper when a stale worker's
@@ -28,6 +154,16 @@ class StaleWorkerSurrender extends Error {
   readonly name = "StaleWorkerSurrender";
   constructor(public readonly eventType: DomainEventType, executionId: string) {
     super(`stale-worker surrender on ${eventType} for ${executionId}`);
+  }
+}
+
+/**
+ * Thrown when partial-commit detection identifies a database state and event log inconsistency.
+ */
+export class PartialCommitError extends Error {
+  readonly name = "PartialCommitError";
+  constructor(public readonly executionId: string, message: string) {
+    super(message);
   }
 }
 
@@ -114,28 +250,69 @@ export type ExecutionAbortReason = "lease-lost" | "shutdown" | "manual";
 export interface ExecutionEngineDeps {
   checkpoints?: CheckpointStore;
   workerId?: string;
+  events?: EventStore;
+  /** Injectable for tests; created from events + repos when omitted. */
+  replayCoordinator?: ReplayExecutionCoordinator;
 }
 
 export class ExecutionEngine {
   private readonly checkpoints?: CheckpointStore;
   private readonly defaultWorkerId?: string;
+  private readonly events?: EventStore;
+  private readonly replayCoordinator?: ReplayExecutionCoordinator;
+
+  private readonly _publisher: PersistedEventPublisher;
+  private readonly _executions: ExecutionRepository;
+  private readonly _memory: MemoryRepository;
+  private readonly _tools: ToolExecutor;
+
+  private get publisher(): PersistedEventPublisher {
+    return sandboxStorage.getStore()?.publisher ?? this._publisher;
+  }
+
+  private get executions(): ExecutionRepository {
+    return sandboxStorage.getStore()?.executions ?? this._executions;
+  }
+
+  private get memory(): MemoryRepository {
+    return sandboxStorage.getStore()?.memory ?? this._memory;
+  }
+
+  private get tools(): ToolExecutor {
+    return sandboxStorage.getStore()?.tools ?? this._tools;
+  }
 
   constructor(
     private readonly eventFactory: EventFactory,
-    private readonly publisher: PersistedEventPublisher,
-    private readonly executions: ExecutionRepository,
-    private readonly memory: MemoryRepository,
+    publisher: PersistedEventPublisher,
+    executions: ExecutionRepository,
+    memory: MemoryRepository,
     private readonly modelProvider: ModelProvider,
-    private readonly tools: ToolExecutor,
+    tools: ToolExecutor,
     private readonly clock: Clock,
     deps: ExecutionEngineDeps = {}
   ) {
+    this._publisher = publisher;
+    this._executions = executions;
+    this._memory = memory;
+    this._tools = tools;
     this.checkpoints = deps.checkpoints;
     this.defaultWorkerId = deps.workerId;
+    this.events = deps.events;
+    this.replayCoordinator =
+      deps.replayCoordinator ??
+      (this.events
+        ? new ReplayExecutionCoordinator(
+            this.events,
+            this.executions,
+            this.publisher,
+            this.eventFactory
+          )
+        : undefined);
   }
 
   private async writeCheckpoint(
-    executionId: string,
+    execution: Execution,
     phase: ExecutionCheckpoint["phase"],
     sequence: number,
     state: Record<string, unknown>,
@@ -147,7 +324,7 @@ export class ExecutionEngine {
     const owner = workerId ?? this.defaultWorkerId ?? "local";
     const checkpoint: ExecutionCheckpoint = {
       id: createId(),
-      executionId,
+      executionId: execution.id,
       workerId: owner,
       sequence,
       phase,
@@ -155,37 +332,40 @@ export class ExecutionEngine {
       createdAt: toIso(this.clock.now())
     };
 
-    // Checkpoints are the authoritative recovery anchor — if the fence is
-    // already invalid we MUST NOT write one (a stale worker's checkpoint
-    // would shift subsequent crash recovery to a snapshot the legitimate
-    // owner never produced). Route through writeFenced and surrender on
-    // FENCED, identical to the publish path.
-    if (fence) {
-      const outcome = await this.checkpoints.writeFenced(checkpoint, fence);
-      if (outcome === "FENCED") {
-        await this.emitFenceRejected(
-          executionId,
-          owner,
-          phase,
-          `checkpoint.${phase}`,
-          context
-        );
-        throw new StaleWorkerSurrender("EXECUTION_CHECKPOINT_WRITTEN", executionId);
-      }
-    } else {
-      await this.checkpoints.write(checkpoint);
+    const checkpointWrittenEvent = this.eventFactory.create({
+      type: "EXECUTION_CHECKPOINT_WRITTEN",
+      aggregateId: execution.id,
+      aggregateType: "EXECUTION",
+      payload: { checkpoint },
+      context
+    });
+
+    const outcome = await this.executions.commitTransition({
+      execution,
+      checkpoint: {
+        phase,
+        sequence,
+        state
+      },
+      events: [checkpointWrittenEvent],
+      fence
+    });
+
+    if (outcome === "FENCED") {
+      await this.emitFenceRejected(
+        execution.id,
+        owner,
+        phase,
+        `checkpoint.${phase}`,
+        context
+      );
+      throw new StaleWorkerSurrender("EXECUTION_CHECKPOINT_WRITTEN", execution.id);
     }
 
-    await this.publishExecutionScoped(
-      this.eventFactory.create({
-        type: "EXECUTION_CHECKPOINT_WRITTEN",
-        aggregateId: executionId,
-        aggregateType: "EXECUTION",
-        payload: { checkpoint },
-        context
-      }),
-      fence
-    );
+    const isOutbox = this.executions.isOutboxEnabled && this.executions.isOutboxEnabled();
+    if (!isOutbox) {
+      await this.publisher.publish(checkpointWrittenEvent);
+    }
   }
 
   /**
@@ -293,8 +473,91 @@ export class ExecutionEngine {
   }
 
   async execute(input: ExecuteTaskInput): Promise<Execution> {
+    if (input.execution.parentExecutionId) {
+      const getSession = () => this.replayCoordinator?.getSession(input.execution.id);
+      const isDiverged = () => getSession()?.diverged ?? false;
+      const isOperatorApproved = () => input.execution.input?.operatorApproved === true;
+
+      const baseEventStore = this.events ?? {
+        append: async (e: any) => e,
+        appendFenced: async (e: any) => ({ outcome: "COMMITTED" as const, event: e }),
+        listByAggregate: async () => [],
+        listByExecution: async () => [],
+        listRecent: async () => [],
+        lastForExecution: async () => undefined,
+        listAfterSequence: async () => []
+      };
+
+      const sandboxCtx = CentralizedReplayEnforcer.enterSandbox({
+        executionId: input.execution.id,
+        parentExecutionId: input.execution.parentExecutionId,
+        events: baseEventStore,
+        executions: this._executions,
+        memory: this._memory,
+        tools: this._tools,
+        isDiverged,
+        isOperatorApproved
+      });
+
+      return sandboxStorage.run(sandboxCtx, () => this.executeInternal(input));
+    } else {
+      return this.executeInternal(input);
+    }
+  }
+
+  private async executeInternal(input: ExecuteTaskInput): Promise<Execution> {
+    assertRuntimeInvariant(
+      "P2",
+      typeof input.execution.tenantId === "string" && input.execution.tenantId.length > 0,
+      "Execution must carry a valid non-empty tenantId for isolation",
+      { executionId: input.execution.id }
+    );
+
+    // Invariant S3: Ambiguous Effects Require Reconciliation
+    // Prevents silent ambiguity bypass by asserting that we cannot execute a quarantined execution.
+    assertRuntimeInvariant(
+      "S3",
+      input.execution.status !== "AMBIGUOUS" && input.execution.status !== "RECONCILIATION_REQUIRED",
+      `Ambiguity Bypass Blocked: execution '${input.execution.id}' is in quarantined state '${input.execution.status}' and cannot be executed without manual operator reconciliation`,
+      { executionId: input.execution.id, status: input.execution.status }
+    );
+
+    // Invariant S3: Partial-commit detection & validation
+    const partialCommitCheck = await this.executions.detectPartialCommit(input.execution.id);
+    if (!partialCommitCheck.isConsistent) {
+      throw new PartialCommitError(
+        input.execution.id,
+        partialCommitCheck.error ?? "Partial commit detected on execution"
+      );
+    }
+
     const context = input.context ?? { traceId: createId() };
     const workerId = input.workerId ?? this.defaultWorkerId;
+
+    // Invariant R1: Recovery Fence Monotonicity
+    // Ensure that recovery/execution fencing attempt counts are strictly monotonic.
+    if (input.fence) {
+      validateFencingToken({
+        executionId: input.fence.executionId,
+        workerId: input.fence.workerId,
+        attempt: input.fence.attempt,
+        currentStatus: input.execution.status,
+        phase: "execution.start"
+      });
+      validateFencingMonotonicity(input.fence.attempt, input.execution.status, workerId);
+    }
+
+    if (input.execution.parentExecutionId) {
+      assertRuntimeInvariant(
+        "RP1",
+        this.replayCoordinator !== undefined,
+        `Replay illegal: execution '${input.execution.id}' has parentExecutionId but execution engine has no replay coordinator configured.`,
+        { executionId: input.execution.id }
+      );
+      await this.replayCoordinator!.beginReplay(input.execution, input.fence, context);
+    }
+
+    try {
 
     // Pre-execute abort short-circuit. If the caller already cancelled the
     // signal before calling execute() (lease lost during job pickup, drain
@@ -327,49 +590,60 @@ export class ExecutionEngine {
           input.fence
         );
       } catch (e) {
+        // Same posture as the pre-execute abort branch: if our fence is
+        // already gone we still need to surrender silently. The diagnostic
+        // counter has been recorded by the publisher.
         if (!(e instanceof StaleWorkerSurrender)) throw e;
       }
       return input.execution;
     }
+    const { status: targetStatus } = resolveExecutionStartStatus({
+      executionId: input.execution.id,
+      currentStatus: input.execution.status,
+      parentExecutionId: input.execution.parentExecutionId,
+      fenceAttempt: input.fence?.attempt
+    });
 
     const execution: Execution = {
       ...input.execution,
-      status: "RUNNING",
+      status: targetStatus,
       updatedAt: toIso(this.clock.now())
     };
 
-    // Fenced RUNNING save — closes the window where a GC-paused worker wakes
-    // up AFTER the legitimate new owner has already written COMPLETED, and
-    // would otherwise regress the row to RUNNING with its stale snapshot.
-    // The fenced UPSERT commits only if this worker's token still matches
-    // the live lease; otherwise the engine surrenders without any further
-    // mutation or event emission for this execution.
-    if (input.fence) {
-      const outcome = await this.executions.saveFenced(execution, input.fence);
-      if (outcome === "FENCED") {
-        await this.emitFenceRejected(
-          execution.id,
-          workerId ?? "unknown",
-          "RUNNING",
-          "executions.RUNNING",
-          context
-        );
-        return input.execution;
-      }
-    } else {
-      await this.executions.save(execution);
-    }
-    await this.publishExecutionScoped(
-      this.eventFactory.create({
-        type: "EXECUTION_STARTED",
-        aggregateId: execution.id,
-        aggregateType: "EXECUTION",
-        payload: { execution },
+    const executionStartedEvent = this.eventFactory.create({
+      type: "EXECUTION_STARTED",
+      aggregateId: execution.id,
+      aggregateType: "EXECUTION",
+      payload: { execution },
+      context
+    });
+
+    const outcome = await this.executions.commitTransition({
+      execution,
+      checkpoint: {
+        phase: "INITIALIZED",
+        sequence: 0,
+        state: { task: input.task }
+      },
+      events: [executionStartedEvent],
+      fence: input.fence
+    });
+
+    if (outcome === "FENCED") {
+      await this.emitFenceRejected(
+        execution.id,
+        workerId ?? "unknown",
+        targetStatus,
+        "executions.RUNNING",
         context
-      }),
-      input.fence
-    );
-    await this.writeCheckpoint(execution.id, "INITIALIZED", 0, { task: input.task }, context, workerId, input.fence);
+      );
+      return input.execution;
+    }
+
+    const isOutbox = this.executions.isOutboxEnabled && this.executions.isOutboxEnabled();
+    if (!isOutbox) {
+      await this.publisher.publish(executionStartedEvent);
+    }
 
     let stepSequence = 0;
 
@@ -379,13 +653,13 @@ export class ExecutionEngine {
         objective: input.agent.goal,
         task: input.task,
         next: ["MEMORY_RETRIEVAL", "TOOL_CALL", "MODEL_GENERATION"]
-      }), context, input.signal, input.fence);
-      await this.writeCheckpoint(execution.id, "PLANNING", ++stepSequence, { plan }, context, workerId, input.fence);
+      }), context, input.signal, input.fence, stepSequence + 1);
+      await this.writeCheckpoint(execution, "PLANNING", ++stepSequence, { plan }, context, workerId, input.fence);
 
       throwIfAborted(input.signal);
       const query = String(input.task.prompt ?? input.task.goal ?? input.agent.goal);
       const memories = await this.runStep(input.agent, execution, "MEMORY_RETRIEVAL", { query }, async () => {
-        const records = (await this.memory.search(input.agent.id, query, input.agent.memoryPolicy.maxRetrievedItems))
+        const records = (await runWithUntrackedAllowedAsync(() => this.memory.search(input.agent.id, query, input.agent.memoryPolicy.maxRetrievedItems)))
           .map((record, index) => ({
             ...record,
             metadata: {
@@ -394,19 +668,9 @@ export class ExecutionEngine {
               influenceReason: index === 0 ? "highest lexical overlap with task prompt" : "recent task context"
             }
           }));
-        await this.publishExecutionScoped(
-          this.eventFactory.create({
-            type: "MEMORY_RETRIEVED",
-            aggregateId: execution.id,
-            aggregateType: "EXECUTION",
-            payload: { records, query },
-            context
-          }),
-          input.fence
-        );
         return { records };
-      }, context, input.signal, input.fence);
-      await this.writeCheckpoint(execution.id, "MEMORY_RETRIEVAL", ++stepSequence, { query, recordCount: (memories.records ?? []).length }, context, workerId, input.fence);
+      }, context, input.signal, input.fence, stepSequence + 1);
+      await this.writeCheckpoint(execution, "MEMORY_RETRIEVAL", ++stepSequence, { query, recordCount: (memories.records ?? []).length }, context, workerId, input.fence);
 
       throwIfAborted(input.signal);
       const enabledTools = input.agent.tools.filter((tool) => tool.enabled);
@@ -418,7 +682,7 @@ export class ExecutionEngine {
         // a fresh createId() per process invocation) and the dedup table
         // would miss — defeating the entire wrapper.
         await this.runToolStep(input.agent, execution, enabledTool.name, { plan }, context, input.signal, input.fence, stepSequence + 1);
-        await this.writeCheckpoint(execution.id, "TOOL_CALL", ++stepSequence, { tool: enabledTool.name }, context, workerId, input.fence);
+        await this.writeCheckpoint(execution, "TOOL_CALL", ++stepSequence, { tool: enabledTool.name }, context, workerId, input.fence);
       }
 
       throwIfAborted(input.signal);
@@ -431,7 +695,7 @@ export class ExecutionEngine {
 
       const modelResult = await this.runStep(input.agent, execution, "MODEL_GENERATION", { prompt }, async () => {
         const contextRecords = (memories.records ?? []) as MemoryRecord[];
-        const result = await this.modelProvider.complete({
+        const result = await runWithUntrackedAllowedAsync(() => this.modelProvider.complete({
           agent: input.agent,
           execution,
           prompt,
@@ -441,30 +705,35 @@ export class ExecutionEngine {
           // request instead of spending tokens for an outcome that will be
           // discarded by the post-execute fencing check.
           signal: input.signal
-        });
-        await this.publishExecutionScoped(
-          this.eventFactory.create({
-            type: "MODEL_COMPLETED",
-            aggregateId: execution.id,
-            aggregateType: "EXECUTION",
-            payload: result,
-            context
-          }),
-          input.fence
-        );
+        }));
         return result;
-      }, context, input.signal, input.fence);
+      }, context, input.signal, input.fence, stepSequence + 1);
 
-      await this.writeCheckpoint(execution.id, "MODEL_GENERATION", ++stepSequence, { tokenUsage: modelResult.tokenUsage }, context, workerId, input.fence);
+      await this.writeCheckpoint(execution, "MODEL_GENERATION", ++stepSequence, { tokenUsage: modelResult.tokenUsage }, context, workerId, input.fence);
 
-      // Fencing check — validate lease ownership before any state-mutating
-      // writes. This is the last barrier preventing a stale worker from
-      // overwriting state already committed by the legitimate new owner.
       throwIfAborted(input.signal);
       await this.assertFencing(input, execution);
 
-      const completed: Execution = {
+      if (execution.status === "REPLAYING") {
+        assertTransition(execution.id, execution.status, "RUNNING");
+        execution.status = "RUNNING";
+        execution.updatedAt = toIso(this.clock.now());
+        await this.executions.commitTransition({
+          execution,
+          fence: input.fence
+        });
+      }
+
+      assertTransition(execution.id, execution.status, "COMMITTED");
+      const committed: Execution = {
         ...execution,
+        status: "COMMITTED",
+        updatedAt: toIso(this.clock.now())
+      };
+
+      assertTransition(committed.id, "COMMITTED", "COMPLETED");
+      const completed: Execution = {
+        ...committed,
         status: "COMPLETED",
         output: modelResult.output as Record<string, unknown>,
         tokenUsage: modelResult.tokenUsage,
@@ -525,8 +794,18 @@ export class ExecutionEngine {
         await this.publisher.publishDurable(terminalEvent);
       }
 
+      await this.replayCoordinator?.finalize(completed, true, input.fence, context);
       return completed;
-    } catch (error) {
+    } catch (error: any) {
+      if (
+        error instanceof InvariantViolation ||
+        error.name === "UnsafeReplayDivergenceError" ||
+        error.name === "NonReconstructableReplayError" ||
+        (error instanceof Error && ((error as any).code === "INVARIANT_VIOLATION" || error.name === "InvariantViolation"))
+      ) {
+        await this.replayCoordinator?.markUnsafe(execution.id, execution, input.fence, context);
+        throw error;
+      }
       const originalMessage =
         error instanceof Error ? error.message : "Unknown execution error";
 
@@ -541,6 +820,7 @@ export class ExecutionEngine {
         error instanceof Error &&
         (error.name === "AbortError" || input.signal?.aborted === true);
       if (isAbort) {
+        await this.replayCoordinator?.abort(execution.id, execution, input.fence, context);
         try {
           await this.publishExecutionScoped(
             this.eventFactory.create({
@@ -613,18 +893,22 @@ export class ExecutionEngine {
         }
       }
 
-      const failed: Execution = {
-        ...execution,
-        status: "FAILED",
-        failure: {
-          message: originalMessage,
-          recoverable: true
-        },
-        completedAt: toIso(this.clock.now()),
-        updatedAt: toIso(this.clock.now())
-      };
+    const failureRec = classifyRuntimeFailure(error);
 
-      const terminalEvent = this.eventFactory.create({
+    assertTransition(execution.id, execution.status, "FAILED");
+    const failed: Execution = {
+      ...execution,
+      status: "FAILED",
+      failure: {
+        message: originalMessage,
+        code: failureRec.category,
+        recoverable: failureRec.recoverable
+      },
+      completedAt: toIso(this.clock.now()),
+      updatedAt: toIso(this.clock.now())
+    };
+
+    const terminalEvent = this.eventFactory.create({
         type: "EXECUTION_FAILED",
         aggregateId: execution.id,
         aggregateType: "EXECUTION",
@@ -656,9 +940,13 @@ export class ExecutionEngine {
         await this.publisher.publishDurable(terminalEvent);
       }
 
+      await this.replayCoordinator?.finalize(execution, false, input.fence, context);
       return failed;
     }
+  } finally {
+    this.replayCoordinator?.endReplay(input.execution.id);
   }
+}
 
   private async runStep<TOutput extends Record<string, unknown>>(
     agent: Agent,
@@ -668,16 +956,60 @@ export class ExecutionEngine {
     fn: (step: ExecutionStep) => Promise<TOutput>,
     context: EventContext,
     signal?: AbortSignal,
-    fence?: FencingToken
+    fence?: FencingToken,
+    stepSequence?: number
   ): Promise<TOutput> {
     throwIfAborted(signal);
+
+    if (this.replayCoordinator) {
+      const session = await this.replayCoordinator.getOrReconstructSession(execution.id, execution);
+      if (session && !session.diverged) {
+        const reconstructed = await this.replayCoordinator.tryReconstructStep<TOutput>({
+          execution,
+          agentId: agent.id,
+          type,
+          stepInput,
+          context,
+          publish: (event, f) => this.publishExecutionScoped(event, f),
+          fence
+        });
+
+        if (reconstructed) {
+          const boundary =
+            type === "MODEL_GENERATION" ? "LLM" : type === "TOOL_CALL" ? "TOOL" : "CLOCK";
+           CentralizedReplayEnforcer.assertBoundary(execution.id, session.lifecycle, boundary, false);
+
+          await this.replayCoordinator.emitReconstructedStep({
+            execution,
+            completed: reconstructed.completed,
+            nestedEmitters: reconstructed.nestedEmitters,
+            context,
+            publish: (event, f) => this.publishExecutionScoped(event, f),
+            fence
+          });
+
+          return reconstructed.output;
+        }
+
+        if (session.diverged) {
+          assertTransition(execution.id, execution.status, "RUNNING");
+          execution.status = "RUNNING";
+          execution.updatedAt = toIso(this.clock.now());
+        }
+      }
+    }
+
     return withSpan(`execution.step.${type.toLowerCase()}`, {
       "agent.id": agent.id,
       "execution.id": execution.id,
       "execution.step.type": type
     }, async () => {
       const startedAt = this.clock.now();
-      const started: ExecutionStep = {
+      const stepSeed = deterministicId([execution.id, `seq:${stepSequence ?? 0}`, "seed"]);
+      const stepClock = this.clock;
+      const stepRandom = seededRandom(stepSeed);
+
+      const started: ExecutionStep & { random?: () => number; clock?: Clock } = {
         id: createId(),
         executionId: execution.id,
         agentId: agent.id,
@@ -685,6 +1017,10 @@ export class ExecutionEngine {
         status: "STARTED",
         input: stepInput,
         startedAt: toIso(startedAt)
+      };
+      started.random = () => runWithUntrackedAllowed(() => stepRandom());
+      started.clock = {
+        now: () => runWithUntrackedAllowed(() => stepClock.now())
       };
 
       await this.publishExecutionScoped(
@@ -699,14 +1035,105 @@ export class ExecutionEngine {
       );
 
       throwIfAborted(signal);
-      const output = await fn(started);
+
+      const stepCtx: DeterministicExecutionContext = {
+        executionId: execution.id,
+        stepType: type,
+        clock: stepClock,
+        random: stepRandom,
+        allowUntracked: false
+      };
+
+      const output = await deterministicStorage.run(stepCtx, async () => {
+        return await fn(started);
+      });
+
       throwIfAborted(signal);
 
       const completedAt = this.clock.now();
+      
+      // Persist the canonical ReplayExternalityRecord before step completion
+      const externality: any = {
+        id: createId(),
+        executionId: execution.id,
+        stepSequence: stepSequence ?? 0,
+        type,
+        timestamp: toIso(completedAt),
+        startedAt: toIso(startedAt),
+        logicalTime: stepSequence ?? 0,
+        randomnessSeed: stepSeed,
+        retryAttempt: fence?.attempt ?? 1,
+        durationMs: completedAt.getTime() - startedAt.getTime(),
+        providerResponseFingerprint: undefined
+      };
+
+      if (type === "MODEL_GENERATION") {
+        externality.prompt = stepInput.prompt as string;
+        externality.llmOutput = (output as any)?.output;
+        externality.providerResponse = output as Record<string, unknown>;
+        externality.providerResponseFingerprint = syncFingerprint(output);
+      } else if (type === "TOOL_CALL") {
+        const tc = (output as any)?.toolCall as ToolCallRecord;
+        if (tc) {
+          externality.toolName = tc.toolName;
+          externality.toolInput = tc.input;
+          externality.toolOutput = tc.output;
+          externality.sideEffectMetadata = {
+            idempotencyKey: tc.id,
+            status: tc.status,
+            durationMs: tc.durationMs
+          };
+          externality.providerResponseFingerprint = syncFingerprint(tc.output);
+        }
+      } else if (type === "MEMORY_RETRIEVAL") {
+        externality.prompt = stepInput.query as string;
+        externality.llmOutput = output as Record<string, unknown>;
+        externality.providerResponseFingerprint = syncFingerprint(output);
+      }
+
+      // Only write the externality record if it wasn't atomically committed inside the runner callback
+      if (type !== "TOOL_CALL" || !(output as any)?.externalityCommitted) {
+        await this.publishExecutionScoped(
+          this.eventFactory.create({
+            type: "EXTERNALITY_RECORDED",
+            aggregateId: execution.id,
+            aggregateType: "EXECUTION",
+            payload: { externality },
+            context
+          }),
+          fence
+        );
+      }
+
+      // Emit step-specific events (MODEL_COMPLETED or MEMORY_RETRIEVED) AFTER the externality is persisted
+      if (type === "MODEL_GENERATION") {
+        await this.publishExecutionScoped(
+          this.eventFactory.create({
+            type: "MODEL_COMPLETED",
+            aggregateId: execution.id,
+            aggregateType: "EXECUTION",
+            payload: output,
+            context
+          }),
+          fence
+        );
+      } else if (type === "MEMORY_RETRIEVAL") {
+        await this.publishExecutionScoped(
+          this.eventFactory.create({
+            type: "MEMORY_RETRIEVED",
+            aggregateId: execution.id,
+            aggregateType: "EXECUTION",
+            payload: { records: (output as any).records, query: stepInput.query },
+            context
+          }),
+          fence
+        );
+      }
+
       const completed: ExecutionStep = {
         ...started,
         status: "COMPLETED",
-        output,
+        output: output as any,
         completedAt: toIso(completedAt),
         durationMs: completedAt.getTime() - startedAt.getTime()
       };
@@ -736,67 +1163,290 @@ export class ExecutionEngine {
     fence?: FencingToken,
     stepSequence?: number
   ): Promise<void> {
+    if (fence && !isReplaySafeTool(toolName)) {
+      assertRuntimeInvariant(
+        "S2",
+        this.tools.constructor.name === "DedupingToolExecutor" || (this.tools as any).inner !== undefined,
+        "Fenced execution requires the DedupingToolExecutor wrapper to enforce durable fences",
+        { executionId: execution.id, toolName }
+      );
+    }
     await this.runStep(agent, execution, "TOOL_CALL", { toolName, args }, async (step) => {
-      const started = this.clock.now();
-      // Canonical fence protocol (docs/specs/fence-protocol.md §B.2):
-      //
-      // The idempotency key is `sha256(executionId || ':' || stepSeq)` —
-      // it does NOT include args or tool name. This is intentional:
-      //
-      //   • Stability across retries: the LLM may produce slightly drifted
-      //     args between attempts. Keying on args would mint a new key,
-      //     defeat the remote idem-key cache, and let a duplicate
-      //     side effect through. Keying on (executionId, stepSeq) keeps
-      //     retries on a single remote dedupe slot.
-      //
-      //   • Drift detection lives in `argsHash` (a sibling column). The
-      //     dedup store surfaces `ARG_DRIFT` on retry when the recorded
-      //     and observed hashes disagree (invariant I5). The engine
-      //     refuses to silently re-execute under that condition.
-      //
-      // When stepSequence is not supplied (legacy in-process tests), we
-      // fall back to the pre-spec args-inclusive key. That preserves the
-      // prior behaviour for old callers but disables the fence protocol's
-      // drift guarantee; new callers are expected to thread stepSequence.
-      const argsHash = syncFingerprint(args);
-      const idempotencyKey = stepSequence !== undefined
-        ? deterministicId([execution.id, `seq:${stepSequence}`])
-        : deterministicId([execution.id, `step:${step.id}`, toolName, canonicalize(args)]);
-      const output = await this.tools.execute({
-        toolName,
-        args,
-        agentId: agent.id,
-        executionId: execution.id,
-        signal,
-        idempotencyKey,
-        attempt: fence?.attempt,
-        ...(stepSequence !== undefined ? { stepSeq: stepSequence, argsHash } : {})
-      });
-      const completed = this.clock.now();
-      const toolCall: ToolCallRecord = {
-        id: createId(),
-        executionId: execution.id,
-        stepId: step.id,
-        toolName,
-        input: args,
-        output,
-        status: "COMPLETED",
-        durationMs: completed.getTime() - started.getTime(),
-        createdAt: toIso(completed)
-      };
+      return await runWithUntrackedAllowedAsync(async () => {
+        const started = this.clock.now();
+        // Canonical fence protocol (docs/specs/fence-protocol.md §B.2):
+        //
+        // The idempotency key is `sha256(executionId || ':' || stepSeq)` —
+        // it does NOT include args or tool name. This is intentional:
+        //
+        //   • Stability across retries: the LLM may produce slightly drifted
+        //     args between attempts. Keying on args would mint a new key,
+        //     defeat the remote idem-key cache, and let a duplicate
+        //     side effect through. Keying on (executionId, stepSeq) keeps
+        //     retries on a single remote dedupe slot.
+        //
+        //   • Drift detection lives in `argsHash` (a sibling column). The
+        //     dedup store surfaces `ARG_DRIFT` on retry when the recorded
+        //     and observed hashes disagree (invariant I5). The engine
+        //     refuses to silently re-execute under that condition.
+        //
+        // When stepSequence is not supplied (legacy in-process tests), we
+        // fall back to the pre-spec args-inclusive key. That preserves the
+        // prior behaviour for old callers but disables the fence protocol's
+        // drift guarantee; new callers are expected to thread stepSequence.
+        const argsHash = syncFingerprint(args);
+        const idempotencyKey = stepSequence !== undefined
+          ? deterministicId([execution.id, `seq:${stepSequence}`])
+          : deterministicId([execution.id, `step:${step.id}`, toolName, canonicalize(args)]);
 
-      await this.publishExecutionScoped(
-        this.eventFactory.create({
+        const owner = fence?.workerId ?? this.defaultWorkerId ?? "unknown";
+
+        // ─── Double-Fire & Ambiguity Check (Invariant S3) ───
+        // If we are recovering (e.g., attempt > 1 or status is RECOVERING / SIDE_EFFECT_PENDING),
+        // we must verify if this tool call already executed but failed to save its outcome durably.
+        const dedupStore = (this.tools as any).dedup;
+        if (dedupStore) {
+          const record = await dedupStore.get(idempotencyKey);
+
+          // If we are in a recovery mode, or a record exists in progress, we have an ambiguity risk
+          if (record && (record.status === "IN_FLIGHT" || record.status === "RESERVED" || execution.status === "RECOVERING" || execution.status === "SIDE_EFFECT_PENDING")) {
+            // If the previous execution actually succeeded and is cached in the dedup table:
+            if (record.status === "COMPLETED" || record.status === "SUCCEEDED") {
+              const completedTime = this.clock.now();
+              const toolCall: ToolCallRecord = {
+                id: createId(),
+                executionId: execution.id,
+                stepId: step.id,
+                toolName,
+                input: args,
+                output: record.output,
+                status: "COMPLETED",
+                durationMs: 0,
+                createdAt: toIso(completedTime)
+              };
+
+              const externality: any = {
+                id: createId(),
+                executionId: execution.id,
+                stepSequence: stepSequence ?? 0,
+                type: "TOOL_CALL",
+                timestamp: toIso(completedTime),
+                randomnessSeed: deterministicId([execution.id, "TOOL_CALL", completedTime.getTime()]),
+                retryAttempt: fence?.attempt ?? 1,
+                toolName,
+                toolInput: args,
+                toolOutput: record.output,
+                sideEffectMetadata: {
+                  idempotencyKey,
+                  status: "COMPLETED",
+                  durationMs: 0
+                }
+              };
+
+              const externalityEvent = this.eventFactory.create({
+                type: "EXTERNALITY_RECORDED",
+                aggregateId: execution.id,
+                aggregateType: "EXECUTION",
+                payload: { externality },
+                context
+              });
+
+              const toolCalledEvent = this.eventFactory.create({
+                type: "TOOL_CALLED",
+                aggregateId: execution.id,
+                aggregateType: "EXECUTION",
+                payload: { toolCall },
+                context
+              });
+
+              await this.publishExecutionScoped(externalityEvent, fence);
+              await this.publishExecutionScoped(toolCalledEvent, fence);
+
+              return { toolCall, externalityCommitted: true };
+            }
+
+            // If the cached output is not complete, it crashed mid-side-effect! We must run the verification flow.
+            const { ReconciliationManager } = await import("./failure/reconciliationManager.js");
+            const reconciler = new ReconciliationManager(this.executions, dedupStore, this.publisher, this.eventFactory);
+
+            const reconCtx = {
+              executionId: execution.id,
+              toolName,
+              args,
+              idempotencyKey,
+              stepSequence: stepSequence ?? 0
+            };
+
+            const reconResult = await reconciler.verifyAndReconcile(reconCtx, execution, this.clock.now());
+
+            if (reconResult.status === "COMMITTED" && reconResult.output) {
+              // Reconciled to COMMITTED successfully! Bypass tool execution.
+              const completedTime = this.clock.now();
+              const toolCall: ToolCallRecord = {
+                id: createId(),
+                executionId: execution.id,
+                stepId: step.id,
+                toolName,
+                input: args,
+                output: reconResult.output,
+                status: "COMPLETED",
+                durationMs: 0,
+                createdAt: toIso(completedTime)
+              };
+
+              const externality: any = {
+                id: createId(),
+                executionId: execution.id,
+                stepSequence: stepSequence ?? 0,
+                type: "TOOL_CALL",
+                timestamp: toIso(completedTime),
+                randomnessSeed: deterministicId([execution.id, "TOOL_CALL", completedTime.getTime()]),
+                retryAttempt: fence?.attempt ?? 1,
+                toolName,
+                toolInput: args,
+                toolOutput: reconResult.output,
+                sideEffectMetadata: {
+                  idempotencyKey,
+                  status: "COMPLETED",
+                  durationMs: 0
+                }
+              };
+
+              const externalityEvent = this.eventFactory.create({
+                type: "EXTERNALITY_RECORDED",
+                aggregateId: execution.id,
+                aggregateType: "EXECUTION",
+                payload: { externality },
+                context
+              });
+
+              const toolCalledEvent = this.eventFactory.create({
+                type: "TOOL_CALLED",
+                aggregateId: execution.id,
+                aggregateType: "EXECUTION",
+                payload: { toolCall },
+                context
+              });
+
+              await this.publishExecutionScoped(externalityEvent, fence);
+              await this.publishExecutionScoped(toolCalledEvent, fence);
+
+              return { toolCall, externalityCommitted: true };
+            }
+            // If reconResult.status is "NOT_COMMITTED", the side effect did not happen. We can proceed to run.
+          }
+        }
+
+        assertTransition(execution.id, execution.status, "SIDE_EFFECT_PENDING");
+        execution.status = "SIDE_EFFECT_PENDING";
+        execution.updatedAt = toIso(this.clock.now());
+        const outcome = await this.executions.commitTransition({
+          execution,
+          fence
+        });
+        if (outcome === "FENCED") {
+          await this.emitFenceRejected(execution.id, owner, "SIDE_EFFECT_PENDING", "executions.RUNNING", context);
+          throw new StaleWorkerSurrender("TOOL_CALLED", execution.id);
+        }
+
+        // Sandboxing boundary check for live replay execution (Invariant RP1 & CAP3):
+        if (this.replayCoordinator) {
+          const session = await this.replayCoordinator.getOrReconstructSession(execution.id, execution);
+          if (session) {
+            CentralizedReplayEnforcer.assertBoundary(execution.id, session.lifecycle, "TOOL", true);
+            CentralizedReplayEnforcer.validateLiveTool(execution, toolName, session.lifecycle, session.diverged);
+          }
+        }
+
+        // Enforce capability safety middleware before live execution
+        IdempotencyPolicyEnforcer.validateExecutionSafety(toolName, {
+          hasFence: fence !== undefined,
+          operatorApproved: execution.input?.operatorApproved === true
+        });
+
+        const output = await runWithUntrackedAllowedAsync(() => this.tools.execute({
+          toolName,
+          args,
+          agentId: agent.id,
+          executionId: execution.id,
+          signal,
+          idempotencyKey,
+          attempt: fence?.attempt,
+          operatorApproved: execution.input?.operatorApproved === true,
+          ...(fence?.workerId ? { workerId: fence.workerId } : {}),
+          ...(stepSequence !== undefined ? { stepSeq: stepSequence, argsHash } : {})
+        } as any));
+
+        assertTransition(execution.id, execution.status, "RUNNING");
+        execution.status = "RUNNING";
+        execution.updatedAt = toIso(this.clock.now());
+
+        const completed = this.clock.now();
+        const toolCall: ToolCallRecord = {
+          id: createId(),
+          executionId: execution.id,
+          stepId: step.id,
+          toolName,
+          input: args,
+          output,
+          status: "COMPLETED",
+          durationMs: completed.getTime() - started.getTime(),
+          createdAt: toIso(completed)
+        };
+
+        const externality: any = {
+          id: createId(),
+          executionId: execution.id,
+          stepSequence: stepSequence ?? 0,
+          type: "TOOL_CALL",
+          timestamp: toIso(completed),
+          randomnessSeed: deterministicId([execution.id, "TOOL_CALL", completed.getTime()]),
+          retryAttempt: fence?.attempt ?? 1,
+          toolName,
+          toolInput: args,
+          toolOutput: output,
+          sideEffectMetadata: {
+            idempotencyKey,
+            status: "COMPLETED",
+            durationMs: completed.getTime() - started.getTime()
+          }
+        };
+
+        const externalityEvent = this.eventFactory.create({
+          type: "EXTERNALITY_RECORDED",
+          aggregateId: execution.id,
+          aggregateType: "EXECUTION",
+          payload: { externality },
+          context
+        });
+
+        const toolCalledEvent = this.eventFactory.create({
           type: "TOOL_CALLED",
           aggregateId: execution.id,
           aggregateType: "EXECUTION",
           payload: { toolCall },
           context
-        }),
-        fence
-      );
+        });
 
-      return { toolCall };
-    }, context, signal, fence);
+        const postOutcome = await this.executions.commitTransition({
+          execution,
+          events: [externalityEvent, toolCalledEvent], // Persist BOTH atomically!
+          fence
+        });
+
+        if (postOutcome === "FENCED") {
+          await this.emitFenceRejected(execution.id, owner, "RUNNING", "executions.RUNNING", context);
+          throw new StaleWorkerSurrender("TOOL_CALLED", execution.id);
+        }
+
+        const isOutbox = this.executions.isOutboxEnabled && this.executions.isOutboxEnabled();
+        if (!isOutbox) {
+          await this.publisher.publish(externalityEvent);
+          await this.publisher.publish(toolCalledEvent);
+        }
+
+        return { toolCall, externalityCommitted: true };
+      });
+    }, context, signal, fence, stepSequence);
   }
 }

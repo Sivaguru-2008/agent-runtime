@@ -278,7 +278,7 @@ describe.skipIf(!harness)("scheduler shutdown mid-cycle", () => {
   it("an active lease can be released cleanly during shutdown — no leak", async () => {
     // Simulates the scheduler's `stop()` path: in-flight executions should
     // release their leases (or the recovery loop will). We assert that after
-    // a release, the row's status reflects RELEASED — not ACTIVE — so a
+    // a release, the row's status reflects TRANSFERRED — not active — so a
     // fresh node can acquire immediately.
     const leases = new PostgresLeaseStore(harness!.pg);
     const now = new Date("2026-05-22T00:00:00.000Z");
@@ -287,7 +287,7 @@ describe.skipIf(!harness)("scheduler shutdown mid-cycle", () => {
     }));
     await leases.release("exec-shutdown", "stopping", now);
     const after = await leases.getByExecution("exec-shutdown");
-    expect(after?.status).toBe("RELEASED");
+    expect(after?.status).toBe("TRANSFERRED");
 
     const acquired = await leases.acquire(makeLeaseInput({
       executionId: "exec-shutdown", workerId: "fresh", ttlMs: 30_000, now

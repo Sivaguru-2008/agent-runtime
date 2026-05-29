@@ -1,7 +1,9 @@
 import type { DomainEvent } from "../../domain/events.js";
 import type { Agent, Execution, MemoryRecord } from "../../domain/model.js";
-import type { AgentRepository, EventStore, ExecutionRepository, MemoryRepository, CommitTerminalInput, FencedAppendOutcome } from "../../domain/ports.js";
+import type { AgentRepository, EventStore, ExecutionRepository, MemoryRepository, CommitTerminalInput, CommitTransitionInput, FencedAppendOutcome } from "../../domain/ports.js";
 import type { FencingToken, FencedWriteOutcome, LeaseStore, CheckpointStore } from "../../domain/clusterPorts.js";
+import { FencingViolationError } from "../../runtime/executionEngine.js";
+import { assertTransition } from "../../runtime/canonicalSemantics.js";
 
 export class InMemoryEventStore implements EventStore {
   private readonly events: DomainEvent[] = [];
@@ -60,6 +62,10 @@ export class InMemoryEventStore implements EventStore {
   }
 
   async listByExecution(executionId: string): Promise<DomainEvent[]> {
+    const sandboxed = (globalThis as any).activeSandboxedEventStores?.get(executionId);
+    if (sandboxed) {
+      return sandboxed.listByExecution(executionId);
+    }
     return this.byExecution.get(executionId) ?? [];
   }
 
@@ -109,8 +115,10 @@ function collectExecutionIds(event: DomainEvent): Set<string> {
     readPath(event.payload, ["execution", "id"]),
     readPath(event.payload, ["step", "executionId"]),
     readPath(event.payload, ["toolCall", "executionId"]),
-    readPath(event.payload, ["replayExecutionId"]),
-    readPath(event.payload, ["parentExecutionId"])
+    readPath(event.payload, ["replayExecutionId"])
+    // parentExecutionId is intentionally omitted: indexing it would append child
+    // replay/lifecycle events onto the parent's execution log and break replay
+    // watermark checks (false STALE_PARENT_LOG divergence).
   ];
   for (const candidate of candidates) {
     if (typeof candidate === "string" && candidate) ids.add(candidate);
@@ -158,7 +166,23 @@ export class InMemoryExecutionRepository implements ExecutionRepository {
     private readonly checkpoints?: CheckpointStore
   ) {}
 
-  async save(execution: Execution): Promise<void> {
+  async save(execution: Execution, fence?: FencingToken): Promise<void> {
+    if (fence) {
+      const outcome = await this.saveFenced(execution, fence);
+      if (outcome === "FENCED") {
+        throw new FencingViolationError(execution.id, fence.workerId);
+      }
+      return;
+    }
+
+    const isLeasedState = execution.status !== "CREATION" && execution.status !== "SCHEDULING" && execution.status !== "QUEUED";
+    if (isLeasedState && this.leases) {
+      const activeLeases = await this.leases.listActive();
+      const hasActive = activeLeases.some(l => l.executionId === execution.id && new Date(l.expiresAt).getTime() > Date.now());
+      if (hasActive) {
+        throw new FencingViolationError(execution.id, "unknown-unfenced-active-lease");
+      }
+    }
     this.executions.set(execution.id, execution);
   }
 
@@ -175,24 +199,71 @@ export class InMemoryExecutionRepository implements ExecutionRepository {
       this.executions.set(execution.id, execution);
       return "COMMITTED";
     }
-    const ok = await this.leases.validateFencing(fence.executionId, fence.workerId, fence.attempt);
+    const ok = await this.leases.validateFencing(
+      fence.executionId,
+      fence.workerId,
+      fence.attempt,
+      fence.leaseId,
+      fence.expiration
+    );
     if (!ok) return "FENCED";
     this.executions.set(execution.id, execution);
     return "COMMITTED";
   }
 
   async commitTerminal(input: CommitTerminalInput): Promise<FencedWriteOutcome> {
+    return this.commitTransition({
+      execution: input.execution,
+      events: [input.event],
+      memoryRecord: input.memoryRecord,
+      checkpoint: input.checkpoint && input.checkpointSequence !== undefined ? {
+        phase: input.execution.status === "COMPLETED" ? "COMPLETION" : "PLANNING",
+        sequence: input.checkpointSequence,
+        state: input.checkpoint
+      } : undefined,
+      fence: input.fence
+    });
+  }
+
+  private validateRepositoryTransition(executionId: string, from: any, to: any): void {
+    if (from === to) return;
+    const terminalFrom = from === "COMPLETED" || from === "FAILED" || from === "DEAD_LETTERED" || from === "CANCELLED";
+    const terminalTo = to === "COMPLETED" || to === "FAILED" || to === "DEAD_LETTERED" || to === "CANCELLED";
+    if (terminalFrom) {
+      if (from === "FAILED" && (to === "LEASE_ACQUISITION" || to === "DEAD_LETTERED")) {
+        return;
+      }
+      throw new Error(`Illegal execution state transition out of terminal state: '${from}' -> '${to}' for execution '${executionId}'`);
+    }
+    if (terminalTo) {
+      return;
+    }
+    assertTransition(executionId, from, to);
+  }
+
+  async commitTransition(input: CommitTransitionInput): Promise<FencedWriteOutcome> {
     if (this.leases && input.fence) {
       const ok = await this.leases.validateFencing(
         input.fence.executionId,
         input.fence.workerId,
-        input.fence.attempt
+        input.fence.attempt,
+        input.fence.leaseId,
+        input.fence.expiration
       );
       if (!ok) return "FENCED";
     }
 
+    // Transactional Validation Hook: Repository Write Status Transition
     const original = this.executions.get(input.execution.id);
-    await this.save(input.execution);
+    if (original) {
+      const from = original.status;
+      const to = input.execution.status;
+      if (from !== to) {
+        this.validateRepositoryTransition(input.execution.id, from, to);
+      }
+    }
+
+    await this.save(input.execution, input.fence);
 
     if (input.memoryRecord && this.memory) {
       if (input.fence) {
@@ -210,23 +281,109 @@ export class InMemoryExecutionRepository implements ExecutionRepository {
       }
     }
 
-    if (input.event && this.events) {
-      await this.events.append(input.event);
+    if (input.events && input.events.length > 0 && this.events) {
+      for (const event of input.events) {
+        await this.events.append(event);
+      }
     }
 
-    if (input.checkpoint && input.checkpointSequence !== undefined && this.checkpoints) {
-      await this.checkpoints.write({
+    if (input.checkpoint && this.checkpoints) {
+      const chk = {
         id: "in-memory-chk-" + Math.random(),
         executionId: input.execution.id,
         workerId: input.fence?.workerId ?? "local",
-        sequence: input.checkpointSequence,
-        phase: input.execution.status === "COMPLETED" ? "COMPLETION" : "PLANNING",
-        state: input.checkpoint,
+        sequence: input.checkpoint.sequence,
+        phase: input.checkpoint.phase as any,
+        state: input.checkpoint.state,
         createdAt: new Date().toISOString()
-      });
+      };
+      if (input.fence) {
+        const chkOutcome = await this.checkpoints.writeFenced(chk, input.fence);
+        if (chkOutcome === "FENCED") {
+          if (original) {
+            this.executions.set(input.execution.id, original);
+          } else {
+            this.executions.delete(input.execution.id);
+          }
+          return "FENCED";
+        }
+      } else {
+        await this.checkpoints.write(chk);
+      }
     }
 
     return "COMMITTED";
+  }
+
+  async detectPartialCommit(executionId: string): Promise<{
+    isConsistent: boolean;
+    actualStatus: Execution["status"];
+    lastEventSeq?: number;
+    error?: string;
+  }> {
+    const execution = await this.getById(executionId);
+    if (!execution) {
+      return { isConsistent: true, actualStatus: "CREATION" };
+    }
+
+    const actualStatus = execution.status;
+    if (!this.events) {
+      return { isConsistent: true, actualStatus };
+    }
+
+    const events = await this.events.listByExecution(executionId);
+    const lastEvent = events[events.length - 1];
+
+    if (actualStatus === "COMPLETED") {
+      if (!lastEvent || lastEvent.type !== "EXECUTION_COMPLETED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: lastEvent ? Number(lastEvent.sequence) : undefined,
+          error: `Partial commit anomaly: execution is marked COMPLETED but last event in log is ${
+            lastEvent ? lastEvent.type : "NONE"
+          }`
+        };
+      }
+    }
+
+    if (actualStatus === "FAILED") {
+      if (!lastEvent || lastEvent.type !== "EXECUTION_FAILED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: lastEvent ? Number(lastEvent.sequence) : undefined,
+          error: `Partial commit anomaly: execution is marked FAILED but last event in log is ${
+            lastEvent ? lastEvent.type : "NONE"
+          }`
+        };
+      }
+    }
+
+    if (lastEvent) {
+      if (lastEvent.type === "EXECUTION_COMPLETED" && actualStatus !== "COMPLETED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: Number(lastEvent.sequence),
+          error: `Partial commit anomaly: event log terminates at EXECUTION_COMPLETED but execution status is ${actualStatus}`
+        };
+      }
+      if (lastEvent.type === "EXECUTION_FAILED" && actualStatus !== "FAILED") {
+        return {
+          isConsistent: false,
+          actualStatus,
+          lastEventSeq: Number(lastEvent.sequence),
+          error: `Partial commit anomaly: event log terminates at EXECUTION_FAILED but execution status is ${actualStatus}`
+        };
+      }
+    }
+
+    return {
+      isConsistent: true,
+      actualStatus,
+      lastEventSeq: lastEvent ? Number(lastEvent.sequence) : undefined
+    };
   }
 
   isOutboxEnabled(): boolean {
@@ -234,6 +391,10 @@ export class InMemoryExecutionRepository implements ExecutionRepository {
   }
 
   async getById(id: string): Promise<Execution | undefined> {
+    const sandboxed = (globalThis as any).activeSandboxedExecutionRepos?.get(id);
+    if (sandboxed) {
+      return sandboxed.getById(id);
+    }
     return this.executions.get(id);
   }
 
@@ -260,7 +421,13 @@ export class InMemoryMemoryRepository implements MemoryRepository {
       this.records.set(record.id, record);
       return "COMMITTED";
     }
-    const ok = await this.leases.validateFencing(fence.executionId, fence.workerId, fence.attempt);
+    const ok = await this.leases.validateFencing(
+      fence.executionId,
+      fence.workerId,
+      fence.attempt,
+      fence.leaseId,
+      fence.expiration
+    );
     if (!ok) return "FENCED";
     this.records.set(record.id, record);
     return "COMMITTED";

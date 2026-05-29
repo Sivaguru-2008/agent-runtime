@@ -47,12 +47,24 @@ import {
 } from "../runtime/toolDedupExecutor.js";
 import { PostgresToolCallDedupStore } from "../infrastructure/persistence/postgres/postgresToolCallDedupStore.js";
 import type { ToolCallDedupStore } from "../domain/toolDedup.js";
+// Canonical fence state machine (docs/specs/fence-state-machine.md) — the
+// hardened correctness layer that guards every external side effect behind a
+// durable, ownership-validated PENDING→EXECUTING→COMMITTED transition.
+import { FenceProtocol, type FenceStore } from "../runtime/fence/fenceProtocol.js";
+import { InMemoryFenceStore } from "../infrastructure/persistence/inMemoryFenceStore.js";
+import { PostgresFenceStore } from "../infrastructure/persistence/postgres/postgresFenceStore.js";
 import { createModelProvider } from "../providers/providerFactory.js";
 import { DistributedScheduler } from "./cluster/distributedScheduler.js";
 import { WorkerLifecycleService } from "./cluster/workerLifecycle.js";
 import { BackgroundRecoveryLoop } from "./cluster/recoveryLoop.js";
 import { WorkerExecutionLoop } from "./cluster/workerExecutionLoop.js";
 import { LeaseHeartbeatWorker } from "../infrastructure/cluster/leaseHeartbeatWorker.js";
+import { RetryCoordinator } from "../runtime/retry/retryCoordinator.js";
+import { InMemoryRetryCoordinationStore } from "../runtime/retry/inMemoryRetryStore.js";
+// Canonical Redis<->Postgres authority boundary (docs/specs/coordination-boundary.md).
+// The startup guard fails closed if a durable correctness concern is ever
+// wired onto a Redis-backed adapter (CA1).
+import { assertCoordinationAuthorityWiring } from "../runtime/coordinationAuthority.js";
 import { InMemoryExecutionJobQueue } from "../infrastructure/queue/inMemoryExecutionJobQueue.js";
 import { RedisExecutionJobQueue } from "../infrastructure/queue/redisExecutionJobQueue.js";
 import type { ExecutionJobQueue } from "../domain/jobQueue.js";
@@ -502,8 +514,22 @@ export async function createRuntimeContainer(
   const toolDedupStore: ToolCallDedupStore = persistence.pg
     ? new PostgresToolCallDedupStore(persistence.pg)
     : new NoopToolCallDedupStore();
+
+  // Canonical fence state machine. The Postgres store is the authoritative
+  // distributed ledger (execution_fences, migration 0016); the in-memory store
+  // is correct only for single-process dev/test — the same durability
+  // trade-off the dedup store makes. The protocol guards every external side
+  // effect: fences are created atomically, ownership is validated on every
+  // transition, and duplicate/stale/replay paths are rejected.
+  const fenceStore: FenceStore = persistence.pg
+    ? new PostgresFenceStore(persistence.pg)
+    : new InMemoryFenceStore({ clock });
+  const fenceProtocol = new FenceProtocol(fenceStore, { clock });
+
   const toolExecutor = new DedupingToolExecutor(metricsToolExecutor, toolDedupStore, {
     resolveTenantId: () => "system",
+    fence: fenceProtocol,
+    defaultWorkerId: workerId,
     // Adapt pino's (obj, msg) signature to the wrapper's (msg, ctx) shape.
     logger: { warn: (msg, ctx) => logger.warn(ctx ?? {}, msg) }
   });
@@ -516,7 +542,7 @@ export async function createRuntimeContainer(
     modelProvider,
     toolExecutor,
     clock,
-    { checkpoints, workerId }
+    { checkpoints, workerId, events: eventStore }
   );
 
   const workerLifecycle = new WorkerLifecycleService(
@@ -558,6 +584,15 @@ export async function createRuntimeContainer(
     }
   );
 
+  // ─── Shared retry coordinator ─────────────────────────────────────────────
+  // One canonical single-flight retry/recovery gate per process, shared by the
+  // scheduler's recovery loop and the worker execution loop so every retry,
+  // recovery, and replay decision on this process passes through the same
+  // RT1..RT8 enforcement. Cross-process serialization remains the durable lease
+  // store's job; this is the in-process single-flight, arbitration, recovery
+  // throttle, backpressure, and storm-guard layer.
+  const retryCoordinator = new RetryCoordinator(new InMemoryRetryCoordinationStore({ clock }), { clock });
+
   const scheduler = new DistributedScheduler(
     engine,
     executions,
@@ -575,7 +610,8 @@ export async function createRuntimeContainer(
     },
     deadLetterQueue,
     leaseHeartbeatWorker,
-    logger
+    logger,
+    retryCoordinator
   );
 
   const recoveryLoop = new BackgroundRecoveryLoop(workerLifecycle, scheduler, clock, logger, {
@@ -606,6 +642,32 @@ export async function createRuntimeContainer(
   // recovering process.
   scheduler.setJobQueue(jobQueue);
 
+  // ─── Coordination authority boundary guard (CA1) ──────────────────────────
+  // Fail closed at boot if any durable correctness concern (leases, fences,
+  // checkpoints, event log, dedup, dead-letters, execution/worker/replay state)
+  // is ever wired onto a Redis-backed adapter. Redis-classified concerns (job
+  // queue, event bus) are intentionally exempt. Classification is by raw
+  // adapter constructor name, so it runs against the stores BEFORE the
+  // metrics/circuit-breaker wrappers. Test doubles (UNKNOWN ctor names) pass —
+  // only an unambiguous Redis* binding for a durable concern trips this.
+  const authorityReport = assertCoordinationAuthorityWiring([
+    { concern: "EXECUTION_STATE", adapterCtorName: executions.constructor.name },
+    { concern: "EXECUTION_LEASE", adapterCtorName: leases.constructor.name },
+    { concern: "FENCE_STATE", adapterCtorName: fenceStore.constructor.name },
+    { concern: "EXECUTION_CHECKPOINT", adapterCtorName: checkpoints.constructor.name },
+    { concern: "EVENT_LOG", adapterCtorName: eventStore.constructor.name },
+    { concern: "TOOL_CALL_DEDUP", adapterCtorName: toolDedupStore.constructor.name },
+    { concern: "DEAD_LETTER", adapterCtorName: rawDeadLetterQueue.constructor.name },
+    { concern: "WORKER_REGISTRY", adapterCtorName: workers.constructor.name },
+    { concern: "REPLAY_METADATA", adapterCtorName: persistence.snapshots.constructor.name },
+    { concern: "JOB_QUEUE", adapterCtorName: jobQueue.constructor.name },
+    { concern: "EVENT_BUS", adapterCtorName: eventBus.constructor.name }
+  ]);
+  logger.info(
+    { bindings: authorityReport.map((b) => `${b.concern}=${b.adapter}(${b.adapterAuthority})`) },
+    "[coordination] Redis<->Postgres authority boundary verified"
+  );
+
   // ─── Worker-side execution consumer ───────────────────────────────────────
   // Constructed on every role so the type remains stable, but only started
   // when this process is in "worker" or "combined" mode. An API-only process
@@ -634,7 +696,8 @@ export async function createRuntimeContainer(
             retryBackoffMaxMs: config.RETRY_BACKOFF_MAX_MS,
             consumerGroup: config.JOB_QUEUE_CONSUMER_GROUP,
             queueBlockMs: 5_000
-          }
+          },
+          retryCoordinator
         );
 
   const clusterQueries = new ClusterQueries(workers, leases, executions, checkpoints);

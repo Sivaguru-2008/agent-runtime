@@ -57,7 +57,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — acquire exclusivity", () => {
     // Stored row matches the winning worker.
     const stored = await leases!.getByExecution(exec);
     expect(stored?.workerId).toBe(wins[0]!.workerId);
-    expect(stored?.status).toBe("ACTIVE");
+    expect(stored?.status).toBe("LEASED");
   });
 
   it("acquires against DISTINCT executions succeed in parallel", async () => {
@@ -86,7 +86,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — acquire exclusivity", () => {
       ttlMs: 60_000,
       now
     }));
-    expect(first?.status).toBe("ACTIVE");
+    expect(first?.status).toBe("LEASED");
 
     const second = await leases!.acquire(makeLeaseInput({
       executionId: "exec-held",
@@ -116,7 +116,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — acquire exclusivity", () => {
     }));
     expect(second?.workerId).toBe("worker-B");
     expect(second?.attempt).toBe(2);
-    expect(second?.status).toBe("ACTIVE");
+    expect(second?.status).toBe("LEASED");
   });
 });
 
@@ -143,7 +143,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — renew + release", () => {
     expect(stolen).toBeUndefined();
   });
 
-  it("release() flips status to RELEASED for the owner", async () => {
+  it("release() flips status to TRANSFERRED for the owner", async () => {
     const now = new Date("2026-05-22T00:00:00.000Z");
     await leases!.acquire(makeLeaseInput({
       executionId: "exec-release",
@@ -152,8 +152,8 @@ describe.skipIf(!harness)("PostgresLeaseStore — renew + release", () => {
       now
     }));
     const released = await leases!.release("exec-release", "worker-A", now);
-    expect(released?.status).toBe("RELEASED");
-    expect((await leases!.getByExecution("exec-release"))!.status).toBe("RELEASED");
+    expect(released?.status).toBe("TRANSFERRED");
+    expect((await leases!.getByExecution("exec-release"))!.status).toBe("TRANSFERRED");
 
     // Another worker can now acquire it.
     const reacquired = await leases!.acquire(makeLeaseInput({
@@ -169,7 +169,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — renew + release", () => {
 describe.skipIf(!harness)("PostgresLeaseStore — reclaimExpired (FOR UPDATE SKIP LOCKED)", () => {
   it("reclaims all expired leases in one pass", async () => {
     const now = new Date("2026-05-22T00:00:00.000Z");
-    // Seed 5 ACTIVE-but-expired leases.
+    // Seed 5 LEASED-but-expired leases.
     for (let i = 0; i < 5; i++) {
       await leases!.acquire(makeLeaseInput({
         executionId: `exec-stale-${i}`,
@@ -226,7 +226,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — reclaimExpired (FOR UPDATE SKI
     }));
     const reclaimed = await leases!.reclaimExpired(new Date(now.getTime() + 1_000));
     expect(reclaimed).toEqual([]);
-    expect((await leases!.getByExecution("exec-fresh"))!.status).toBe("ACTIVE");
+    expect((await leases!.getByExecution("exec-fresh"))!.status).toBe("LEASED");
   });
 
   it("reclaimByWorker() reclaims every active lease for a dead worker", async () => {
@@ -237,14 +237,14 @@ describe.skipIf(!harness)("PostgresLeaseStore — reclaimExpired (FOR UPDATE SKI
 
     const reclaimed = await leases!.reclaimByWorker("dead", now);
     expect(reclaimed.map((l) => l.executionId).sort()).toEqual(["e1", "e2"]);
-    expect(reclaimed.every((l) => l.status === "RECLAIMED")).toBe(true);
+    expect(reclaimed.every((l) => l.status === "INVALIDATED")).toBe(true);
     // Other worker's lease is untouched.
-    expect((await leases!.getByExecution("e3"))!.status).toBe("ACTIVE");
+    expect((await leases!.getByExecution("e3"))!.status).toBe("LEASED");
   });
 });
 
 describe.skipIf(!harness)("PostgresLeaseStore — listActive ordering", () => {
-  it("returns only ACTIVE leases, ordered by acquired_at ascending", async () => {
+  it("returns only active leases, ordered by acquired_at ascending", async () => {
     const t0 = new Date("2026-05-22T00:00:00.000Z");
     await leases!.acquire(makeLeaseInput({
       executionId: "first", workerId: "w1", ttlMs: 60_000, now: t0
@@ -294,7 +294,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — worker crash recovery semantic
 
   it("stale dead-worker leases do not block reacquire even WITHOUT a recovery pass", async () => {
     // Documents the on-demand recovery path: acquire() itself notices an
-    // expired ACTIVE lease and overwrites it. This is critical when the
+    // expired LEASED lease and overwrites it. This is critical when the
     // recovery loop is delayed (e.g., briefly partitioned).
     const clock = new ManualClock(new Date("2026-05-22T00:00:00.000Z"));
     await leases!.acquire(makeLeaseInput({

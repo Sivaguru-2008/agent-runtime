@@ -3,6 +3,17 @@
 Status: canonical. This document replaces the fencing language in the archived
 `distributed-topology.md` and `reliability-phase-v3.md` for any new work.
 
+> **Superseded lifecycle.** The state-machine section (§1 below:
+> `NONE → RESERVED → RETURNED → SUCCEEDED|FAILED`) is the original two-state
+> dedup model. It has been hardened into an explicit eight-state machine —
+> `PENDING, EXECUTING, COMMITTED, FAILED, AMBIGUOUS, RECONCILING, RECONCILED,
+> EXPIRED` — with transactionally-enforced transitions and mandatory ownership
+> validation. See **[`fence-state-machine.md`](./fence-state-machine.md)** for
+> the canonical lifecycle, ownership semantics, transition diagrams and
+> ambiguity/reconciliation handling. The remote-idempotency-key threading (§3),
+> product idempotency grades (§6), crash-case prose (§5) and "what this does NOT
+> promise" (§7) in this document all still hold.
+
 ## 0. Why this protocol exists
 
 Tool calls produce **external side effects** — Stripe refunds, emails sent,

@@ -52,7 +52,10 @@ export class PostgresCheckpointStore implements CheckpointStore {
           where execution_id = $8
             and worker_id    = $9
             and attempt      = $10
-            and status       = 'ACTIVE'
+            and coalesce(fencing_token, attempt)     = $10
+            and coalesce(lease_epoch, attempt)       = $10
+            and coalesce(ownership_version, attempt) = $10
+            and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
             and expires_at   > $11
           for update
        )

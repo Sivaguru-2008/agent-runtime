@@ -13,7 +13,7 @@ import { DeterministicModelProvider } from "../src/runtime/mockModelProvider.js"
 import { BuiltInToolExecutor } from "../src/runtime/toolRegistry.js";
 import type { DomainEvent } from "../src/domain/events.js";
 import type { Agent, Execution } from "../src/domain/model.js";
-import type { EventBus, EventHandler, ExecutionRepository, CommitTerminalInput } from "../src/domain/ports.js";
+import type { EventBus, EventHandler, ExecutionRepository, CommitTerminalInput, CommitTransitionInput } from "../src/domain/ports.js";
 import type { FencedWriteOutcome } from "../src/domain/clusterPorts.js";
 
 /**
@@ -103,6 +103,13 @@ class FlakyExecutionRepository implements ExecutionRepository {
   async commitTerminal(input: CommitTerminalInput): Promise<FencedWriteOutcome> {
     if (this.broken) throw new Error("simulated executions repo outage");
     return this.delegate.commitTerminal(input);
+  }
+  async commitTransition(input: CommitTransitionInput): Promise<FencedWriteOutcome> {
+    if (this.broken) throw new Error("simulated executions repo outage");
+    return this.delegate.commitTransition(input);
+  }
+  async detectPartialCommit(executionId: string): Promise<{ isConsistent: boolean; actualStatus: Execution["status"]; lastEventSeq?: number; error?: string }> {
+    return this.delegate.detectPartialCommit(executionId);
   }
   isOutboxEnabled(): boolean {
     return false;

@@ -271,6 +271,7 @@ describe("true-distributed topology", () => {
       model: { provider: "mock", model: "x", temperature: 0 },
       tools: [],
       memoryPolicy: { episodicEnabled: true, semanticEnabled: false, maxRetrievedItems: 5 },
+      tenantId: "tenant-dist",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -281,6 +282,7 @@ describe("true-distributed topology", () => {
       status: "QUEUED",
       input: { task: 1 },
       tokenUsage: { prompt: 0, completion: 0, total: 0 },
+      tenantId: "tenant-dist",
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -383,6 +385,7 @@ describe("true-distributed topology", () => {
       model: { provider: "mock", model: "x", temperature: 0 },
       tools: [],
       memoryPolicy: { episodicEnabled: true, semanticEnabled: false, maxRetrievedItems: 5 },
+      tenantId: "tenant-dist",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -393,6 +396,7 @@ describe("true-distributed topology", () => {
       status: "QUEUED",
       input: { task: 1 },
       tokenUsage: { prompt: 0, completion: 0, total: 0 },
+      tenantId: "tenant-dist",
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -498,6 +502,7 @@ describe("true-distributed topology", () => {
       model: { provider: "mock", model: "x", temperature: 0 },
       tools: [],
       memoryPolicy: { episodicEnabled: true, semanticEnabled: false, maxRetrievedItems: 5 },
+      tenantId: "tenant-dist",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -508,6 +513,7 @@ describe("true-distributed topology", () => {
       status: "QUEUED",
       input: { task: 1 },
       tokenUsage: { prompt: 0, completion: 0, total: 0 },
+      tenantId: "tenant-dist",
       startedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

@@ -8,6 +8,7 @@ import type {
   WorkerRegistry
 } from "../../domain/clusterPorts.js";
 import { toIso } from "../../shared/clock.js";
+import { createId } from "../../shared/id.js";
 
 export class InMemoryWorkerRegistry implements WorkerRegistry {
   private readonly workers = new Map<string, RuntimeWorker>();
@@ -19,12 +20,12 @@ export class InMemoryWorkerRegistry implements WorkerRegistry {
 
   async heartbeat(workerId: string, load: RuntimeWorker["load"]): Promise<RuntimeWorker | undefined> {
     const existing = this.workers.get(workerId);
-    if (!existing) return undefined;
+    if (!existing || existing.status === "LOST" || existing.status === "STOPPED") return undefined;
     const next: RuntimeWorker = {
       ...existing,
       load,
       lastHeartbeatAt: toIso(new Date()),
-      status: existing.status === "LOST" ? "READY" : existing.status
+      status: existing.status
     };
     this.workers.set(workerId, next);
     return next;
@@ -67,18 +68,31 @@ export class InMemoryLeaseStore implements LeaseStore {
 
   async acquire({ executionId, workerId, ttlMs, now }: AcquireLeaseInput): Promise<ExecutionLease | undefined> {
     const existing = this.leases.get(executionId);
-    if (existing && existing.status === "ACTIVE") {
+    if (existing) {
+      const isActive = existing.status === "LEASED" || existing.status === "RENEWING" || existing.status === "RECOVERY_OWNED" || existing.status === "LEASE_PENDING";
       const expiresAt = new Date(existing.expiresAt).getTime();
-      if (expiresAt > now.getTime()) return undefined;
+      if (isActive && expiresAt > now.getTime()) return undefined;
     }
     const attempt = existing ? existing.attempt + 1 : 1;
+    if (existing && attempt <= existing.attempt) {
+      throw new Error(`Epoch rollback attempt rejected: new attempt ${attempt} <= existing ${existing.attempt}`);
+    }
     const lease: ExecutionLease = {
       executionId,
+      leaseId: createId(),
+      leaseEpoch: attempt,
+      lease_epoch: attempt,
+      fencingToken: attempt,
+      fencing_token: attempt,
+      ownershipVersion: attempt,
+      ownership_version: attempt,
+      workerIdentity: workerId,
+      worker_identity: workerId,
       workerId,
       acquiredAt: toIso(now),
       renewedAt: toIso(now),
       expiresAt: toIso(new Date(now.getTime() + ttlMs)),
-      status: "ACTIVE",
+      status: "LEASED",
       attempt
     };
     this.leases.set(executionId, lease);
@@ -87,9 +101,10 @@ export class InMemoryLeaseStore implements LeaseStore {
 
   async renew(executionId: string, workerId: string, now: Date, ttlMs: number): Promise<ExecutionLease | undefined> {
     const existing = this.leases.get(executionId);
-    if (!existing || existing.workerId !== workerId || existing.status !== "ACTIVE") return undefined;
+    if (!existing || existing.workerId !== workerId || (existing.status !== "LEASED" && existing.status !== "RENEWING" && existing.status !== "RECOVERY_OWNED")) return undefined;
     const next: ExecutionLease = {
       ...existing,
+      status: "LEASED",
       renewedAt: toIso(now),
       expiresAt: toIso(new Date(now.getTime() + ttlMs))
     };
@@ -100,7 +115,7 @@ export class InMemoryLeaseStore implements LeaseStore {
   async release(executionId: string, workerId: string, now: Date): Promise<ExecutionLease | undefined> {
     const existing = this.leases.get(executionId);
     if (!existing || existing.workerId !== workerId) return undefined;
-    const next: ExecutionLease = { ...existing, status: "RELEASED", renewedAt: toIso(now) };
+    const next: ExecutionLease = { ...existing, status: "TRANSFERRED", renewedAt: toIso(now) };
     this.leases.set(executionId, next);
     return next;
   }
@@ -108,7 +123,7 @@ export class InMemoryLeaseStore implements LeaseStore {
   async reclaimExpired(now: Date): Promise<ExecutionLease[]> {
     const reclaimed: ExecutionLease[] = [];
     for (const lease of this.leases.values()) {
-      if (lease.status !== "ACTIVE") continue;
+      if (lease.status !== "LEASED" && lease.status !== "RENEWING" && lease.status !== "RECOVERY_OWNED" && lease.status !== "LEASE_PENDING") continue;
       if (new Date(lease.expiresAt).getTime() < now.getTime()) {
         const next: ExecutionLease = { ...lease, status: "EXPIRED", renewedAt: toIso(now) };
         this.leases.set(lease.executionId, next);
@@ -121,12 +136,41 @@ export class InMemoryLeaseStore implements LeaseStore {
   async reclaimByWorker(workerId: string, now: Date): Promise<ExecutionLease[]> {
     const reclaimed: ExecutionLease[] = [];
     for (const lease of this.leases.values()) {
-      if (lease.workerId !== workerId || lease.status !== "ACTIVE") continue;
-      const next: ExecutionLease = { ...lease, status: "RECLAIMED", renewedAt: toIso(now) };
+      if (lease.workerId !== workerId || (lease.status !== "LEASED" && lease.status !== "RENEWING" && lease.status !== "RECOVERY_OWNED" && lease.status !== "LEASE_PENDING")) continue;
+      const next: ExecutionLease = { ...lease, status: "INVALIDATED", renewedAt: toIso(now) };
       this.leases.set(lease.executionId, next);
       reclaimed.push(next);
     }
     return reclaimed;
+  }
+
+  async takeoverRecovery(executionId: string, workerId: string, now: Date, ttlMs: number): Promise<ExecutionLease | undefined> {
+    const existing = this.leases.get(executionId);
+    if (!existing || existing.status !== "EXPIRED") return undefined;
+    const attempt = existing.attempt + 1;
+    if (attempt <= existing.attempt) {
+      throw new Error(`Epoch rollback attempt rejected: new attempt ${attempt} <= existing ${existing.attempt}`);
+    }
+    const lease: ExecutionLease = {
+      executionId,
+      leaseId: createId(),
+      leaseEpoch: attempt,
+      lease_epoch: attempt,
+      fencingToken: attempt,
+      fencing_token: attempt,
+      ownershipVersion: attempt,
+      ownership_version: attempt,
+      workerIdentity: workerId,
+      worker_identity: workerId,
+      workerId,
+      acquiredAt: toIso(now),
+      renewedAt: toIso(now),
+      expiresAt: toIso(new Date(now.getTime() + ttlMs)),
+      status: "RECOVERY_OWNED",
+      attempt
+    };
+    this.leases.set(executionId, lease);
+    return lease;
   }
 
   async getByExecution(executionId: string): Promise<ExecutionLease | undefined> {
@@ -134,15 +178,16 @@ export class InMemoryLeaseStore implements LeaseStore {
   }
 
   async listActive(): Promise<ExecutionLease[]> {
-    return [...this.leases.values()].filter((lease) => lease.status === "ACTIVE");
+    return [...this.leases.values()].filter((lease) => lease.status === "LEASED" || lease.status === "RENEWING" || lease.status === "RECOVERY_OWNED");
   }
 
-  async validateFencing(executionId: string, workerId: string, fencingToken: number): Promise<boolean> {
+  async validateFencing(executionId: string, workerId: string, fencingToken: number, leaseId?: string, expiration?: string): Promise<boolean> {
     const lease = this.leases.get(executionId);
     if (!lease) return false;
     if (lease.workerId !== workerId) return false;
-    if (lease.status !== "ACTIVE") return false;
+    if (lease.status !== "LEASED" && lease.status !== "RENEWING" && lease.status !== "RECOVERY_OWNED") return false;
     if (lease.attempt !== fencingToken) return false;
+    if (leaseId !== undefined && lease.leaseId !== leaseId) return false;
     if (new Date(lease.expiresAt).getTime() < Date.now()) return false;
     return true;
   }

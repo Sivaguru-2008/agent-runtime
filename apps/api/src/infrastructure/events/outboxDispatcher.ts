@@ -16,6 +16,7 @@ import type { EventBus } from "../../domain/ports.js";
 import type { PersistedEventPublisher } from "./persistedEventPublisher.js";
 import type { PgClient } from "../persistence/postgres/pgClient.js";
 import { acquireFencingToken, assertCanWrite } from "../reliability/splitBrainGuard.js";
+import { assertRuntimeInvariant } from "../../runtime/canonicalSemantics.js";
 
 const MAX_RETRIES = 5;
 const VISIBILITY_TIMEOUT_SEC = 30;
@@ -113,6 +114,21 @@ export class OutboxDispatcher {
     const rows = claimResult.rows;
     if (rows.length === 0) {
       return 0;
+    }
+
+    // O1 Invariant: outbox publication FIFO order preservation
+    const lastSequencePerExecution = new Map<string, number>();
+    for (const r of rows) {
+      const prevSeq = lastSequencePerExecution.get(r.execution_id);
+      if (prevSeq !== undefined) {
+        assertRuntimeInvariant(
+          "O1",
+          Number(r.sequence) > prevSeq,
+          `FIFO Ordering violation: outbox batch processed event seq ${r.sequence} after seq ${prevSeq} for execution ${r.execution_id}`,
+          { executionId: r.execution_id, currentSeq: r.sequence, previousSeq: prevSeq }
+        );
+      }
+      lastSequencePerExecution.set(r.execution_id, Number(r.sequence));
     }
 
     let successfullyDelivered = 0;
@@ -215,6 +231,26 @@ export class OutboxDispatcher {
   private async tickMemory(): Promise<number> {
     const pending = this.publisher.peekPending();
     let delivered = 0;
+
+    // O1 Invariant: outbox publication FIFO order preservation (in-memory)
+    const lastSequencePerExecution = new Map<string, number>();
+    for (const event of pending) {
+      if (event.aggregateType === "EXECUTION") {
+        const prevSeq = lastSequencePerExecution.get(event.aggregateId);
+        if (prevSeq !== undefined && event.sequence !== undefined) {
+          assertRuntimeInvariant(
+            "O1",
+            event.sequence > prevSeq,
+            `FIFO Ordering violation in-memory: outbox batch processed event seq ${event.sequence} after seq ${prevSeq} for execution ${event.aggregateId}`,
+            { executionId: event.aggregateId, currentSeq: event.sequence, previousSeq: prevSeq }
+          );
+        }
+        if (event.sequence !== undefined) {
+          lastSequencePerExecution.set(event.aggregateId, event.sequence);
+        }
+      }
+    }
+
     for (const event of pending) {
       try {
         await this.bus.publish(event);

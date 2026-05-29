@@ -176,8 +176,9 @@ export class PostgresEventStore implements EventStore {
    *   2. SELECT 1 FROM execution_leases WHERE
    *          execution_id = $fence.executionId
    *      AND worker_id    = $fence.workerId
-   *      AND attempt      = $fence.attempt
-   *      AND status       = 'ACTIVE'
+   *      AND attempt = fencing_token = lease_epoch = ownership_version
+   *          = $fence.attempt   (fail-closed AND over the canonical epoch)
+   *      AND status in ('LEASED','RENEWING','RECOVERY_OWNED')
    *      AND expires_at   > $clock.now()
    *      FOR SHARE
    *      → if 0 rows: ROLLBACK, return FENCED.
@@ -223,9 +224,12 @@ export class PostgresEventStore implements EventStore {
         `select 1 as ok
            from execution_leases
           where execution_id = $1
-            and worker_id    = $2
-            and attempt      = $3
-            and status       = 'ACTIVE'
+            and (worker_id    = $2 and coalesce(worker_identity, worker_id) = $2)
+            and (attempt      = $3
+                 and coalesce(fencing_token, attempt)     = $3
+                 and coalesce(lease_epoch, attempt)       = $3
+                 and coalesce(ownership_version, attempt) = $3)
+            and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
             and expires_at   > $4::timestamptz
           for share`,
         [fence.executionId, fence.workerId, fence.attempt, nowIso]

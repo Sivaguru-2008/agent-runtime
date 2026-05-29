@@ -95,7 +95,7 @@ export class PostgresMemoryRepository implements MemoryRepository {
           where execution_id = $9
             and worker_id    = $10
             and attempt      = $11
-            and status       = 'ACTIVE'
+            and status in ('LEASED', 'RENEWING', 'RECOVERY_OWNED')
             and expires_at   > $12
           for update
        )
