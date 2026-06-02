@@ -25,14 +25,19 @@ import { createHash, randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { PgClient } from "../../infrastructure/persistence/postgres/pgClient.js";
-import { requireRole } from "../../infrastructure/security/rbac.js";
+import { requirePermission } from "../../infrastructure/security/rbac.js";
+import {
+  ROLE_WEIGHT,
+  requireTenant,
+  type ApiKeyRole
+} from "../../infrastructure/security/tenantContext.js";
 import { createId } from "../../shared/id.js";
 import { PostgresDeadLetterStore } from "../../infrastructure/reliability/postgresDeadLetterStore.js";
 
 const createKeySchema = z.object({
   tenantId: z.string().min(1),
   name: z.string().min(1).max(255),
-  role: z.enum(["admin", "operator", "developer", "readonly"]).default("developer"),
+  role: z.enum(["owner", "admin", "operator", "developer", "auditor", "viewer"]).default("viewer"),
   rateLimitRpm: z.number().int().min(1).max(100_000).default(1_000),
   expiresAt: z.string().datetime().optional()
 });
@@ -100,11 +105,19 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     return;
   }
 
-  const adminGuard = requireRole("admin");
+  // Permission-scoped guards. Tenant CREATE/CONFIGURE (quotas, retention) is
+  // admin+ (tenant:configure); reads are tenant:read; key management is
+  // apikey:manage. The owner-exclusive `tenant:admin` permission is reserved
+  // for destructive lifecycle (tenant delete / ownership transfer) — admins can
+  // still provision tenants so there is no owner-bootstrap deadlock (the first
+  // owner key is seeded out-of-band, exactly as the first admin key is today).
+  const manageKeys = requirePermission("apikey:manage");
+  const configureTenant = requirePermission("tenant:configure");
+  const readTenant = requirePermission("tenant:read");
 
   // ── Tenant management ────────────────────────────────────────────────────
 
-  app.post("/admin/tenants", { preHandler: adminGuard }, async (request, reply) => {
+  app.post("/admin/tenants", { preHandler: configureTenant }, async (request, reply) => {
     const body = createTenantSchema.parse(request.body);
 
     await db.withTransaction(async (tx) => {
@@ -124,7 +137,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     return reply.status(201).send({ id: body.id, name: body.name, plan: body.plan });
   });
 
-  app.get("/admin/tenants", { preHandler: adminGuard }, async () => {
+  app.get("/admin/tenants", { preHandler: readTenant }, async () => {
     const { rows } = await db.query<{
       id: string; name: string; plan: string; is_active: boolean; created_at: string;
     }>(
@@ -134,7 +147,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     return rows;
   });
 
-  app.patch("/admin/tenants/:tenantId/quotas", { preHandler: adminGuard }, async (request, reply) => {
+  app.patch("/admin/tenants/:tenantId/quotas", { preHandler: configureTenant }, async (request, reply) => {
     const { tenantId } = request.params as { tenantId: string };
     const body = updateQuotaSchema.parse(request.body);
 
@@ -178,8 +191,21 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
 
   // ── API Key management ───────────────────────────────────────────────────
 
-  app.post("/admin/api-keys", { preHandler: adminGuard }, async (request, reply) => {
+  app.post("/admin/api-keys", { preHandler: manageKeys }, async (request, reply) => {
     const body = createKeySchema.parse(request.body);
+
+    // Privilege-escalation guard (least privilege): a caller may never mint a
+    // key MORE privileged than itself. Without this, an admin (apikey:manage)
+    // could create an owner key and escalate. Owner can mint any role; everyone
+    // else is capped at their own weight on the operational ladder.
+    const callerRole = requireTenant(request).role;
+    if (ROLE_WEIGHT[body.role as ApiKeyRole] > ROLE_WEIGHT[callerRole]) {
+      return reply.status(403).send({
+        error: "FORBIDDEN",
+        message: `Cannot create a key with role '${body.role}' — it exceeds your own role '${callerRole}'`
+      });
+    }
+
     const { rawKey, keyHash, keyPrefix } = generateApiKey();
     const keyId = createId();
 
@@ -202,7 +228,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     });
   });
 
-  app.get("/admin/api-keys", { preHandler: adminGuard }, async (request) => {
+  app.get("/admin/api-keys", { preHandler: manageKeys }, async (request) => {
     const { tenantId } = request.query as { tenantId?: string };
     const { rows } = await db.query<{
       id: string; tenant_id: string; name: string; key_prefix: string;
@@ -221,7 +247,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     return rows;
   });
 
-  app.delete("/admin/api-keys/:keyId", { preHandler: adminGuard }, async (request, reply) => {
+  app.delete("/admin/api-keys/:keyId", { preHandler: manageKeys }, async (request, reply) => {
     const { keyId } = request.params as { keyId: string };
     await db.query(
       "update api_keys set revoked_at = now(), is_active = false where id = $1",
@@ -235,7 +261,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
 
   // ── Dead-Letter Queue management ─────────────────────────────────────────
 
-  app.get("/admin/dlq", { preHandler: requireRole("operator") }, async () => {
+  app.get("/admin/dlq", { preHandler: requirePermission("observability:read") }, async () => {
     const { rows } = await db.query<{
       execution_id: string; worker_id: string | null; tenant_id: string;
       attempt: number; error: unknown; moved_at: string; resolved_at: string | null;
@@ -248,7 +274,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     return rows;
   });
 
-  app.post("/admin/dlq/:executionId/resolve", { preHandler: requireRole("operator") }, async (request, reply) => {
+  app.post("/admin/dlq/:executionId/resolve", { preHandler: requirePermission("recovery:execute") }, async (request, reply) => {
     const { executionId } = request.params as { executionId: string };
     const { resolution } = (request.body as { resolution?: string }) ?? {};
     
@@ -261,7 +287,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
 
   // ── Retention management ──────────────────────────────────────────────────
 
-  app.post("/admin/retention/archive-events", { preHandler: adminGuard }, async (request, reply) => {
+  app.post("/admin/retention/archive-events", { preHandler: configureTenant }, async (request, reply) => {
     const { olderThanDays = 90, batchSize = 10_000 } = (request.body as {
       olderThanDays?: number;
       batchSize?: number;
@@ -274,7 +300,7 @@ export async function registerAdminRoutes(app: FastifyInstance, db: PgClient | n
     return reply.status(200).send({ archived, olderThanDays, batchSize });
   });
 
-  app.post("/admin/retention/prune-audit-log", { preHandler: adminGuard }, async (request, reply) => {
+  app.post("/admin/retention/prune-audit-log", { preHandler: configureTenant }, async (request, reply) => {
     const { olderThanDays = 365, batchSize = 50_000 } = (request.body as {
       olderThanDays?: number;
       batchSize?: number;

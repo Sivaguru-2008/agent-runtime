@@ -28,6 +28,9 @@
 
 import type { FastifyInstance } from "fastify";
 import type { PgClient } from "../persistence/postgres/pgClient.js";
+// Side-effect import: brings the `request.authz` FastifyRequest augmentation
+// into scope so the authorization outcome reads as typed below.
+import type {} from "./permissions.js";
 
 export interface AuditEntry {
   tenantId: string;
@@ -129,6 +132,12 @@ export async function registerAuditLogger(
     const path = request.url.split("?")[0]!;
     const { action, resourceType, resourceId } = classifyAction(request.method, path);
 
+    // Record the authorization outcome (set by requirePermission/requireRole)
+    // so the forensic trail captures WHY a protected action was allowed or
+    // denied — not just the resulting status code. Absent on routes carrying
+    // no RBAC guard (tenant-ownership-only reads).
+    const metadata = request.authz ? { authz: request.authz } : undefined;
+
     auditLogger.log({
       tenantId: tenant.tenantId,
       apiKeyId: tenant.apiKeyId,
@@ -141,7 +150,8 @@ export async function registerAuditLogger(
       statusCode: reply.statusCode,
       durationMs,
       ip: request.ip,
-      requestId: String(request.id)
+      requestId: String(request.id),
+      metadata
     });
   });
 }

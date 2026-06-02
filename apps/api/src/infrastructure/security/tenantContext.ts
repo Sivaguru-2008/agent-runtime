@@ -12,12 +12,40 @@
  *   auth middleware before any handler runs, and enforced in repository calls
  *   by passing tenantId as a query parameter.
  *
- * Role hierarchy:
- *   admin > operator > developer > readonly
- *   Each role inherits all permissions of roles below it.
+ * Role hierarchy (operational chain, most → least privileged):
+ *   owner > admin > operator > developer > viewer
+ *   Each role on the chain inherits all permissions of the roles below it.
+ *
+ *   `auditor` is a SIDE role, not on the chain: a read-only compliance reviewer
+ *   that can read the audit log / certifications / observability but holds no
+ *   write capability. Its weight sits between viewer and developer so the
+ *   weight-based requireRole() write gates correctly reject it; its broad reads
+ *   are granted through the explicit permission matrix (see permissions.ts).
+ *
+ * For the named protected resources (replay, certifications, recovery,
+ * execution, tool execution, tenant config) authorization is enforced through
+ * the capability matrix in permissions.ts via requirePermission(), not the
+ * coarse weight ladder. The ladder is retained for backward-compatible coarse
+ * gating (hasRole / requireRole) of cluster/operator diagnostic routes.
  */
 
-export type ApiKeyRole = "admin" | "operator" | "developer" | "readonly";
+export type ApiKeyRole =
+  | "owner"
+  | "admin"
+  | "operator"
+  | "developer"
+  | "auditor"
+  | "viewer";
+
+/**
+ * Legacy role label retained only at the trust boundary. The pre-RBAC schema
+ * used "readonly"; it is normalized to "viewer" on read so stale API-key rows
+ * or cached entries keep working until migration 0026 rewrites them.
+ */
+export function normalizeRole(role: string): ApiKeyRole {
+  if (role === "readonly") return "viewer";
+  return role as ApiKeyRole;
+}
 
 export interface TenantContext {
   tenantId: string;
@@ -35,16 +63,34 @@ declare module "fastify" {
   }
 }
 
-const ROLE_WEIGHT: Record<ApiKeyRole, number> = {
-  admin: 40,
-  operator: 30,
-  developer: 20,
-  readonly: 10
+/**
+ * Coarse privilege weight for the operational chain. Used only by the
+ * weight-based hasRole()/requireRole() gates. `auditor` sits between viewer and
+ * developer: high enough to pass nothing that grants writes, low enough that
+ * every write/operator gate rejects it. Fine-grained authorization for the
+ * named protected resources uses the capability matrix (permissions.ts).
+ */
+export const ROLE_WEIGHT: Record<ApiKeyRole, number> = {
+  owner: 60,
+  admin: 50,
+  operator: 40,
+  developer: 30,
+  auditor: 20,
+  viewer: 10
 };
 
-/** Returns true if ctx.role is at least as privileged as `required`. */
+/** Returns true if ctx.role is at least as privileged as `required` (weight ladder). */
 export function hasRole(ctx: TenantContext, required: ApiKeyRole): boolean {
   return ROLE_WEIGHT[ctx.role] >= ROLE_WEIGHT[required];
+}
+
+/**
+ * Roles permitted to operate ACROSS tenant boundaries (platform tooling).
+ * Owner and admin only — every per-resource ownership check defers to this so
+ * adding `owner` did not silently downgrade it to a tenant-scoped role.
+ */
+export function canAccessAllTenants(role: ApiKeyRole): boolean {
+  return role === "owner" || role === "admin";
 }
 
 /**
@@ -61,10 +107,10 @@ export function requireTenant(request: { tenant?: TenantContext }): TenantContex
 
 /**
  * Verify that the requesting tenant owns the resource.
- * Admins are implicitly allowed cross-tenant access for operator tooling.
+ * Owners and admins are implicitly allowed cross-tenant access for platform tooling.
  */
 export function assertSameTenant(ctx: TenantContext, resourceTenantId: string): void {
-  if (ctx.role === "admin") return;
+  if (canAccessAllTenants(ctx.role)) return;
   if (ctx.tenantId !== resourceTenantId) {
     const err = new Error("Cross-tenant access denied");
     (err as NodeJS.ErrnoException).code = "CROSS_TENANT_ACCESS";

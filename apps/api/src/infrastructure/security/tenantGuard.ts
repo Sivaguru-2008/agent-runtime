@@ -33,7 +33,7 @@
  */
 
 import type { PgClient } from "../persistence/postgres/pgClient.js";
-import type { TenantContext } from "./tenantContext.js";
+import { canAccessAllTenants, type TenantContext } from "./tenantContext.js";
 
 export const SYSTEM_TENANT_ID = "system";
 
@@ -258,7 +258,7 @@ export class TenantGuard {
     resourceType: string,
     resolve: () => Promise<string | null>
   ): Promise<void> {
-    if (ctx.role === "admin") return; // Admin bypass — audited via auditLogger
+    if (canAccessAllTenants(ctx.role)) return; // Owner/admin bypass — audited via auditLogger
     const owner = await resolve();
     if (owner === null) return; // permit-when-not-found mode (legacy/in-memory)
     if (owner === ctx.tenantId) return;

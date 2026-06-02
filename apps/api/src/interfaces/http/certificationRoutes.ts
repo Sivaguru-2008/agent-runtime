@@ -24,7 +24,6 @@ import type { RuntimeContainer } from "../../application/runtimeContainer.js";
 import { requireTenant } from "../../infrastructure/security/tenantContext.js";
 import { requirePermission } from "../../infrastructure/security/rbac.js";
 import type { TenantGuard } from "../../infrastructure/security/tenantGuard.js";
-import { runtimeIdFor } from "./observabilityMetadata.js";
 
 // workflowVersion labels the certification so replays across workflow versions
 // are not compared as if equivalent. Callers supply it; default to "current".
@@ -58,7 +57,10 @@ export async function registerCertificationRoutes(
         (request.query as { workflowVersion?: string }).workflowVersion ?? "current"
       );
       const divergence = await detector.compare(executionId, workflowVersion);
-      return { ...divergence, runtimeId: runtimeIdFor(request) };
+      // request.id is the per-request correlation id (Fastify genReqId). Used
+      // directly so this RBAC module carries no dependency on the observability
+      // metadata helper — keeping the RBAC layer self-contained.
+      return { ...divergence, runtimeId: request.id };
     }
   );
 
@@ -74,7 +76,7 @@ export async function registerCertificationRoutes(
       await guard.assertOwnsExecution(ctx, executionId);
       const { workflowVersion } = certifyBodySchema.parse(request.body ?? {});
       const certification = await detector.certify(executionId, workflowVersion);
-      return reply.status(201).send({ ...certification, runtimeId: runtimeIdFor(request) });
+      return reply.status(201).send({ ...certification, runtimeId: request.id });
     }
   );
 }
