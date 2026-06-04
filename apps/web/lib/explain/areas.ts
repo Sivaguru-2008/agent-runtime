@@ -55,6 +55,7 @@ export const CONCEPT_AREA: Record<string, ConceptArea> = {
   "stream-status": "Overview",
   "completed-executions": "Overview",
   "queue-depth": "Overview",
+  funnel: "Overview",
 
   // Execution & ownership
   execution: "Execution & Ownership",

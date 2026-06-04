@@ -886,6 +886,33 @@ export const CONCEPTS: Record<string, Concept> = {
     whyCare: "A high suppression rate means lots of stored memory isn't trustworthy.",
     example: "A garbled or duplicate memory gets suppressed so it can't mislead the answer.",
   },
+  funnel: {
+    id: "funnel",
+    label: "Activation Funnel",
+    short: "Tracks how users move from signup to activation and identifies where users drop off.",
+    what: "A multi-stage conversion pipeline mapping user progression from initial landing to registration, developer key generation, agent creation, and first task execution.",
+    why: "Onboarding drop-off is the primary friction point for platform adoption; the funnel pinpoints where the user experience breaks down.",
+    whyCare: "Knowing the exact stage where signups stall helps product teams focus improvement efforts and fix high-impact onboarding issues.",
+    example: "A drop-off at 'Create Agent' suggests that the agent setup forms might be too confusing for new signups.",
+    whyQuestions: [
+      {
+        q: "Why are signups not activating?",
+        a: "Users fail to activate if onboarding is too complex, contains friction points, or if the value proposition is not clear early on."
+      },
+      {
+        q: "Where are users dropping off?",
+        a: "The funnel visualizes drop-offs per stage. If there is a sharp decline at a particular step, that step is causing friction."
+      },
+      {
+        q: "Which acquisition sources convert best?",
+        a: "By segmenting the funnel by acquisition channel, you can identify which traffic sources bring users who actually complete the onboarding flow."
+      },
+      {
+        q: "How healthy is onboarding?",
+        a: "Onboarding health is measured by the overall conversion rate from signup to activation. Higher rates mean a smoother onboarding experience."
+      }
+    ]
+  },
 };
 
 /** Look up a concept by id (no throw — returns undefined if unknown). */

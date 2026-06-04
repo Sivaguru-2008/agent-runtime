@@ -55,6 +55,9 @@ import { registerAdminRoutes } from "./interfaces/http/adminRoutes.js";
 import { registerSignupRoutes } from "./interfaces/http/signupRoutes.js";
 import { registerFunnelAnalyticsRoutes } from "./interfaces/http/funnelRoutes.js";
 import { DEFAULT_ALERT_CONFIG } from "./application/analytics/funnelAlerts.js";
+import { registerAuthRoutes } from "./interfaces/http/authRoutes.js";
+import { registerFounderRoutes } from "./interfaces/http/founderRoutes.js";
+import { LiveGoogleTokenVerifier } from "./infrastructure/security/googleAuth.js";
 
 // UUID-like segments that inflate histogram cardinality if left in paths.
 const ID_PATTERN = /\/[0-9a-f-]{8,}(?=\/|$)/gi;
@@ -224,6 +227,14 @@ export async function buildApp(config: AppConfig) {
   // never a 401 that leaks the auth boundary.
   const authSkipPaths = config.AUTH_SKIP_PATHS.split(",").map((p) => p.trim()).filter(Boolean);
   if (!authSkipPaths.includes("/signup")) authSkipPaths.push("/signup");
+  // Human-session routes run unauthenticated with respect to the API-key plugin
+  // (the human carries a session cookie, not a machine key). The session guards
+  // inside these routes enforce authorization; /auth/* and /admin/founder/* are
+  // skip-listed so the API-key hook does not 401 them before the guard runs.
+  if (config.USER_AUTH_ENABLED) {
+    if (!authSkipPaths.includes("/auth")) authSkipPaths.push("/auth");
+    if (!authSkipPaths.includes("/admin/founder")) authSkipPaths.push("/admin/founder");
+  }
   await registerApiKeyAuth(app, {
     redis: securityRedis,
     db: securityDb ?? createNoopPgClient(),
@@ -376,6 +387,46 @@ export async function buildApp(config: AppConfig) {
     minSample: config.FUNNEL_ALERT_MIN_SAMPLE ?? DEFAULT_ALERT_CONFIG.minSample,
     maxSignupGapHours: config.FUNNEL_ALERT_MAX_SIGNUP_GAP_HOURS ?? DEFAULT_ALERT_CONFIG.maxSignupGapHours
   });
+
+  // ── Human authentication (Google Sign-In) + onboarding + founder dashboard ──
+  if (config.USER_AUTH_ENABLED) {
+    // Dev fallback secret is clearly marked and only reachable outside strict
+    // environments (loadConfig refuses to boot a weak secret in production).
+    const sessionSecret =
+      config.SESSION_SECRET ?? "dev-insecure-session-secret-change-me-please-32+chars";
+    const sessionTtlSeconds = Math.round((config.SESSION_TTL_HOURS ?? 24 * 7) * 3600);
+    const founderEmails = new Set(
+      (config.FOUNDER_EMAILS ?? "")
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean)
+    );
+    const verifier = config.GOOGLE_CLIENT_ID
+      ? new LiveGoogleTokenVerifier(config.GOOGLE_CLIENT_ID)
+      : null;
+
+    if (!verifier) {
+      logger.warn(
+        "[auth] USER_AUTH_ENABLED but no GOOGLE_CLIENT_ID — POST /auth/google will return 503 until configured."
+      );
+    }
+
+    await registerAuthRoutes(app, securityDb, {
+      enabled: true,
+      verifier,
+      sessionSecret,
+      sessionTtlSeconds,
+      founderEmails,
+      defaultPlan: config.SIGNUP_DEFAULT_PLAN ?? "starter",
+      defaultRpm: config.SIGNUP_DEFAULT_RPM ?? 120
+    });
+    await registerFounderRoutes(app, securityDb, { enabled: true, sessionSecret });
+
+    logger.info(
+      { googleConfigured: Boolean(verifier), founderCount: founderEmails.size },
+      "[auth] human authentication + founder dashboard routes registered"
+    );
+  }
 
   return app;
 }

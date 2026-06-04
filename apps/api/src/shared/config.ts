@@ -315,6 +315,37 @@ const configSchema = z.object({
   // bounded against abuse. Overridable per-tenant later via the admin API.
   SIGNUP_DEFAULT_RPM: z.coerce.number().int().positive().optional(),
 
+  // ─── Human authentication (Google Sign-In) ────────────────────────────────
+  // All optional so existing AppConfig fixtures need no change; read sites in
+  // app.ts apply documented defaults and the master switch gates everything.
+  //
+  // Master switch for the human auth + onboarding + founder dashboard surface
+  // (POST /auth/google, /auth/*, /admin/founder/*). Default OFF: a deployment
+  // with no USER_AUTH_* env behaves exactly as before (no human-session routes).
+  USER_AUTH_ENABLED: z
+    .string()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true" || v === "1")),
+
+  // Google OAuth client id — the audience the ID token is verified against.
+  // Required for POST /auth/google to function; absent → that route returns 503.
+  GOOGLE_CLIENT_ID: z.string().optional(),
+
+  // HMAC secret used to sign/verify human session tokens. MUST be set (and be
+  // shared with the web middleware) when USER_AUTH_ENABLED=true in a strict
+  // environment — loadConfig enforces this below. In dev it falls back to a
+  // clearly-marked insecure default.
+  SESSION_SECRET: z.string().optional(),
+
+  // Human session lifetime in hours (default 7 days). After this the cookie is
+  // rejected and the user must sign in again.
+  SESSION_TTL_HOURS: z.coerce.number().positive().optional(),
+
+  // Comma-separated lowercased emails granted founder access (the founder
+  // dashboard + user directory). Everyone else with a valid session is a normal
+  // user and receives 403 on /admin/founder/*.
+  FOUNDER_EMAILS: z.string().optional(),
+
   // ─── Funnel analytics alerts (Phase 2) ────────────────────────────────────
   // All optional so existing AppConfig literals need no change; read sites in
   // app.ts apply DEFAULT_ALERT_CONFIG values. Alerts are OFF by default — a
@@ -537,6 +568,27 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
 
   if (parsed.AUTH_ENABLED && !parsed.DATABASE_URL) {
     throw new Error("DATABASE_URL is required when AUTH_ENABLED=true");
+  }
+
+  // Human auth (Google Sign-In) requires durable storage for the users/session
+  // tables, and — in a strict environment — a real session secret + Google
+  // client id. We refuse to boot with a default-signed session in production:
+  // a predictable secret means anyone can forge a founder session.
+  if (parsed.USER_AUTH_ENABLED) {
+    if (!parsed.DATABASE_URL) {
+      throw new Error("DATABASE_URL is required when USER_AUTH_ENABLED=true");
+    }
+    if (parsed.NODE_ENV === "production" || parsed.STRICT_PROD === true) {
+      if (!parsed.SESSION_SECRET || parsed.SESSION_SECRET.length < 32) {
+        throw new Error(
+          "SESSION_SECRET (>=32 chars) is required when USER_AUTH_ENABLED=true in production — " +
+            "a default or weak secret allows session/founder forgery."
+        );
+      }
+      if (!parsed.GOOGLE_CLIENT_ID) {
+        throw new Error("GOOGLE_CLIENT_ID is required when USER_AUTH_ENABLED=true in production.");
+      }
+    }
   }
 
   // L-1: defense in depth. The app-layer bootstrap also refuses to boot
