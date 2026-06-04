@@ -62,6 +62,15 @@ export interface WorkerRegistry {
   getById(workerId: string): Promise<RuntimeWorker | undefined>;
   list(): Promise<RuntimeWorker[]>;
   expireStale(now: Date, ttlMs: number): Promise<RuntimeWorker[]>;
+  /**
+   * Permanently remove workers that have been terminal (LOST or STOPPED) since
+   * before `now - retentionMs`. Returns the removed workers. Unlike
+   * expireStale — which only flips a live worker to LOST — this purges
+   * long-dead rows so they stop polluting topology views and live-fleet
+   * aggregates. Recently-terminal workers (within the retention window) are
+   * retained so operators can still inspect a just-lost node.
+   */
+  reapTerminated(now: Date, retentionMs: number): Promise<RuntimeWorker[]>;
 }
 
 export interface AcquireLeaseInput {

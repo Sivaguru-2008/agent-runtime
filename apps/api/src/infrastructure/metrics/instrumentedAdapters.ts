@@ -31,6 +31,7 @@ import type { ModelProvider, ToolExecutor } from "../../domain/ports.js";
 import type { DeadLetterEntry } from "../../domain/cluster.js";
 import type { DeadLetterQueue } from "../../domain/clusterPorts.js";
 import type { AgentMetrics } from "./prometheusMetrics.js";
+import { estimateCostUsd } from "../../providers/cost.js";
 
 // ── Model Provider ─────────────────────────────────────────────────────────
 
@@ -64,6 +65,14 @@ export class MetricsModelProvider implements ModelProvider {
         { provider: this.provider, token_type: "completion" },
         result.tokenUsage.completion
       );
+
+      // Dollar projection: estimate spend from the model id + token usage so
+      // cost dashboards don't have to re-join a price table at query time.
+      // estimateCostUsd never throws and clamps malformed counts to 0.
+      const cost = estimateCostUsd(model, result.tokenUsage);
+      if (cost.totalCostUsd > 0) {
+        this.metrics.modelCostUsdTotal.inc({ provider: this.provider, model }, cost.totalCostUsd);
+      }
 
       return result;
     } catch (err) {

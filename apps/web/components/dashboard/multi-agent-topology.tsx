@@ -7,7 +7,8 @@ import type { Topology } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { statusVariant } from "./status";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { StatusPill } from "@/components/explain/status-pill";
 
 const nodeTypes = {
   topology: TopologyNode
@@ -19,7 +20,9 @@ export function MultiAgentTopology({ topology }: { topology?: Topology }) {
   return (
     <Card className="h-[420px] overflow-hidden">
       <CardHeader>
-        <CardTitle>Coordination View</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="multi-agent-topology" as="span">Coordination View</ExplainLabel>
+        </CardTitle>
         <Badge variant="muted">{edges.length} links</Badge>
       </CardHeader>
       <CardContent className="h-[365px] p-0">
@@ -48,7 +51,7 @@ function TopologyNode({ data }: NodeProps<Node<{ label: string; type: string; st
       </div>
       <div className="mt-2 flex items-center justify-between">
         <span className="font-mono text-[11px] text-muted-foreground">{data.type}</span>
-        <Badge variant={statusVariant(data.status)}>{data.status ?? "unknown"}</Badge>
+        <StatusPill status={data.status} dot={false} />
       </div>
       {data.congestion !== undefined ? (
         <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-muted-foreground">

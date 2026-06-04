@@ -22,10 +22,14 @@ import { LiveExecutionEngine } from "../src/runtime/execution-engine.js";
 import { LiveEventBroadcaster } from "../src/events/live-broadcaster.js";
 import type { LiveEvent } from "../src/telemetry/live-events.js";
 import { QuotaEnforcer } from "../src/infrastructure/quota/quotaEnforcer.js";
-import { TenantGuard, createPermissiveTenantGuard } from "../src/infrastructure/security/tenantGuard.js";
+import {
+  TenantGuard,
+  createPermissiveTenantGuard,
+  ResourceTenantNotResolvableError
+} from "../src/infrastructure/security/tenantGuard.js";
 
-// ── Minimal Ollama stub — yields one token then completes. ────────────────
-function stubOllama(model = "stub-model") {
+// ── Minimal Groq stub — yields one token then completes. ──────────────────
+function stubGroq(model = "stub-model") {
   return {
     modelName: model,
     async isAvailable() { return true; },
@@ -45,7 +49,7 @@ function stubOllama(model = "stub-model") {
 describe("C-2 — live engine tenant stamping", () => {
   it("stamps tenantId on the execution record returned to the caller", async () => {
     const broadcaster = new LiveEventBroadcaster();
-    const engine = new LiveExecutionEngine(stubOllama(), broadcaster);
+    const engine = new LiveExecutionEngine(stubGroq(), broadcaster);
     const record = await engine.runPrompt({ prompt: "hi", tenantId: "tenant-alpha" });
     expect(record.tenantId).toBe("tenant-alpha");
   });
@@ -54,7 +58,7 @@ describe("C-2 — live engine tenant stamping", () => {
     const broadcaster = new LiveEventBroadcaster();
     const events: LiveEvent[] = [];
     broadcaster.subscribe((e) => events.push(e));
-    const engine = new LiveExecutionEngine(stubOllama(), broadcaster);
+    const engine = new LiveExecutionEngine(stubGroq(), broadcaster);
     await engine.runPrompt({ prompt: "hi", tenantId: "tenant-alpha" });
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
@@ -68,7 +72,7 @@ describe("C-2 — live engine tenant stamping", () => {
     const betaEvents: LiveEvent[] = [];
     broadcaster.subscribe((e) => alphaEvents.push(e), "tenant-alpha");
     broadcaster.subscribe((e) => betaEvents.push(e), "tenant-beta");
-    const engine = new LiveExecutionEngine(stubOllama(), broadcaster);
+    const engine = new LiveExecutionEngine(stubGroq(), broadcaster);
     await engine.runPrompt({ prompt: "hi", tenantId: "tenant-alpha" });
     expect(alphaEvents.length).toBeGreaterThan(0);
     expect(betaEvents.length).toBe(0);
@@ -76,7 +80,7 @@ describe("C-2 — live engine tenant stamping", () => {
 
   it("history() filters by tenant — no untagged leak under a tenant filter", async () => {
     const broadcaster = new LiveEventBroadcaster();
-    const engine = new LiveExecutionEngine(stubOllama(), broadcaster);
+    const engine = new LiveExecutionEngine(stubGroq(), broadcaster);
     await engine.runPrompt({ prompt: "hi", tenantId: "tenant-alpha" });
     expect(broadcaster.history(undefined, "tenant-alpha").length).toBeGreaterThan(0);
     expect(broadcaster.history(undefined, "tenant-beta").length).toBe(0);
@@ -204,6 +208,49 @@ describe("L-1 — TenantGuard mode introspection", () => {
     };
     const guard = new TenantGuard({ db: stubDb as never, permitWhenNotFound: false });
     expect(guard.isPermissive).toBe(false);
+  });
+});
+
+// ── L-2: malformed identifier never escapes as an opaque 500 ──────────────────
+// A non-uuid string handed to a uuid-keyed column makes Postgres raise 22P02
+// (invalid_text_representation). Previously that error bubbled out of the route
+// as INTERNAL_ERROR (500) — the operator console's Root Cause panel rendered it
+// as "INTERNAL_ERROR (500): Unexpected runtime error". A value that cannot even
+// be a valid key can never own a row, so the guard must treat it as
+// "not resolvable" (→ 403), identical to a non-existent id.
+
+describe("L-2 — malformed id (Postgres 22P02) is not an opaque 500", () => {
+  function dbThrowing22P02() {
+    const err = Object.assign(new Error("invalid input syntax for type uuid"), { code: "22P02" });
+    const db = {
+      async query() { throw err; },
+      async withTransaction(fn: (tx: unknown) => unknown) { return fn(db); },
+      async close() { /* noop */ }
+    };
+    return db;
+  }
+
+  it("strict guard maps a 22P02 to ResourceTenantNotResolvableError (→403), not the raw error", async () => {
+    const guard = new TenantGuard({ db: dbThrowing22P02() as never, permitWhenNotFound: false });
+    await expect(guard.resolveExecutionTenant("not-a-real-exec-id")).rejects.toBeInstanceOf(
+      ResourceTenantNotResolvableError
+    );
+  });
+
+  it("permissive guard degrades a 22P02 to null (permits) instead of throwing", async () => {
+    const guard = new TenantGuard({ db: dbThrowing22P02() as never, permitWhenNotFound: true });
+    await expect(guard.resolveExecutionTenant("not-a-real-exec-id")).resolves.toBeNull();
+  });
+
+  it("a non-22P02 db error still propagates under the strict guard", async () => {
+    const boom = Object.assign(new Error("connection reset"), { code: "08006" });
+    const db = {
+      async query() { throw boom; },
+      async withTransaction(fn: (tx: unknown) => unknown) { return fn(db); },
+      async close() { /* noop */ }
+    };
+    const guard = new TenantGuard({ db: db as never, permitWhenNotFound: false });
+    await expect(guard.resolveExecutionTenant("11111111111111111111111111111111")).rejects.toBe(boom);
   });
 });
 

@@ -200,17 +200,27 @@ if (
   (config.PERSISTENCE_DRIVER === "postgres" || config.EVENT_STORE_DRIVER === "postgres")
 ) {
   const migrationClient = createPgClient(config.DATABASE_URL);
+  // Checksum-repair recovery is DEV ONLY — refused in strict/production mode.
+  const repairChecksumsInDev = config.MIGRATIONS_REPAIR_CHECKSUMS === true && !strict;
+  if (config.MIGRATIONS_REPAIR_CHECKSUMS === true && strict) {
+    logger.warn(
+      {},
+      "worker: MIGRATIONS_REPAIR_CHECKSUMS ignored in strict/production mode — checksum validation stays enforced"
+    );
+  }
   try {
     const runner = new MigrationRunner(migrationClient, {
       schemaPath: SCHEMA_PATH,
       migrationsDir: MIGRATIONS_DIR,
-      logger
+      logger,
+      repairChecksumsInDev
     });
     const result = await runner.run();
     logger.info(
       {
         applied: result.applied.map((m) => m.filename),
         skipped: result.skipped,
+        repaired: result.repaired,
         schemaApplied: result.schemaApplied
       },
       "worker: schema migrations complete"
@@ -250,24 +260,30 @@ try {
 
 setLivenessState("healthy");
 
-// Surface unexpected throws inside the worker loop. Exit non-zero so the
-// orchestrator (Kubernetes, systemd) restarts a clean process. Lease
-// reclamation by sibling workers will cover any executions in flight.
-// D1: flush spans on every exit path so the final lease-handover and DLQ
-// transitions land in the collector before termination.
-process.on("uncaughtException", (err) => {
-  logger.fatal({ err }, "worker uncaughtException — exiting");
-  void worker
-    .close()
-    .finally(() => shutdownTracing())
-    .finally(() => process.exit(1));
-});
-process.on("unhandledRejection", (reason) => {
-  logger.fatal({ reason }, "worker unhandledRejection — exiting");
-  void worker
-    .close()
-    .finally(() => shutdownTracing())
-    .finally(() => process.exit(1));
+// Crash diagnostics + termination policy (shared with the API entry point).
+// An uncaughtException drains the worker and exits non-zero so the orchestrator
+// (Kubernetes, systemd) restarts a clean process; sibling workers reclaim any
+// in-flight leases. An unhandledRejection is logged with a full diagnostic
+// snapshot but is NON-FATAL — a stray rejection (a transient downstream blip,
+// a provider timeout) must not tear a healthy worker off the queue. D1: spans
+// are flushed on the fatal path so the final lease-handover / DLQ transitions
+// reach the collector before termination.
+const { installProcessLifecycle } = await import("./infrastructure/reliability/processLifecycle.js");
+const { deterministicStorage } = await import("./runtime/executionEngine.js");
+installProcessLifecycle({
+  logger,
+  runtimeId: `worker-${worker.workerId}-${process.pid}`,
+  role: "worker",
+  getExecutionId: () => deterministicStorage.getStore()?.executionId,
+  onFatal: async () => {
+    try {
+      await worker.close();
+    } catch {
+      /* ignore — we are exiting regardless */
+    }
+    await shutdownTracing();
+    process.exit(1);
+  }
 });
 
 await worker.runUntilSignal();

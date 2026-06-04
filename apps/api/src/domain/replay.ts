@@ -73,6 +73,20 @@ export interface ReplaySession {
   /** Cognition being replayed — may be original or a branch. */
   cognitionId: string;
   executionId: string;
+  /**
+   * Owning tenant. Resolved from the replayed execution's tenant. Optional on
+   * the type for back-compat with replay fixtures that pre-date tenant
+   * denormalization (migration 0025); the postgres adapter coalesces the value
+   * from the owning execution when the caller leaves it unset, so a persisted
+   * replay_sessions row always carries the originating tenant for isolation.
+   */
+  tenantId?: string;
+  /**
+   * Deterministic trace correlation id for this replay session, derived from
+   * the session id at creation so the same replay always reports the same
+   * trace. Returned in the replay DTO for end-to-end correlation.
+   */
+  traceId?: string;
   status: "READY" | "PLAYING" | "PAUSED" | "ENDED";
   /** Current playback cursor. */
   cursor: ReplayCursor;
@@ -165,6 +179,12 @@ export interface ReplayCheckpoint {
   id: string;
   cognitionId: string;
   sessionId?: string;
+  /**
+   * Owning tenant — resolved from the checkpoint's execution. Optional for
+   * back-compat (see ReplaySession.tenantId); persisted rows carry it via the
+   * execution_checkpoints.tenant_id column (migration 0025).
+   */
+  tenantId?: string;
   frameIndex: number;
   eventSequence: number;
   /** Operator-supplied label, e.g. "before-verifier-1", "post-tool-fix". */
@@ -265,6 +285,13 @@ export interface BranchComparison {
  */
 export interface ReplayCertification {
   executionId: string;
+  /**
+   * Owning tenant — resolved from the certified execution. Optional for
+   * back-compat (see ReplaySession.tenantId); persisted rows carry it via the
+   * replay_certifications.tenant_id column (migration 0025) so a tenant's
+   * determinism audit trail is isolated from other tenants'.
+   */
+  tenantId?: string;
   workflowVersion: string;
   eventCount: number;
   lastEventSequence: number;

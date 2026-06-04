@@ -6,6 +6,7 @@ import type { ExecutionDetails } from "@/types/observability";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 import { formatDuration, formatTime } from "@/lib/utils";
 
 export function TimelineReplay({
@@ -73,7 +74,7 @@ export function TimelineReplay({
             </div>
           </div>
         ) : (
-          <div className="flex h-72 items-center justify-center text-sm text-muted-foreground">No execution selected</div>
+          <ExplainedEmptyState concept="execution" className="h-72" />
         )}
       </CardContent>
     </Card>

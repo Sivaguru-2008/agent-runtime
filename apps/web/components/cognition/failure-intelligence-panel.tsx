@@ -2,9 +2,12 @@
 
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import type { FailureReport, FailureSignal } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { StatusPill } from "@/components/explain/status-pill";
+import { GraphGuide } from "@/components/explain/graph-guide";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 const SEVERITY_TONE: Record<FailureSignal["severity"], string> = {
   INFO: "border-zinc-700 text-zinc-300",
@@ -35,9 +38,11 @@ export interface FailureIntelligencePanelProps {
 export function FailureIntelligencePanel({ report }: FailureIntelligencePanelProps) {
   if (!report) {
     return (
-      <Card className="p-4 bg-zinc-950/60 border-zinc-800">
-        <div className="text-sm font-medium text-zinc-200">Failure Intelligence</div>
-        <div className="text-xs text-zinc-500 mt-2">No analysis available.</div>
+      <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-2">
+        <ExplainLabel concept="self-healing-diagnostics" as="span" className="text-sm font-medium text-zinc-200">
+          Failure Intelligence
+        </ExplainLabel>
+        <ExplainedEmptyState concept="health-score" className="border-0 bg-transparent py-4" />
       </Card>
     );
   }
@@ -54,14 +59,20 @@ export function FailureIntelligencePanel({ report }: FailureIntelligencePanelPro
     <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-200">Failure Intelligence</div>
+          <ExplainLabel concept="self-healing-diagnostics" as="span" className="text-sm font-medium text-zinc-200">
+            Failure Intelligence
+          </ExplainLabel>
           <div className="text-xs text-zinc-500">{report.totalSignals} signal{report.totalSignals === 1 ? "" : "s"}</div>
         </div>
         <div className="text-right">
           <div className={cn("text-3xl font-bold", healthTone)}>{report.healthScore}</div>
-          <div className="text-[10px] uppercase tracking-wide text-zinc-500">health</div>
+          <ExplainLabel concept="health-score" className="text-[10px] uppercase tracking-wide text-zinc-500">
+            health
+          </ExplainLabel>
         </div>
       </div>
+
+      <GraphGuide concept="health-score" value={report.healthScore} />
 
       <div className="grid grid-cols-5 gap-1 text-[10px]">
         {bySeverity.map(([sev, count]) => (
@@ -73,11 +84,12 @@ export function FailureIntelligencePanel({ report }: FailureIntelligencePanelPro
       </div>
 
       {byKind.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap items-center gap-1.5">
           {byKind.map(([kind, count]) => (
-            <Badge key={kind} variant="muted" className="text-[10px]">
-              {KIND_ICON[kind as FailureSignal["kind"]]} {kind} · {String(count)}
-            </Badge>
+            <span key={kind} className="inline-flex items-center gap-1">
+              <StatusPill status={kind} dot={false} />
+              <span className="text-[10px] text-zinc-500">×{String(count)}</span>
+            </span>
           ))}
         </div>
       )}
@@ -87,8 +99,11 @@ export function FailureIntelligencePanel({ report }: FailureIntelligencePanelPro
           <div className="text-[11px] uppercase tracking-wide text-zinc-500">Top signals</div>
           {report.topSignals.map((s) => (
             <div key={s.id} className={cn("rounded border bg-zinc-900/50 px-2 py-1 text-xs", SEVERITY_TONE[s.severity])}>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">{KIND_ICON[s.kind]} {s.kind}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span aria-hidden>{KIND_ICON[s.kind]}</span>
+                  <StatusPill status={s.kind} dot={false} />
+                </span>
                 <span className="opacity-60">score {s.score.toFixed(2)}</span>
               </div>
               <div className="text-zinc-300/90 mt-0.5">{s.summary}</div>

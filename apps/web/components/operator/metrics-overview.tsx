@@ -20,6 +20,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { operatorApi, type MetricsSnapshot } from "../../services/operator-api";
 import { Activity, AlertTriangle, CheckCircle, Clock, Cpu, Layers, Zap } from "lucide-react";
+import { ExplainLabel } from "../explain/explain-label";
 
 function formatMs(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)}ms`;
@@ -40,9 +41,11 @@ interface KpiCardProps {
   icon: React.ReactNode;
   alert?: boolean;
   warn?: boolean;
+  /** Registry concept id — when set, the label becomes hover/click explainable. */
+  concept?: string;
 }
 
-function KpiCard({ label, value, sub, icon, alert, warn }: KpiCardProps) {
+function KpiCard({ label, value, sub, icon, alert, warn, concept }: KpiCardProps) {
   const border = alert
     ? "border-red-500/60 bg-red-950/20"
     : warn
@@ -53,7 +56,7 @@ function KpiCard({ label, value, sub, icon, alert, warn }: KpiCardProps) {
     <div className={`rounded-lg border p-4 flex flex-col gap-2 ${border}`}>
       <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium uppercase tracking-wide">
         {icon}
-        {label}
+        {concept ? <ExplainLabel concept={concept}>{label}</ExplainLabel> : label}
       </div>
       <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
       {sub && <div className="text-xs text-zinc-500">{sub}</div>}
@@ -106,7 +109,9 @@ export function MetricsOverview() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">System Health</h2>
+        <ExplainLabel concept="cluster-topology" as="span" className="text-base font-semibold text-white">
+          System Health
+        </ExplainLabel>
         <div className={`text-xs ${isStale ? "text-red-400" : "text-zinc-500"}`}>
           {isStale ? "⚠ stale" : "● live"} · {new Date(snapshot.ts).toLocaleTimeString()}
         </div>
@@ -118,12 +123,14 @@ export function MetricsOverview() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <KpiCard
             label="Running"
+            concept="executions-running"
             value={executions.running}
             icon={<Activity className="h-3 w-3" />}
             warn={executions.running > 20}
           />
           <KpiCard
             label="Queue Depth"
+            concept="queue-depth"
             value={scheduler.queueDepth}
             sub="pending lease"
             icon={<Layers className="h-3 w-3" />}
@@ -132,11 +139,13 @@ export function MetricsOverview() {
           />
           <KpiCard
             label="Completed"
+            concept="completed-executions"
             value={formatNumber(executions.completed)}
             icon={<CheckCircle className="h-3 w-3" />}
           />
           <KpiCard
             label="Failed"
+            concept="executions-failed"
             value={executions.failed}
             icon={<AlertTriangle className="h-3 w-3" />}
             warn={executions.failed > 0}
@@ -151,11 +160,13 @@ export function MetricsOverview() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <KpiCard
             label="Ready"
+            concept="worker-health"
             value={workers.ready}
             icon={<CheckCircle className="h-3 w-3" />}
           />
           <KpiCard
             label="Busy"
+            concept="worker-utilisation"
             value={workers.busy}
             sub={`${workers.total} total`}
             icon={<Cpu className="h-3 w-3" />}
@@ -163,6 +174,7 @@ export function MetricsOverview() {
           />
           <KpiCard
             label="Lost"
+            concept="worker-health"
             value={workers.lost}
             icon={<AlertTriangle className="h-3 w-3" />}
             warn={workers.lost > 0}
@@ -170,6 +182,7 @@ export function MetricsOverview() {
           />
           <KpiCard
             label="Heartbeat Age"
+            concept="heartbeat"
             value={formatMs(workers.meanHeartbeatAgeMs)}
             sub="mean across workers"
             icon={<Clock className="h-3 w-3" />}
@@ -185,11 +198,13 @@ export function MetricsOverview() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <KpiCard
             label="Active Leases"
+            concept="leases"
             value={leases.active}
             icon={<Zap className="h-3 w-3" />}
           />
           <KpiCard
             label="Oldest Lease"
+            concept="oldest-lease"
             value={formatMs(leases.oldestAgeMs)}
             sub="should renew < TTL"
             icon={<Clock className="h-3 w-3" />}
@@ -198,6 +213,7 @@ export function MetricsOverview() {
           />
           <KpiCard
             label="DLQ Volume"
+            concept="dlq"
             value={dlq.volume}
             sub="poison pills"
             icon={<AlertTriangle className="h-3 w-3" />}
@@ -206,6 +222,7 @@ export function MetricsOverview() {
           />
           <KpiCard
             label="Tokens Used"
+            concept="tokens-total"
             value={formatNumber(tokens.total)}
             sub={`${formatNumber(tokens.prompt)}p / ${formatNumber(tokens.completion)}c`}
             icon={<Activity className="h-3 w-3" />}

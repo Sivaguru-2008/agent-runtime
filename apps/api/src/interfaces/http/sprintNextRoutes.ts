@@ -9,9 +9,10 @@ import {
   calculateConfidenceScore,
   makeOrchestrationDecision
 } from "../../runtime/confidence/confidencePolicyEngine.js";
-import { requireRole } from "../../infrastructure/security/rbac.js";
-import { requireTenant } from "../../infrastructure/security/tenantContext.js";
+import { requirePermission } from "../../infrastructure/security/rbac.js";
+import { requireTenant, canAccessAllTenants } from "../../infrastructure/security/tenantContext.js";
 import type { TenantGuard } from "../../infrastructure/security/tenantGuard.js";
+import { runtimeIdFor, resolveTraceId } from "./observabilityMetadata.js";
 
 const checkpointSchema = z.object({
   frameIndex: z.number().int().nonnegative(),
@@ -67,10 +68,14 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
   const guard: TenantGuard = app.hasDecorator("tenantGuard")
     ? app.tenantGuard
     : container.tenantGuard;
-  const devRole = requireRole("developer");
+  // Cognition start is an execution-class write; replay/branch/checkpoint
+  // materialisation and time-travel control are replay-class writes. Both are
+  // developer-grade in the permission matrix and exclude viewer/auditor.
+  const writeExecution = requirePermission("execution:write");
+  const writeReplay = requirePermission("replay:write");
 
   // --- Cognition ---
-  app.post("/cognition", { preHandler: devRole }, async (request, reply) => {
+  app.post("/cognition", { preHandler: writeExecution }, async (request, reply) => {
     const ctx = requireTenant(request);
     const body = startCognitionSchema.parse(request.body);
     // The cognition is rooted on an agent; the agent must belong to this tenant.
@@ -86,14 +91,17 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
       correlationId: request.id,
       tenantId: ctx.tenantId
     } as { traceId: string; correlationId: string; tenantId?: string });
-    return reply.status(201).send(graph);
+    // graph already carries traceId (persisted by the orchestrator); attach the
+    // runtime correlation id so the creation response is a complete identity
+    // envelope on its own.
+    return reply.status(201).send({ ...graph, runtimeId: runtimeIdFor(request) });
   });
 
   app.get("/cognition", async (request) => {
     const ctx = requireTenant(request);
     const limit = Number((request.query as Record<string, string | undefined>).limit ?? 25);
     const all = await container.cognitionQueries.listRecent(Math.min(100, Math.max(1, limit)));
-    if (ctx.role === "admin") return all;
+    if (canAccessAllTenants(ctx.role)) return all;
     // Filter to the caller's tenant. The cognition_graphs table doesn't yet
     // carry tenant_id, so resolve via the related execution.
     const owned: typeof all = [];
@@ -110,7 +118,12 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     await guard.assertOwnsCognition(ctx, cognitionId);
     const view = await container.cognitionQueries.get(cognitionId);
     if (!view) throw new NotFoundError("Cognition", cognitionId);
-    return view;
+    const traceId = await resolveTraceId(
+      container.eventStore,
+      view.graph.executionId,
+      view.graph.traceId
+    );
+    return { ...view, traceId, runtimeId: runtimeIdFor(request) };
   });
 
   app.get("/cognition/:cognitionId/lineage", async (request) => {
@@ -217,12 +230,12 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
 
   // Creating a replay session is a write — it materialises frames and may
   // execute model providers. Restrict to developer+ and assert ownership.
-  app.post("/cognition/:cognitionId/replay", { preHandler: devRole }, async (request, reply) => {
+  app.post("/cognition/:cognitionId/replay", { preHandler: writeReplay }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { cognitionId } = request.params as { cognitionId: string };
     await guard.assertOwnsCognition(ctx, cognitionId);
     const session = await container.cognitionCommands.createReplaySession(cognitionId);
-    return reply.status(201).send(session);
+    return reply.status(201).send({ ...session, runtimeId: runtimeIdFor(request) });
   });
 
   app.get("/replay/:sessionId", async (request) => {
@@ -231,10 +244,12 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     await guard.assertOwnsReplaySession(ctx, sessionId);
     const view = await container.replayQueries.getSession(sessionId);
     if (!view) throw new NotFoundError("ReplaySession", sessionId);
-    return view;
+    const traceId = view.session?.traceId
+      ?? (await resolveTraceId(container.eventStore, view.session?.executionId ?? ""));
+    return { ...view, traceId, runtimeId: runtimeIdFor(request) };
   });
 
-  app.post("/replay/:sessionId/seek", { preHandler: devRole }, async (request) => {
+  app.post("/replay/:sessionId/seek", { preHandler: writeReplay }, async (request) => {
     const ctx = requireTenant(request);
     const { sessionId } = request.params as { sessionId: string };
     await guard.assertOwnsReplaySession(ctx, sessionId);
@@ -242,7 +257,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     return container.cognitionCommands.seekReplay(sessionId, body.frameIndex);
   });
 
-  app.post("/replay/:sessionId/play", { preHandler: devRole }, async (request) => {
+  app.post("/replay/:sessionId/play", { preHandler: writeReplay }, async (request) => {
     const ctx = requireTenant(request);
     const { sessionId } = request.params as { sessionId: string };
     await guard.assertOwnsReplaySession(ctx, sessionId);
@@ -250,7 +265,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     return container.cognitionCommands.playReplay(sessionId, body.speed);
   });
 
-  app.post("/replay/:sessionId/snapshot", { preHandler: devRole }, async (request) => {
+  app.post("/replay/:sessionId/snapshot", { preHandler: writeReplay }, async (request) => {
     const ctx = requireTenant(request);
     const { sessionId } = request.params as { sessionId: string };
     await guard.assertOwnsReplaySession(ctx, sessionId);
@@ -264,7 +279,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
   // an execution from a checkpoint and re-runs model providers. Cross-tenant
   // branching would let an attacker fork another tenant's reasoning trace and
   // inject inputs into the resumed flow — a runtime ownership bypass.
-  app.post("/replay/branch", { preHandler: devRole }, async (request, reply) => {
+  app.post("/replay/branch", { preHandler: writeReplay }, async (request, reply) => {
     const ctx = requireTenant(request);
     const body = branchSchema.parse(request.body);
     await guard.assertOwnsCognition(ctx, body.sourceCognitionId);
@@ -275,7 +290,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
   app.get("/replay/branches", async (request) => {
     const ctx = requireTenant(request);
     const all = await container.branches.listAll();
-    if (ctx.role === "admin") return all;
+    if (canAccessAllTenants(ctx.role)) return all;
     const owned: typeof all = [];
     for (const b of all) {
       // BranchPointer is keyed on the source cognition rather than a dedicated
@@ -310,7 +325,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     return container.failureEngine.buildReport(view.graph.executionId, cognitionId, view.failureSignals);
   });
 
-  app.post("/executions/:executionId/analyze-failures", { preHandler: devRole }, async (request) => {
+  app.post("/executions/:executionId/analyze-failures", { preHandler: writeExecution }, async (request) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
     await guard.assertOwnsExecution(ctx, executionId);
@@ -321,7 +336,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     const ctx = requireTenant(request);
     const limit = Number((request.query as Record<string, string | undefined>).limit ?? 50);
     const all = await container.failureSignals.listRecent(Math.min(200, Math.max(1, limit)));
-    if (ctx.role === "admin") return all;
+    if (canAccessAllTenants(ctx.role)) return all;
     const owned: typeof all = [];
     for (const s of all) {
       const t = await guard.resolveFailureSignalTenant(s.id);
@@ -376,7 +391,7 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
 
   // ── Phase 3: Named Replay Checkpoints ──────────────────────────────────────
   // Operator-placed named markers in a replay session for branching and comparison.
-  app.post("/cognition/:cognitionId/checkpoints", { preHandler: devRole }, async (request, reply) => {
+  app.post("/cognition/:cognitionId/checkpoints", { preHandler: writeReplay }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { cognitionId } = request.params as { cognitionId: string };
     await guard.assertOwnsCognition(ctx, cognitionId);
@@ -644,57 +659,183 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
   // Single endpoint that runs the complete demo scenario:
   // analyze → detect failure → produce timeline + causality for the top signal.
   // Designed for the operator dashboard "run analysis" action.
-  app.post("/executions/:executionId/full-analysis", { preHandler: devRole }, async (request) => {
+  //
+  // Registered for BOTH GET and POST. The handler is read-only (it runs
+  // analyzers and derives a timeline/causality view but mutates no execution
+  // state), so GET is the semantically correct verb for the dashboard, which
+  // *fetches* the full analysis on panel load. The original registration was
+  // POST-only, which made the dashboard's GET 404 with
+  // "Route GET:/executions/:id/full-analysis not found". POST is retained so
+  // existing API clients that POST (apps/web/lib/cognition-api.ts) keep working.
+  app.route({
+    method: ["GET", "POST"],
+    url: "/executions/:executionId/full-analysis",
+    preHandler: writeExecution,
+    handler: async (request) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
     await guard.assertOwnsExecution(ctx, executionId);
 
-    // 1. Run all analyzers.
-    const report = await container.failureEngine.analyzeExecution(executionId);
+    // Every stage of the full-analysis pipeline (report, timeline, causality,
+    // branch analysis) is a SEPARATE failure domain. A throw in any one — a
+    // malformed signal with no evidence array, a node missing its
+    // inputFingerprint, a transient store hiccup — must degrade ONLY that stage,
+    // never the whole panel into an opaque INTERNAL_ERROR (500). The operator
+    // dashboard's Root Cause tab needs whatever we can compute. Each stage below
+    // runs inside its own guard; failures are recorded with structured context
+    // and the response carries a `degraded` marker + per-stage `errors` so the
+    // failure is observable rather than silent. Read-only throughout.
+    const degradations: Array<{ stage: string; error: string }> = [];
+    const recordStageError = (stage: string, error: unknown, cognitionId?: string): void => {
+      const err = error instanceof Error ? error : new Error(String(error));
+      app.log.error(
+        {
+          executionId,
+          cognitionId,
+          stage,
+          error: err.message,
+          stack: err.stack
+        },
+        `[full-analysis] stage "${stage}" failed — degrading gracefully`
+      );
+      degradations.push({ stage, error: err.message });
+    };
 
-    // 2. If there are signals, build the failure timeline.
-    const graph = await container.cognitions.getByExecution(executionId);
-    let timeline = null;
-    let topCausality = null;
+    // ── Stage: cognition graph lookup ─────────────────────────────────────────
+    let graph: Awaited<ReturnType<typeof container.cognitions.getByExecution>> = undefined;
+    try {
+      graph = await container.cognitions.getByExecution(executionId);
+    } catch (err) {
+      recordStageError("graph-lookup", err);
+    }
+    const cognitionId = graph?.id;
 
+    // ── Stage: failure report (analyzers + health) ────────────────────────────
+    // The core deliverable. If the engine itself throws we still return 200 with
+    // an empty-but-well-formed report so the dashboard chip renders and the
+    // operator sees the degradation rather than a 500.
+    let report;
+    try {
+      report = await container.failureEngine.analyzeExecution(executionId);
+    } catch (err) {
+      recordStageError("report", err, cognitionId);
+      report = container.failureEngine.buildReport(executionId, cognitionId, []);
+    }
+
+    // ── Stage: frames + signals (inputs for timeline & causality) ─────────────
+    let frames: Awaited<ReturnType<typeof container.replayEngine.materializeFrames>> = [];
+    let allSignals: Awaited<ReturnType<typeof container.failureSignals.listByCognition>> = [];
     if (graph) {
-      const [frames, allSignals] = await Promise.all([
-        container.replayEngine.materializeFrames(graph),
-        container.failureSignals.listByCognition(graph.id)
-      ]);
-
-      if (allSignals.length > 0) {
-        const builder = new FailureTimelineBuilder();
-        timeline = builder.build(frames, allSignals, graph);
-
-        // 3. Trace causality for the top signal (highest score).
-        const topSignal = allSignals.sort((a, b) => b.score - a.score)[0];
-        const tracer = new CausalityTracer(
-          container.cognitions,
-          container.eventStore,
-          container.clock
-        );
-        topCausality = await tracer.trace(topSignal, frames);
+      try {
+        frames = await container.replayEngine.materializeFrames(graph);
+      } catch (err) {
+        recordStageError("frames", err, cognitionId);
+      }
+      try {
+        allSignals = await container.failureSignals.listByCognition(graph.id);
+      } catch (err) {
+        recordStageError("signals", err, cognitionId);
       }
     }
 
-    // 4. Fetch any existing branches for comparison.
-    const branches = graph
-      ? await container.branches.listForCognition(graph.id)
-      : [];
+    // ── Stage: timeline (independent of causality) ────────────────────────────
+    let timeline = null;
+    if (allSignals.length > 0) {
+      try {
+        timeline = new FailureTimelineBuilder().build(frames, allSignals, graph);
+      } catch (err) {
+        recordStageError("timeline", err, cognitionId);
+        timeline = null;
+      }
+    }
 
-    return {
+    // ── Stage: causality (independent of timeline) ────────────────────────────
+    let topCausality = null;
+    if (allSignals.length > 0) {
+      try {
+        const topSignal = allSignals
+          .slice()
+          .sort((a, b) => (Number.isFinite(b.score) ? b.score : 0) - (Number.isFinite(a.score) ? a.score : 0))[0];
+        if (topSignal) {
+          const tracer = new CausalityTracer(
+            container.cognitions,
+            container.eventStore,
+            container.clock
+          );
+          topCausality = await tracer.trace(topSignal, frames);
+        }
+      } catch (err) {
+        recordStageError("causality", err, cognitionId);
+        topCausality = null;
+      }
+    }
+
+    // ── Stage: branch analysis (independent) ──────────────────────────────────
+    let branchCount = 0;
+    if (graph) {
+      try {
+        const branches = await container.branches.listForCognition(graph.id);
+        branchCount = Array.isArray(branches) ? branches.length : 0;
+      } catch (err) {
+        recordStageError("branch-analysis", err, cognitionId);
+      }
+    }
+
+    // Severity hints. bySeverity values may be absent; coerce defensively so a
+    // missing key can never throw or produce NaN comparisons.
+    const highCount = report.bySeverity?.HIGH ?? 0;
+    const criticalCount = report.bySeverity?.CRITICAL ?? 0;
+    const shouldSuggestBranch = highCount > 0 || criticalCount > 0;
+
+    const baseResponse = {
       executionId,
-      cognitionId: graph?.id,
+      cognitionId,
       report,
       timeline,
       topCausality,
-      branchCount: branches.length,
+      branchCount,
       // Hint for the UI: if there are HIGH/CRITICAL signals, suggest branching.
-      suggestBranch: report.bySeverity.HIGH > 0 || report.bySeverity.CRITICAL > 0,
-      branchSuggestion: (report.bySeverity.HIGH > 0 || report.bySeverity.CRITICAL > 0)
+      suggestBranch: shouldSuggestBranch,
+      branchSuggestion: shouldSuggestBranch
         ? "Branch replay at the ROOT_CAUSE frame to test corrective inputs"
         : null
     };
+
+    // ── Stage: serialize ──────────────────────────────────────────────────────
+    // The last — and most easily overlooked — failure domain. Fastify serializes
+    // this reply with JSON.stringify (no response schema is attached to the
+    // route), so a single non-JSON-safe value anywhere in the tree throws
+    // DURING serialization: a BigInt (e.g. a tool result that leaked into a
+    // signal's evidence), a circular reference, or a value JSON can't represent.
+    // That throw happens AFTER the handler returns — outside every per-stage
+    // guard above — so without this probe it would reach the global catch-all
+    // and surface as the opaque INTERNAL_ERROR (500) this endpoint exists to
+    // prevent. We pre-serialize here; on failure we drop the heavy analytic
+    // payloads (timeline/causality/topSignals — where any exotic value lives)
+    // and return a still-well-formed, guaranteed-serializable envelope, with the
+    // failure recorded as a degradation rather than swallowed.
+    try {
+      JSON.stringify(baseResponse);
+      return { ...baseResponse, degraded: degradations.length > 0, errors: degradations };
+    } catch (err) {
+      recordStageError("serialize", err, cognitionId);
+      // buildReport over an empty signal list is total + primitive-only, so the
+      // fallback report can never itself fail serialization.
+      return {
+        executionId,
+        cognitionId,
+        report: container.failureEngine.buildReport(executionId, cognitionId, []),
+        timeline: null,
+        topCausality: null,
+        branchCount,
+        suggestBranch: shouldSuggestBranch,
+        branchSuggestion: shouldSuggestBranch
+          ? "Branch replay at the ROOT_CAUSE frame to test corrective inputs"
+          : null,
+        degraded: true,
+        errors: degradations
+      };
+    }
+    }
   });
 }

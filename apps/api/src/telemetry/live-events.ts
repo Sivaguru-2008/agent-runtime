@@ -1,6 +1,6 @@
 /**
  * Live runtime telemetry event types. These are the realtime events emitted by
- * the Ollama-backed execution engine. They are separate from the rich domain
+ * the Groq-backed execution engine. They are separate from the rich domain
  * events used by the existing agent runtime — the live events are intentionally
  * compact, transport-friendly, and built around a single executionId.
  */

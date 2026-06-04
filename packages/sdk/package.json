@@ -1,0 +1,51 @@
+{
+  "name": "@agent-platform/sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for the Agent Runtime API — create, fetch, replay, list, and stream agent executions.",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "example:quickstart": "tsx examples/quickstart.ts",
+    "example:streaming": "tsx examples/streaming.ts",
+    "example:replay": "tsx examples/replay.ts"
+  },
+  "keywords": [
+    "agent",
+    "runtime",
+    "sdk",
+    "executions",
+    "typescript",
+    "streaming",
+    "sse"
+  ],
+  "devDependencies": {
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.4"
+  }
+}

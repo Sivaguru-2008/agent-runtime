@@ -44,6 +44,13 @@ describe("canonical runtime semantics constitution", () => {
     expect(() => assertRetryAllowed("LEASE_EXPIRY", "exec-recover")).not.toThrow();
   });
 
+  it("allows direct recovery transitions from active executing states", () => {
+    expect(() => assertTransition("exec-recover", "RUNNING", "RECOVERING")).not.toThrow();
+    expect(() => assertTransition("exec-recover", "SIDE_EFFECT_PENDING", "RECOVERING")).not.toThrow();
+    expect(() => assertTransition("exec-recover", "REPLAYING", "RECOVERING")).not.toThrow();
+    expect(() => assertTransition("exec-recover", "RECOVERING", "REPLAYING")).not.toThrow();
+  });
+
   it("blocks replay divergence from executing unsafe side effects", () => {
     expect(() =>
       validateReplayAction({

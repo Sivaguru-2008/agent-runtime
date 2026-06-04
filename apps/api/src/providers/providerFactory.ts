@@ -14,10 +14,11 @@
 
 import type { ModelProvider } from "../domain/ports.js";
 import type { AppConfig } from "../shared/config.js";
+import { isStrictInfrastructureMode } from "../shared/config.js";
 import { ClaudeProvider } from "./claudeProvider.js";
 import { OpenAIProvider } from "./openaiProvider.js";
-import { OllamaModelProvider } from "./ollamaModelProvider.js";
-import { OllamaProvider } from "./ollama.js";
+import { GroqModelProvider } from "./groqModelProvider.js";
+import { GroqProvider } from "./GroqProvider.js";
 import { DeterministicModelProvider } from "../runtime/mockModelProvider.js";
 import { FailoverModelProvider, type FailoverLink } from "./failoverModelProvider.js";
 import type { AgentMetrics } from "../infrastructure/metrics/prometheusMetrics.js";
@@ -47,12 +48,14 @@ function buildNamed(name: string, config: AppConfig): ModelProvider | undefined 
         timeoutMs: config.PROVIDER_TIMEOUT_MS,
         retry: { maxAttempts: config.PROVIDER_MAX_RETRIES }
       });
-    case "ollama":
-      return new OllamaModelProvider(
-        new OllamaProvider({
-          baseUrl: config.OLLAMA_URL,
-          model: config.OLLAMA_MODEL,
-          requestTimeoutMs: config.OLLAMA_REQUEST_TIMEOUT_MS
+    case "groq":
+      if (!config.GROQ_API_KEY) return undefined;
+      return new GroqModelProvider(
+        new GroqProvider({
+          apiKey: config.GROQ_API_KEY,
+          baseUrl: config.GROQ_BASE_URL,
+          model: config.MODEL_NAME ?? config.GROQ_MODEL,
+          requestTimeoutMs: config.GROQ_REQUEST_TIMEOUT_MS
         }),
         { retry: { maxAttempts: config.PROVIDER_MAX_RETRIES } }
       );
@@ -77,14 +80,17 @@ export function createModelProvider(config: AppConfig, metrics?: AgentMetrics): 
       }
       return buildNamed("openai", config)!;
 
-    case "ollama":
-      return buildNamed("ollama", config)!;
+    case "groq":
+      if (!config.GROQ_API_KEY) {
+        throw new Error("MODEL_PROVIDER=groq requires GROQ_API_KEY to be set");
+      }
+      return buildNamed("groq", config)!;
 
     case "failover": {
       // D2 — build the chain from MODEL_FAILOVER_CHAIN, dropping providers
       // whose credentials are missing. Order is preserved so primary →
       // secondary → tertiary failover semantics are obvious from config.
-      const order = (config.MODEL_FAILOVER_CHAIN ?? "claude,openai,ollama")
+      const order = (config.MODEL_FAILOVER_CHAIN ?? "claude,openai,groq")
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
@@ -93,10 +99,32 @@ export function createModelProvider(config: AppConfig, metrics?: AgentMetrics): 
         const provider = buildNamed(name, config);
         if (provider) links.push({ name, provider });
       }
+
+      // Resilience — terminal deterministic fallback (non-strict environments).
+      // With a chain that collapses to e.g. [groq] (the only provider with
+      // credentials), a single transient upstream failure ("groq: rate limit
+      // exceeded", a network blip) exhausts the chain and throws. The wrapping
+      // "model-provider" circuit breaker then OPENs and fast-fails EVERY
+      // subsequent execution ("Circuit breaker 'model-provider' is OPEN"), so one
+      // rate-limit cascades into a wave of dead-lettered runs (observed: 11 such
+      // failures). Appending the always-available DeterministicModelProvider as
+      // the LAST link means the failover chain always succeeds, so the breaker
+      // never opens and a run degrades to a deterministic response instead of
+      // failing. Skipped in strict (production/staging) mode — there a genuine
+      // provider outage must fail loudly rather than silently serve canned
+      // output — and skipped if the operator already placed it in the chain.
+      const strict = isStrictInfrastructureMode(config.NODE_ENV) || config.STRICT_PROD === true;
+      const hasDeterministic = links.some((l) => l.name.trim().toLowerCase() === "deterministic");
+      if (!strict && !hasDeterministic) {
+        links.push({ name: "deterministic", provider: new DeterministicModelProvider() });
+      }
+
       if (!links.length) {
+        // Reachable only in strict mode (non-strict always has the deterministic
+        // terminal link above): production must be configured with real keys.
         throw new Error(
           "MODEL_PROVIDER=failover but no providers in MODEL_FAILOVER_CHAIN have valid credentials — " +
-            "set ANTHROPIC_API_KEY / OPENAI_API_KEY and/or include 'ollama' in the chain."
+            "set ANTHROPIC_API_KEY / OPENAI_API_KEY / GROQ_API_KEY for the providers in the chain."
         );
       }
       return new FailoverModelProvider({

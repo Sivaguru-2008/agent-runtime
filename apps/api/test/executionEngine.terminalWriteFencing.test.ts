@@ -86,6 +86,9 @@ class ReclaimOnSaveExecutionRepository implements ExecutionRepository {
   async listByAgent(agentId: string): Promise<Execution[]> {
     return this.inner.listByAgent(agentId);
   }
+  async listByStatus(status: Execution["status"]): Promise<Execution[]> {
+    return this.inner.listByStatus(status);
+  }
 }
 
 class ReclaimOnAddMemoryRepository implements MemoryRepository {

@@ -101,6 +101,20 @@ create table if not exists tool_call_dedup (
   step_seq               integer null
 );
 
+-- Self-heal for partially-migrated databases. `create table if not exists`
+-- above is a no-op when tool_call_dedup already exists from migration 0010
+-- (which predates the fence columns). On such a database the fence columns
+-- would be absent when schema.sql runs — and schema.sql runs BEFORE the
+-- migration files (migrationRunner applies it first as the base bootstrap).
+-- Without these guards the `idx_tool_call_dedup_replay (… step_seq …)` index
+-- below fails with `column "step_seq" does not exist`, which aborts the entire
+-- migration run and crashes startup (every API request then 500s) until
+-- migration 0015 — which can never apply, because schema.sql died first.
+-- These ALTERs are idempotent: no-ops on fresh installs and fully-migrated DBs.
+alter table tool_call_dedup add column if not exists fence_token_at_reserve bigint null;
+alter table tool_call_dedup add column if not exists args_hash text null;
+alter table tool_call_dedup add column if not exists step_seq integer null;
+
 create index if not exists idx_tool_call_dedup_execution
   on tool_call_dedup(execution_id);
 create index if not exists idx_tool_call_dedup_tenant_created
@@ -158,8 +172,15 @@ create index if not exists idx_event_outbox_poll
   on event_outbox(status, visible_after) 
   where status = 'PENDING';
 
-create index if not exists idx_event_outbox_ordering 
+create index if not exists idx_event_outbox_ordering
   on event_outbox(execution_id, sequence);
+
+-- Recovery-side index: locate stranded PROCESSING rows whose visibility
+-- timeout has elapsed so the dispatcher can reclaim them. Mirrors
+-- migration 0021 (outbox crash recovery).
+create index if not exists idx_event_outbox_recovery
+  on event_outbox(visible_after)
+  where status = 'PROCESSING';
 
 create table if not exists event_outbox_dlq (
   id uuid primary key,
@@ -171,9 +192,38 @@ create table if not exists event_outbox_dlq (
   sequence bigint not null,
   idempotency_key text not null unique,
   failed_at timestamptz not null default now(),
-  last_error text null
+  last_error text null,
+  -- Producer-side timestamp (migration 0011) so a redelivered event carries
+  -- its original `timestamp` rather than the recovery wall-clock.
+  original_timestamp timestamptz null,
+  -- Out-of-band recovery bookkeeping (migration 0022). A background sweep
+  -- re-attempts delivery of dead-lettered events; these columns make that
+  -- bounded, crash-safe, and multi-worker safe.
+  recovery_attempts integer not null default 0,
+  recovery_visible_after timestamptz not null default now(),
+  last_recovery_error text null,
+  quarantined boolean not null default false
 );
 
-create index if not exists idx_event_outbox_dlq_execution 
+-- Self-heal for partially-migrated databases. event_outbox_dlq is created by
+-- migration 0007 without the original_timestamp (0011) or recovery (0022)
+-- columns; `create table if not exists` above is then a no-op and those columns
+-- stay absent. Because schema.sql runs BEFORE the migration files, the
+-- `idx_event_outbox_dlq_recovery (… where quarantined = false)` index below
+-- would otherwise fail with `column "quarantined" does not exist`, aborting the
+-- whole migration run and crashing startup. These ALTERs are idempotent.
+alter table event_outbox_dlq add column if not exists original_timestamp timestamptz null;
+alter table event_outbox_dlq add column if not exists recovery_attempts integer not null default 0;
+alter table event_outbox_dlq add column if not exists recovery_visible_after timestamptz not null default now();
+alter table event_outbox_dlq add column if not exists last_recovery_error text null;
+alter table event_outbox_dlq add column if not exists quarantined boolean not null default false;
+
+create index if not exists idx_event_outbox_dlq_execution
   on event_outbox_dlq(execution_id);
+
+-- Recovery-side index: locate non-quarantined DLQ rows whose backoff window
+-- has elapsed so OutboxDlqRecoveryService can re-attempt delivery fast.
+create index if not exists idx_event_outbox_dlq_recovery
+  on event_outbox_dlq(recovery_visible_after)
+  where quarantined = false;
 

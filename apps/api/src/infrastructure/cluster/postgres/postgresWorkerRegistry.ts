@@ -89,6 +89,18 @@ export class PostgresWorkerRegistry implements WorkerRegistry {
     );
     return rows.map(rowToWorker);
   }
+
+  async reapTerminated(now: Date, retentionMs: number): Promise<RuntimeWorker[]> {
+    const cutoff = toIso(new Date(now.getTime() - retentionMs));
+    const { rows } = await this.client.query<WorkerRow>(
+      `delete from runtime_workers
+          where status in ('LOST', 'STOPPED')
+            and last_heartbeat_at < $1
+          returning *`,
+      [cutoff]
+    );
+    return rows.map(rowToWorker);
+  }
 }
 
 interface WorkerRow {

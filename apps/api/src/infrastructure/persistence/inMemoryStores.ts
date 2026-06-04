@@ -110,6 +110,11 @@ function aggregateKey(aggregateType: DomainEvent["aggregateType"], aggregateId: 
 
 function collectExecutionIds(event: DomainEvent): Set<string> {
   const ids = new Set<string>();
+  // REPLAY_SESSION_CREATED is a replay-viewer artifact whose aggregateId is a
+  // cognitionId, not an executionId. It must not enter any execution log —
+  // doing so pollutes replay/divergence/recovery consumers. Mirrors the
+  // Postgres deriveEventLinks() guard so both drivers agree.
+  if (event.type === "REPLAY_SESSION_CREATED") return ids;
   if (event.aggregateType === "EXECUTION") ids.add(event.aggregateId);
   const candidates = [
     readPath(event.payload, ["execution", "id"]),
@@ -401,6 +406,12 @@ export class InMemoryExecutionRepository implements ExecutionRepository {
   async listByAgent(agentId: string): Promise<Execution[]> {
     return [...this.executions.values()]
       .filter((execution) => execution.agentId === agentId)
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+
+  async listByStatus(status: Execution["status"]): Promise<Execution[]> {
+    return [...this.executions.values()]
+      .filter((execution) => execution.status === status)
       .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
   }
 }

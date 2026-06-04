@@ -2,40 +2,43 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { LiveExecutionEngine } from "../runtime/execution-engine.js";
 import type { LiveEventBroadcaster } from "../events/live-broadcaster.js";
-import type { OllamaProvider } from "../providers/ollama.js";
-import { requireRole } from "../infrastructure/security/rbac.js";
-import { requireTenant } from "../infrastructure/security/tenantContext.js";
+import type { GroqProvider } from "../providers/GroqProvider.js";
+import { requirePermission } from "../infrastructure/security/rbac.js";
+import { requireTenant, canAccessAllTenants } from "../infrastructure/security/tenantContext.js";
 
 const runBody = z.object({
   prompt: z.string().min(1, "prompt is required").max(8000),
   system: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
-  executionId: z.string().optional()
+  executionId: z.string().optional(),
+  // Optional Groq model override driven by the UI model selector.
+  model: z.string().optional()
 });
 
 export interface LiveRouteDeps {
   engine: LiveExecutionEngine;
   broadcaster: LiveEventBroadcaster;
-  ollama: OllamaProvider;
+  llm: GroqProvider;
 }
 
 export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDeps): Promise<void> {
-  const { engine, broadcaster, ollama } = deps;
+  const { engine, broadcaster, llm } = deps;
 
   // ------------------------------------------------------------------------
-  // Health: confirms Ollama is reachable and reports the active model.
+  // Health: confirms Groq is reachable and reports the active model.
   // ------------------------------------------------------------------------
   app.get("/agent/health", async () => {
-    const available = await ollama.isAvailable();
+    const available = await llm.isAvailable();
     return {
       ok: available,
-      model: ollama.modelName,
-      ollama: available ? "online" : "offline"
+      model: llm.modelName,
+      provider: "groq",
+      groq: available ? "online" : "offline"
     };
   });
 
   // ------------------------------------------------------------------------
-  // Submit a prompt. Returns the final execution record once Ollama is done.
+  // Submit a prompt. Returns the final execution record once Groq is done.
   // Telemetry (tokens, state changes, errors) is streamed concurrently over
   // the SSE channel below.
   //
@@ -43,7 +46,7 @@ export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDe
   // the caller's tenantId. The broadcaster fan-out filters by tenant so other
   // subscribers can never observe this tenant's token stream.
   // ------------------------------------------------------------------------
-  app.post("/agent/run", { preHandler: requireRole("developer") }, async (request, reply) => {
+  app.post("/agent/run", { preHandler: requirePermission("execution:write") }, async (request, reply) => {
     const ctx = requireTenant(request);
     const parse = runBody.safeParse(request.body);
     if (!parse.success) {
@@ -103,7 +106,7 @@ export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDe
   app.get("/agent/executions", async (request) => {
     const ctx = requireTenant(request);
     const all = engine.list();
-    if (ctx.role === "admin") return all;
+    if (canAccessAllTenants(ctx.role)) return all;
     // C-2: live runPrompt now always stamps tenantId, so a missing tenantId
     // on an in-memory record is a pre-tenancy artifact that non-admins must
     // not see. Fail closed.
@@ -117,7 +120,7 @@ export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDe
     if (!record) return reply.status(404).send({ error: "NOT_FOUND" });
     // C-2: untagged records are denied to non-admins — the previous
     // `owner !== undefined` bypass let any tenant read every legacy record.
-    if (ctx.role !== "admin" && record.tenantId !== ctx.tenantId) {
+    if (!canAccessAllTenants(ctx.role) && record.tenantId !== ctx.tenantId) {
       return reply.status(403).send({ error: "FORBIDDEN", message: "Cross-tenant access denied" });
     }
     return record;
@@ -130,13 +133,13 @@ export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDe
     if (!record) return reply.status(404).send({ error: "NOT_FOUND" });
     // C-2: same fail-closed rule as the executions detail endpoint —
     // ownership must match (or admin) before any history is returned.
-    if (ctx.role !== "admin" && record.tenantId !== ctx.tenantId) {
+    if (!canAccessAllTenants(ctx.role) && record.tenantId !== ctx.tenantId) {
       return reply.status(403).send({ error: "FORBIDDEN", message: "Cross-tenant access denied" });
     }
-    return broadcaster.history(id, ctx.role === "admin" ? undefined : ctx.tenantId);
+    return broadcaster.history(id, canAccessAllTenants(ctx.role) ? undefined : ctx.tenantId);
   });
 
-  app.get("/agent/metrics", { preHandler: requireRole("operator") }, async () => engine.metrics());
+  app.get("/agent/metrics", { preHandler: requirePermission("observability:read") }, async () => engine.metrics());
 
   // ------------------------------------------------------------------------
   // SSE stream for live telemetry. Tenant-scoped subscription — only events
@@ -155,7 +158,7 @@ export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDe
     // `owner !== undefined` bypass leaked legacy streams across tenants.
     if (executionId) {
       const rec = engine.get(executionId);
-      if (rec && ctx.role !== "admin" && rec.tenantId !== ctx.tenantId) {
+      if (rec && !canAccessAllTenants(ctx.role) && rec.tenantId !== ctx.tenantId) {
         return reply.status(403).send({ error: "FORBIDDEN", message: "Cross-tenant access denied" });
       }
     }
@@ -168,7 +171,7 @@ export async function registerLiveRoutes(app: FastifyInstance, deps: LiveRouteDe
     });
     reply.raw.write(": connected\n\n");
 
-    const tenantFilter = ctx.role === "admin" ? undefined : ctx.tenantId;
+    const tenantFilter = canAccessAllTenants(ctx.role) ? undefined : ctx.tenantId;
     if (replay) {
       const history = broadcaster.history(executionId, tenantFilter);
       for (const event of history) {

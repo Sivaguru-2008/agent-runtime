@@ -190,7 +190,8 @@ export class AgentRuntime {
       tokenUsage: { prompt: 0, completion: 0, total: 0 },
       startedAt: now,
       updatedAt: now,
-      tenantId: execTenantId
+      tenantId: execTenantId,
+      traceId: contextTraceId(context)
     };
 
     assertTransition(execution.id, "CREATION", "SCHEDULING");
@@ -409,5 +410,12 @@ export class AgentRuntime {
 function contextTenantId(context?: EventContext): string | undefined {
   if (!context) return undefined;
   const value = (context as unknown as Record<string, unknown>).tenantId;
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+/** Extract the trace correlation id from an EventContext, if present. */
+function contextTraceId(context?: EventContext): string | undefined {
+  if (!context) return undefined;
+  const value = (context as unknown as Record<string, unknown>).traceId;
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }

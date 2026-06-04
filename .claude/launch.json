@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "-w", "apps/web"],
+      "port": 3100,
+      "autoPort": true
+    }
+  ]
+}

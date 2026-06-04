@@ -3,30 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Activity, Cpu, GitBranch, HeartPulse, Server, Workflow } from "lucide-react";
 import { api } from "@/lib/api";
-import type { ClusterSnapshot, RuntimeWorker, WorkerStatus } from "@/types/observability";
+import type { ClusterSnapshot, RuntimeWorker } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { BadgeTone } from "./status";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { StatusPill } from "@/components/explain/status-pill";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 const POLL_MS = 4000;
-
-function workerTone(status: WorkerStatus): BadgeTone {
-  switch (status) {
-    case "READY":
-      return "success";
-    case "BUSY":
-      return "warning";
-    case "DRAINING":
-      return "muted";
-    case "LOST":
-    case "STOPPED":
-      return "critical";
-    default:
-      return "muted";
-  }
-}
 
 function fmtAge(ms: number): string {
   if (ms < 1500) return `${ms}ms`;
@@ -125,7 +111,9 @@ export function ClusterView() {
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
         <Card>
           <CardHeader>
-            <CardTitle>Runtime Workers</CardTitle>
+            <CardTitle>
+              <ExplainLabel concept="worker-health" as="span">Runtime Workers</ExplainLabel>
+            </CardTitle>
             <div className="flex items-center gap-2">
               <Badge variant="muted">{workers.length} nodes</Badge>
               <Button size="sm" variant="secondary" onClick={recover} disabled={busy}>
@@ -137,14 +125,16 @@ export function ClusterView() {
             {workers.length ? workers.map((worker) => (
               <WorkerRow key={worker.id} worker={worker} onDrain={drain} busy={busy} />
             )) : (
-              <div className="py-12 text-center text-sm text-muted-foreground">No workers registered</div>
+              <ExplainedEmptyState concept="worker-health" />
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Execution Ownership</CardTitle>
+            <CardTitle>
+              <ExplainLabel concept="execution-ownership" as="span">Execution Ownership</ExplainLabel>
+            </CardTitle>
             <Badge variant="muted">{snapshot?.executionsByWorker.length ?? 0} active</Badge>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -165,7 +155,7 @@ export function ClusterView() {
                 </ul>
               </div>
             )) : (
-              <div className="py-12 text-center text-sm text-muted-foreground">No active leases</div>
+              <ExplainedEmptyState concept="execution-ownership" title="No execution ownership yet" body="No worker currently owns any task, because nothing is running. Ownership appears here the moment a worker picks up a task." />
             )}
           </CardContent>
         </Card>
@@ -216,7 +206,7 @@ function WorkerRow({
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Cpu className="h-4 w-4 text-primary" />
             <span className="truncate">{worker.id}</span>
-            <Badge variant={workerTone(worker.status)}>{worker.status}</Badge>
+            <StatusPill status={worker.status} />
           </div>
           <div className="mt-1 font-mono text-[11px] text-muted-foreground">
             {worker.host} • v{worker.version} • cap {worker.capacity}

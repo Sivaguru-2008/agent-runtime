@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { OllamaProvider, OllamaUnavailableError, type OllamaStreamChunk } from "../providers/ollama.js";
+import { GroqProvider, GroqUnavailableError, type GroqStreamChunk } from "../providers/GroqProvider.js";
 import type { LiveEventBroadcaster } from "../events/live-broadcaster.js";
 import type {
   LiveEvent,
@@ -25,6 +25,12 @@ export interface RunPromptInput {
    */
   tenantId?: string;
   executionId?: string;
+  /**
+   * Optional per-request model override. When supplied the live run uses this
+   * Groq model instead of the provider default — this is what the UI model
+   * selector drives. Falls back to the provider's configured model.
+   */
+  model?: string;
 }
 
 export interface ExecutionRecord {
@@ -72,7 +78,7 @@ export class LiveExecutionEngine {
   private sequence = 0;
 
   constructor(
-    private readonly ollama: OllamaProvider,
+    private readonly groq: GroqProvider,
     private readonly broadcaster: LiveEventBroadcaster
   ) {}
 
@@ -140,7 +146,7 @@ export class LiveExecutionEngine {
     // the broadcaster ring buffer. Defensive: prevents an SSE replay from
     // surfacing prior-run frames to a freshly-subscribed client.
     this.broadcaster.resetExecution(executionId);
-    const model = this.ollama.modelName;
+    const model = input.model ?? this.groq.modelName;
     const startedWallClock = Date.now();
     const tenantId = input.tenantId;
 
@@ -196,14 +202,15 @@ export class LiveExecutionEngine {
         tenantId
       });
 
-      const stream = this.ollama.runPrompt({
+      const stream = this.groq.runPrompt({
         prompt: input.prompt,
         system: input.system,
         temperature: input.temperature,
-        signal: input.signal
+        signal: input.signal,
+        model
       });
 
-      let chunk: OllamaStreamChunk;
+      let chunk: GroqStreamChunk;
       for await (chunk of stream) {
         throwIfAborted(input.signal);
         if (chunk.token && chunk.token.length > 0) {
@@ -330,12 +337,12 @@ export class LiveExecutionEngine {
 }
 
 function estimateTokens(text: string): number {
-  // Coarse heuristic — Ollama reports the real count on the final chunk.
+  // Coarse heuristic — Groq reports the real count on the final usage chunk.
   return Math.max(1, Math.ceil(text.length / 4));
 }
 
 function classifyError(error: unknown): string {
-  if (error instanceof OllamaUnavailableError) return "OLLAMA_UNAVAILABLE";
+  if (error instanceof GroqUnavailableError) return "GROQ_UNAVAILABLE";
   if (error instanceof Error) {
     if (error.name === "AbortError") return "ABORTED";
     if (error.message.toLowerCase().includes("timeout")) return "TIMEOUT";

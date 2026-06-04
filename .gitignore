@@ -23,6 +23,10 @@ docs/chaos-certification-report.md
 .vscode/
 .idea/
 
+# Dev watcher lock
+.api-dev.lock
+.test-lock-dir/
+
 # OS files
 .DS_Store
 Thumbs.db

@@ -10,6 +10,10 @@ import { cognitionApi, type CognitionNode } from "@/lib/cognition-api";
 import { ReplayTimelineScrubber } from "./replay-timeline-scrubber";
 import { BranchDivergence } from "./branch-divergence";
 import { cn, formatDuration } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { StatusPill } from "@/components/explain/status-pill";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
+import { translateStatus } from "@/lib/explain/status";
 
 export interface TimeTravelDebuggerProps {
   cognitionId: string;
@@ -90,13 +94,15 @@ export function TimeTravelDebugger({ cognitionId }: TimeTravelDebuggerProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Card className="p-4 lg:col-span-2 bg-zinc-950/60 border-zinc-800 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-zinc-200">Cognition State @ cursor</div>
-            <Badge variant="muted">{cognition.view?.graph.phase ?? "—"}</Badge>
+            <ExplainLabel concept="time-travel-replay" as="span" className="text-sm font-medium text-zinc-200">
+              Cognition State @ cursor
+            </ExplainLabel>
+            {cognition.view?.graph.phase ? <StatusPill status={cognition.view.graph.phase} /> : <Badge variant="muted">—</Badge>}
           </div>
           {currentNode ? (
             <NodeInspector node={currentNode} />
           ) : (
-            <div className="text-xs text-zinc-500">No node at this cursor yet.</div>
+            <ExplainedEmptyState concept="scrubber" className="py-6" />
           )}
         </Card>
 
@@ -123,14 +129,14 @@ function NodeInspector({ node }: { node: CognitionNode }) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-        <KV label="role" value={node.role} />
+        <KV label="role" value={translateStatus(node.role).label} />
         <KV label="seq" value={`#${node.sequence}`} />
-        <KV label="status" value={node.status} />
+        <KV label="status" value={translateStatus(node.status).label} />
         <KV label="duration" value={formatDuration(node.durationMs)} />
         <KV label="uncertainty" value={uncertainty.toFixed(2)} tone={uncertainty > 0.5 ? "error" : "success"} />
         <KV label="influence" value={String(node.memoryInfluence?.length ?? 0)} />
         <KV label="streamed" value={String(node.tokenStream?.length ?? 0)} />
-        <KV label="phase" value={node.phase} />
+        <KV label="phase" value={translateStatus(node.phase).label} />
       </div>
       {node.tokenStream && node.tokenStream.length > 0 && (
         <div className="space-y-1">

@@ -19,7 +19,24 @@ import { acquireFencingToken, assertCanWrite } from "../reliability/splitBrainGu
 import { assertRuntimeInvariant } from "../../runtime/canonicalSemantics.js";
 
 const MAX_RETRIES = 5;
-const VISIBILITY_TIMEOUT_SEC = 30;
+const DEFAULT_VISIBILITY_TIMEOUT_SEC = 30;
+
+/**
+ * Marker stamped into event_outbox.last_error when the dispatcher reclaims
+ * a stranded PROCESSING row whose visibility timeout has elapsed. Observability
+ * only — operators grep for this to count crash-recovery reclaims.
+ */
+export const STRANDED_RECOVERY_MARKER = "OUTBOX_RECOVERED_STRANDED_PROCESSING";
+
+export interface OutboxDispatcherOptions {
+  /**
+   * How long a claimed (PROCESSING) row stays invisible to other workers
+   * before it is treated as stranded and eligible for re-claim. Must exceed
+   * the slowest expected bus.publish() round-trip plus the post-publish DB
+   * write. Default 30s matches the legacy constant.
+   */
+  visibilityTimeoutSec?: number;
+}
 
 export interface OutboxRow {
   id: string;
@@ -39,15 +56,32 @@ export interface OutboxRow {
    * that single degenerate case.
    */
   original_timestamp: Date | string | null;
+  /**
+   * Owning tenant (migration 0025). Pure attribution: it is carried through to
+   * the DLQ on poison promotion so a dead-lettered side effect keeps its
+   * tenant, but it never participates in the claim CTE, FIFO ordering, or
+   * fencing — exactly-once + per-execution ordering are unchanged.
+   */
+  tenant_id: string;
 }
 
 export class OutboxDispatcher {
+  private readonly visibilityTimeoutSec: number;
+
   constructor(
     private readonly publisher: PersistedEventPublisher,
     private readonly bus: EventBus,
     private readonly db?: PgClient,
-    private readonly logger?: { info: (msg: string, ...args: unknown[]) => void; error: (msg: string, ...args: unknown[]) => void; warn: (msg: string, ...args: unknown[]) => void }
-  ) {}
+    private readonly logger?: { info: (msg: string, ...args: unknown[]) => void; error: (msg: string, ...args: unknown[]) => void; warn: (msg: string, ...args: unknown[]) => void },
+    options?: OutboxDispatcherOptions
+  ) {
+    const requested = options?.visibilityTimeoutSec ?? DEFAULT_VISIBILITY_TIMEOUT_SEC;
+    // Defensive lower bound: a zero/negative timeout would let a worker
+    // reclaim a row another worker is *currently* publishing, breaking
+    // at-least-once into "many-times" with no upper bound. 1s is the
+    // minimum that still leaves room for a healthy publish round-trip.
+    this.visibilityTimeoutSec = requested >= 1 ? requested : DEFAULT_VISIBILITY_TIMEOUT_SEC;
+  }
 
   /**
    * Drain pending events to the bus.
@@ -74,47 +108,90 @@ export class OutboxDispatcher {
     if (!this.db) return 0;
 
     const now = new Date();
-    const visibleAfter = new Date(now.getTime() + VISIBILITY_TIMEOUT_SEC * 1000);
+    const visibleAfter = new Date(now.getTime() + this.visibilityTimeoutSec * 1000);
 
-    // 1. Claim a batch of eligible candidates by setting status to PROCESSING
+    // Claim a batch of eligible candidates. A row is eligible if:
+    //   • status = PENDING and its backoff window has elapsed (the normal
+    //     dispatch path), OR
+    //   • status = PROCESSING and its visibility timeout has elapsed (the
+    //     crash-recovery path — a previous worker claimed it and never
+    //     finished, so we treat it as abandoned and reclaim it).
+    //
+    // The per-execution FIFO blocker check still rejects later sequence
+    // numbers if any earlier row is *actively* in flight, but it does NOT
+    // count a stranded PROCESSING row (visible_after past) as a blocker —
+    // that row is itself eligible in the same tick, and the row-level
+    // `for update skip locked` keeps two workers from racing on it.
+    //
+    // The update reclaims rows by re-stamping status='PROCESSING' and a
+    // fresh visible_after. For reclaimed (already-PROCESSING) rows we also
+    // bump retry_count and stamp last_error with STRANDED_RECOVERY_MARKER
+    // so MAX_RETRIES still bounds runaway recovery and operators can see
+    // the reclaim count via the existing retry telemetry.
     const claimResult = await this.db.query<OutboxRow>(
       `with eligible_candidates as (
          select id, execution_id, sequence
            from event_outbox
-          where status = 'PENDING'
-            and visible_after <= $1
+          where visible_after <= $1
+            and (status = 'PENDING' or status = 'PROCESSING')
        ),
        ordered_candidates as (
          select ec.id
            from eligible_candidates ec
           where not exists (
-            select 1 
+            select 1
               from event_outbox prev
              where prev.execution_id = ec.execution_id
                and prev.sequence < ec.sequence
-               and prev.status in ('PENDING', 'PROCESSING')
+               and (
+                 prev.status = 'PENDING'
+                 or (prev.status = 'PROCESSING' and prev.visible_after > $1)
+               )
           )
           order by ec.sequence asc
           limit $2
        ),
        locked_batch as (
-         select id 
+         select id
            from event_outbox
           where id in (select id from ordered_candidates)
             for update skip locked
        )
        update event_outbox
           set status = 'PROCESSING',
-              visible_after = $3
+              visible_after = $3,
+              retry_count = case
+                when event_outbox.status = 'PROCESSING' then event_outbox.retry_count + 1
+                else event_outbox.retry_count
+              end,
+              last_error = case
+                when event_outbox.status = 'PROCESSING' then $4
+                else event_outbox.last_error
+              end
         where id in (select id from locked_batch)
-        returning id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, original_timestamp`,
-      [now.toISOString(), batchSize, visibleAfter.toISOString()]
+        returning id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, original_timestamp, tenant_id`,
+      [now.toISOString(), batchSize, visibleAfter.toISOString(), STRANDED_RECOVERY_MARKER]
     );
 
     const rows = claimResult.rows;
     if (rows.length === 0) {
       return 0;
     }
+
+    // FIFO enforcement (O1): the claim CTE selects candidates `order by sequence`,
+    // but `UPDATE … RETURNING` does NOT preserve that order — Postgres returns
+    // updated rows in physical/arbitrary order. Delivering or asserting in that
+    // order intermittently trips the O1 invariant (e.g. a reclaimed stranded
+    // seq=1 returned after a PENDING seq=2). Sort the claimed batch by
+    // (execution_id, sequence) so delivery is genuinely FIFO per execution and
+    // the invariant below validates an already-ordered batch rather than
+    // depending on RETURNING order.
+    rows.sort((a, b) => {
+      if (a.execution_id !== b.execution_id) {
+        return a.execution_id < b.execution_id ? -1 : 1;
+      }
+      return Number(a.sequence) - Number(b.sequence);
+    });
 
     // O1 Invariant: outbox publication FIFO order preservation
     const lastSequencePerExecution = new Map<string, number>();
@@ -186,8 +263,8 @@ export class OutboxDispatcher {
           await this.db.withTransaction(async (tx) => {
             // Write to DLQ
             await tx.query(
-              `insert into event_outbox_dlq (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, last_error)
-               values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9)
+              `insert into event_outbox_dlq (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, last_error, original_timestamp, tenant_id)
+               values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11)
                on conflict (event_id) do nothing`,
               [
                 row.id,
@@ -198,7 +275,13 @@ export class OutboxDispatcher {
                 JSON.stringify(row.metadata),
                 row.sequence,
                 row.idempotency_key,
-                errMsg
+                errMsg,
+                row.original_timestamp instanceof Date
+                  ? row.original_timestamp.toISOString()
+                  : row.original_timestamp ?? null,
+                // Carry the tenant from the originating outbox row so a
+                // dead-lettered side effect stays attributed to its tenant.
+                row.tenant_id ?? "system"
               ]
             );
             // Delete from active outbox queue

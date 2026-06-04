@@ -14,6 +14,15 @@
  *     never re-enqueued. This survives process restarts — the attempt count
  *     lives in Postgres, not in memory.
  *
+ *   Recovery-resume cap:
+ *     A second, independent bound on how many times the recovery loop may RESUME
+ *     one execution. The poison cap above only fires when the lease epoch climbs
+ *     to its ceiling inside the recovery loop; a stuck execution that never makes
+ *     forward progress can otherwise be re-driven forever if that epoch fails to
+ *     advance. The cap counts durable EXECUTION_RESUMED events (append-only,
+ *     restart-surviving, +1 per re-drive); past `maxRecoveryAttempts` the
+ *     execution is dead-lettered exactly like a poison pill, terminating the loop.
+ *
  *   Fencing token validation:
  *     The lease.attempt at acquisition time is passed to the ExecutionEngine as
  *     a `validateLease` callback. The engine checks fencing before committing
@@ -80,6 +89,27 @@ export interface SchedulerConfig {
    * Bounded concurrency limit for recovery loops to avoid sequential stalling.
    */
   recoveryConcurrencyLimit?: number;
+  /**
+   * Maximum number of times the recovery loop may RESUME a single execution
+   * before it is declared a stuck/non-progressing recovery and finalized to the
+   * Dead-Letter Queue.
+   *
+   * This is a SECOND, independent bound layered on top of the lease-epoch poison
+   * cap (`maxPoisonPillAttempts`). The poison cap only fires when the durable
+   * lease epoch (`lease.attempt`) climbs past its ceiling INSIDE the recovery
+   * loop; a never-progressing execution can otherwise be re-driven forever if the
+   * epoch fails to advance to that ceiling (e.g. a mixed-persistence restart
+   * resetting it, or the worker-side poison-pill never running because the
+   * consumer can never acquire the RECOVERY_OWNED lease). This cap counts durable
+   * EXECUTION_RESUMED events — an append-only signal that grows by exactly one
+   * per re-drive and survives restarts — so the re-drive cycle is bounded no
+   * matter how the lease epoch behaves.
+   *
+   * Optional; defaults to `maxPoisonPillAttempts` so existing call sites need no
+   * change and inherit the same proven threshold. A first/single clean recovery
+   * (resume count 0 → 1) is always allowed.
+   */
+  maxRecoveryAttempts?: number;
 }
 
 export class DistributedScheduler {
@@ -320,6 +350,10 @@ export class DistributedScheduler {
         })
       );
 
+      // Free the agent — this execution is terminal (dead-lettered) and will
+      // not be re-enqueued, so the agent must not stay pinned in RUNNING/BUSY.
+      await this.releaseAgentAfterFailure(job.agent.id);
+
       // Release lease — job will not be re-enqueued.
       await this.safeReleaseLease(job, "poison-pill");
       return;
@@ -476,6 +510,34 @@ export class DistributedScheduler {
   }
 
   /**
+   * Free an agent after one of its executions reached a TERMINAL dead-letter.
+   *
+   * runJob resets agent state only on its success path, so an execution that is
+   * dead-lettered (poison-pill at dispatch, or recovery attempts exhausted) left
+   * the agent pinned in RUNNING/BUSY forever — which is exactly what keeps the
+   * console's "Active" agent count stuck at a non-zero value long after nothing
+   * is running. Mirror runJob's failure convention (DEGRADED/ERROR); a later
+   * successful run resets it back to IDLE/READY. Best-effort — never throws.
+   */
+  private async releaseAgentAfterFailure(agentId: string): Promise<void> {
+    try {
+      const agent = await this.agents.getById(agentId);
+      if (!agent) return;
+      await this.agents.save({
+        ...agent,
+        state: "DEGRADED",
+        runtimeStatus: "ERROR",
+        updatedAt: toIso(this.clock.now())
+      });
+    } catch (err) {
+      this.logger.warn(
+        { err, agentId },
+        "failed to reset agent state after dead-letter — non-fatal (agent display state may lag)"
+      );
+    }
+  }
+
+  /**
    * Re-enqueue executions whose leases were reclaimed (worker death, lease
    * expiry). Safe to call concurrently with the main scheduler loop.
    *
@@ -575,18 +637,53 @@ export class DistributedScheduler {
 
       try {
         if (decision.decision === "RECOVER" || decision.decision === "REPLAY_RECOVER") {
-          const handedOff = await this.recoverOneAdmitted(lease, heldFencing);
-          if (handedOff) {
-            await this.orchestrator.completeRecovery({
-              executionId: lease.executionId,
-              workerId: this.config.workerId,
-              ownerEpoch: prospectiveEpoch
-            });
+          // ─── Recovery-resume cap (independent of the lease-epoch poison cap) ──
+          // The orchestrator's ABORTED/poison path keys on the durable lease
+          // epoch (lease.attempt) climbing past maxPoisonPillAttempts. That cap
+          // only fires if the epoch actually reaches the ceiling INSIDE this loop
+          // — and a never-progressing execution can be re-driven forever if the
+          // epoch fails to climb (a mixed-persistence restart resetting it, a
+          // misconfigured ceiling, or the worker-side poison-pill never running
+          // because the consumer can never acquire the RECOVERY_OWNED lease this
+          // takeover holds). Guard with a second, independent bound: the count of
+          // durable EXECUTION_RESUMED events. It is append-only (lease churn or an
+          // epoch reset cannot lower it), survives restarts (the event log is
+          // durable), and grows by exactly one per re-drive — so it bounds the
+          // re-drive cycle no matter how the epoch behaves. A first clean recovery
+          // (0 → 1) is unaffected; only an execution already resumed
+          // `recoveryAttemptCap` times WITHOUT reaching a terminal state is
+          // finalized, exactly as the dispatch-time poison path does.
+          const recoveryAttemptCap = this.config.maxRecoveryAttempts ?? this.config.maxPoisonPillAttempts;
+          const priorResumes = await this.countRecoveryResumes(lease.executionId);
+          if (priorResumes >= recoveryAttemptCap) {
+            await this.deadLetterExhaustedRecovery(
+              lease,
+              prospectiveEpoch,
+              `recovery resume cap reached — execution resumed ${priorResumes} time(s) without reaching a terminal state (cap ${recoveryAttemptCap})`
+            );
+          } else {
+            const handedOff = await this.recoverOneAdmitted(lease, heldFencing);
+            if (handedOff) {
+              await this.orchestrator.completeRecovery({
+                executionId: lease.executionId,
+                workerId: this.config.workerId,
+                ownerEpoch: prospectiveEpoch
+              });
+            }
           }
+        } else if (decision.decision === "ABORTED") {
+          // The orchestrator classified this recovery as non-recoverable
+          // (attempts exhausted / poison). The re-drive path never re-enqueues
+          // it, so runJob's poison-pill guard would never fire — the execution
+          // would otherwise churn through reclaimExpired → ABORTED forever,
+          // pinned in a non-terminal state. Finalize it here exactly as the
+          // dispatch-time poison path does: DEAD_LETTER the execution, record it
+          // in the DLQ, and terminalize the lease so it is never re-surfaced.
+          await this.deadLetterExhaustedRecovery(lease, prospectiveEpoch, decision.reason);
         } else {
           this.logger.warn(
             { executionId: lease.executionId, decision: decision.decision, state: decision.state, reason: decision.reason },
-            "recover: orchestrator routed recovery off the re-drive path (reconcile/abort/blocked/owned/completed)"
+            "recover: orchestrator routed recovery off the re-drive path (reconcile/blocked/owned/completed)"
           );
         }
       } finally {
@@ -608,6 +705,169 @@ export class DistributedScheduler {
       return code as RuntimeFailureCategory;
     }
     return undefined;
+  }
+
+  /**
+   * Count the durable EXECUTION_RESUMED events recorded for an execution — the
+   * number of times the recovery loop has already re-driven it. Unlike the lease
+   * epoch (`lease.attempt`), this count is append-only: lease churn, an epoch
+   * reset, or a process restart cannot lower it, and it survives restarts because
+   * the event log is durable. It is the canonical "how many times has recovery
+   * resumed this execution" signal and the basis of the recovery-resume cap that
+   * stops a never-progressing execution from being recovered indefinitely.
+   */
+  private async countRecoveryResumes(executionId: string): Promise<number> {
+    const events = await this.publisher.eventStore.listByExecution(executionId);
+    let count = 0;
+    for (const event of events) {
+      if (event.type === "EXECUTION_RESUMED") count += 1;
+    }
+    return count;
+  }
+
+  /**
+   * Finalize an execution whose recovery the orchestrator classified as
+   * non-recoverable (attempts exhausted / poison). The re-drive path never
+   * re-enqueues such an execution, so the dispatch-time poison-pill guard in
+   * runJob can never fire for it — without this it would remain pinned in a
+   * non-terminal state and (with reclaimExpired re-surfacing stranded EXPIRED
+   * leases) be re-classified ABORTED on every recovery tick forever.
+   *
+   * Mirrors the dispatch-time poison path: move the execution to DEAD_LETTERED,
+   * record a Dead-Letter entry for operator replay, and terminalize the lease so
+   * it is never re-surfaced. Ordering matters — the unfenced execution write
+   * must land while the lease is still inactive (EXPIRED) to pass the
+   * active-lease guard, so the lease is terminalized last.
+   */
+  private async deadLetterExhaustedRecovery(
+    lease: ExecutionLease,
+    prospectiveEpoch: number,
+    reason: string
+  ): Promise<void> {
+    const now = this.clock.now();
+    const execution = await this.executions.getById(lease.executionId);
+    const alreadyTerminal =
+      execution !== undefined &&
+      (execution.status === "COMPLETED" ||
+        execution.status === "FAILED" ||
+        execution.status === "DEAD_LETTERED" ||
+        execution.status === "CANCELLED");
+
+    // 1. Finalize the execution to DEAD_LETTERED (lease still EXPIRED → the
+    //    unfenced save passes the active-lease guard).
+    if (execution && !alreadyTerminal) {
+      const dead: Execution = {
+        ...execution,
+        status: "DEAD_LETTERED",
+        failure: {
+          message: execution.failure?.message ?? reason,
+          code: execution.failure?.code ?? "RECOVERY_ATTEMPTS_EXHAUSTED",
+          recoverable: false
+        },
+        completedAt: toIso(now),
+        updatedAt: toIso(now)
+      };
+      try {
+        await this.executions.save(dead);
+      } catch (err) {
+        this.logger.error(
+          { err, executionId: lease.executionId },
+          "recover: failed to finalize exhausted execution as DEAD_LETTERED"
+        );
+      }
+    }
+
+    // 1b. Free the agent — the recovery path never runs runJob's success reset,
+    //     so without this the agent stays pinned in RUNNING/BUSY indefinitely
+    //     after its execution is dead-lettered (stale "Active" count in the UI).
+    if (execution && !alreadyTerminal) {
+      await this.releaseAgentAfterFailure(execution.agentId);
+    }
+
+    // 2. Record in the DLQ for operator visibility (idempotent).
+    if (execution) {
+      const existing = await this.deadLetterQueue.getByExecution(lease.executionId);
+      if (!existing) {
+        const dlqEntry: DeadLetterEntry = {
+          id: createId(),
+          executionId: lease.executionId,
+          agentId: execution.agentId,
+          workerId: this.config.workerId,
+          failureCount: lease.attempt,
+          lastError: execution.failure?.message ?? reason,
+          firstFailedAt: execution.startedAt,
+          movedAt: toIso(now),
+          taskSnapshot: execution.input
+        };
+        try {
+          await this.deadLetterQueue.push(dlqEntry);
+          await this.publisher.publish(
+            this.eventFactory.create({
+              type: "EXECUTION_DEAD_LETTERED",
+              aggregateId: lease.executionId,
+              aggregateType: "EXECUTION",
+              payload: {
+                executionId: lease.executionId,
+                workerId: this.config.workerId,
+                failureCount: lease.attempt,
+                lastError: dlqEntry.lastError,
+                movedAt: dlqEntry.movedAt
+              }
+            })
+          );
+        } catch (err) {
+          this.logger.error(
+            { err, executionId: lease.executionId },
+            "recover: failed to push exhausted execution to DLQ"
+          );
+        }
+      }
+    }
+
+    // 3. Conclude the recovery coordination record (best-effort).
+    try {
+      await this.orchestrator.abortRecovery({
+        executionId: lease.executionId,
+        workerId: this.config.workerId,
+        ownerEpoch: prospectiveEpoch,
+        reason
+      });
+    } catch {
+      // best-effort — the lease terminalization below is what actually stops
+      // the execution from being re-surfaced.
+    }
+
+    // 4. Terminalize the lease so reclaimExpired never re-surfaces it. release()
+    //    only acts on an active lease and the stranded lease is EXPIRED, so take
+    //    a fresh recovery ownership first, then release it to TRANSFERRED.
+    try {
+      const held = acquireFencingToken();
+      const owned = await this.leases.takeoverRecovery(
+        lease.executionId,
+        this.config.workerId,
+        now,
+        this.config.leaseTtlMs
+      );
+      if (owned) {
+        assertCanWrite(held);
+        await this.leases.release(lease.executionId, this.config.workerId, now);
+      }
+    } catch (err) {
+      this.logger.error(
+        { err, executionId: lease.executionId },
+        "recover: failed to terminalize lease for exhausted execution"
+      );
+    }
+
+    this.logger.warn(
+      {
+        executionId: lease.executionId,
+        attemptCount: lease.attempt,
+        maxAttempts: this.config.maxPoisonPillAttempts,
+        reason
+      },
+      "recover: dead-lettered execution with exhausted recovery attempts"
+    );
   }
 
   private async recoverOneAdmitted(lease: ExecutionLease, heldFencing: { token: number; regionId: string }): Promise<boolean> {

@@ -3,6 +3,9 @@ import type { Topology } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { GraphGuide } from "@/components/explain/graph-guide";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export function CoordinationPressurePanel({ topology }: { topology?: Topology }) {
   const summary = topology?.pressure;
@@ -15,13 +18,16 @@ export function CoordinationPressurePanel({ topology }: { topology?: Topology })
   return (
     <Card className="h-[360px]">
       <CardHeader>
-        <CardTitle>Coordination Pressure</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="coordination-pressure" as="span">Coordination Pressure</ExplainLabel>
+        </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant="muted">mean {summary?.meanCongestion?.toFixed(1) ?? "0.0"}</Badge>
           <Badge variant="muted">peak {summary?.peakCongestion?.toFixed(1) ?? "0.0"}</Badge>
         </div>
       </CardHeader>
       <CardContent className="h-[305px] overflow-auto space-y-2">
+        {nodes.length ? <GraphGuide concept="coordination-pressure" value={Math.round(summary?.meanCongestion ?? 0)} className="mb-1" /> : null}
         {nodes.length ? nodes.map((node) => {
           const share = peak ? node.congestion / peak : 0;
           return (
@@ -47,7 +53,7 @@ export function CoordinationPressurePanel({ topology }: { topology?: Topology })
             </div>
           );
         }) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No coordination data</div>
+          <ExplainedEmptyState concept="coordination-pressure" className="h-full justify-center border-0 bg-transparent" />
         )}
       </CardContent>
     </Card>

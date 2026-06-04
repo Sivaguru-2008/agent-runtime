@@ -7,15 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   typedRoutes: false,
-  outputFileTracingRoot: path.join(__dirname, "../.."),
-  async rewrites() {
-    return [
-      {
-        source: "/api/runtime/:path*",
-        destination: "http://localhost:4000/:path*"
-      }
-    ];
-  }
+  outputFileTracingRoot: path.join(__dirname, "../..")
 };
 
 export default nextConfig;

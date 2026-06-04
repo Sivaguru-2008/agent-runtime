@@ -43,6 +43,7 @@ import { Button } from "@/components/ui/button";
 import { operatorApi } from "@/services/operator-api";
 import { cognitionApi, type BranchPointer, type ReplayDiff, type CognitionGraphView } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 import {
   AlertTriangle,
   GitBranch,
@@ -640,9 +641,11 @@ function ComparePanel({ sourceCognitionId }: { sourceCognitionId: string }) {
       </div>
 
       {branches.length === 0 ? (
-        <div className="text-zinc-500 text-xs p-3 text-center border border-zinc-800 rounded">
-          No branches exist yet. Use the Branch tab to create one.
-        </div>
+        <ExplainedEmptyState
+          concept="compare"
+          title="Nothing to compare yet"
+          body="Comparison needs at least one branch to put side-by-side with the original. Create a branch (fork from any frame) first, then come back to compare them."
+        />
       ) : (
         <>
           <div className="flex items-end gap-2">

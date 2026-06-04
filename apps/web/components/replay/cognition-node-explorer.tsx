@@ -39,6 +39,9 @@ import {
 } from "@/lib/cognition-api";
 import { cn, formatDuration, formatTime } from "@/lib/utils";
 import { AlertTriangle, ChevronDown, ChevronRight, GitBranch } from "lucide-react";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
+import { translateStatus } from "@/lib/explain/status";
 
 export interface CognitionNodeExplorerProps {
   cognitionId: string;
@@ -143,11 +146,11 @@ export function CognitionNodeExplorer({ cognitionId, onBranchFromNode }: Cogniti
       {/* Graph header */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className="text-sm font-medium text-zinc-200">
+          <ExplainLabel concept="nodes" as="span" className="text-sm font-medium text-zinc-200">
             Cognition Node Explorer
-          </div>
+          </ExplainLabel>
           <div className="text-xs text-zinc-500 font-mono mt-0.5">
-            {cognitionId.slice(0, 16)}… · {view.graph.nodes.length} nodes · phase: {view.graph.phase}
+            {cognitionId.slice(0, 16)}… · {view.graph.nodes.length} nodes · phase: {translateStatus(view.graph.phase).label}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -263,10 +266,10 @@ function NodeListItem({
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span className={cn("text-xs font-mono", ROLE_COLORS[node.role])}>{node.role}</span>
+          <span className={cn("text-xs font-mono", ROLE_COLORS[node.role])} title={node.role}>{translateStatus(node.role).label}</span>
           <span className="text-zinc-600 text-xs">#{node.sequence}</span>
         </div>
-        <span className={cn("text-[10px]", STATUS_COLORS[node.status] ?? "text-zinc-500")}>{node.status}</span>
+        <span className={cn("text-[10px]", STATUS_COLORS[node.status] ?? "text-zinc-500")} title={node.status}>{translateStatus(node.status).label}</span>
       </div>
       {/* Uncertainty bar */}
       <div className="mt-1.5 h-1 bg-zinc-800 rounded overflow-hidden">
@@ -313,9 +316,9 @@ function NodeDetail({
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className={cn("text-sm font-medium", ROLE_COLORS[node.role])}>{node.role}</span>
+            <span className={cn("text-sm font-medium", ROLE_COLORS[node.role])} title={node.role}>{translateStatus(node.role).label}</span>
             <span className="text-zinc-500 text-xs">seq #{node.sequence}</span>
-            <span className={cn("text-xs font-mono", STATUS_COLORS[node.status] ?? "text-zinc-500")}>{node.status}</span>
+            <span className={cn("text-xs font-mono", STATUS_COLORS[node.status] ?? "text-zinc-500")} title={node.status}>{translateStatus(node.status).label}</span>
           </div>
           <div className="font-mono text-xs text-zinc-500 mt-0.5">{node.id.slice(0, 20)}…</div>
         </div>
@@ -433,9 +436,11 @@ function LineageView({
 
   if (lineage.length === 0) {
     return (
-      <div className="text-zinc-500 text-sm p-4 text-center border border-zinc-800 rounded">
-        No lineage data available for this cognition.
-      </div>
+      <ExplainedEmptyState
+        concept="nodes"
+        title="No lineage to trace"
+        body="This run's reasoning steps aren't linked into an ancestry chain yet. Lineage shows which step fed which — pick a run with connected reasoning steps to explore it."
+      />
     );
   }
 
@@ -498,12 +503,7 @@ function BranchesView({
 }) {
   if (branches.length === 0) {
     return (
-      <div className="text-zinc-500 text-sm p-4 text-center border border-zinc-800 rounded">
-        No branches forked from this cognition yet.
-        <div className="mt-1 text-xs text-zinc-600">
-          Use "Branch here" on any node to fork a new replay branch.
-        </div>
-      </div>
+      <ExplainedEmptyState concept="branch" />
     );
   }
 

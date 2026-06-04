@@ -21,6 +21,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { operatorApi, type LeaseMapEntry } from "../../services/operator-api";
 import { AlertTriangle, Clock, Shield, User } from "lucide-react";
+import { ExplainLabel } from "../explain/explain-label";
+import { StatusPill } from "../explain/status-pill";
+import { ExplainedEmptyState } from "../explain/empty-state";
+import { WhyChip } from "../explain/why-chip";
 
 function formatMs(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)}ms`;
@@ -70,25 +74,17 @@ function LeaseRow({ entry, onDrilldown }: LeaseRowProps) {
             <div className="text-xs text-zinc-500 mt-0.5">
               agent: <span className="text-zinc-400 font-mono">{execution.agentId}</span>
               {" · "}
-              <span
-                className={
-                  execution.status === "FAILED"
-                    ? "text-red-400"
-                    : execution.status === "COMPLETED"
-                    ? "text-emerald-400"
-                    : "text-zinc-400"
-                }
-              >
-                {execution.status}
-              </span>
+              <StatusPill status={execution.status} dot={false} className="px-1.5 py-0 align-middle" />
             </div>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {isRetried && (
-            <span className="text-xs text-yellow-400 bg-yellow-900/30 border border-yellow-700/50 px-1.5 py-0.5 rounded">
-              attempt #{attemptCount}
-            </span>
+            <WhyChip
+              label={`attempt #${attemptCount}`}
+              question={`Why is this on attempt #${attemptCount}?`}
+              answer="This task's lease was reclaimed at least once: the worker holding it stopped renewing (it crashed, stalled, or was network-split), so the recovery loop handed the task to another worker. Repeated attempts signal instability worth investigating."
+            />
           )}
           {isExpiring && (
             <AlertTriangle className="h-3.5 w-3.5 text-red-400" />
@@ -107,7 +103,8 @@ function LeaseRow({ entry, onDrilldown }: LeaseRowProps) {
         </div>
         <div className="flex items-center gap-1 text-zinc-500">
           <Shield className="h-3 w-3" />
-          <span>remaining: <span className={isExpiring ? "text-red-400 font-medium" : "text-zinc-300"}>{formatMs(remainingMs)}</span></span>
+          <ExplainLabel concept="lease-ttl">remaining</ExplainLabel>
+          <span>: <span className={isExpiring ? "text-red-400 font-medium" : "text-zinc-300"}>{formatMs(remainingMs)}</span></span>
         </div>
         <div className="flex items-center gap-1 text-zinc-500">
           <User className="h-3 w-3" />
@@ -160,14 +157,17 @@ export function LeaseOwnershipPanel({ onDrilldown }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">Lease Ownership</h2>
+        <div className="flex items-center gap-2">
+          <ExplainLabel concept="leases" as="span" className="text-base font-semibold text-white">
+            Lease Ownership
+          </ExplainLabel>
+          <WhyChip concept="lease" />
+        </div>
         <span className="text-xs text-zinc-500">{entries.length} active</span>
       </div>
 
       {entries.length === 0 ? (
-        <div className="text-zinc-500 text-sm p-4 text-center border border-zinc-800 rounded-lg">
-          No active leases — no executions running.
-        </div>
+        <ExplainedEmptyState concept="leases" />
       ) : (
         <div className="space-y-2">
           {entries.map((entry) => (

@@ -55,11 +55,56 @@ export interface PgPoolStats {
   outstanding: number;
 }
 
+/**
+ * Resolve the pg SSL option from `DATABASE_SSL`.
+ *
+ * Managed Postgres (Neon, Supabase, Render, Fly, Aurora) terminates TLS and,
+ * unless TLS is negotiated, the connection is refused — which in strict/prod
+ * mode crashes the boot probe (`SELECT 1` → exit 2). Local Docker Postgres has
+ * no TLS, so SSL must stay OFF by default and be opted into for hosted deploys.
+ *
+ *   (unset) | "false" | "disable"        → no SSL          (local Docker)
+ *   "require" | "no-verify"              → TLS, skip CA verify (most managed PG)
+ *   "verify-full" | "strict" | "true"    → TLS, verify the CA chain
+ *
+ * Most managed providers present a CA the default Node trust store does not
+ * carry, so `require` (rejectUnauthorized:false) is the pragmatic hosted
+ * default. Use `verify-full` only when you have pinned the provider CA.
+ */
+export function resolvePoolSsl(
+  mode: string | undefined = process.env.DATABASE_SSL
+): false | { rejectUnauthorized: boolean } {
+  switch ((mode ?? "").trim().toLowerCase()) {
+    case "":
+    case "false":
+    case "disable":
+    case "off":
+      return false;
+    case "require":
+    case "no-verify":
+    case "prefer":
+      return { rejectUnauthorized: false };
+    case "verify-full":
+    case "verify-ca":
+    case "strict":
+    case "true":
+      return { rejectUnauthorized: true };
+    default:
+      return false;
+  }
+}
+
 export interface PgClientOptions {
   /** Connection string. Required. */
   connectionString: string;
   /** Max pool clients. Defaults to env PG_POOL_MAX or 10. */
   max?: number;
+  /**
+   * TLS configuration. Defaults to {@link resolvePoolSsl} reading the
+   * `DATABASE_SSL` env var. Pass `false` to force-disable for an in-process
+   * test pool.
+   */
+  ssl?: false | { rejectUnauthorized: boolean };
   /**
    * Threshold (ms) after which a still-held `acquire()` token logs a leak
    * warning. Set high enough (default 30s) that legitimate long transactions
@@ -97,6 +142,7 @@ class PgPoolClient implements PgClient {
         : 30_000);
     this.pool = new pg.Pool({
       connectionString: opts.connectionString,
+      ssl: opts.ssl ?? resolvePoolSsl(),
       max,
       idleTimeoutMillis: opts.idleTimeoutMillis ?? 10_000,
       // statement_timeout protects against runaway queries holding a connection

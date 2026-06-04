@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Reliability Runtime for Production AI Agents</title>
+  <meta name="description" content="Event-sourced execution, SQL-level fencing, and deterministic replay so AI agents never double-charge Stripe — even when a worker crashes mid-refund." />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:title" content="We make it safe for AI agents to touch money in production" />
+  <meta property="og:description" content="Your agent issues a $150 refund, the next step fails, the retry fires — and the customer is refunded twice. We make that structurally impossible." />
+  <meta property="og:type" content="website" />
+  <!-- <meta property="og:image" content="REPLACE_OG_IMAGE_URL" /> -->
+
+  <!--
+    P1.5 landing page. Self-contained — deploy by dragging this folder to Netlify/Vercel/GitHub Pages.
+    BEFORE PUBLISHING, replace every REPLACE_* token below:
+      REPLACE_DEMO_VIDEO_EMBED  → YouTube embed URL (e.g. https://www.youtube.com/embed/XXXX)
+      REPLACE_DEPLOY_URL        → your hosted API base URL (P0.2)
+      REPLACE_SIGNUP_URL        → <deploy-url>/signup (P0.4)
+      REPLACE_DOCS_URL          → docs link (fencing + replay guarantees)
+      REPLACE_PKG               → published npm package name (P0.3)
+      REPLACE_UTM               → ?utm_source=landing&utm_medium=cta (so the funnel attributes it)
+    The CTA links carry UTM so the funnel analytics you shipped attributes signups to this page.
+  -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background:#070708; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body class="text-zinc-100 antialiased">
+
+  <!-- Nav -->
+  <header class="flex items-center justify-between max-w-6xl mx-auto px-6 py-5">
+    <div class="font-semibold tracking-tight">Agent Reliability Runtime</div>
+    <nav class="flex items-center gap-3 text-sm">
+      <a href="REPLACE_DOCS_URL" class="text-zinc-400 hover:text-zinc-100 transition">Docs</a>
+      <a href="#how" class="text-zinc-400 hover:text-zinc-100 transition hidden sm:inline">How it works</a>
+      <a href="REPLACE_SIGNUP_URLREPLACE_UTM"
+         class="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 font-medium transition">Get an API key</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
+    <p class="text-blue-400 text-sm font-medium mb-4">For teams running AI agents that touch money or infrastructure</p>
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
+      Your AI agents will fail silently.<br />
+      <span class="text-blue-400">We make it safe to fail in production.</span>
+    </h1>
+    <p class="mt-6 text-lg text-zinc-400 max-w-2xl mx-auto">
+      The transactional, event-sourced runtime that prevents data corruption, duplicate
+      side-effects, and runaway LLM loops when external infrastructure fails — so a Stripe
+      refund is <em>never</em> issued twice.
+    </p>
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="REPLACE_SIGNUP_URLREPLACE_UTM"
+         class="w-full sm:w-auto rounded-lg bg-blue-600 hover:bg-blue-500 px-6 py-3 font-semibold transition">
+        Deploy your first agent
+      </a>
+      <a href="#demo"
+         class="w-full sm:w-auto rounded-lg border border-zinc-700 hover:border-blue-500 px-6 py-3 font-semibold text-zinc-300 hover:text-blue-300 transition">
+        Watch the 2:30 demo
+      </a>
+    </div>
+    <div class="mt-6 inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2 mono text-sm text-zinc-300">
+      <span class="text-zinc-500">$</span> npm install REPLACE_PKG
+    </div>
+  </section>
+
+  <!-- The failure narrative -->
+  <section class="max-w-3xl mx-auto px-6 py-10">
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6">
+      <h2 class="text-lg font-semibold text-rose-400">The silent failure mode</h2>
+      <p class="mt-3 text-zinc-300 leading-relaxed">
+        An agent issues a <span class="text-zinc-100 font-medium">$150 Stripe refund</span>. The next step —
+        logging it to your database — times out. Your retry logic fires and re-runs the agent's plan.
+        The agent calls Stripe again.
+      </p>
+      <p class="mt-3 text-zinc-400 leading-relaxed">
+        You just refunded the customer twice. LLM agents plan steps <em>dynamically</em>, so a naive retry
+        re-runs the whole plan — every external call repeats. Money moves twice. State corrupts.
+      </p>
+    </div>
+  </section>
+
+  <!-- Demo video -->
+  <section id="demo" class="max-w-4xl mx-auto px-6 py-12">
+    <h2 class="text-2xl font-bold text-center">See a worker crash mid-refund — and recover safely</h2>
+    <p class="mt-2 text-center text-zinc-400">Kill the worker mid-execution. A standby hydrates from the last checkpoint, skips the already-done refund (fenced 🔒), and finishes the ledger write. Charged once.</p>
+    <div class="mt-6 aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+      <!-- Replace src with your unlisted YouTube embed (P1.3). Fallback: link the mp4 directly. -->
+      <iframe class="w-full h-full" src="REPLACE_DEMO_VIDEO_EMBED" title="Demo: Stripe is never double-charged"
+              frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how" class="max-w-5xl mx-auto px-6 py-12">
+    <h2 class="text-2xl font-bold text-center">How it works</h2>
+    <div class="mt-8 grid gap-5 sm:grid-cols-3">
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+        <div class="text-emerald-400 font-semibold">1 · Event sourcing</div>
+        <p class="mt-2 text-sm text-zinc-400 leading-relaxed">Every step is an append-only event, not a mutable row that races under recovery. State is rebuilt by replaying the log.</p>
+      </div>
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+        <div class="text-blue-400 font-semibold">2 · SQL-level fencing</div>
+        <p class="mt-2 text-sm text-zinc-400 leading-relaxed">Each side effect reserves a deterministic idempotency key in the same transaction that validates the worker's fence token. A stale worker is rejected at the database.</p>
+      </div>
+      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+        <div class="text-indigo-400 font-semibold">3 · Deterministic replay</div>
+        <p class="mt-2 text-sm text-zinc-400 leading-relaxed">Rewind any failed run from any point. A chain-hash divergence detector makes replays verifiable — you can prove no external call was duplicated.</p>
+      </div>
+    </div>
+    <p class="mt-6 text-center text-sm text-zinc-500">One Node process + Postgres. No Redis, no Kubernetes to try it.</p>
+  </section>
+
+  <!-- CTA / design partner -->
+  <section class="max-w-3xl mx-auto px-6 py-16 text-center">
+    <h2 class="text-2xl font-bold">Run agents that touch money or infra?</h2>
+    <p class="mt-3 text-zinc-400">I'm pre-customers and looking for 5 design partners. Free early access + hands-on help getting it running on one real failure case, in exchange for 30 minutes of honest feedback.</p>
+    <div class="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="REPLACE_SIGNUP_URLREPLACE_UTM"
+         class="w-full sm:w-auto rounded-lg bg-blue-600 hover:bg-blue-500 px-6 py-3 font-semibold transition">Deploy your first agent</a>
+      <a href="mailto:REPLACE_FOUNDER_EMAIL?subject=Design%20partner%20—%20agent%20reliability"
+         class="w-full sm:w-auto rounded-lg border border-zinc-700 hover:border-blue-500 px-6 py-3 font-semibold text-zinc-300 hover:text-blue-300 transition">Talk to me</a>
+    </div>
+  </section>
+
+  <footer class="max-w-6xl mx-auto px-6 py-10 border-t border-zinc-900 text-sm text-zinc-600 flex flex-col sm:flex-row justify-between gap-2">
+    <span>Agent Reliability Runtime</span>
+    <span><a href="REPLACE_DOCS_URL" class="hover:text-zinc-400">Docs</a> · <a href="REPLACE_DEPLOY_URL" class="hover:text-zinc-400">Hosted API</a></span>
+  </footer>
+
+</body>
+</html>

@@ -36,6 +36,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 import {
   cognitionApi,
   CognitionApiError,
@@ -359,7 +360,12 @@ function CausalChainView({
       )}
 
       {!loading && !chain && (
-        <div className="text-xs text-zinc-500">No causal chain available for this execution.</div>
+        <ExplainedEmptyState
+          concept="root-cause"
+          title="No causal chain to trace"
+          body="No failure signals were linked into a cause-and-effect chain for this execution — usually because it didn't fail, or the failure was isolated to a single step."
+          className="py-6"
+        />
       )}
 
       {chain && (
@@ -473,7 +479,15 @@ function KindInspectionPanel({
   onSeekToFrame?: (i: number) => void;
 }) {
   if (signals.length === 0) {
-    return <div className="text-zinc-500 text-xs p-3 border border-zinc-800 rounded">No {kind} signals found.</div>;
+    const kindLabel = SIGNAL_KIND_LABELS[kind] ?? kind;
+    return (
+      <ExplainedEmptyState
+        concept="root-cause"
+        title={`No ${kindLabel} signals found`}
+        body={`This run recorded no ${kindLabel.toLowerCase()} signals, so there's nothing to inspect for this category.`}
+        className="px-4 py-6"
+      />
+    );
   }
 
   return (

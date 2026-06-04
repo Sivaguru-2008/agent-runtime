@@ -120,6 +120,9 @@ class FlakyExecutionRepository implements ExecutionRepository {
   async listByAgent(agentId: string): Promise<Execution[]> {
     return this.delegate.listByAgent(agentId);
   }
+  async listByStatus(status: Execution["status"]): Promise<Execution[]> {
+    return this.delegate.listByStatus(status);
+  }
   breakSave(): void {
     this.broken = true;
   }

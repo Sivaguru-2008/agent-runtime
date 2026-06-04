@@ -28,6 +28,24 @@ export function deriveEventLinks(event: DomainEvent): {
   executions: EventExecutionLink[];
   cognitions: string[];
 } {
+  // REPLAY_SESSION_CREATED records that an operator opened a replay VIEWER over
+  // a cognition; it is not part of the execution's causal event history. Its
+  // aggregateId is the cognitionId (not an executionId) and its payload carries
+  // the executionId only for routing. Linking it into event_execution_links
+  // would fold it into every execution-log consumer that derives replay
+  // semantics from the log — divergence certification (chainHash/eventCount),
+  // parent-log watermark staleness (false NonReconstructable aborts), recovery
+  // cursor selection, and frame materialization. We link it to the cognition
+  // only (so listByCognition / the operator timeline still surface it) and keep
+  // it out of the execution log entirely.
+  if (event.type === "REPLAY_SESSION_CREATED") {
+    const cognitionId = (event.payload as Record<string, unknown>)?.cognitionId;
+    return {
+      executions: [],
+      cognitions: typeof cognitionId === "string" && cognitionId ? [cognitionId] : []
+    };
+  }
+
   const executions = new Map<string, EventExecutionLink["kind"]>();
   const cognitions = new Set<string>();
 

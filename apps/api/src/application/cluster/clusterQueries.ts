@@ -1,3 +1,4 @@
+import { isLiveWorker } from "../../domain/cluster.js";
 import type { ClusterOverview, ExecutionLease, RuntimeWorker } from "../../domain/cluster.js";
 import type { CheckpointStore, LeaseStore, WorkerRegistry } from "../../domain/clusterPorts.js";
 import type { ExecutionRepository } from "../../domain/ports.js";
@@ -24,8 +25,12 @@ export class ClusterQueries {
     const workers = await this.registry.list();
     const leases = await this.leases.listActive();
     const now = Date.now();
+    // "Mean across live workers": only workers still in the fleet count toward
+    // the heartbeat-age mean. LOST/STOPPED workers are excluded — otherwise a
+    // single long-dead worker (e.g. a renamed embedded worker that lingered)
+    // drags the mean to multi-day nonsense values.
     const ages = workers
-      .filter((worker) => worker.status !== "STOPPED")
+      .filter((worker) => isLiveWorker(worker.status))
       .map((worker) => now - new Date(worker.lastHeartbeatAt).getTime());
     const mean = ages.length ? ages.reduce((sum, age) => sum + age, 0) / ages.length : 0;
     const eventsPerSecond = workers.reduce((sum, worker) => sum + worker.load.eventsPerSecond, 0);

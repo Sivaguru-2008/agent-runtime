@@ -7,10 +7,16 @@ export class PostgresBranchRegistry implements BranchRegistry {
 
   async record(pointer: BranchPointer): Promise<void> {
     await this.client.query(
+      // tenant_id (migration 0025) resolves through the source cognition's
+      // tenant — a PK lookup on cognition_graphs (already tenant-columned by
+      // 0005), so no scan. Unresolvable source falls back to 'system'.
       `insert into replay_branches (
          branch_cognition_id, source_cognition_id, source_node_id,
-         branch_point_frame_index, reason, created_at
-       ) values ($1, $2, $3, $4, $5, $6)
+         branch_point_frame_index, reason, created_at, tenant_id
+       ) values (
+         $1, $2, $3, $4, $5, $6,
+         coalesce((select tenant_id from cognition_graphs where id = $2), 'system')
+       )
        on conflict (branch_cognition_id) do nothing`,
       [
         pointer.branchCognitionId,

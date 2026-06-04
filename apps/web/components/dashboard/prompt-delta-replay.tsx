@@ -6,6 +6,7 @@ import type { PromptDelta } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 import { formatTime } from "@/lib/utils";
 
 export function PromptDeltaReplay({ deltas }: { deltas?: PromptDelta[] }) {
@@ -56,7 +57,11 @@ export function PromptDeltaReplay({ deltas }: { deltas?: PromptDelta[] }) {
             ) : null}
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No prompt mutations</div>
+          <ExplainedEmptyState
+            className="h-full"
+            title="No prompt mutations"
+            body="The prompt didn't change across this execution's replays, so there are no deltas to compare here."
+          />
         )}
       </CardContent>
     </Card>

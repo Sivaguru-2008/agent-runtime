@@ -3,6 +3,9 @@ import type { DecisionHeatmap } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatDuration } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { GraphGuide } from "@/components/explain/graph-guide";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export function DecisionHeatmapPanel({ heatmap }: { heatmap?: DecisionHeatmap }) {
   const nodes = heatmap?.nodes ?? [];
@@ -10,13 +13,16 @@ export function DecisionHeatmapPanel({ heatmap }: { heatmap?: DecisionHeatmap })
   return (
     <Card className="h-[360px]">
       <CardHeader>
-        <CardTitle>Decision Heatmap</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="decision-heatmap" as="span">Decision Heatmap</ExplainLabel>
+        </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant="muted">{nodes.length} nodes</Badge>
           <Badge variant="muted">{heatmap?.totals.tokens ?? 0} tokens</Badge>
         </div>
       </CardHeader>
       <CardContent className="h-[305px] overflow-auto space-y-2">
+        {nodes.length ? <GraphGuide concept="decision-heatmap" className="mb-1" /> : null}
         {nodes.length ? nodes.map((node) => {
           const intensity = node.reasoningIntensity;
           return (
@@ -44,7 +50,7 @@ export function DecisionHeatmapPanel({ heatmap }: { heatmap?: DecisionHeatmap })
             </div>
           );
         }) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No heatmap data</div>
+          <ExplainedEmptyState concept="decision-heatmap" className="h-full justify-center border-0 bg-transparent" />
         )}
       </CardContent>
     </Card>

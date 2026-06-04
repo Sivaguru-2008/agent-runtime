@@ -27,8 +27,8 @@ export class PostgresCognitionRepository implements CognitionRepository {
         `insert into cognition_graphs (
            id, execution_id, agent_id, parent_cognition_id, parent_node_id,
            phase, started_at, completed_at, output, owner_worker_id,
-           uncertainty, graph, updated_at, tenant_id
-         ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, '{"nodes":[],"handoffs":[]}'::jsonb, now(), $12)
+           uncertainty, graph, updated_at, tenant_id, trace_id
+         ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, '{"nodes":[],"handoffs":[]}'::jsonb, now(), $12, $13)
          on conflict (id) do update set
            phase = excluded.phase,
            completed_at = excluded.completed_at,
@@ -36,7 +36,8 @@ export class PostgresCognitionRepository implements CognitionRepository {
            owner_worker_id = excluded.owner_worker_id,
            uncertainty = excluded.uncertainty,
            updated_at = now(),
-           tenant_id = excluded.tenant_id`,
+           tenant_id = excluded.tenant_id,
+           trace_id = coalesce(excluded.trace_id, cognition_graphs.trace_id)`,
         [
           graph.id,
           graph.executionId,
@@ -49,7 +50,8 @@ export class PostgresCognitionRepository implements CognitionRepository {
           graph.output ? JSON.stringify(graph.output) : null,
           graph.ownerWorkerId ?? null,
           graph.uncertainty ? JSON.stringify(graph.uncertainty) : null,
-          tenantId
+          tenantId,
+          graph.traceId ?? null
         ]
       );
 
@@ -87,7 +89,7 @@ export class PostgresCognitionRepository implements CognitionRepository {
     const { rows } = await this.client.query<GraphRow>(
       `select id, execution_id, agent_id, parent_cognition_id, parent_node_id,
               phase, started_at, completed_at, output, owner_worker_id,
-              uncertainty, graph, tenant_id
+              uncertainty, graph, tenant_id, trace_id
          from cognition_graphs where id = $1`,
       [id]
     );
@@ -99,7 +101,7 @@ export class PostgresCognitionRepository implements CognitionRepository {
     const { rows } = await this.client.query<GraphRow>(
       `select id, execution_id, agent_id, parent_cognition_id, parent_node_id,
               phase, started_at, completed_at, output, owner_worker_id,
-              uncertainty, graph, tenant_id
+              uncertainty, graph, tenant_id, trace_id
          from cognition_graphs
          where execution_id = $1
          order by started_at desc
@@ -114,13 +116,13 @@ export class PostgresCognitionRepository implements CognitionRepository {
     const { rows } = await this.client.query<any>(
       `select g.id, g.execution_id, g.agent_id, g.parent_cognition_id, g.parent_node_id,
               g.phase, g.started_at, g.completed_at, g.output, g.owner_worker_id,
-              g.uncertainty, g.tenant_id,
+              g.uncertainty, g.tenant_id, g.trace_id,
               count(n.id) as node_count
          from cognition_graphs g
          left join cognition_nodes n on n.cognition_id = g.id
          group by g.id, g.execution_id, g.agent_id, g.parent_cognition_id, g.parent_node_id,
                   g.phase, g.started_at, g.completed_at, g.output, g.owner_worker_id,
-                  g.uncertainty, g.tenant_id
+                  g.uncertainty, g.tenant_id, g.trace_id
          order by g.started_at desc
          limit $1`,
       [limit]
@@ -134,6 +136,7 @@ export class PostgresCognitionRepository implements CognitionRepository {
         parentCognitionId: r.parent_cognition_id ?? undefined,
         parentNodeId: r.parent_node_id ?? undefined,
         tenantId: r.tenant_id ?? undefined,
+        traceId: r.trace_id ?? undefined,
         phase: r.phase as CognitionGraph["phase"],
         startedAt: toIso(r.started_at),
         completedAt: r.completed_at ? toIso(r.completed_at) : undefined,
@@ -150,7 +153,7 @@ export class PostgresCognitionRepository implements CognitionRepository {
     const { rows } = await this.client.query<GraphRow>(
       `select id, execution_id, agent_id, parent_cognition_id, parent_node_id,
               phase, started_at, completed_at, output, owner_worker_id,
-              uncertainty, graph, tenant_id
+              uncertainty, graph, tenant_id, trace_id
          from cognition_graphs
          where parent_cognition_id = $1
          order by started_at asc`,
@@ -220,6 +223,7 @@ export class PostgresCognitionRepository implements CognitionRepository {
         parentCognitionId: row.parent_cognition_id ?? undefined,
         parentNodeId: row.parent_node_id ?? undefined,
         tenantId: row.tenant_id ?? undefined,
+        traceId: row.trace_id ?? undefined,
         phase: row.phase as CognitionGraph["phase"],
         startedAt: toIso(row.started_at),
         completedAt: row.completed_at ? toIso(row.completed_at) : undefined,
@@ -317,6 +321,8 @@ interface GraphRow {
   uncertainty: Record<string, unknown> | null;
   graph: { nodes: CognitionNode[]; handoffs: CognitionGraph["handoffs"] } | null;
   tenant_id?: string | null;
+  /** Persisted distributed trace correlation id (migration 0023). */
+  trace_id?: string | null;
 }
 
 function rowToGraph(row: GraphRow): CognitionGraph {
@@ -328,6 +334,7 @@ function rowToGraph(row: GraphRow): CognitionGraph {
     parentCognitionId: row.parent_cognition_id ?? undefined,
     parentNodeId: row.parent_node_id ?? undefined,
     tenantId: row.tenant_id ?? undefined,
+    traceId: row.trace_id ?? undefined,
     phase: row.phase as CognitionGraph["phase"],
     startedAt: toIso(row.started_at),
     completedAt: row.completed_at ? toIso(row.completed_at) : undefined,

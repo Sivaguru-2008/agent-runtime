@@ -86,6 +86,14 @@ export interface Execution {
    * enforcement. Optional on the type for back-compat with replay fixtures.
    */
   tenantId?: string;
+  /**
+   * Distributed trace correlation id, threaded from the originating request
+   * context at execution creation. Optional for back-compat; observability
+   * routes fall back to resolving it from the execution's event log when a
+   * persisted value is unavailable (e.g. the Postgres executions table predates
+   * the column).
+   */
+  traceId?: string;
 }
 
 export interface ExecutionStep {

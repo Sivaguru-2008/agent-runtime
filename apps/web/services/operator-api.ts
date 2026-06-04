@@ -6,13 +6,26 @@
  * never constructs raw URLs.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// Single backend URL source: route through the Next proxy at /api/runtime like
+// every other client (lib/api.ts, lib/cognition-api.ts, services/playground-api.ts,
+// hooks/use-backend-health.ts). Talking to http://localhost:4000 directly from
+// the browser bypassed the proxy's circuit breaker, IPv4/IPv6 normalisation and
+// structured error envelopes, and broke the moment the backend host/port moved.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api/runtime";
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { Accept: "application/json" },
-    next: { revalidate: 0 }
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 0 }
+    });
+  } catch (err) {
+    throw new Error(
+      `Backend is unavailable — ensure the API server is running on port 4000. ` +
+        `(${err instanceof Error ? err.message : String(err)})`
+    );
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`GET ${path} failed (${res.status}): ${body}`);
@@ -112,6 +125,10 @@ export interface DeadLetterEntry {
 
 export interface ExecutionDiagnosis {
   executionId: string;
+  /** Distributed trace id, resolved server-side from the execution's events. */
+  traceId?: string;
+  /** Runtime correlation id of the request that produced this diagnosis. */
+  runtimeId?: string;
   execution: { id: string; agentId: string; status: string; createdAt?: string; completedAt?: string } | undefined;
   checkpoint: {
     id: string;
@@ -206,12 +223,20 @@ export interface OperatorInjectResult {
 // ── API functions ─────────────────────────────────────────────────────────
 
 async function post<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    next: { revalidate: 0 }
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      next: { revalidate: 0 }
+    });
+  } catch (err) {
+    throw new Error(
+      `Backend is unavailable — ensure the API server is running on port 4000. ` +
+        `(${err instanceof Error ? err.message : String(err)})`
+    );
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`POST ${path} failed (${res.status}): ${text}`);
@@ -258,8 +283,181 @@ export interface MemoryTrustData {
   }>;
 }
 
+// ── Activation funnel (admin-gated) ──────────────────────────────────────
+// Mirrors GET /admin/funnel: how many self-serve signups went on to run their
+// first agent. The single founder-facing growth number.
+
+export interface FunnelSource {
+  source: string;
+  signups: number;
+  activated: number;
+  activationRate: number;
+}
+
+export interface FunnelData {
+  total: number;
+  activated: number;
+  activationRate: number;
+  bySource: FunnelSource[];
+}
+
+// ── Historical funnel (admin-gated) ──────────────────────────────────────
+// Mirrors GET /admin/funnel/history: signup→activation conversion bucketed by
+// signup time over a window. Buckets are cohort-based (a bucket's `activated`
+// = tenants who signed up in it and have since activated).
+
+export type FunnelGranularity = "day" | "week" | "month";
+
+export interface FunnelHistoryBucket {
+  /** Bucket start, ISO-8601 UTC. */
+  bucket: string;
+  signups: number;
+  activated: number;
+  activationRate: number;
+}
+
+export interface FunnelHistory {
+  from: string;
+  to: string;
+  granularity: FunnelGranularity;
+  buckets: FunnelHistoryBucket[];
+  totals: { signups: number; activated: number; activationRate: number };
+}
+
+// ── Phase 2: cohorts, segmentation, period comparison, health, alerts ───────
+
+export type CohortGranularity = "week" | "month";
+
+export interface CohortCell {
+  period: number;
+  activated: number;
+  rate: number;
+}
+export interface Cohort {
+  cohort: string;
+  size: number;
+  cells: CohortCell[];
+}
+export interface CohortReport {
+  cohortBy: CohortGranularity;
+  periods: number;
+  cohorts: Cohort[];
+}
+
+export interface RetentionCell {
+  period: number;
+  active: number;
+  rate: number;
+}
+export interface RetentionCohort {
+  cohort: string;
+  size: number;
+  cells: RetentionCell[];
+}
+export interface RetentionReport {
+  cohortBy: CohortGranularity;
+  periods: number;
+  cohorts: RetentionCohort[];
+}
+
+export type SegmentDimension = "source" | "plan" | "invite" | "campaign";
+export interface FunnelSegment {
+  key: string;
+  signups: number;
+  activated: number;
+  activationRate: number;
+}
+export interface SegmentedFunnel {
+  segmentBy: SegmentDimension;
+  segments: FunnelSegment[];
+  totals: { signups: number; activated: number; activationRate: number };
+}
+
+export interface PeriodCounts {
+  from: string;
+  to: string;
+  signups: number;
+  activated: number;
+  activationRate: number;
+}
+export interface PeriodComparison {
+  granularity: CohortGranularity;
+  current: PeriodCounts;
+  previous: PeriodCounts;
+  delta: { signupsPct: number | null; activationRatePoints: number };
+}
+
+export type HealthStatus = "ok" | "warn" | "error" | "empty";
+export interface DataQualityCheck {
+  id: string;
+  description: string;
+  count: number;
+  severity: "warn" | "error";
+  ok: boolean;
+}
+export interface FunnelHealth {
+  generatedAt: string;
+  pipeline: {
+    status: HealthStatus;
+    totalEvents: number;
+    signupEvents: number;
+    activationEvents: number;
+    lastEventAt: string | null;
+    freshnessMs: number | null;
+  };
+  dataQuality: { status: HealthStatus; checks: DataQualityCheck[] };
+}
+
+export interface FunnelAlertEvaluation {
+  ruleId: string;
+  title: string;
+  status: "ok" | "firing";
+  value: number | null;
+  threshold: number | null;
+  reason: string;
+  firedAt: string | null;
+  changed: boolean;
+}
+export interface FunnelAlertsResult {
+  enabled: boolean;
+  evaluatedAt: string;
+  alerts: FunnelAlertEvaluation[];
+}
+
 export const operatorApi = {
   snapshot: () => get<MetricsSnapshot>("/operator/snapshot"),
+  funnel: () => get<FunnelData>("/admin/funnel"),
+  funnelHistory: (params?: { granularity?: FunnelGranularity; from?: string; to?: string; source?: "events" | "rollup" }) => {
+    const qs = new URLSearchParams();
+    if (params?.granularity) qs.set("granularity", params.granularity);
+    if (params?.from) qs.set("from", params.from);
+    if (params?.to) qs.set("to", params.to);
+    if (params?.source) qs.set("source", params.source);
+    const suffix = qs.toString();
+    return get<FunnelHistory>(`/admin/funnel/history${suffix ? `?${suffix}` : ""}`);
+  },
+  funnelCohorts: (params?: { cohortBy?: CohortGranularity; periods?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.cohortBy) qs.set("cohortBy", params.cohortBy);
+    if (params?.periods != null) qs.set("periods", String(params.periods));
+    const suffix = qs.toString();
+    return get<CohortReport>(`/admin/funnel/cohorts${suffix ? `?${suffix}` : ""}`);
+  },
+  funnelSegments: (segmentBy: SegmentDimension) =>
+    get<SegmentedFunnel>(`/admin/funnel/segments?segmentBy=${encodeURIComponent(segmentBy)}`),
+  funnelCompare: (granularity: CohortGranularity = "week") =>
+    get<PeriodComparison>(`/admin/funnel/compare?granularity=${granularity}`),
+  funnelHealth: () => get<FunnelHealth>("/admin/funnel/health"),
+  funnelAlerts: () => get<FunnelAlertsResult>("/admin/funnel/alerts"),
+  funnelRetention: (params?: { cohortBy?: CohortGranularity; periods?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.cohortBy) qs.set("cohortBy", params.cohortBy);
+    if (params?.periods != null) qs.set("periods", String(params.periods));
+    const suffix = qs.toString();
+    return get<RetentionReport>(`/admin/funnel/retention${suffix ? `?${suffix}` : ""}`);
+  },
+  /** Download URL for the CSV export (proxied; the proxy injects the key). */
+  funnelExportUrl: () => `${API_BASE}/admin/funnel/export`,
   workers: () => get<WorkerHealthEntry[]>("/operator/workers"),
   leases: () => get<LeaseMapEntry[]>("/operator/leases"),
   dlq: () => get<DeadLetterEntry[]>("/operator/dlq"),

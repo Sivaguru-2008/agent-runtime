@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ServerCrash } from "lucide-react";
-import { playgroundApi } from "@/services/playground-api";
+import { playgroundApi, GROQ_MODELS } from "@/services/playground-api";
 import { useExecutionStream } from "@/stores/execution-store";
 import { PromptInputPanel } from "./prompt-input-panel";
 import { StreamingResponse } from "./streaming-response";
@@ -11,13 +11,19 @@ import { LiveExecutionGraph } from "@/components/graph/live-execution-graph";
 import { LiveTimeline } from "@/components/timeline/live-timeline";
 import { LiveEventFeed } from "./live-event-feed";
 
-export function Playground() {
+interface PlaygroundProps {
+  /** Shared prompt lifted to the dashboard so Run Studio + Run Trace reuse it. */
+  prompt?: string;
+  onPromptChange?(value: string): void;
+}
+
+export function Playground({ prompt: sharedPrompt, onPromptChange }: PlaygroundProps = {}) {
   const stream = useExecutionStream();
   const { current, events, connected, startExecution } = stream;
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string>();
-  const [model, setModel] = useState<string>();
-  const [ollamaOnline, setOllamaOnline] = useState(false);
+  const [model, setModel] = useState<string>(GROQ_MODELS[0]);
+  const [groqOnline, setGroqOnline] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   useEffect(() => {
@@ -27,11 +33,13 @@ export function Playground() {
         .health()
         .then((res) => {
           if (cancelled) return;
-          setOllamaOnline(res.ok);
-          setModel(res.model);
+          setGroqOnline(res.ok);
+          // Sync the selector to the server's active model on first connect,
+          // but never override an explicit user selection afterwards.
+          setModel((prev) => prev || res.model);
         })
         .catch(() => {
-          if (!cancelled) setOllamaOnline(false);
+          if (!cancelled) setGroqOnline(false);
         });
     };
     tick();
@@ -68,7 +76,7 @@ export function Playground() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-execution-id": executionId },
-          body: JSON.stringify({ prompt, executionId }),
+          body: JSON.stringify({ prompt, executionId, model }),
           signal: controller.signal
         }
       );
@@ -113,9 +121,13 @@ export function Playground() {
         <PromptInputPanel
           running={running}
           model={model}
-          ollamaOnline={ollamaOnline}
+          models={[...GROQ_MODELS]}
+          onModelChange={setModel}
+          groqOnline={groqOnline}
           onRun={onRun}
           onCancel={onCancel}
+          value={sharedPrompt}
+          onValueChange={onPromptChange}
         />
         <StreamingResponse view={current} />
       </div>

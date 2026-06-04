@@ -168,7 +168,7 @@ describe("D2 — provider failover", () => {
       links: [
         { name: "anthropic", provider: mockProvider("anthropic", "throw") },
         { name: "openai", provider: mockProvider("openai", "ok") },
-        { name: "ollama", provider: mockProvider("ollama", "ok") }
+        { name: "groq", provider: mockProvider("groq", "ok") }
       ],
       metrics
     });
@@ -244,7 +244,7 @@ describe("D2 — provider failover", () => {
       links: [
         { name: "anthropic", provider: mockProvider("anthropic", "throw") },
         { name: "openai", provider: mockProvider("openai", "throw") },
-        { name: "ollama", provider: mockProvider("ollama", "throw") }
+        { name: "groq", provider: mockProvider("groq", "throw") }
       ],
       metrics
     });
@@ -351,13 +351,18 @@ describe("queue recovery correctness", () => {
 // signature store (occurrenceCount = number of observe() calls).
 const harness = await tryStartHarness();
 
+// Module-scoped teardown: the harness pool is shared by BOTH the D3 suite
+// and the "distributed replay determinism" suite further below. Stopping it
+// inside the D3 sub-suite's afterAll closed the pool before that later suite
+// ran (→ "Cannot use a pool after calling end on the pool"). Owning stop()
+// here guarantees it fires exactly once, after every suite has completed.
+afterAll(async () => {
+  if (harness) await harness.stop();
+});
+
 describe.skipIf(harness === null)("D3 — analytics durability across restart", () => {
   beforeEach(async () => {
     if (harness) await harness.reset();
-  });
-
-  afterAll(async () => {
-    if (harness) await harness.stop();
   });
 
   it("HealthSnapshot.put → reload returns identical snapshot", async () => {

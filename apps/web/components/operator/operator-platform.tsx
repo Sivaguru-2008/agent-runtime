@@ -36,25 +36,36 @@ import { LeaseOwnershipPanel } from "./lease-ownership-panel";
 import { ExecutionDrilldownWithInput, ExecutionDrilldown } from "./execution-drilldown";
 import { FailureDiagnosticsPanel, FailureDiagnosticsWithInput } from "./failure-diagnostics-panel";
 import { EventTraceExplorer } from "./event-trace-explorer";
+import { FunnelCard } from "./funnel-card";
 import { ReplayExperience } from "../replay/replay-experience";
 import { MemoryTrustWithInput } from "./memory-trust-panel";
 import { operatorApi, type DeadLetterEntry } from "../../services/operator-api";
 import { useEffect, useCallback } from "react";
-import { AlertTriangle, Activity, Server, Shield, Skull, Search, GitBranch, Zap, Play, Brain } from "lucide-react";
+import { AlertTriangle, Activity, Server, Shield, Skull, Search, GitBranch, Zap, Play, Brain, TrendingUp } from "lucide-react";
 import { FrontendDiagnostics } from "../dashboard/frontend-diagnostics";
+import { ExplainModeToggle } from "../explain/explain-mode-toggle";
+import { ExplainLabel } from "../explain/explain-label";
+import { WhyChip } from "../explain/why-chip";
+import { ExplainedEmptyState } from "../explain/empty-state";
+import { getConcept } from "../../lib/explain/registry";
+import { OnboardingLaunchers } from "../onboarding/onboarding-launchers";
+import { TourAutoStart } from "../onboarding/tour-auto-start";
 
-type Tab = "replay" | "overview" | "workers" | "leases" | "dlq" | "diagnosis" | "failure" | "trace" | "memory-trust";
+type Tab = "replay" | "overview" | "workers" | "leases" | "dlq" | "diagnosis" | "failure" | "trace" | "memory-trust" | "funnel";
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode; phase6?: boolean }[] = [
-  { id: "replay", label: "Replay", icon: <Play className="h-4 w-4" />, phase6: true },
-  { id: "memory-trust", label: "Memory", icon: <Brain className="h-4 w-4" />, phase6: true },
-  { id: "overview", label: "Overview", icon: <Activity className="h-4 w-4" /> },
-  { id: "workers", label: "Workers", icon: <Server className="h-4 w-4" /> },
-  { id: "leases", label: "Leases", icon: <Shield className="h-4 w-4" /> },
-  { id: "dlq", label: "DLQ", icon: <Skull className="h-4 w-4" /> },
-  { id: "diagnosis", label: "Diagnose", icon: <Search className="h-4 w-4" /> },
-  { id: "failure", label: "Failure", icon: <AlertTriangle className="h-4 w-4" /> },
-  { id: "trace", label: "Trace", icon: <GitBranch className="h-4 w-4" /> }
+// `concept` ties each tab to its registry entry so the tab content can show an
+// explainable header (hover = micro explanation, click = full panel).
+const TABS: { id: Tab; label: string; icon: React.ReactNode; phase6?: boolean; concept: string }[] = [
+  { id: "replay", label: "Replay", icon: <Play className="h-4 w-4" />, phase6: true, concept: "replay" },
+  { id: "memory-trust", label: "Memory", icon: <Brain className="h-4 w-4" />, phase6: true, concept: "memory-trust" },
+  { id: "overview", label: "Overview", icon: <Activity className="h-4 w-4" />, concept: "cluster-topology" },
+  { id: "workers", label: "Workers", icon: <Server className="h-4 w-4" />, concept: "worker-health" },
+  { id: "leases", label: "Leases", icon: <Shield className="h-4 w-4" />, concept: "leases" },
+  { id: "dlq", label: "DLQ", icon: <Skull className="h-4 w-4" />, concept: "dlq" },
+  { id: "diagnosis", label: "Diagnose", icon: <Search className="h-4 w-4" />, concept: "diagnose" },
+  { id: "failure", label: "Failure", icon: <AlertTriangle className="h-4 w-4" />, concept: "failure" },
+  { id: "trace", label: "Trace", icon: <GitBranch className="h-4 w-4" />, concept: "trace" },
+  { id: "funnel", label: "Funnel", icon: <TrendingUp className="h-4 w-4" />, concept: "funnel" }
 ];
 
 // ── DLQ Browser ──────────────────────────────────────────────────────────
@@ -95,8 +106,11 @@ function DLQBrowser({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">Dead-Letter Queue</h2>
+        <ExplainLabel concept="dlq" as="span" className="text-base font-semibold text-white">
+          Dead-Letter Queue
+        </ExplainLabel>
         <div className="flex items-center gap-2">
+          <WhyChip concept="dlq" label="Why are tasks here?" />
           <span className={`text-xs px-2 py-0.5 rounded border ${
             entries.length > 0
               ? "border-red-600 bg-red-950/30 text-red-400"
@@ -114,9 +128,7 @@ function DLQBrowser({
       </div>
 
       {entries.length === 0 ? (
-        <div className="text-zinc-500 text-sm p-6 text-center border border-zinc-800 rounded-lg">
-          Dead-letter queue is empty. No poison pills detected.
-        </div>
+        <ExplainedEmptyState concept="dlq" />
       ) : (
         <div className="space-y-2">
           {entries.map((entry) => (
@@ -167,6 +179,28 @@ function DLQBrowser({
   );
 }
 
+// ── Per-tab explainable header ─────────────────────────────────────────────
+// One consistent place that gives every operator tab a plain-language intro:
+// hover the title for the micro explanation, click it for the full panel.
+
+function TabExplainHeader({ tab }: { tab: Tab }) {
+  const meta = TABS.find((t) => t.id === tab);
+  if (!meta) return null;
+  const concept = getConcept(meta.concept);
+  if (!concept) return null;
+  return (
+    <div className="mb-4 flex items-start justify-between gap-3 border-b border-zinc-800/70 pb-3">
+      <div className="min-w-0">
+        <ExplainLabel concept={meta.concept} as="span" className="text-lg font-semibold text-white">
+          {concept.label}
+        </ExplainLabel>
+        <p className="mt-0.5 text-xs text-zinc-500">{concept.short}</p>
+      </div>
+      {concept.whyQuestions?.length ? <WhyChip concept={meta.concept} /> : null}
+    </div>
+  );
+}
+
 // ── Main Platform ─────────────────────────────────────────────────────────
 
 export function OperatorPlatform() {
@@ -194,6 +228,10 @@ export function OperatorPlatform() {
           Phase 6
         </span>
         <div className="ml-auto flex items-center gap-3">
+          <span data-tour="op-explain-toggle" className="inline-flex">
+            <ExplainModeToggle />
+          </span>
+          <OnboardingLaunchers surface="operator" />
           <FrontendDiagnostics />
           <a
             href="/"
@@ -204,12 +242,16 @@ export function OperatorPlatform() {
         </div>
       </div>
 
+      {/* First-run guided tour (auto-starts once; replay via "Take the tour"). */}
+      <TourAutoStart surface="operator" />
+
       {/* Tabs */}
       <div className="border-b border-zinc-800 px-6">
         <nav className="flex gap-0 overflow-x-auto">
           {TABS.map(({ id, label, icon, phase6 }) => (
             <button
               key={id}
+              data-tour={`op-tab-${id}`}
               onClick={() => setActiveTab(id)}
               className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === id
@@ -229,6 +271,7 @@ export function OperatorPlatform() {
 
       {/* Tab content */}
       <div className={`px-6 py-6 ${activeTab === "replay" ? "max-w-[1600px]" : "max-w-6xl"}`}>
+        <TabExplainHeader tab={activeTab} />
         {activeTab === "replay" && (
           <ReplayExperience />
         )}
@@ -287,6 +330,10 @@ export function OperatorPlatform() {
 
         {activeTab === "memory-trust" && (
           <MemoryTrustWithInput />
+        )}
+
+        {activeTab === "funnel" && (
+          <FunnelCard />
         )}
       </div>
     </div>

@@ -51,6 +51,8 @@ interface ExecutionRow {
   completed_at: Date | string | null;
   updated_at: Date | string;
   tenant_id?: string | null;
+  /** Persisted distributed trace correlation id (migration 0023). */
+  trace_id?: string | null;
 }
 
 export class PostgresExecutionRepository implements ExecutionRepository {
@@ -86,11 +88,15 @@ export class PostgresExecutionRepository implements ExecutionRepository {
     // owning tenant's reads (and visible to every other tenant via tenant
     // guard fall-through).
     const tenantId = assertTenantId(execution.tenantId, "executions", execution.id);
+    // trace_id is persisted (migration 0023). On insert we stamp whatever the
+    // caller threaded; on conflict we update ONLY when the incoming row
+    // actually carries a value, so a later un-traced update can't blank the
+    // original trace id captured at creation time.
     await this.db.query(
       `insert into executions (
          id, agent_id, parent_execution_id, status, input, output, failure,
-         token_usage, started_at, completed_at, updated_at, tenant_id
-       ) values ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9,$10,$11,$12)
+         token_usage, started_at, completed_at, updated_at, tenant_id, trace_id
+       ) values ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9,$10,$11,$12,$13)
        on conflict (id) do update set
          status              = excluded.status,
          output              = excluded.output,
@@ -98,7 +104,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
          token_usage         = excluded.token_usage,
          completed_at        = excluded.completed_at,
          updated_at          = excluded.updated_at,
-         tenant_id           = excluded.tenant_id`,
+         tenant_id           = excluded.tenant_id,
+         trace_id            = coalesce(excluded.trace_id, executions.trace_id)`,
       [
         execution.id,
         execution.agentId,
@@ -111,7 +118,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
         execution.startedAt,
         execution.completedAt ?? null,
         execution.updatedAt,
-        tenantId
+        tenantId,
+        execution.traceId ?? null
       ]
     );
   }
@@ -166,9 +174,9 @@ export class PostgresExecutionRepository implements ExecutionRepository {
        )
        insert into executions (
          id, agent_id, parent_execution_id, status, input, output, failure,
-         token_usage, started_at, completed_at, updated_at, tenant_id
+         token_usage, started_at, completed_at, updated_at, tenant_id, trace_id
        )
-       select $1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8::jsonb, $9, $10, $11, $12
+       select $1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8::jsonb, $9, $10, $11, $12, $19
        from fence
        on conflict (id) do update set
          status       = excluded.status,
@@ -177,7 +185,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
          token_usage  = excluded.token_usage,
          completed_at = excluded.completed_at,
          updated_at   = excluded.updated_at,
-         tenant_id    = excluded.tenant_id
+         tenant_id    = excluded.tenant_id,
+         trace_id     = coalesce(excluded.trace_id, executions.trace_id)
        returning id`,
       [
         execution.id,
@@ -197,7 +206,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
         fence.attempt,
         nowIso,
         fence.leaseId,
-        execution.status
+        execution.status,
+        execution.traceId ?? null
       ]
     );
     return rows.length === 1 ? "COMMITTED" : "FENCED";
@@ -206,7 +216,7 @@ export class PostgresExecutionRepository implements ExecutionRepository {
   async getById(id: string): Promise<Execution | undefined> {
     const { rows } = await this.db.query<ExecutionRow>(
       `select id, agent_id, parent_execution_id, status, input, output, failure,
-              token_usage, started_at, completed_at, updated_at, tenant_id
+              token_usage, started_at, completed_at, updated_at, tenant_id, trace_id
          from executions where id = $1`,
       [id]
     );
@@ -216,11 +226,23 @@ export class PostgresExecutionRepository implements ExecutionRepository {
   async listByAgent(agentId: string): Promise<Execution[]> {
     const { rows } = await this.db.query<ExecutionRow>(
       `select id, agent_id, parent_execution_id, status, input, output, failure,
-              token_usage, started_at, completed_at, updated_at, tenant_id
+              token_usage, started_at, completed_at, updated_at, tenant_id, trace_id
          from executions
          where agent_id = $1
          order by started_at desc`,
       [agentId]
+    );
+    return rows.map(rowToExecution);
+  }
+
+  async listByStatus(status: Execution["status"]): Promise<Execution[]> {
+    const { rows } = await this.db.query<ExecutionRow>(
+      `select id, agent_id, parent_execution_id, status, input, output, failure,
+              token_usage, started_at, completed_at, updated_at, tenant_id, trace_id
+         from executions
+         where status = $1
+         order by started_at desc`,
+      [status]
     );
     return rows.map(rowToExecution);
   }
@@ -310,8 +332,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
       await tx.query(
         `insert into executions (
            id, agent_id, parent_execution_id, status, input, output, failure,
-           token_usage, started_at, completed_at, updated_at, tenant_id
-         ) values ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9,$10,$11,$12)
+           token_usage, started_at, completed_at, updated_at, tenant_id, trace_id
+         ) values ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9,$10,$11,$12,$13)
          on conflict (id) do update set
            status              = excluded.status,
            output              = excluded.output,
@@ -319,7 +341,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
            token_usage         = excluded.token_usage,
            completed_at        = excluded.completed_at,
            updated_at          = excluded.updated_at,
-           tenant_id           = excluded.tenant_id`,
+           tenant_id           = excluded.tenant_id,
+           trace_id            = coalesce(excluded.trace_id, executions.trace_id)`,
         [
           execution.id,
           execution.agentId,
@@ -332,7 +355,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
           execution.startedAt,
           execution.completedAt ?? null,
           execution.updatedAt,
-          tenantId
+          tenantId,
+          execution.traceId ?? null
         ]
       );
 
@@ -423,8 +447,12 @@ export class PostgresExecutionRepository implements ExecutionRepository {
           // Insert event into event_outbox
           const outboxId = createId();
           await tx.query(
-            `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, original_timestamp)
-             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9)
+            // tenant_id (migration 0025): the side effect inherits the
+            // committing execution's tenant, which is already in memory — no
+            // subquery on the hot append path. Carried to the DLQ on poison
+            // promotion; never touches the dispatcher's claim/FIFO/fencing.
+            `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, original_timestamp, tenant_id)
+             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10)
              on conflict (idempotency_key) do nothing`,
             [
               outboxId,
@@ -435,7 +463,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
               JSON.stringify(event.metadata),
               sequence,
               event.metadata.idempotencyKey,
-              event.timestamp
+              event.timestamp,
+              execution.tenantId ?? "system"
             ]
           );
         }
@@ -445,8 +474,9 @@ export class PostgresExecutionRepository implements ExecutionRepository {
       if (input.checkpoint) {
         const checkpointId = createId();
         await tx.query(
-          `insert into execution_checkpoints (id, execution_id, worker_id, sequence, phase, state, created_at)
-           values ($1, $2, $3, $4, $5, $6::jsonb, $7)
+          // tenant_id (migration 0025) inherited from the committing execution.
+          `insert into execution_checkpoints (id, execution_id, worker_id, sequence, phase, state, created_at, tenant_id)
+           values ($1, $2, $3, $4, $5, $6::jsonb, $7, $8)
            on conflict (execution_id, sequence) do update set
              phase      = excluded.phase,
              state      = excluded.state,
@@ -458,7 +488,8 @@ export class PostgresExecutionRepository implements ExecutionRepository {
             input.checkpoint.sequence,
             input.checkpoint.phase,
             JSON.stringify(input.checkpoint.state),
-            nowIso
+            nowIso,
+            execution.tenantId ?? "system"
           ]
         );
       }
@@ -578,7 +609,8 @@ function rowToExecution(row: ExecutionRow): Execution {
     startedAt: toIso(row.started_at),
     completedAt: row.completed_at ? toIso(row.completed_at) : undefined,
     updatedAt: toIso(row.updated_at),
-    tenantId: row.tenant_id ?? undefined
+    tenantId: row.tenant_id ?? undefined,
+    traceId: row.trace_id ?? undefined
   };
 }
 

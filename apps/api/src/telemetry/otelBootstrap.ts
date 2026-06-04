@@ -150,6 +150,20 @@ export async function startTracing(opts: TracingStartOptions): Promise<TracingSt
   const endpoint = opts.endpoint ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   const tracesDisabled = process.env.OTEL_SDK_DISABLED === "true";
 
+  // Root-cause fix for the periodic `AggregateError [ECONNREFUSED] ...:4318`
+  // log spam: when no OTLP endpoint is configured, @opentelemetry/sdk-node
+  // otherwise falls back to its BUILT-IN default exporter pointed at
+  // http://localhost:4318 ("OTEL_TRACES_EXPORTER is empty. Using default otlp
+  // exporter") and then fails to connect on every scheduled flush because no
+  // collector is running locally. Those rejections are swallowed by the SDK so
+  // they never crashed the process, but they bury the real logs and are a
+  // latent rejection source. Forcing the exporter to "none" realises this
+  // module's documented intent — the tracer and W3C propagation still work,
+  // spans are simply not shipped. An explicit operator setting always wins.
+  if (!endpoint && !process.env.OTEL_TRACES_EXPORTER) {
+    process.env.OTEL_TRACES_EXPORTER = "none";
+  }
+
   const envRatio = process.env.OTEL_TRACE_SAMPLE_RATIO
     ? Number(process.env.OTEL_TRACE_SAMPLE_RATIO)
     : undefined;

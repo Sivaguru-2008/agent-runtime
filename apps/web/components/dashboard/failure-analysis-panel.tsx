@@ -3,12 +3,16 @@ import type { ObservabilityWarning } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTime } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export function FailureAnalysisPanel({ warnings }: { warnings: ObservabilityWarning[] }) {
   return (
     <Card className="h-[360px]">
       <CardHeader>
-        <CardTitle>Failure Analysis</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="self-healing-diagnostics" as="span">Failure Analysis</ExplainLabel>
+        </CardTitle>
         <Badge variant={warnings.some((warning) => warning.severity === "critical") ? "critical" : warnings.length ? "warning" : "success"}>
           {warnings.length} warnings
         </Badge>
@@ -34,10 +38,13 @@ export function FailureAnalysisPanel({ warnings }: { warnings: ObservabilityWarn
             </div>
           );
         }) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
-            <ShieldAlert className="h-5 w-5 text-emerald-300" />
-            No active analysis warnings
-          </div>
+          <ExplainedEmptyState
+            concept="self-healing-diagnostics"
+            icon={<ShieldAlert className="h-5 w-5 text-emerald-300" />}
+            title="No analysis warnings"
+            body="The platform's health checks didn't flag anything about this run — no anomalies, drift, or risks were detected. This is the healthy state."
+            className="h-full justify-center border-0 bg-transparent"
+          />
         )}
       </CardContent>
     </Card>

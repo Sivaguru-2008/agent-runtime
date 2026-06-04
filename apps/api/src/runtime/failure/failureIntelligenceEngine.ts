@@ -318,19 +318,34 @@ export class FailureIntelligenceEngine {
       PLAN_DRIFT: 0
     };
     let penalty = 0;
-    for (const signal of signals) {
-      bySeverity[signal.severity] += 1;
-      byKind[signal.kind] += 1;
-      penalty += SEVERITY_WEIGHT[signal.severity] * signal.score;
+    // A signal persisted by a buggy/legacy analyzer (or a malformed row read back
+    // from the store) can carry an unknown severity/kind or a non-finite score.
+    // Indexing the count maps with an unknown key yields `undefined`, and
+    // `undefined += 1` / `undefined * score` silently propagates NaN into
+    // healthScore — turning the whole report into garbage the dashboard renders
+    // as "NaN". Coerce every contribution defensively so a single malformed
+    // signal can neither throw nor poison the aggregate.
+    const safeSignals = Array.isArray(signals) ? signals : [];
+    for (const signal of safeSignals) {
+      if (!signal) continue;
+      const severity: FailureSeverity = signal.severity in SEVERITY_WEIGHT ? signal.severity : "INFO";
+      const kind: FailureSignalKind = signal.kind in byKind ? signal.kind : "PLAN_DRIFT";
+      const score = Number.isFinite(signal.score) ? signal.score : 0;
+      bySeverity[severity] += 1;
+      byKind[kind] += 1;
+      penalty += SEVERITY_WEIGHT[severity] * score;
     }
-    const healthScore = Math.max(0, Math.round(100 - penalty));
+    const healthScore = Number.isFinite(penalty) ? Math.max(0, Math.round(100 - penalty)) : 100;
     return {
       executionId,
       cognitionId,
-      totalSignals: signals.length,
+      totalSignals: safeSignals.length,
       bySeverity,
       byKind,
-      topSignals: [...signals].sort((a, b) => b.score - a.score).slice(0, 8),
+      topSignals: [...safeSignals]
+        .filter((s) => !!s)
+        .sort((a, b) => (Number.isFinite(b.score) ? b.score : 0) - (Number.isFinite(a.score) ? a.score : 0))
+        .slice(0, 8),
       healthScore
     };
   }

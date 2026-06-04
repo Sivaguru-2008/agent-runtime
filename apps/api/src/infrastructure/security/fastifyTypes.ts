@@ -10,9 +10,18 @@
 
 import type { QuotaEnforcer } from "../quota/quotaEnforcer.js";
 import type { TenantGuard } from "./tenantGuard.js";
+import type { PgClient } from "../persistence/postgres/pgClient.js";
 
 declare module "fastify" {
   interface FastifyInstance {
+    /**
+     * The Postgres-backed security store (api keys, tenants, signups), or null
+     * when the runtime is in MEMORY fallback mode. Decorated so request handlers
+     * (e.g. the task-creation handler's fire-and-forget activation write) can
+     * reach it without coupling to in-memory mode. Always present as a decorator;
+     * the value is null when no DATABASE_URL is configured.
+     */
+    securityDb: PgClient | null;
     /**
      * Phase 5: Per-tenant quota enforcement.
      * Call checkExecutionStart() before creating an execution.

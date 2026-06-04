@@ -12,12 +12,13 @@ import {
   type NamedCheckpoint,
 } from "@/lib/cognition-api";
 import { cn, formatTime } from "@/lib/utils";
-import { 
-  AlertTriangle, 
-  Crosshair, 
-  GitBranch, 
-  ShieldCheck, 
-  Database, 
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
+import {
+  AlertTriangle,
+  Crosshair,
+  GitBranch,
+  ShieldCheck,
+  Database,
   Save, 
   RotateCw, 
   CheckCircle, 
@@ -63,194 +64,154 @@ const SEVERITY_DOT: Record<string, string> = {
   INFO: "bg-blue-500",
 };
 
+// Phase/role coloring for CLEAN frames. A healthy run carries no failure roles,
+// so without this every tile is the same grey ("looks the same for every id").
+// Coloring clean frames by the agent phase that produced them surfaces each
+// run's real PLAN → EXECUTE → VERIFY → CRITIQUE → MEMORY structure.
+type PhaseKey = "PLANNER" | "EXECUTOR" | "VERIFIER" | "CRITIC" | "MEMORY" | "SYSTEM";
+
+const PHASE_COLORS: Record<PhaseKey, string> = {
+  PLANNER: "bg-sky-600/70 hover:bg-sky-500/80 border border-sky-700",
+  EXECUTOR: "bg-emerald-600/70 hover:bg-emerald-500/80 border border-emerald-700",
+  VERIFIER: "bg-amber-600/70 hover:bg-amber-500/80 border border-amber-700",
+  CRITIC: "bg-fuchsia-600/70 hover:bg-fuchsia-500/80 border border-fuchsia-700",
+  MEMORY: "bg-cyan-600/70 hover:bg-cyan-500/80 border border-cyan-700",
+  SYSTEM: "bg-zinc-700/60 hover:bg-zinc-600/70 border border-zinc-800",
+};
+
+const PHASE_LABELS: Record<PhaseKey, string> = {
+  PLANNER: "plan",
+  EXECUTOR: "execute",
+  VERIFIER: "verify",
+  CRITIC: "critique",
+  MEMORY: "memory",
+  SYSTEM: "system",
+};
+
+function phaseKeyForFrame(frame: AnnotatedFrame): PhaseKey {
+  const hay = `${frame.label ?? ""} ${frame.eventType ?? ""}`.toUpperCase();
+  if (hay.includes("PLANNER")) return "PLANNER";
+  if (hay.includes("EXECUTOR")) return "EXECUTOR";
+  if (hay.includes("VERIFIER")) return "VERIFIER";
+  if (hay.includes("CRITIC")) return "CRITIC";
+  if (hay.includes("MEMORY")) return "MEMORY";
+  return "SYSTEM";
+}
+
+// Color a tile by failure role when it carries signals; otherwise by phase.
+function tileColor(frame: AnnotatedFrame): string {
+  return frame.causalRole === "CLEAN"
+    ? PHASE_COLORS[phaseKeyForFrame(frame)]
+    : CAUSAL_COLORS[frame.causalRole];
+}
+
 // Show at most this many frame tiles before virtualizing
 const TILE_WINDOW = 200;
 
-// Human-readable translation engine (Phase 1)
+// Honest, data-driven event description. Maps the REAL runtime event type
+// (and the frame's own label) to accurate text — no fabricated business
+// narrative. Every field is derived from the actual frame, so the description
+// differs per cognition instead of repeating a fixed story.
 function translateEvent(eventType: string, label?: string): { title: string; subtitle: string; description: string; explain: string; icon: any; stateColor: "nominal" | "warning" | "incident" | "recovery" | "replay" } {
-  const cleanType = eventType.toUpperCase();
-  const cleanLabel = (label || "").toLowerCase();
+  const t = (eventType || "").toUpperCase();
+  const human = humanizeEventType(t);
+  const detail = label && label.trim().length > 0 ? label.trim() : undefined;
 
-  if (cleanType.includes("TOOL_EXECUTION_STARTED") || (cleanType.includes("TOOL") && cleanLabel.includes("refund"))) {
+  // Failure / abort family.
+  if (t.includes("FAILED") || t.includes("FENCE_REJECTED") || t.includes("ABORTED")) {
     return {
-      title: "Refund API request started",
-      subtitle: "stripe_refund_v2 initiated",
-      description: "Dispatching secure customer credit payload to Stripe API gateway with transactional tracing.",
-      explain: "This tool call represents a high-risk external side-effect. The runtime fences this operation to prevent double execution if a crash happens subsequently.",
-      icon: Cpu,
-      stateColor: "replay"
-    };
-  }
-  if (cleanType.includes("TOOL_EXECUTION_SUCCEEDED") || (cleanType.includes("TOOL") && cleanLabel.includes("success") && cleanLabel.includes("refund"))) {
-    return {
-      title: "Refund completed successfully",
-      subtitle: "Stripe API response 200 OK",
-      description: "Stripe successfully processed the refund. The transaction ID has been safely committed to the event log.",
-      explain: "The Stripe refund was successfully recorded. The runtime logs this result in our event-sourced record, sealing it from future retries.",
-      icon: CheckCircle,
-      stateColor: "nominal"
-    };
-  }
-  if (cleanType.includes("TOOL_EXECUTION_FAILED") || cleanType.includes("EXECUTION_FAILED") || cleanLabel.includes("timeout") || cleanLabel.includes("failed")) {
-    return {
-      title: "Ledger write failed due to database timeout",
-      subtitle: "PostgresConnectionTimeoutError",
-      description: "Database connection failed at 10.0.0.4. Transaction aborted safely to prevent duplicate writes.",
-      explain: "When a system crash occurs mid-flight, our regional fencing automatically triggers and locks the old worker out, preventing data corruption.",
+      title: detail ? `${human} — ${detail}` : human,
+      subtitle: eventType,
+      description: `A failure was recorded at this frame${detail ? ` (${detail})` : ""}. Inspect the failure-intelligence signals below for the originating cause.`,
+      explain: "This frame carries a terminal or fenced state. The runtime records it in the event log so the exact failure point is replayable.",
       icon: ShieldAlert,
       stateColor: "incident"
     };
   }
-  if (cleanType.includes("CHECKPOINT_CREATED") || cleanType.includes("CHECKPOINT_WRITTEN") || cleanType.includes("CHECKPOINT")) {
+  // Recovery / retry / replay family.
+  if (t.includes("RECOVERY") || t.includes("RETRY") || t.includes("REPLAY") || t.includes("RESUMED") || t.includes("RECLAIMED") || t.includes("RESTORED")) {
     return {
-      title: "Workflow savepoint created",
-      subtitle: `Checkpoint Sequence #${label || "1"} locked`,
-      description: "Materialized memory graph and prompt parameters committed to Postgres append-only transaction store.",
-      explain: "Savepoints act as immutable snapshotted states of the agent's cognition, allowing flawless recovery without repeating completed API calls.",
+      title: detail ? `${human} — ${detail}` : human,
+      subtitle: eventType,
+      description: "A recovery/replay transition was recorded — the runtime re-derived state from a durable checkpoint or re-ran a step under a fresh lease.",
+      explain: "Recovery frames mark where the self-healing orchestrator resumed work without repeating already-committed side-effects.",
+      icon: RotateCw,
+      stateColor: "recovery"
+    };
+  }
+  // Completion family.
+  if (t.includes("COMPLETED") || t.includes("SUCCEEDED")) {
+    return {
+      title: detail ? `${human} — ${detail}` : human,
+      subtitle: eventType,
+      description: `Step completed successfully${detail ? `: ${detail}` : ""}. State committed to the event log.`,
+      explain: "Completed frames are sealed in the event-sourced record and skipped on replay.",
+      icon: CheckCircle,
+      stateColor: "nominal"
+    };
+  }
+  // Checkpoint family.
+  if (t.includes("CHECKPOINT") || t.includes("SNAPSHOT") || t.includes("SAVEPOINT")) {
+    return {
+      title: detail ? `${human} — ${detail}` : human,
+      subtitle: eventType,
+      description: "A durable savepoint of the cognition state was written, enabling resume-from-here on recovery.",
+      explain: "Checkpoints capture the materialized graph + cursor so replay can hydrate exact state without re-running prior steps.",
       icon: Save,
       stateColor: "recovery"
     };
   }
-  if (cleanType.includes("CHECKPOINT_RESTORED") || cleanType.includes("EXECUTION_RESUMED") || cleanType.includes("RESTORED")) {
+  // Tool / model family.
+  if (t.includes("TOOL")) {
     return {
-      title: "Recovered from last safe workflow state",
-      subtitle: "Hydrated graph state from Checkpoint #1",
-      description: "Standby worker successfully reclaimed the expired execution lease and hydrated the last verified checkpoint.",
-      explain: "Our self-healing orchestrator recovers state up to the last known checkpoint. It skips all upstream successful steps.",
-      icon: Database,
-      stateColor: "recovery"
-    };
-  }
-  if (cleanType.includes("EXECUTION_REPLAYED") || cleanType.includes("REPLAYED") || cleanType.includes("REPLAY")) {
-    return {
-      title: "Retrying failed ledger operation",
-      subtitle: "Divergence detection and fencing lock enabled",
-      description: "Replaying step sequence. Stripe API refund is locked and fenced to prevent duplicate disbursements.",
-      explain: "The system replays the sequence while suppressing the refund node, ensuring that Stripe is never double charged.",
-      icon: RotateCw,
-      stateColor: "replay"
-    };
-  }
-  if (cleanType.includes("EXECUTION_COMPLETED") || cleanType.includes("COMPLETED")) {
-    return {
-      title: "Workflow completed safely",
-      subtitle: "State locked, resources clean",
-      description: "All database writes confirmed and Stripe API protected. Agent task successfully completed.",
-      explain: "End of transaction lifecycle. All external side-effects were safely isolated, and the execution trace is marked clean.",
-      icon: CheckCircle,
-      stateColor: "nominal"
-    };
-  }
-  if (cleanType.includes("AGENT_CREATED")) {
-    return {
-      title: "Agent identity and safety policy compiled",
-      subtitle: "Security sandbox policies active",
-      description: "LLM configuration verified and transactional execution guards configured.",
-      explain: "System-level security controls bound to the runtime before the agent is eligible to run goals.",
-      icon: ShieldCheck,
-      stateColor: "nominal"
-    };
-  }
-  if (cleanType.includes("AGENT_STARTED")) {
-    return {
-      title: "Reliability runtime online & listening",
-      subtitle: "Worker cluster ready",
-      description: "Event-sourced runtime is polling queues and listening for active execution goals.",
-      explain: "Ready to accept traced execution tasks and coordinate dynamic worker leases.",
-      icon: PlayIcon,
-      stateColor: "nominal"
-    };
-  }
-  if (cleanType.includes("TASK_SCHEDULED")) {
-    return {
-      title: "Goal queued for active execution",
-      subtitle: label || "Task assigned to agent",
-      description: "Goal received. Dispatching task to dynamic sandbox isolation workspace.",
-      explain: "Initiates a dedicated sandboxed execution container. Timeout and recovery limits are mapped to the task.",
-      icon: Activity,
-      stateColor: "nominal"
-    };
-  }
-  if (cleanType.includes("EXECUTION_STARTED")) {
-    return {
-      title: "Workflow isolation sandbox initialized",
-      subtitle: "Sandbox compiled successfully",
-      description: "Virtual container created with strict boundary and lease timeouts active.",
-      explain: "Initial sandbox boundaries compiled. All state transitions within this sandbox are strictly captured by telemetry.",
-      icon: Server,
-      stateColor: "nominal"
-    };
-  }
-  if (cleanType.includes("EXECUTION_STEP_STARTED")) {
-    return {
-      title: `Executing step: ${label || "Task Planning"}`,
-      subtitle: "LLM thought loop active",
-      description: "Evaluating memory graph and planning execution actions dynamically.",
-      explain: "LLM thoughts and plan evaluations are streamed and indexed to preserve complete cognitive lineage.",
-      icon: Activity,
-      stateColor: "replay"
-    };
-  }
-  if (cleanType.includes("TOOL_CALLED")) {
-    return {
-      title: "Calling external API",
-      subtitle: label || "Tool trigger",
-      description: "Executing sandboxed tool with lease-fencing token active.",
-      explain: "Tool calls represent side-effects that interact with third-party servers. Transaction fencing guards every write.",
+      title: detail ? `Tool: ${detail}` : human,
+      subtitle: eventType,
+      description: `An external tool call was recorded${detail ? ` (${detail})` : ""}.`,
+      explain: "Tool calls are side-effects; the runtime fences them so a replay cannot double-execute.",
       icon: Cpu,
       stateColor: "replay"
     };
   }
-  if (cleanType.includes("MODEL_COMPLETED")) {
+  if (t.includes("MODEL")) {
     return {
-      title: "LLM response parsed & state updated",
-      subtitle: label || "Thought completed",
-      description: "Planning sequence successfully completed. Memory nodes committed to trace.",
-      explain: "The LLM decided to proceed. The updated variables are stored canonically inside the agent's episodic memory graph.",
+      title: human,
+      subtitle: eventType,
+      description: "A model generation step was recorded at this frame.",
+      explain: "Model frames capture the generated tokens and usage for this step.",
       icon: Activity,
       stateColor: "nominal"
     };
   }
-  if (cleanType.includes("RETRY_TRIGGERED")) {
-    return {
-      title: "Initiating automatic, lease-safe retry",
-      subtitle: "Automatic backoff active",
-      description: "Lease has been reclaimed. Standby worker is scheduled to resume sequence from the nearest checkpoint.",
-      explain: "Self-healing in progress. Standby worker acquires lease, increments fencing token, and recovers safely.",
-      icon: RotateCw,
-      stateColor: "warning"
-    };
-  }
-  if (cleanType.includes("EXECUTION_FENCE_REJECTED")) {
-    return {
-      title: "Stale execution aborted: Fencing lock held",
-      subtitle: "Fencing token mismatch",
-      description: "Stale worker write was successfully intercepted and blocked at the database level. Zero double-side-effects.",
-      explain: "This blocks split-brain conditions. Even if a delayed worker wakes up, its lower fencing token forces a database rollback.",
-      icon: ShieldAlert,
-      stateColor: "incident"
-    };
-  }
-  if (cleanType.includes("EXECUTION_LEASE_RECLAIMED")) {
-    return {
-      title: "Worker lease reclaimed",
-      subtitle: "Host crash recovery",
-      description: "Active lease was expired. Replaying orchestrator has locked execution and started failover.",
-      explain: "Protects stranded tasks. When a node hangs or drops out, the lease-sweeper safely claims ownership without duplicating state.",
-      icon: Activity,
-      stateColor: "warning"
-    };
-  }
 
-  // Fallback
+  // Default: honest, derived from the real type + label.
   return {
-    title: label || eventType,
+    title: detail ? `${human} — ${detail}` : human,
     subtitle: eventType,
-    description: `System event recorded at sequence sequence ${label || "unknown"}`,
-    explain: "Transactional event logged canonically within the execution timeline store.",
-    icon: Activity,
-    stateColor: "nominal"
+    description: detail
+      ? `${human}: ${detail}.`
+      : `${human} recorded in the execution timeline.`,
+    explain: "Event recorded canonically in the event-sourced execution log.",
+    icon: iconForEventType(t),
+    stateColor: t.includes("STARTED") || t.includes("SCHEDULED") ? "replay" : "nominal"
   };
+}
+
+// Turn a SCREAMING_SNAKE event type into a readable phrase.
+function humanizeEventType(t: string): string {
+  if (!t) return "Event";
+  return t
+    .toLowerCase()
+    .split("_")
+    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+function iconForEventType(t: string): any {
+  if (t.includes("HANDOFF") || t.includes("PHASE")) return ArrowRight;
+  if (t.includes("NODE") || t.includes("STEP")) return Activity;
+  if (t.includes("STARTED") || t.includes("SCHEDULED")) return Server;
+  if (t.includes("MEMORY")) return Database;
+  return Activity;
 }
 
 function PlayIcon(props: any) {
@@ -399,11 +360,7 @@ export function ExecutionTimelineViewer({
     );
   }
   if (!timeline || timeline.frames.length === 0) {
-    return (
-      <div className="text-zinc-500 text-sm p-4 text-center border border-zinc-800 rounded">
-        No execution frames available for this cognition.
-      </div>
-    );
+    return <ExplainedEmptyState concept="timeline" />;
   }
 
   const totalFrames = timeline.frames.length;
@@ -502,11 +459,11 @@ export function ExecutionTimelineViewer({
                 key={frame.frameIndex}
                 ref={isRoot ? rootCauseRef : undefined}
                 role="listitem"
-                title={`Frame ${frame.frameIndex}: ${tEvent.title} · ${frame.causalRole}`}
+                title={`Frame ${frame.frameIndex}: ${tEvent.title} · ${frame.causalRole === "CLEAN" ? PHASE_LABELS[phaseKeyForFrame(frame)] : frame.causalRole}`}
                 onClick={() => setSelected(frame)}
                 className={cn(
                   "w-3 h-7 rounded-sm cursor-pointer transition-all relative flex items-center justify-center",
-                  CAUSAL_COLORS[frame.causalRole],
+                  tileColor(frame),
                   isActive && "ring-2 ring-amber-300 scale-y-110 shadow-[0_0_12px_rgba(252,211,77,0.4)]",
                   isSelected && "ring-2 ring-white scale-y-110 shadow-[0_0_12px_rgba(255,255,255,0.4)]",
                   isFirstFailure && "ring-1 ring-rose-400 animate-pulse",
@@ -536,6 +493,17 @@ export function ExecutionTimelineViewer({
             <span className="font-medium text-zinc-400">checkpoint</span>
           </div>
         </div>
+
+        {/* Phase legend — how CLEAN frames are tinted by the producing agent role */}
+        <div className="flex items-center gap-3 text-[10px] text-zinc-600 flex-wrap pt-1">
+          <span className="text-zinc-500">clean frames by phase:</span>
+          {(["PLANNER", "EXECUTOR", "VERIFIER", "CRITIC", "MEMORY"] as const).map((p) => (
+            <div key={p} className="flex items-center gap-1.5">
+              <div className={cn("w-3 h-3 rounded border", PHASE_COLORS[p].split(" ")[0], PHASE_COLORS[p].split(" ").slice(-1)[0])} />
+              <span className="text-zinc-400">{PHASE_LABELS[p]}</span>
+            </div>
+          ))}
+        </div>
       </Card>
 
       {/* Selected frame detail (Observability Translation Layer + Overlays) */}
@@ -547,9 +515,6 @@ export function ExecutionTimelineViewer({
           explainMode={explainMode}
         />
       )}
-
-      {/* Attempt Comparison Panel (Phase 4: Git Diff for AI Workflows) */}
-      <AttemptComparisonPanel explainMode={explainMode} />
     </div>
   );
 }
@@ -707,8 +672,12 @@ function FrameDetailPanel({
         {translated.description}
       </div>
 
-      {/* Phase 3 Storytelling Overlay Cards */}
-      {renderStorytellingOverlay(frame.eventType, frame.label, explainMode)}
+      {explainMode && (
+        <div className="text-[11px] text-zinc-400 leading-relaxed bg-zinc-900/20 rounded-lg p-3 border border-zinc-900">
+          <span className="font-semibold block text-zinc-300 mb-1">Why this frame matters</span>
+          {translated.explain}
+        </div>
+      )}
 
       {signals.length > 0 && (
         <div className="space-y-2">
@@ -723,254 +692,6 @@ function FrameDetailPanel({
         </div>
       )}
     </Card>
-  );
-}
-
-// Phase 3 Storytelling Card Renderer
-function renderStorytellingOverlay(eventType: string, label?: string, explainMode?: boolean) {
-  const cleanType = eventType.toUpperCase();
-  const cleanLabel = (label || "").toLowerCase();
-
-  // 1. Stripe refund bypassed/fenced (Side-effect protection moment)
-  if (cleanLabel.includes("refund") && (cleanType.includes("REPLAY") || cleanType.includes("FENCE") || explainMode)) {
-    return (
-      <div className="bg-indigo-950/20 border border-indigo-900/40 rounded-xl p-3 text-xs text-indigo-300 space-y-1.5 animate-in fade-in duration-200">
-        <div className="flex items-center gap-1.5 font-semibold text-indigo-200">
-          <ShieldCheck className="h-4 w-4 text-indigo-400 animate-pulse" />
-          🛡️ Transaction Idempotency & Side-Effect Protection Active
-        </div>
-        <div className="grid gap-1.5 pl-5.5 text-[11px] leading-relaxed text-indigo-300/90">
-          <p>
-            <strong className="text-indigo-200">What Happened:</strong> The payment refund of $150.00 had already succeeded on Attempt 1. The runtime automatically intercepted the active `stripe_refund_v2` call in the replay branch and bypassed it.
-          </p>
-          <p>
-            <strong className="text-indigo-200">Why It Matters:</strong> Naive retries trigger all steps from scratch. If an agent crashes *after* an API charge but *before* logging it, standard systems will duplicate the credit, costing real business capital.
-          </p>
-          <p>
-            <strong className="text-indigo-200">Risk Prevented:</strong> Duplicate customer disbursements. Stripe API was completely insulated.
-          </p>
-          <p>
-            <strong className="text-indigo-200">System Action:</strong> Sealed sequence execution hash matched Checkpoint #1 signatures. Suppressed outgoing API dispatch.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // 2. Database Transient timeout (Workflow failure moment)
-  if (cleanType.includes("FAILED") || cleanLabel.includes("timeout") || cleanLabel.includes("failed")) {
-    return (
-      <div className="bg-rose-950/20 border border-rose-900/40 rounded-xl p-3 text-xs text-rose-300 space-y-1.5 animate-in fade-in duration-200">
-        <div className="flex items-center gap-1.5 font-semibold text-rose-200">
-          <AlertTriangle className="h-4 w-4 text-rose-400" />
-          ⚠️ Transient Infrastructure Failure Safely Guarded
-        </div>
-        <div className="grid gap-1.5 pl-5.5 text-[11px] leading-relaxed text-rose-300/90">
-          <p>
-            <strong className="text-rose-200">What Happened:</strong> A Postgres timeout occurred while writing the customer transaction ledger. The database pool exhausted at 10.0.0.4.
-          </p>
-          <p>
-            <strong className="text-rose-200">Why It Matters:</strong> Traditional runtimes crash mid-flight, leaving API outcomes un-logged and orphaned. If the transaction ledger and payment state desynchronize, the system database corrupts.
-          </p>
-          <p>
-            <strong className="text-rose-200">Risk Prevented:</strong> Unrecoverable memory graph state and double planning loops that drain LLM resource quotas.
-          </p>
-          <p>
-            <strong className="text-rose-200">System Action:</strong> The runtime terminated the stalled worker, quarantined the thread state, and held Checkpoint #1 as the recovery ceiling.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // 3. Checkpoint saved (Savepoint moment)
-  if (cleanType.includes("CHECKPOINT") || cleanType.includes("SAVEPOINT")) {
-    return (
-      <div className="bg-emerald-950/10 border border-emerald-900/40 rounded-xl p-3 text-xs text-emerald-300 space-y-1.5 animate-in fade-in duration-200">
-        <div className="flex items-center gap-1.5 font-semibold text-emerald-250">
-          <Save className="h-4 w-4 text-emerald-400" />
-          💾 Continuous Event-Sourced Savepoint Active
-        </div>
-        <div className="grid gap-1.5 pl-5.5 text-[11px] leading-relaxed text-emerald-300/90">
-          <p>
-            <strong className="text-emerald-200">What Happened:</strong> Materialized the complete cognition graph, planning arrays, and variable registers to our append-only SQL log.
-          </p>
-          <p>
-            <strong className="text-emerald-200">Why It Matters:</strong> Traditional agent runtimes mutate state in-place. When a crash occurs, it's impossible to trace *why* the LLM selected an action or restore its exact context.
-          </p>
-          <p>
-            <strong className="text-emerald-200">Risk Prevented:</strong> Split-brain writes, non-deterministic re-planning drift, and telemetry loss.
-          </p>
-          <p>
-            <strong className="text-emerald-200">System Action:</strong> Sealed sequence frame, computed rolling integrity hash, and committed row lock parameters.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
-// Phase 4: Git-Diff Style Side-by-Side Attempt Comparison Panel
-function AttemptComparisonPanel({ explainMode }: { explainMode: boolean }) {
-  return (
-    <Card className="p-4 bg-zinc-950 border-zinc-850 shadow-xl space-y-4">
-      <div className="flex items-center justify-between border-b border-zinc-900 pb-3 flex-wrap gap-2">
-        <div className="space-y-0.5">
-          <h3 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
-            <Split className="h-4 w-4 text-indigo-400" />
-            Active Replay Attempt Diff Explorer
-          </h3>
-          <p className="text-[10px] text-zinc-500">
-            Comparing Attempt 1 (Failed Run) with Attempt 2 (Auto-Recovered Replay)
-          </p>
-        </div>
-        <span className="bg-indigo-950/40 border border-indigo-900/60 text-indigo-400 text-[10px] font-mono px-2 py-0.5 rounded-full">
-          REPLAY DETERMINISM: 100% CANONICAL
-        </span>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        {/* Attempt 1: Failed Run */}
-        <div className="border border-zinc-900/80 rounded-xl bg-zinc-900/10 p-3 space-y-3 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-center justify-between text-xs border-b border-zinc-900 pb-2">
-            <span className="font-semibold text-rose-450 uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-              Attempt 1: Halted Execution
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500">HOST_WORKER_0X3A</span>
-          </div>
-
-          <div className="space-y-2">
-            <DiffStep
-              seq="01"
-              title="Refund API request dispatched"
-              subtitle="stripe_refund_v2 called"
-              status="succeeded"
-              desc="Disbursed credit of $150.00 to client. Stripe gateway processed with success response."
-            />
-            <DiffStep
-              seq="02"
-              title="Workflow savepoint created"
-              subtitle="Checkpoint Sequence #1"
-              status="savepoint"
-              desc="Materialized graph context and state parameters successfully saved in transactional Postgres store."
-            />
-            <DiffStep
-              seq="03"
-              title="Ledger database write timeout"
-              subtitle="Postgres timeout error"
-              status="failed"
-              desc="Database connection timeout at 10.0.0.4. Database pool exhausted. Stale lease sweeps thread."
-            />
-            <div className="border border-dashed border-rose-900/30 rounded-lg p-2 bg-rose-950/5 text-[10px] text-rose-350 leading-relaxed">
-              <strong>CRASH ANATOMY:</strong> The transaction desynchronized at Step 3. The worker stalled, and the platform quarantined the thread state to protect external side-effects from naive retry corruption.
-            </div>
-          </div>
-        </div>
-
-        {/* Attempt 2: Recovered Replay */}
-        <div className="border border-zinc-900/80 rounded-xl bg-zinc-900/10 p-3 space-y-3 relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-center justify-between text-xs border-b border-zinc-900 pb-2">
-            <span className="font-semibold text-emerald-450 uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Attempt 2: Self-Healed Replay
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500">STANDBY_WORKER_0X8B</span>
-          </div>
-
-          <div className="space-y-2">
-            <DiffStep
-              seq="01"
-              title="stripe_refund_v2 [FENCED]"
-              subtitle="API dispatch suppressed"
-              status="fenced"
-              desc="Bypassed API trigger. Transaction records matched Checkpoint #1, resolving state from cache."
-            />
-            <DiffStep
-              seq="02"
-              title="Workflow state hydrated"
-              subtitle="Savepoint restored"
-              status="restored"
-              desc="Hydrated memory graph up to the last verified checkpoint sequence. Replay engine continues from step 3."
-            />
-            <DiffStep
-              seq="03"
-              title="Ledger database write completed"
-              subtitle="Postgres commit 200 OK"
-              status="succeeded"
-              desc="Database connection restored. Retry write completed successfully after pool cleared."
-            />
-            <DiffStep
-              seq="04"
-              title="Workflow completed safely"
-              subtitle="Execution state sealed"
-              status="succeeded"
-              desc="All steps resolved. Transaction cycle completed with zero duplicate side-effects. 100% consistent."
-            />
-          </div>
-        </div>
-      </div>
-
-      {explainMode && (
-        <div className="border border-indigo-900/30 rounded-lg p-2.5 bg-indigo-950/10 text-[10px] text-indigo-400 leading-normal animate-in fade-in duration-200 flex items-start gap-2">
-          <HelpCircle className="h-3.5 w-3.5 text-indigo-400 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-semibold block text-indigo-300">How the Diff Debugger Works:</span>
-            By contrasting the two tracks side-by-side, developers verify exactly how the replay engine protects data integrity. In Attempt 2, the refund is skipped entirely because the runtime checks the transactional signatures of Checkpoint #1, preventing duplicate disbursements.
-          </div>
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function DiffStep({
-  seq,
-  title,
-  subtitle,
-  status,
-  desc
-}: {
-  seq: string;
-  title: string;
-  subtitle: string;
-  status: "succeeded" | "failed" | "fenced" | "savepoint" | "restored";
-  desc: string;
-}) {
-  return (
-    <div className="flex items-start gap-2.5 bg-zinc-950/40 border border-zinc-900 rounded-lg p-2.5 text-[11px] relative overflow-hidden group">
-      <div className={cn(
-        "w-5 h-5 rounded-full shrink-0 flex items-center justify-center font-mono font-bold text-[10px] border",
-        status === "succeeded" && "bg-emerald-950/20 border-emerald-900/60 text-emerald-400",
-        status === "failed" && "bg-rose-950/20 border-rose-900/60 text-rose-400",
-        status === "fenced" && "bg-blue-950/20 border-blue-900/60 text-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.15)]",
-        status === "savepoint" && "bg-indigo-950/20 border-indigo-900/60 text-indigo-400",
-        status === "restored" && "bg-indigo-950/20 border-indigo-900/60 text-indigo-400"
-      )}>
-        {seq}
-      </div>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <div className="flex items-center justify-between gap-1 flex-wrap">
-          <span className="font-bold text-zinc-200 group-hover:text-white transition-colors">{title}</span>
-          <span className={cn(
-            "text-[9px] px-1 font-bold uppercase rounded border tracking-wider",
-            status === "succeeded" && "bg-emerald-990 border-emerald-800 text-emerald-400",
-            status === "failed" && "bg-rose-990 border-rose-800 text-rose-400",
-            status === "fenced" && "bg-blue-990 border-blue-800 text-blue-400",
-            status === "savepoint" && "bg-indigo-990 border-indigo-800 text-indigo-400",
-            status === "restored" && "bg-indigo-990 border-indigo-800 text-indigo-400"
-          )}>
-            {status}
-          </span>
-        </div>
-        <div className="text-[10px] text-zinc-500 font-mono">{subtitle}</div>
-        <p className="text-[10px] text-zinc-400/90 leading-relaxed mt-1 group-hover:text-zinc-300 transition-colors">{desc}</p>
-      </div>
-    </div>
   );
 }
 

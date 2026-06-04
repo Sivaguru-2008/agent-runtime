@@ -108,11 +108,18 @@ const configSchema = z.object({
   WORKER_CAPACITY: z.coerce.number().int().positive().default(4),
   WORKER_HEARTBEAT_TTL_MS: z.coerce.number().int().positive().default(15_000),
   WORKER_SWEEP_INTERVAL_MS: z.coerce.number().int().positive().default(5_000),
+  /** Terminal (LOST/STOPPED) workers older than this are permanently reaped. Default 24h. */
+  WORKER_REAP_AFTER_MS: z.coerce.number().int().positive().default(86_400_000),
   EXECUTION_LEASE_TTL_MS: z.coerce.number().int().positive().default(30_000),
   SCHEDULER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(250),
-  OLLAMA_URL: z.string().default("http://localhost:11434"),
-  OLLAMA_MODEL: z.string().default("llama3"),
-  OLLAMA_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
+  // ─── Groq (used when MODEL_PROVIDER=groq or by LiveExecutionEngine) ────────
+  // Groq exposes an OpenAI-compatible API. GROQ_API_KEY authenticates every
+  // call; GROQ_BASE_URL / GROQ_MODEL allow pointing at a proxy or pinning a
+  // model without code changes.
+  GROQ_API_KEY: z.string().optional(),
+  GROQ_MODEL: z.string().default("llama-3.3-70b-versatile"),
+  GROQ_BASE_URL: z.string().default("https://api.groq.com/openai/v1"),
+  GROQ_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
   // Sprint Hardening 3 — bounded SSE dedupe window.
   SSE_DEDUPE_WINDOW: z.coerce.number().int().positive().default(1024),
   // Sprint Hardening 3 — fail-fast worker startup.
@@ -138,11 +145,11 @@ const configSchema = z.object({
 
   // ─── Phase 1: Real AI execution ───────────────────────────────────────────
   // Which LLM backend to use. "deterministic" is the safe default for local
-  // development without API keys; set to "claude", "openai", or "ollama" for
+  // development without API keys; set to "claude", "openai", or "groq" for
   // real inference.
-  MODEL_PROVIDER: z.enum(["deterministic", "claude", "openai", "ollama", "failover"]).default("deterministic"),
+  MODEL_PROVIDER: z.enum(["deterministic", "claude", "openai", "groq", "failover"]).default("deterministic"),
   // Override the default model name for the selected provider.
-  // claude → claude-sonnet-4-6 | openai → gpt-4o | ollama → llama3
+  // claude → claude-sonnet-4-6 | openai → gpt-4o | groq → llama-3.3-70b-versatile
   MODEL_NAME: z.string().optional(),
   // API keys for cloud providers. Required when MODEL_PROVIDER is set to the
   // corresponding provider; validated at boot time via loadConfig().
@@ -153,6 +160,29 @@ const configSchema = z.object({
   // How many times to retry a transient provider error (rate-limit, 5xx,
   // network blip) before propagating the failure.
   PROVIDER_MAX_RETRIES: z.coerce.number().int().min(1).max(10).default(3),
+
+  // ─── LLM response cache ───────────────────────────────────────────────────
+  // Memoise deterministic (temperature=0) completions keyed by prompt hash so
+  // identical re-runs / retries / duplicate traffic don't re-bill the provider.
+  // Off by default — turning it on changes nothing for non-deterministic agents
+  // and is a pure spend/latency win for deterministic ones. Backed by an
+  // in-process TTL+LRU cache today; a Redis store is a drop-in (see
+  // providers/responseCache.ts) when REDIS_URL is configured.
+  // Optional (like STRICT_PROD / ALLOW_MEMORY_FALLBACK) so existing test
+  // fixtures that build a structural AppConfig literal need no change; read
+  // sites treat undefined as "disabled".
+  LLM_RESPONSE_CACHE_ENABLED: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((v): boolean | undefined => {
+      if (v === false || v === "false" || v === "0") return false;
+      if (v === true || v === "true" || v === "1") return true;
+      return undefined;
+    }),
+  // Entry lifetime in ms. Default 15 minutes per the hardening spec.
+  LLM_RESPONSE_CACHE_TTL_MS: z.coerce.number().int().positive().optional(),
+  // Max retained entries in the in-process cache before LRU eviction.
+  LLM_RESPONSE_CACHE_MAX_ENTRIES: z.coerce.number().int().positive().optional(),
 
   // ─── Tool registry ────────────────────────────────────────────────────────
   // Brave Search API key — enables richer web.search results. Falls back to
@@ -166,6 +196,19 @@ const configSchema = z.object({
   TOOL_WEB_SEARCH_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   // Wall-clock timeout for code.execute sandbox in ms.
   TOOL_CODE_EXECUTE_TIMEOUT_MS: z.coerce.number().int().positive().default(5_000),
+  // V8 old-space ceiling for the code.execute child process in MB. The sandbox
+  // is a separate, permission-jailed Node process; this caps its heap so an
+  // OOM crashes only the child, never the API host. Optional (read sites apply
+  // the 128 default) so existing AppConfig test fixtures need no change.
+  TOOL_CODE_EXECUTE_MEMORY_MB: z.coerce.number().int().positive().optional(),
+  // Strict tool allowlist (comma-separated). When non-empty, ONLY these tools
+  // may be executed by an agent — every other tool (including any the model
+  // requests via prompt injection) is denied. Empty/unset = capability-baseline
+  // mode (tools classified UNSAFE are always denied; others permitted). The
+  // strict allowlist is the recommended production posture. Example:
+  //   TOOL_ALLOWLIST=web.search,file.read,code.execute,memory.summarize,runtime.inspect
+  // Optional so existing AppConfig test fixtures need no change.
+  TOOL_ALLOWLIST: z.string().optional(),
 
   // ─── Phase 4: Observability ───────────────────────────────────────────────
   // Enable the Prometheus /metrics endpoint. Disable in environments where the
@@ -193,6 +236,18 @@ const configSchema = z.object({
   // readiness probe path (k8s readinessProbe target); it is bypass-listed by
   // default because the LB must reach it without holding an API key.
   AUTH_SKIP_PATHS: z.string().default("/metrics,/ready"),
+
+  // Role granted to the synthetic tenant when AUTH_ENABLED=false (local dev /
+  // in-memory tests only — strict environments REFUSE to boot with auth off).
+  // Defaults to "developer": the pre-hardening behaviour granted "admin" to
+  // every unauthenticated caller, a privilege-escalation fallback that this
+  // hardening removes. Operators who need the operator/admin dashboard in a
+  // local unauthenticated run must opt in EXPLICITLY by setting this. Optional
+  // so existing AppConfig test fixtures need no change (read site defaults to
+  // "developer").
+  AUTH_DISABLED_FALLBACK_ROLE: z
+    .enum(["viewer", "auditor", "developer", "operator", "admin", "owner"])
+    .optional(),
 
   // How long (seconds) a validated API key stays cached in Redis before
   // a fresh Postgres lookup is required. Longer TTL = fewer DB hits but
@@ -225,6 +280,60 @@ const configSchema = z.object({
     .default("false")
     .transform((v) => v === "true" || v === "1"),
 
+  // ─── Self-serve onboarding (POST /signup) ─────────────────────────────────
+  // All SIGNUP_* fields are OPTIONAL (output `… | undefined`) so the structural
+  // AppConfig literals built by test fixtures need no change; read sites in
+  // app.ts apply the documented defaults. A deployment with no SIGNUP_* env set
+  // therefore behaves exactly as before — no public credential-minting surface.
+  //
+  // Master switch for the public, unauthenticated signup endpoint that mints a
+  // `developer`-role API key + a fresh `starter` tenant. Default OFF.
+  SIGNUP_ENABLED: z
+    .string()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true" || v === "1")),
+
+  // When true, anyone can self-serve a key (open beta). When false (default),
+  // the caller MUST present an invite code from SIGNUP_INVITE_CODES. Invite-
+  // gating is the right posture for the design-partner stage: removes the
+  // manual seed-owner-key step without opening an abusable public faucet.
+  SIGNUP_OPEN: z
+    .string()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true" || v === "1")),
+
+  // Comma-separated invite codes accepted when SIGNUP_OPEN=false. Each design
+  // partner gets one; they self-onboard in <60s instead of you SSHing in.
+  SIGNUP_INVITE_CODES: z.string().optional(),
+
+  // Plan assigned to tenants created via self-serve signup. `starter` carries
+  // the default bounded quotas from migration 0002 (100 exec/hr, 50 agents…),
+  // so a free signup can never exhaust the cluster.
+  SIGNUP_DEFAULT_PLAN: z.enum(["starter", "growth", "enterprise"]).optional(),
+
+  // Per-key RPM stamped on self-serve developer keys. Generous for evaluation,
+  // bounded against abuse. Overridable per-tenant later via the admin API.
+  SIGNUP_DEFAULT_RPM: z.coerce.number().int().positive().optional(),
+
+  // ─── Funnel analytics alerts (Phase 2) ────────────────────────────────────
+  // All optional so existing AppConfig literals need no change; read sites in
+  // app.ts apply DEFAULT_ALERT_CONFIG values. Alerts are OFF by default — a
+  // deployment with no FUNNEL_ALERT* env behaves exactly as before.
+  //
+  // Master switch for funnel threshold alert evaluation (GET /admin/funnel/alerts).
+  FUNNEL_ALERTS_ENABLED: z
+    .string()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true" || v === "1")),
+  // Activation-rate floor (0..1). Below this, with enough sample, fires.
+  FUNNEL_ALERT_MIN_ACTIVATION_RATE: z.coerce.number().min(0).max(1).optional(),
+  // Trailing window (days) the activation-rate rule measures over.
+  FUNNEL_ALERT_ACTIVATION_WINDOW_DAYS: z.coerce.number().int().positive().optional(),
+  // Minimum signups in the window before the activation-rate rule can fire.
+  FUNNEL_ALERT_MIN_SAMPLE: z.coerce.number().int().min(0).optional(),
+  // Max hours since the last signup before the signup-gap rule fires.
+  FUNNEL_ALERT_MAX_SIGNUP_GAP_HOURS: z.coerce.number().positive().optional(),
+
   // How long to wait for in-flight connections to drain before force-exiting
   // on SIGTERM. Should be less than Kubernetes terminationGracePeriodSeconds.
   SHUTDOWN_DRAIN_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
@@ -238,7 +347,7 @@ const configSchema = z.object({
 
   // D2 — Failover provider chain. Optional for the same backward-compat
   // reason; the providerFactory reads it with a default of
-  // "claude,openai,ollama" when undefined.
+  // "claude,openai,groq" when undefined.
   MODEL_FAILOVER_CHAIN: z.string().optional(),
 
   // ─── Sprint Stabilization — explicit fallback gate ────────────────────────
@@ -270,6 +379,21 @@ const configSchema = z.object({
   // `boolean`, preserving backward compatibility with object-literal
   // construction in tests.
   ALLOW_MEMORY_FALLBACK: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((v): boolean | undefined => {
+      if (v === false || v === "false" || v === "0") return false;
+      if (v === true || v === "true" || v === "1") return true;
+      return undefined;
+    }),
+
+  // Local-development migration checksum recovery. DEV ONLY. When true, the
+  // MigrationRunner re-applies and re-stamps migrations whose on-disk file has
+  // drifted from the recorded checksum instead of crashing with
+  // MigrationChecksumError. This bypasses the tamper guard, so it is hard-
+  // refused in strict/production mode (see server.ts) — it exists only to
+  // recover a developer DB whose migration files were edited after apply.
+  MIGRATIONS_REPAIR_CHECKSUMS: z
     .union([z.boolean(), z.string()])
     .optional()
     .transform((v): boolean | undefined => {
@@ -391,11 +515,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (parsed.MODEL_PROVIDER === "openai" && !parsed.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is required when MODEL_PROVIDER=openai");
   }
+  if (parsed.MODEL_PROVIDER === "groq" && !parsed.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY is required when MODEL_PROVIDER=groq");
+  }
 
   // Phase 5: Enforce security requirements in production.
-  if (parsed.NODE_ENV === "production" && !parsed.AUTH_ENABLED) {
+  // Production AND any STRICT_PROD-forced environment must run authenticated.
+  // This is the primary guarantee that the unauthenticated "synthetic admin/dev
+  // tenant" code path in registerApiKeyAuth can NEVER be reached in production;
+  // registerApiKeyAuth re-asserts the same rule as defense in depth.
+  if ((parsed.NODE_ENV === "production" || parsed.STRICT_PROD === true) && !parsed.AUTH_ENABLED) {
     throw new Error(
-      "AUTH_ENABLED must be 'true' in production — " +
+      "AUTH_ENABLED must be 'true' in production (or when STRICT_PROD=true) — " +
         "unauthenticated endpoints are not acceptable in a production deployment."
     );
   }

@@ -9,15 +9,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface Props {
   running: boolean;
   model?: string;
-  ollamaOnline: boolean;
+  /** Available Groq models for the selector. */
+  models?: string[];
+  onModelChange?(model: string): void;
+  groqOnline: boolean;
   onRun(prompt: string): void;
   onCancel(): void;
+  /** Controlled prompt value — when provided, this panel becomes the single
+   *  source of truth shared across the console (Run Studio, Run Trace). */
+  value?: string;
+  onValueChange?(value: string): void;
 }
 
 const DEFAULT_PROMPT = "Explain what a vector database is in 4 sentences.";
 
-export function PromptInputPanel({ running, model, ollamaOnline, onRun, onCancel }: Props) {
-  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
+export function PromptInputPanel({ running, model, models, onModelChange, groqOnline, onRun, onCancel, value, onValueChange }: Props) {
+  const [internal, setInternal] = useState(DEFAULT_PROMPT);
+  const prompt = value !== undefined ? value : internal;
+  const setPrompt = (next: string) => {
+    if (onValueChange) onValueChange(next);
+    else setInternal(next);
+  };
 
   const submit = () => {
     const trimmed = prompt.trim();
@@ -33,10 +45,26 @@ export function PromptInputPanel({ running, model, ollamaOnline, onRun, onCancel
           Prompt Playground
         </CardTitle>
         <div className="flex items-center gap-2">
-          <Badge variant={ollamaOnline ? "success" : "critical"}>
-            Ollama {ollamaOnline ? "online" : "offline"}
+          <Badge variant={groqOnline ? "success" : "critical"}>
+            Groq {groqOnline ? "online" : "offline"}
           </Badge>
-          {model ? <Badge variant="muted">{model}</Badge> : null}
+          {models && models.length > 0 ? (
+            <select
+              className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              value={model ?? models[0]}
+              onChange={(event) => onModelChange?.(event.target.value)}
+              disabled={running}
+              aria-label="Groq model"
+            >
+              {models.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          ) : model ? (
+            <Badge variant="muted">{model}</Badge>
+          ) : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -61,7 +89,7 @@ export function PromptInputPanel({ running, model, ollamaOnline, onRun, onCancel
                 <Square className="h-3.5 w-3.5" /> Cancel
               </Button>
             ) : null}
-            <Button onClick={submit} disabled={running || !ollamaOnline}>
+            <Button onClick={submit} disabled={running || !groqOnline}>
               {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {running ? "Running" : "Run Agent"}
             </Button>

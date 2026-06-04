@@ -56,26 +56,35 @@ import { CognitionNodeExplorer } from "./cognition-node-explorer";
 import { FailureRootCausePanel } from "./failure-root-cause-panel";
 import { OperatorReplayConsole } from "./operator-replay-console";
 import { ReplayDeterminismPanel } from "./replay-determinism-panel";
+import { ExecutionMetadataPanel } from "@/components/ui/execution-metadata-panel";
 import type { ReplayFrame } from "@/lib/cognition-api";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { getConcept } from "@/lib/explain/registry";
 
 type ReplayPanel = "timeline" | "scrubber" | "nodes" | "rootcause" | "console" | "determinism";
 
-const PANELS: { id: ReplayPanel; label: string; icon: React.ReactNode; description: string }[] = [
-  { id: "timeline", label: "Timeline", icon: <Activity className="h-4 w-4" />, description: "Causality-annotated frame timeline with health curve" },
-  { id: "scrubber", label: "Scrubber", icon: <GitBranch className="h-4 w-4" />, description: "Step-by-step replay with snapshot and branch controls" },
-  { id: "nodes", label: "Nodes", icon: <Network className="h-4 w-4" />, description: "Agent node inspector with lineage traversal" },
-  { id: "rootcause", label: "Root Cause", icon: <AlertTriangle className="h-4 w-4" />, description: "Failure heatmap, causal chain, and per-kind inspection" },
-  { id: "console", label: "Console", icon: <Terminal className="h-4 w-4" />, description: "Pause, branch, inject, and compare operator controls" },
-  { id: "determinism", label: "Determinism", icon: <ShieldCheck className="h-4 w-4" />, description: "Fingerprint verification and replay trust score" },
+// `concept` ties each panel to its registry entry so first-time users get a
+// plain-language explanation (hover) and the full click-to-learn panel (click).
+const PANELS: { id: ReplayPanel; label: string; icon: React.ReactNode; description: string; concept: string }[] = [
+  { id: "timeline", label: "Timeline", icon: <Activity className="h-4 w-4" />, description: "Causality-annotated frame timeline with health curve", concept: "timeline" },
+  { id: "scrubber", label: "Scrubber", icon: <GitBranch className="h-4 w-4" />, description: "Step-by-step replay with snapshot and branch controls", concept: "scrubber" },
+  { id: "nodes", label: "Nodes", icon: <Network className="h-4 w-4" />, description: "Agent node inspector with lineage traversal", concept: "nodes" },
+  { id: "rootcause", label: "Root Cause", icon: <AlertTriangle className="h-4 w-4" />, description: "Failure heatmap, causal chain, and per-kind inspection", concept: "root-cause" },
+  { id: "console", label: "Console", icon: <Terminal className="h-4 w-4" />, description: "Pause, branch, inject, and compare operator controls", concept: "inject" },
+  { id: "determinism", label: "Determinism", icon: <ShieldCheck className="h-4 w-4" />, description: "Fingerprint verification and replay trust score", concept: "determinism" },
 ];
 
 export function ReplayExperience() {
   const [activePanel, setActivePanel] = useState<ReplayPanel>("timeline");
   const [cognitionId, setCognitionId] = useState<string | undefined>();
   const [executionId, setExecutionId] = useState<string | undefined>();
+  const [traceId, setTraceId] = useState<string | undefined>();
+  const [runtimeId, setRuntimeId] = useState<string | undefined>();
+  const [mode, setMode] = useState<string | undefined>();
   const [cognitions, setCognitions] = useState<CognitionListItem[]>([]);
   const [inputId, setInputId] = useState("");
-  const [replaySession, setReplaySession] = useState<ReplaySession | undefined>();
+  const [replaySession] = useState<ReplaySession | undefined>();
+  const [frames, setFrames] = useState<ReplayFrame[]>([]);
   const [seekTarget, setSeekTarget] = useState<number | undefined>();
 
   // Load recent cognitions for the picker
@@ -84,16 +93,38 @@ export function ReplayExperience() {
   }, []);
 
   // Auto-derive executionId from cognitionId so the operator does not have to
-  // re-enter it for the Root Cause and Console panels.
+  // re-enter it for the Root Cause and Console panels — and load the real
+  // replay frames that feed the Determinism panel (previously this panel was
+  // never wired to data, so it always showed "No replay frames").
   useEffect(() => {
     if (!cognitionId) {
       setExecutionId(undefined);
+      setTraceId(undefined);
+      setRuntimeId(undefined);
+      setMode(undefined);
+      setFrames([]);
       return;
     }
+    let cancelled = false;
     cognitionApi
       .get(cognitionId)
-      .then((view) => setExecutionId(view.graph.executionId))
+      .then((view) => {
+        if (cancelled) return;
+        setExecutionId(view.graph.executionId);
+        setTraceId(view.traceId ?? view.graph.traceId);
+        setRuntimeId(view.runtimeId);
+        setMode(
+          view.graph.nodes?.some((n) => (n.output as Record<string, unknown> | undefined)?.modelBacked)
+            ? "MODEL-BACKED"
+            : "DETERMINISTIC"
+        );
+      })
       .catch(() => {});
+    cognitionApi
+      .listFrames(cognitionId)
+      .then((f) => { if (!cancelled) setFrames(f); })
+      .catch(() => { if (!cancelled) setFrames([]); });
+    return () => { cancelled = true; };
   }, [cognitionId]);
 
   const handleSelect = (cid: string) => {
@@ -110,9 +141,6 @@ export function ReplayExperience() {
     setCognitionId(cid);
     setActivePanel("console");
   }, []);
-
-  // When a replay session is active, track frames for determinism panel
-  const frames: ReplayFrame[] = replaySession?.frames ?? [];
 
   return (
     <div className="space-y-4">
@@ -155,6 +183,17 @@ export function ReplayExperience() {
 
       {cognitionId && (
         <>
+          {/* Execution identity — copyable IDs shared across all replay panels */}
+          <ExecutionMetadataPanel
+            cognitionId={cognitionId}
+            executionId={executionId}
+            runId={executionId}
+            traceId={traceId}
+            runtimeId={runtimeId}
+            mode={mode}
+            title="Replay Target"
+          />
+
           {/* Panel tabs */}
           <div className="border-b border-zinc-800">
             <nav className="flex gap-0 overflow-x-auto">
@@ -175,6 +214,9 @@ export function ReplayExperience() {
               ))}
             </nav>
           </div>
+
+          {/* Plain-language explanation of the active panel */}
+          <ReplayPanelHeader panel={activePanel} />
 
           {/* Active panel content */}
           <div className="min-h-[400px]">
@@ -246,6 +288,34 @@ export function ReplayExperience() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+// ── Per-panel explanation header ─────────────────────────────────────────────
+
+function ReplayPanelHeader({ panel }: { panel: ReplayPanel }) {
+  const meta = PANELS.find((p) => p.id === panel);
+  if (!meta) return null;
+  const concept = getConcept(meta.concept);
+  if (!concept) return null;
+  return (
+    <div className="my-3 rounded-lg border border-zinc-800/70 bg-zinc-900/30 px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <ExplainLabel concept={meta.concept} as="span" className="text-sm font-semibold text-zinc-200">
+          {concept.label}
+        </ExplainLabel>
+        <span className="text-xs text-zinc-500">— {concept.short}</span>
+      </div>
+      {/* The Console hosts the operator actions the user listed individually. */}
+      {panel === "console" ? (
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
+          <span className="text-zinc-500">Actions:</span>
+          <ExplainLabel concept="branch">Branch</ExplainLabel>
+          <ExplainLabel concept="inject">Inject</ExplainLabel>
+          <ExplainLabel concept="compare">Compare</ExplainLabel>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -331,6 +331,8 @@ export interface CognitionGraph {
   agentId: string;
   parentCognitionId?: string;
   parentNodeId?: string;
+  /** Distributed trace correlation id, persisted at cognition creation. */
+  traceId?: string;
   phase: CognitionPhase;
   startedAt: string;
   completedAt?: string;
@@ -359,6 +361,10 @@ export interface ReplaySession {
   id: string;
   cognitionId: string;
   executionId: string;
+  /** Deterministic trace id for this replay session. */
+  traceId?: string;
+  /** Runtime correlation id of the request that produced the session. */
+  runtimeId?: string;
   status: "READY" | "PLAYING" | "PAUSED" | "ENDED";
   cursor: { frameIndex: number; eventSequence: number; speed: number };
   frames: ReplayFrame[];
@@ -411,6 +417,10 @@ export interface CognitionGraphView {
   branches: BranchPointer[];
   failureSignals: FailureSignal[];
   uncertainty: { overall: number; variance: number; lowConfidenceTokens: number; nodeCount: number };
+  /** Distributed trace id for the cognition (resolved server-side). */
+  traceId?: string;
+  /** Runtime correlation id of the request that produced this view. */
+  runtimeId?: string;
 }
 
 export interface MemoryInfluenceHeatmap {
@@ -576,12 +586,15 @@ export const cognitionApi = {
   },
   get: async (cognitionId: string) => {
     const res = await request<CognitionGraphView>(`/cognition/${cognitionId}`);
+    const graph = sanitizeCognitionGraph(res?.graph);
     return {
-      graph: sanitizeCognitionGraph(res?.graph),
+      graph,
       lineage: Array.isArray(res?.lineage) ? res.lineage : [],
       branches: Array.isArray(res?.branches) ? res.branches : [],
       failureSignals: Array.isArray(res?.failureSignals) ? res.failureSignals.map(sanitizeFailureSignal) : [],
-      uncertainty: res?.uncertainty ?? { overall: 0, variance: 0, lowConfidenceTokens: 0, nodeCount: 0 }
+      uncertainty: res?.uncertainty ?? { overall: 0, variance: 0, lowConfidenceTokens: 0, nodeCount: 0 },
+      traceId: res?.traceId ?? graph.traceId,
+      runtimeId: res?.runtimeId
     };
   },
   getNodeDetails: async (cognitionId: string, nodeId: string) => {

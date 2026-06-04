@@ -14,6 +14,7 @@ import type { EventFactory, EventContext } from "../../infrastructure/events/eve
 import type { PersistedEventPublisher } from "../../infrastructure/events/persistedEventPublisher.js";
 import type { Clock } from "../../shared/clock.js";
 import type { MemoryRepository, ExecutionRepository, AgentRepository } from "../../domain/ports.js";
+import type { Execution } from "../../domain/model.js";
 import { MemoryTrustEngine, type ScoredMemory } from "../../memory/trust/memoryTrustEngine.js";
 import type { RoleAgent, RoleContext, RoleResult } from "./roles.js";
 import { toIso } from "../../shared/clock.js";
@@ -119,6 +120,9 @@ export class CognitionOrchestrator {
       parentCognitionId: input.parentCognitionId,
       parentNodeId: input.parentNodeId,
       tenantId: resolvedTenantId,
+      // Persist the request trace id so cognition/replay DTOs can return it
+      // directly. Every event below also carries it via context.
+      traceId: contextTraceId(context),
       phase: "INIT",
       startedAt: toIso(this.deps.clock.now()),
       nodes: [],
@@ -151,6 +155,16 @@ export class CognitionOrchestrator {
 
     try {
       await this.deps.cognitions.save(graph);
+      // Phantom-execution fix: a cognition advertises `executionId` on every
+      // event it emits (aggregateType EXECUTION) and the workbench/dashboard
+      // resolve that id via GET /executions/:id. Historically the orchestrator
+      // derived the id but never created the row, so every cognition-driven
+      // run referenced a non-existent execution — surfacing as a 404
+      // ("Unable to load execution") and a run that looked phantom. Materialise
+      // the Execution record here so the id resolves consistently across the
+      // drilldown, snapshot, replay and full-analysis surfaces. Idempotent and
+      // tenant-stamped; only runs when an ExecutionRepository is wired.
+      await this.persistExecutionStart(executionId, graph, input, resolvedTenantId);
       await this.deps.publisher.publish(
         this.deps.eventFactory.create({
           type: "COGNITION_STARTED",
@@ -449,6 +463,12 @@ export class CognitionOrchestrator {
       };
       await this.deps.cognitions.save(completedGraph);
 
+      // Mirror the terminal cognition phase onto the Execution record so the
+      // UI's run list and metadata panel reflect COMPLETED/FAILED rather than
+      // a stuck RUNNING. A FAILED terminal phase carries the structured reason
+      // extracted from the graph output.
+      await this.persistExecutionTerminal(executionId, completedGraph);
+
       await this.deps.publisher.publish(
         this.deps.eventFactory.create({
           type: currentPhase === "FAILED" ? "COGNITION_FAILED" : "COGNITION_COMPLETED",
@@ -481,6 +501,14 @@ export class CognitionOrchestrator {
       } catch (saveError) {
         // Safe fallback in case DB save fails, continue recovery
       }
+
+      // Surface the failure on the Execution record so the run no longer shows
+      // an opaque/stuck status and the UI can render the originating reason.
+      await this.persistExecutionTerminal(executionId, graph, {
+        message: errorMsg,
+        type: err instanceof Error ? err.name : "UnknownError",
+        recoverable: (err as any).recoverable ?? true
+      });
 
       // Emit structured failure intelligence signals
       await this.deps.publisher.publish(
@@ -526,6 +554,84 @@ export class CognitionOrchestrator {
         true, // retryable
         err
       );
+    }
+  }
+
+  /**
+   * Materialise the Execution row backing a cognition run so its derived
+   * `executionId` resolves through the standard /executions/:id surfaces.
+   *
+   * Idempotent: if a row already exists (re-entry, branch sharing the parent's
+   * executionId, or a prior runTask) we leave it untouched rather than
+   * clobbering a richer record. No-op when no ExecutionRepository is wired
+   * (most unit fixtures), preserving existing test behaviour.
+   */
+  private async persistExecutionStart(
+    executionId: string,
+    graph: CognitionGraph,
+    input: CognitionStartInput,
+    tenantId: string
+  ): Promise<void> {
+    const repo = this.deps.executions;
+    if (!repo) return;
+    try {
+      const existing = await repo.getById(executionId);
+      if (existing) return;
+      const now = toIso(this.deps.clock.now());
+      const execution: Execution = {
+        id: executionId,
+        agentId: graph.agentId,
+        parentExecutionId: undefined,
+        status: "RUNNING",
+        input: input.task ?? {},
+        tokenUsage: { prompt: 0, completion: 0, total: 0 },
+        startedAt: graph.startedAt ?? now,
+        updatedAt: now,
+        tenantId,
+        traceId: graph.traceId
+      };
+      await repo.save(execution);
+    } catch {
+      // Execution materialisation is a best-effort consistency aid for the
+      // observability surfaces; never let it abort a live cognition run.
+    }
+  }
+
+  /**
+   * Reflect the terminal cognition phase onto the Execution record. Carries the
+   * structured failure reason (from the orchestrator catch or the graph output)
+   * so the UI surfaces the originating error rather than a bare FAILED badge.
+   */
+  private async persistExecutionTerminal(
+    executionId: string,
+    graph: CognitionGraph,
+    failure?: { message: string; type?: string; recoverable?: boolean }
+  ): Promise<void> {
+    const repo = this.deps.executions;
+    if (!repo) return;
+    try {
+      const existing = await repo.getById(executionId);
+      if (!existing) return;
+      const isFailed = graph.phase === "FAILED" || !!failure;
+      const tokenUsage = deriveTokenUsage(graph) ?? existing.tokenUsage;
+      const updated: Execution = {
+        ...existing,
+        status: isFailed ? "FAILED" : "COMPLETED",
+        output: graph.output && typeof graph.output === "object" ? graph.output : existing.output,
+        failure: isFailed
+          ? {
+              message: failure?.message ?? extractGraphErrorMessage(graph) ?? "Cognition failed",
+              code: failure?.type,
+              recoverable: failure?.recoverable ?? true
+            }
+          : existing.failure,
+        tokenUsage,
+        completedAt: graph.completedAt ?? toIso(this.deps.clock.now()),
+        updatedAt: toIso(this.deps.clock.now())
+      };
+      await repo.save(updated);
+    } catch {
+      // Best-effort terminal reflection — see persistExecutionStart.
     }
   }
 
@@ -802,6 +908,15 @@ export class CognitionOrchestrator {
   private async markFailed(graph: CognitionGraph, reason: string, context: EventContext): Promise<void> {
     const failed: CognitionGraph = { ...graph, phase: "FAILED", completedAt: toIso(this.deps.clock.now()) };
     await this.deps.cognitions.save(failed);
+    // markFailed is the shared chokepoint for every early-exit failure path
+    // (missing role agent, confidence halt, autonomy halt). Mirror the FAILED
+    // status + reason onto the Execution row here so these short-circuit runs
+    // don't leave the execution stuck in RUNNING with no surfaced reason.
+    await this.persistExecutionTerminal(failed.executionId, failed, {
+      message: reason,
+      type: "CognitionHalted",
+      recoverable: true
+    });
     await this.deps.publisher.publish(
       this.deps.eventFactory.create({
         type: "COGNITION_FAILED",
@@ -1109,4 +1224,38 @@ function contextTenantId(context?: EventContext): string | undefined {
   if (!context) return undefined;
   const value = (context as unknown as Record<string, unknown>).tenantId;
   return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function contextTraceId(context?: EventContext): string | undefined {
+  if (!context) return undefined;
+  const value = (context as unknown as Record<string, unknown>).traceId;
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+/**
+ * Approximate token usage for a cognition from the per-node token streams.
+ * Cognition nodes don't carry a prompt/completion split, so we report the
+ * streamed chunk count as completion tokens — enough for the run list and
+ * metadata panel to show non-zero usage. Returns undefined when no node has
+ * a token stream so callers can preserve any pre-existing usage figure.
+ */
+function deriveTokenUsage(graph: CognitionGraph): { prompt: number; completion: number; total: number } | undefined {
+  let completion = 0;
+  let sawStream = false;
+  for (const node of graph.nodes ?? []) {
+    if (Array.isArray(node.tokenStream) && node.tokenStream.length > 0) {
+      sawStream = true;
+      completion += node.tokenStream.length;
+    }
+  }
+  if (!sawStream) return undefined;
+  return { prompt: 0, completion, total: completion };
+}
+
+/** Pull a human-readable error message out of a failed graph's output blob. */
+function extractGraphErrorMessage(graph: CognitionGraph): string | undefined {
+  const output = graph.output as Record<string, unknown> | undefined;
+  const err = output?.error as Record<string, unknown> | undefined;
+  const msg = err?.message;
+  return typeof msg === "string" && msg.length > 0 ? msg : undefined;
 }

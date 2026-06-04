@@ -11,6 +11,7 @@ export interface RecoveryLoopConfig {
 export interface RecoveryTickSummary {
   expiredWorkers: number;
   reclaimedLeases: number;
+  reapedWorkers: number;
   recoveredExecutions: number;
   durationMs: number;
 }
@@ -67,7 +68,7 @@ export class BackgroundRecoveryLoop {
 
   async tick(): Promise<RecoveryTickSummary> {
     if (this.inFlight) {
-      return { expiredWorkers: 0, reclaimedLeases: 0, recoveredExecutions: 0, durationMs: 0 };
+      return { expiredWorkers: 0, reclaimedLeases: 0, reapedWorkers: 0, recoveredExecutions: 0, durationMs: 0 };
     }
     this.inFlight = true;
     const startedAt = this.clock.now().getTime();
@@ -78,10 +79,16 @@ export class BackgroundRecoveryLoop {
         const summary: RecoveryTickSummary = {
           expiredWorkers: sweep.expired.length,
           reclaimedLeases: sweep.reclaimedLeases,
+          reapedWorkers: sweep.reaped.length,
           recoveredExecutions: recovered,
           durationMs: this.clock.now().getTime() - startedAt
         };
-        if (summary.expiredWorkers > 0 || summary.reclaimedLeases > 0 || summary.recoveredExecutions > 0) {
+        if (
+          summary.expiredWorkers > 0 ||
+          summary.reclaimedLeases > 0 ||
+          summary.reapedWorkers > 0 ||
+          summary.recoveredExecutions > 0
+        ) {
           this.logger.info(summary, "cluster recovery tick");
         }
         return summary;

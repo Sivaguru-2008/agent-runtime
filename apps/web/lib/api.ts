@@ -12,17 +12,43 @@ import type {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api/runtime";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers
-    },
-    cache: "no-store"
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...init?.headers
+      },
+      cache: "no-store"
+    });
+  } catch (err) {
+    throw new Error(
+      `Backend is unavailable — ensure the API server is running on port 4000. ` +
+        `(${err instanceof Error ? err.message : String(err)})`
+    );
+  }
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
+    try {
+      const text = await response.text();
+      if (text && text.trim().startsWith("{")) {
+        const errorBody = JSON.parse(text);
+        if (errorBody && typeof errorBody === "object") {
+          if (errorBody.message) {
+            errorMessage = errorBody.message;
+          } else if (errorBody.error) {
+            errorMessage = `API Error (${response.status}): ${errorBody.error}`;
+          }
+        }
+      } else if (text && text.length < 200) {
+        errorMessage += ` - ${text}`;
+      }
+    } catch {
+      // ignore parsing errors
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json() as Promise<T>;

@@ -293,25 +293,54 @@ describe.skipIf(!harness)("PostgresEventStore — transactional integrity", () =
     const before = (await store!.listByExecution(exec)).length;
     expect(before).toBe(1);
 
-    // Force a constraint failure by inserting a duplicate id.
-    const dup = makeEvent({
+    // Append a second distinct, valid event that persists (its link rows land
+    // too). This is the row whose primary key we will later collide with.
+    const original = makeEvent({
       type: "EXECUTION_COMPLETED",
-      executionId: exec, seed, step: 0, // same step → same deterministic id
+      executionId: exec, seed, step: 1,
       payloadExtras: { execution: { id: exec, agentId: agent } }
     });
-    // First append succeeds; second one with identical id fails.
-    await store!.append(dup);
-    await expect(store!.append(dup)).rejects.toThrow();
+    await store!.append(original);
+    expect((await store!.listByExecution(exec)).length).toBe(2);
 
-    // The second append must have rolled back fully — the event_execution_links
-    // row for the duplicate must NOT exist. We assert by counting links for
-    // the duplicate's sequence (which never got assigned).
-    const linksAfter = await harness!.pg.query<{ count: string }>(
+    // Force a GENUINE constraint failure that the idempotency dedup path
+    // cannot absorb. append() runs `INSERT ... ON CONFLICT (idempotency_key)
+    // DO NOTHING`, so re-appending the SAME event is silently deduped (no
+    // throw). To exercise the rollback path we instead reuse the persisted
+    // event's primary key (`id`) while giving it a FRESH idempotency_key:
+    // the ON CONFLICT target (idempotency_key) does not match, so the INSERT
+    // proceeds and trips the events_pkey unique constraint. The whole
+    // transaction must then roll back — events row AND link rows.
+    const collidingPk = {
+      ...makeEvent({
+        type: "EXECUTION_FAILED",
+        executionId: exec, seed, step: 2, // distinct → fresh idempotency_key
+        payloadExtras: { execution: { id: exec, agentId: agent } }
+      }),
+      id: original.id // duplicate primary key → genuine constraint violation
+    };
+    // Sanity: this is a true PK collision, not an idempotency re-send.
+    expect(collidingPk.id).toBe(original.id);
+    expect(collidingPk.metadata.idempotencyKey).not.toBe(original.metadata.idempotencyKey);
+
+    await expect(store!.append(collidingPk)).rejects.toThrow();
+
+    // The failed append must have rolled back fully — no phantom event row...
+    const eventsAfter = await harness!.pg.query<{ count: string }>(
       `select count(*)::text as count from events where aggregate_id = $1`,
       [exec]
     );
-    // 2 events total (EXECUTION_STARTED + the first dup append), not 3.
-    expect(Number(linksAfter.rows[0].count)).toBe(2);
+    // 2 events total (EXECUTION_STARTED + EXECUTION_COMPLETED), not 3.
+    expect(Number(eventsAfter.rows[0].count)).toBe(2);
+
+    // ...and no orphan link rows pointing at a sequence that never committed.
+    const orphans = await harness!.pg.query<{ count: string }>(
+      `select count(*)::text as count
+         from event_execution_links l
+         left join events e on e.sequence = l.event_sequence
+         where e.id is null`
+    );
+    expect(Number(orphans.rows[0].count)).toBe(0);
   });
 });
 

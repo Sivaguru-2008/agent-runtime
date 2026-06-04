@@ -3,12 +3,16 @@ import type { MemoryInfluence } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export function MemoryInspector({ memories }: { memories: MemoryInfluence[] }) {
   return (
     <Card className="h-[360px]">
       <CardHeader>
-        <CardTitle>Memory Influence</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="memory-influence" as="span">Memory Influence</ExplainLabel>
+        </CardTitle>
         <Badge variant="muted">{memories.length} retrieved</Badge>
       </CardHeader>
       <CardContent className="h-[305px] overflow-auto space-y-3">
@@ -28,7 +32,7 @@ export function MemoryInspector({ memories }: { memories: MemoryInfluence[] }) {
             <p className="mt-3 line-clamp-4 text-xs leading-relaxed text-muted-foreground">{memory.content}</p>
           </div>
         )) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No memory influence recorded</div>
+          <ExplainedEmptyState concept="memory-influence" className="h-full justify-center border-0 bg-transparent" />
         )}
       </CardContent>
     </Card>

@@ -109,9 +109,13 @@ export class ObservabilityQueries {
 
     const flowEvents = events.filter(
       (event) =>
+        event.type === "EXECUTION_STARTED" ||
         event.type === "EXECUTION_STEP_STARTED" ||
+        event.type === "MODEL_COMPLETED" ||
         event.type === "TOOL_CALLED" ||
-        event.type === "MEMORY_RETRIEVED"
+        event.type === "MEMORY_RETRIEVED" ||
+        event.type === "EXECUTION_COMPLETED" ||
+        event.type === "EXECUTION_FAILED"
     );
     const nodes = flowEvents.map((event) => eventToGraphNode(event, intensityByEventId));
 
@@ -140,6 +144,23 @@ export class ObservabilityQueries {
     }));
 
     const graphNodes = [...nodes, ...warningNodes];
+    if (graphNodes.length === 0) {
+      graphNodes.push({
+        id: `fallback-${executionId}`,
+        type: "EXECUTION_STARTED",
+        label: "execution started (fallback)",
+        timestamp: events[0]?.timestamp ?? new Date().toISOString(),
+        data: { message: "Execution resolved successfully with no internal step events recorded." },
+        metadata: {
+          aggregateId: executionId,
+          traceId: events[0]?.metadata.traceId ?? "unknown",
+          reasoningIntensity: 0,
+          intensityRank: undefined,
+          durationMs: undefined,
+          totalTokens: undefined
+        }
+      });
+    }
     const flowEdges = nodes.slice(1).map((node, index) => ({
       id: `${nodes[index].id}->${node.id}`,
       source: nodes[index].id,

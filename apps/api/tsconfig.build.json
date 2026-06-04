@@ -1,0 +1,14 @@
+{
+  // Production build config. Unlike tsconfig.json (which also includes test/**
+  // for typechecking), this emits ONLY src with rootDir=src so the entrypoint
+  // lands at dist/server.js — the path server.ts resolves db/schema.sql and
+  // db/migrations against (API_ROOT = dist/..). Mirrors packages/sdk's split.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["test/**/*.ts", "**/*.test.ts"]
+}

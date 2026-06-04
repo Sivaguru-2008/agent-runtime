@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { eventStreamUrl } from "@/lib/api";
 import type { TokenChunk } from "@/lib/cognition-api";
+import { ExplainLabel } from "@/components/explain/explain-label";
 
 interface StreamFrame {
   cognitionId: string;
@@ -78,7 +79,9 @@ export function TokenStreamOverlay({ cognitionId }: TokenStreamOverlayProps) {
     <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-2">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-200">Token Stream</div>
+          <ExplainLabel concept="token-stream" as="span" className="text-sm font-medium text-zinc-200">
+            Token Stream
+          </ExplainLabel>
           <div className="text-xs text-zinc-500">
             {cognitionId ? cognitionId.slice(0, 12) + "…" : "all live cognitions"}
           </div>

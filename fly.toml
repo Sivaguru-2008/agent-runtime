@@ -1,0 +1,51 @@
+# Fly.io deployment for the Agent Runtime API.
+#
+# First-time setup (see docs/deploy.md for the full runbook):
+#   fly launch --no-deploy --copy-config        # creates the app from this file
+#   fly postgres create --name agent-runtime-db # managed Postgres
+#   fly postgres attach agent-runtime-db        # sets DATABASE_URL secret
+#   fly secrets set DATABASE_SSL=require AUTH_ENABLED=true \
+#       PERSISTENCE_DRIVER=postgres EVENT_STORE_DRIVER=postgres \
+#       MODEL_PROVIDER=failover MODEL_FAILOVER_CHAIN=groq,deterministic \
+#       GROQ_API_KEY=gsk_...
+#   fly deploy
+#   # then seed the first owner key (one-off machine):
+#   fly ssh console -C "node /app/scripts/seed-owner-key.mjs" || \
+#     fly machine run . -C "node apps/api/dist/server.js" ...   # see runbook
+
+app = "agent-runtime-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "apps/api/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "4000"
+  API_HOST = "::"
+  PERSISTENCE_DRIVER = "postgres"
+  EVENT_STORE_DRIVER = "postgres"
+  EVENT_BUS_DRIVER = "memory"   # V1: SSE via Postgres LISTEN/NOTIFY, no Redis
+  RUNTIME_MODE = "single"
+  DATABASE_SSL = "require"
+  AUTH_ENABLED = "true"
+  LOG_LEVEL = "info"
+  SHUTDOWN_DRAIN_TIMEOUT_MS = "25000"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "40s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

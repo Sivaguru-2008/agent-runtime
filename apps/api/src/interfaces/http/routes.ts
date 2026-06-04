@@ -14,11 +14,24 @@ import {
 } from "../../shared/errors.js";
 import { createId } from "../../shared/id.js";
 import { toIso } from "../../shared/clock.js";
+import {
+  ProviderRateLimitError,
+  ProviderNetworkError,
+  ProviderServerError,
+  ProviderTimeoutError
+} from "../../providers/errors.js";
+import { AllProvidersFailedError } from "../../providers/failoverModelProvider.js";
+import { CircuitOpenError } from "../../infrastructure/reliability/circuitBreaker.js";
 import { registerLiveRoutes } from "../../routes/live-routes.js";
 import { registerSprintNextRoutes } from "./sprintNextRoutes.js";
+import { runtimeIdFor, resolveTraceId } from "./observabilityMetadata.js";
 import { RecentSequenceTracker } from "../../events/sse-dedupe.js";
-import { requireTenant } from "../../infrastructure/security/tenantContext.js";
-import { requireRole } from "../../infrastructure/security/rbac.js";
+import { requireTenant, canAccessAllTenants, type TenantContext } from "../../infrastructure/security/tenantContext.js";
+import type { Execution } from "../../domain/model.js";
+import { requirePermission } from "../../infrastructure/security/rbac.js";
+import { registerCertificationRoutes } from "./certificationRoutes.js";
+import { markTenantActivated } from "./signupRoutes.js";
+import { recordRetentionPing } from "../../application/analytics/funnelEvents.js";
 import {
   CrossTenantAccessError,
   ResourceTenantNotResolvableError,
@@ -32,11 +45,146 @@ import {
   workerHeartbeatSchema
 } from "./schemas.js";
 
+/**
+ * A RuntimeExecutionError is "transient" when its root cause is the upstream
+ * model provider being momentarily unavailable — the runtime itself is healthy.
+ * This covers a rate-limit, an OPEN circuit breaker, an unreachable host
+ * (network/DNS), a connect/read timeout, an upstream 5xx, or an exhausted
+ * failover chain. All of these must surface as 503 + Retry-After so clients and
+ * the UI back off and retry, rather than the opaque 500 ("Internal Server
+ * Error") that reads as "the runtime is broken" — the exact symptom seen when
+ * Groq goes offline mid-runloop.
+ *
+ * Walks the originalError/cause chain (the cognition orchestrator wraps the
+ * provider error in a RuntimeExecutionError whose `originalError` is the typed
+ * ProviderError; the failover provider re-throws an AllProvidersFailedError).
+ */
+export function classifyTransientProviderFailure(err: unknown): { retryAfterSec: number } | null {
+  let cur: unknown = err;
+  for (let depth = 0; depth < 6 && cur; depth += 1) {
+    if (cur instanceof ProviderRateLimitError) {
+      const ms = cur.retryAfterMs;
+      return { retryAfterSec: ms ? Math.min(60, Math.max(1, Math.ceil(ms / 1000))) : 5 };
+    }
+    if (cur instanceof CircuitOpenError) return { retryAfterSec: 10 };
+    // Whole failover chain exhausted: every upstream is down. Treat as a
+    // transient infrastructure outage — the operator/UI should retry, not
+    // escalate the runtime as broken.
+    if (cur instanceof AllProvidersFailedError) return { retryAfterSec: 10 };
+    // Provider momentarily unreachable / timed out / upstream 5xx — the
+    // runtime is healthy, the model API is not. (ProviderNetworkError is what
+    // GroqModelProvider throws when the Groq API can't be reached.)
+    if (
+      cur instanceof ProviderNetworkError ||
+      cur instanceof ProviderTimeoutError ||
+      cur instanceof ProviderServerError
+    ) {
+      return { retryAfterSec: 5 };
+    }
+    // Message-based matching is the fallback for when the typed error has been
+    // flattened to a plain Error along the way — the cognition orchestrator
+    // surfaces a failed role as `node.output.error` (a string) and re-wraps it
+    // as a generic Error, so only the *message* survives, not the class. These
+    // patterns mirror the messages emitted by the ProviderError taxonomy and
+    // the failover coordinator.
+    const msg = cur instanceof Error ? cur.message : "";
+    if (/rate limit exceeded/i.test(msg)) return { retryAfterSec: 5 };
+    if (/circuit breaker .* is OPEN/i.test(msg)) return { retryAfterSec: 10 };
+    if (/all providers in failover chain .* failed/i.test(msg)) return { retryAfterSec: 10 };
+    // ProviderNetworkError / ProviderTimeoutError / ProviderServerError messages.
+    if (/network error|is the service reachable|unable to reach/i.test(msg)) return { retryAfterSec: 5 };
+    if (/request timed out after/i.test(msg)) return { retryAfterSec: 5 };
+    if (/server error HTTP 5\d\d/i.test(msg)) return { retryAfterSec: 5 };
+    const next = cur as { originalError?: unknown; cause?: unknown };
+    cur = next.originalError ?? next.cause;
+  }
+  return null;
+}
+
 // Cardinality-bounded route label for metrics. Same UUID pattern used in
 // app.ts so the queue_saturation series joins cleanly with http_request_duration.
 const ROUTE_ID_PATTERN = /\/[0-9a-f-]{8,}(?=\/|$)/gi;
 function normaliseRouteForMetrics(url: string): string {
   return url.split("?")[0]!.replace(ROUTE_ID_PATTERN, "/:id");
+}
+
+/** Query string accepted by `GET /executions`. */
+export interface ExecutionListQuery {
+  agentId?: string;
+  status?: string;
+  limit?: string;
+}
+
+/**
+ * Structural dependencies of {@link listExecutionsForTenant}. Declared as a
+ * narrow shape (not the full RuntimeContainer) so the function can be unit
+ * tested with lightweight stubs.
+ */
+export interface ExecutionListDeps {
+  agents: { list(): Promise<Array<{ id: string }>> };
+  executions: { listByAgent(agentId: string): Promise<Execution[]> };
+  guard: {
+    assertOwnsAgent(ctx: TenantContext, agentId: string): Promise<void>;
+    resolveAgentTenant(agentId: string): Promise<string | null>;
+  };
+}
+
+/**
+ * Resolve the executions a caller may see, tenant-scoped, with optional
+ * status/limit filtering.
+ *
+ * Security model (mirrors GET /agents): a non-admin sees only executions
+ * belonging to agents they own; an admin sees every tenant's executions.
+ * Agents with an unresolvable owner (null) are treated as visible — matching
+ * the legacy permissive behaviour for system/in-memory fixtures.
+ *
+ * Built on the existing `listByAgent` primitive so no repository/schema change
+ * is required. Results are newest-first by `startedAt` so `limit` keeps the
+ * most recent executions.
+ */
+export async function listExecutionsForTenant(
+  deps: ExecutionListDeps,
+  ctx: TenantContext,
+  query: ExecutionListQuery
+): Promise<Execution[]> {
+  // 1. Resolve the set of agents whose executions the caller may see.
+  let agentIds: string[];
+  if (query.agentId) {
+    await deps.guard.assertOwnsAgent(ctx, query.agentId);
+    agentIds = [query.agentId];
+  } else {
+    const allAgents = await deps.agents.list();
+    if (canAccessAllTenants(ctx.role)) {
+      agentIds = allAgents.map((a) => a.id);
+    } else {
+      agentIds = [];
+      for (const a of allAgents) {
+        const owner = await deps.guard.resolveAgentTenant(a.id);
+        if (owner === null || owner === ctx.tenantId) agentIds.push(a.id);
+      }
+    }
+  }
+
+  // 2. Gather and merge their executions.
+  const executionLists = await Promise.all(agentIds.map((id) => deps.executions.listByAgent(id)));
+  let executions = executionLists.flat();
+
+  // 3. Newest first by startedAt.
+  executions.sort((a, b) => (a.startedAt < b.startedAt ? 1 : a.startedAt > b.startedAt ? -1 : 0));
+
+  // 4. Optional status filter (comma-separated).
+  if (query.status) {
+    const allowed = new Set(query.status.split(",").map((s) => s.trim()).filter(Boolean));
+    if (allowed.size) executions = executions.filter((e) => allowed.has(e.status));
+  }
+
+  // 5. Optional limit.
+  const limit = query.limit ? Number(query.limit) : undefined;
+  if (typeof limit === "number" && Number.isFinite(limit) && limit >= 0) {
+    executions = executions.slice(0, limit);
+  }
+
+  return executions;
 }
 
 export async function registerRoutes(app: FastifyInstance, container: RuntimeContainer): Promise<void> {
@@ -116,6 +264,39 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
       return reply.status(403).send({ error: "FORBIDDEN", message: "Cross-tenant access denied" });
     }
 
+    // A model-provider rate-limit or OPEN circuit is transient infrastructure
+    // unavailability, not a server fault — surface it as 503 + Retry-After with
+    // a clear, actionable message instead of an opaque 500.
+    if (error instanceof RuntimeExecutionError) {
+      const transient = classifyTransientProviderFailure(error);
+      if (transient) {
+        reply.header("Retry-After", String(transient.retryAfterSec));
+        app.log.warn(
+          {
+            requestId: request.id,
+            url: request.url,
+            method: request.method,
+            cognitionId: error.cognitionId,
+            cause: error.message,
+            retryAfterSec: transient.retryAfterSec
+          },
+          "[PROVIDER_UNAVAILABLE] model provider rate-limited or circuit OPEN — returning 503"
+        );
+        return reply.status(503).send({
+          success: false,
+          error: {
+            type: "PROVIDER_UNAVAILABLE",
+            message:
+              "The model provider is temporarily rate-limited or unavailable. Please retry shortly.",
+            cognitionId: error.cognitionId,
+            recoverable: true,
+            retryable: true,
+            retryAfterSec: transient.retryAfterSec
+          }
+        });
+      }
+    }
+
     if (
       error instanceof PlannerValidationError ||
       error instanceof LowConfidenceExecutionBlocked ||
@@ -166,6 +347,28 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
     service: "agent-runtime-api",
     timestamp: new Date().toISOString()
   }));
+
+  // ── LLM provider health ──────────────────────────────────────────────────
+  // Validates reachability of the Groq API (GET …/v1/models) and reports the
+  // active provider, online flag, probe latency and the selected model. The
+  // probe never runs inference. On failure the normalised provider-error
+  // envelope is returned (provider/status/error/timestamp) with HTTP 503 so
+  // upstream health aggregation can distinguish a degraded provider from a
+  // healthy one without parsing prose.
+  app.get("/api/health/llm", async (request, reply) => {
+    const health = await container.llm.health();
+    const body = {
+      provider: health.provider,
+      online: health.online,
+      latency: health.latency,
+      selectedModel: health.selectedModel,
+      runtimeId: runtimeIdFor(request),
+      traceId: createId(),
+      timestamp: new Date().toISOString(),
+      ...(health.error ? { error: health.error } : {})
+    };
+    return reply.status(health.online ? 200 : 503).send(body);
+  });
 
   // ── K8s-style probes ───────────────────────────────────────────────────────
   // /live  — process-only liveness. Returns 200 as long as the event loop is
@@ -262,7 +465,7 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
   // Agent creation requires write privilege (developer+). Quota enforcement
   // on max_agents runs BEFORE the insert so a tenant cannot burst past their
   // plan limit by racing many concurrent creates.
-  app.post("/agents", { preHandler: requireRole("developer") }, async (request, reply) => {
+  app.post("/agents", { preHandler: requirePermission("agent:write") }, async (request, reply) => {
     const ctx = requireTenant(request);
     const body = createAgentSchema.parse(request.body);
     if (app.hasDecorator("quotaEnforcer")) {
@@ -280,7 +483,7 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
   app.get("/agents", async (request) => {
     const ctx = requireTenant(request);
     const all = await container.agents.list();
-    if (ctx.role === "admin") return all;
+    if (canAccessAllTenants(ctx.role)) return all;
     const owned: typeof all = [];
     for (const a of all) {
       const owner = await guard.resolveAgentTenant(a.id);
@@ -300,23 +503,28 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
     return { agent, executions, memory };
   });
 
-  app.post("/agents/:agentId/start", { preHandler: requireRole("developer") }, async (request) => {
+  app.post("/agents/:agentId/start", { preHandler: requirePermission("execution:write") }, async (request) => {
     const ctx = requireTenant(request);
     const { agentId } = request.params as { agentId: string };
     await guard.assertOwnsAgent(ctx, agentId);
     return container.runtime.startAgent(agentId, requestContext(request.id, ctx.tenantId));
   });
 
-  app.post("/agents/:agentId/stop", { preHandler: requireRole("developer") }, async (request) => {
+  app.post("/agents/:agentId/stop", { preHandler: requirePermission("execution:write") }, async (request) => {
     const ctx = requireTenant(request);
     const { agentId } = request.params as { agentId: string };
     await guard.assertOwnsAgent(ctx, agentId);
     return container.runtime.stopAgent(agentId, requestContext(request.id, ctx.tenantId));
   });
 
-  // Task creation is the heaviest write path — gated on developer+, ownership,
-  // and per-tenant execution quota (concurrent + hourly).
-  app.post("/agents/:agentId/tasks", { preHandler: requireRole("developer") }, async (request, reply) => {
+  // Task creation is the heaviest write path. It both starts an execution and
+  // drives tool execution, so it is gated on BOTH execution:write AND
+  // tool:execute (defense in depth: a future tool-only restricted role would be
+  // blocked here), plus ownership and per-tenant execution quota.
+  app.post(
+    "/agents/:agentId/tasks",
+    { preHandler: [requirePermission("execution:write"), requirePermission("tool:execute")] },
+    async (request, reply) => {
     const ctx = requireTenant(request);
     const { agentId } = request.params as { agentId: string };
     await guard.assertOwnsAgent(ctx, agentId);
@@ -332,10 +540,24 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
     }
     const body = runTaskSchema.parse(request.body);
     const execution = await container.runtime.runTask(agentId, body, requestContext(request.id, ctx.tenantId));
+    // Per-tenant operation accounting (multi-tenant billing/quota visibility).
+    // Bounded cardinality: tenant_id × a small fixed operation enum.
+    container.metrics.tenantOperationsTotal.inc({ tenant_id: ctx.tenantId, operation: "execution_started" });
+    // Activation funnel: a tenant's first traced task flips signups.activated_at.
+    // Strictly fire-and-forget — markTenantActivated never throws, never awaits,
+    // and no-ops in MEMORY mode (securityDb === null), so it can never delay or
+    // fail this 202. The `activated_at is null` guard makes it idempotent.
+    if (app.hasDecorator("securityDb")) {
+      markTenantActivated(app.securityDb, ctx.tenantId);
+      // Retention: a daily-debounced "active today" ping (one insert/tenant/day
+      // via the dedupe key). Same fire-and-forget, fail-safe contract as
+      // markTenantActivated — never delays or fails this 202.
+      recordRetentionPing(app.securityDb, ctx.tenantId);
+    }
     return reply.status(202).send(execution);
   });
 
-  app.post("/agents/:agentId/memory", { preHandler: requireRole("developer") }, async (request, reply) => {
+  app.post("/agents/:agentId/memory", { preHandler: requirePermission("agent:write") }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { agentId } = request.params as { agentId: string };
     await guard.assertOwnsAgent(ctx, agentId);
@@ -358,6 +580,26 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
     return reply.status(201).send(memory);
   });
 
+  // Cross-agent execution listing, tenant-scoped. See listExecutionsForTenant —
+  // the security-critical ownership filtering and the status/limit logic live
+  // there as a pure function so they can be unit-tested without standing up the
+  // whole app.
+  //
+  // Query params (all optional):
+  //   agentId — restrict to a single agent (must be owned by the caller).
+  //   status  — comma-separated ExecutionStatus filter (e.g. "COMPLETED,FAILED").
+  //   limit   — cap the number of executions returned (newest first).
+  app.get("/executions", async (request) => {
+    const ctx = requireTenant(request);
+    const query = request.query as ExecutionListQuery;
+    const executions = await listExecutionsForTenant(
+      { agents: container.agents, executions: container.executions, guard },
+      ctx,
+      query
+    );
+    return { executions, count: executions.length };
+  });
+
   app.get("/executions/:executionId", async (request) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
@@ -365,7 +607,10 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
     const execution = await container.executions.getById(executionId);
     if (!execution) throw new NotFoundError("Execution", executionId);
     const details = await queries.executionDetails(executionId);
-    return { execution, ...details };
+    // Identity envelope for the frontend ExecutionMetadataPanel. traceId is
+    // resolved from the persisted execution first, then the event log.
+    const traceId = await resolveTraceId(container.eventStore, executionId, execution.traceId);
+    return { execution, traceId, runtimeId: runtimeIdFor(request), ...details };
   });
 
   app.get("/executions/:executionId/events", async (request) => {
@@ -384,7 +629,7 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
 
   // Replay is a write-class operation (reconstructs an execution) — requires
   // developer+ and ownership of the source execution to prevent replay leakage.
-  app.post("/executions/:executionId/replay", { preHandler: requireRole("developer") }, async (request, reply) => {
+  app.post("/executions/:executionId/replay", { preHandler: requirePermission("replay:write") }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
     await guard.assertOwnsExecution(ctx, executionId);
@@ -395,35 +640,37 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
   // Cluster topology endpoints expose worker hosts, lease ownership, and
   // execution timelines that span all tenants. Restrict to operator+ — these
   // are platform-level diagnostics, not customer-visible product surfaces.
-  app.get("/cluster/overview", { preHandler: requireRole("operator") }, async () => container.clusterQueries.overview());
+  // Cluster topology reads are platform observability — operators and the
+  // read-only compliance auditor may view them (observability:read).
+  app.get("/cluster/overview", { preHandler: requirePermission("observability:read") }, async () => container.clusterQueries.overview());
 
-  app.get("/cluster/snapshot", { preHandler: requireRole("operator") }, async () => container.clusterQueries.snapshot());
+  app.get("/cluster/snapshot", { preHandler: requirePermission("observability:read") }, async () => container.clusterQueries.snapshot());
 
-  app.get("/cluster/workers", { preHandler: requireRole("operator") }, async () => container.workers.list());
+  app.get("/cluster/workers", { preHandler: requirePermission("observability:read") }, async () => container.workers.list());
 
-  app.get("/cluster/leases", { preHandler: requireRole("operator") }, async () => container.leases.listActive());
+  app.get("/cluster/leases", { preHandler: requirePermission("observability:read") }, async () => container.leases.listActive());
 
-  app.get("/cluster/executions/:executionId", { preHandler: requireRole("operator") }, async (request) => {
+  app.get("/cluster/executions/:executionId", { preHandler: requirePermission("observability:read") }, async (request) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
-    // Operator can see cross-tenant *cluster* state for their own tenant's
-    // executions; only admins can pivot to executions outside their tenant.
-    if (ctx.role !== "admin") {
+    // Tenant-scoped unless owner/admin: an operator/auditor sees cluster state
+    // for their own tenant's executions; only owner/admin can pivot outside it.
+    if (!canAccessAllTenants(ctx.role)) {
       await guard.assertOwnsExecution(ctx, executionId);
     }
     return container.clusterQueries.executionTimeline(executionId);
   });
 
-  // Worker registration & lifecycle controls are infrastructure-grade actions:
-  // a rogue developer key must not be able to register a fake worker (which
-  // could then steal leases) or stop a real one. Operator+ required.
-  app.post("/cluster/workers", { preHandler: requireRole("operator") }, async (request, reply) => {
+  // Worker registration & lifecycle are recovery/break-glass controls: a rogue
+  // developer key must not register a fake worker (which could steal leases) or
+  // stop a real one. Gated on recovery:execute (operator+).
+  app.post("/cluster/workers", { preHandler: requirePermission("recovery:execute") }, async (request, reply) => {
     const body = registerWorkerSchema.parse(request.body);
     const worker = await container.workerLifecycle.register(body);
     return reply.status(201).send(worker);
   });
 
-  app.post("/cluster/workers/:workerId/heartbeat", { preHandler: requireRole("operator") }, async (request) => {
+  app.post("/cluster/workers/:workerId/heartbeat", { preHandler: requirePermission("recovery:execute") }, async (request) => {
     const { workerId } = request.params as { workerId: string };
     const body = workerHeartbeatSchema.parse(request.body);
     const worker = await container.workerLifecycle.heartbeat(workerId, body);
@@ -431,31 +678,32 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
     return worker;
   });
 
-  app.post("/cluster/workers/:workerId/drain", { preHandler: requireRole("operator") }, async (request) => {
+  app.post("/cluster/workers/:workerId/drain", { preHandler: requirePermission("recovery:execute") }, async (request) => {
     const { workerId } = request.params as { workerId: string };
     const worker = await container.workerLifecycle.setStatus(workerId, "DRAINING");
     if (!worker) throw new NotFoundError("Worker", workerId);
     return worker;
   });
 
-  app.post("/cluster/workers/:workerId/stop", { preHandler: requireRole("operator") }, async (request) => {
+  app.post("/cluster/workers/:workerId/stop", { preHandler: requirePermission("recovery:execute") }, async (request) => {
     const { workerId } = request.params as { workerId: string };
     const worker = await container.workerLifecycle.setStatus(workerId, "STOPPED");
     if (!worker) throw new NotFoundError("Worker", workerId);
     return worker;
   });
 
-  app.post("/cluster/recover", { preHandler: requireRole("operator") }, async () => {
+  app.post("/cluster/recover", { preHandler: requirePermission("recovery:execute") }, async () => {
     const recovered = await container.scheduler.recover();
     return { recovered };
   });
 
-  // Observability endpoints aggregate across all tenants — operator+ only.
-  app.get("/observability/overview", { preHandler: requireRole("operator") }, async () => queries.overview());
+  // Observability endpoints aggregate across all tenants — observability:read
+  // (operator/admin/owner, plus the read-only auditor).
+  app.get("/observability/overview", { preHandler: requirePermission("observability:read") }, async () => queries.overview());
 
-  app.get("/observability/topology", { preHandler: requireRole("operator") }, async () => queries.topology());
+  app.get("/observability/topology", { preHandler: requirePermission("observability:read") }, async () => queries.topology());
 
-  app.get("/observability/failure-clusters", { preHandler: requireRole("operator") }, async () => queries.failureClusters());
+  app.get("/observability/failure-clusters", { preHandler: requirePermission("observability:read") }, async () => queries.failureClusters());
 
   app.get("/executions/:executionId/snapshot", async (request, reply) => {
     const ctx = requireTenant(request);
@@ -532,7 +780,7 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
       return tid;
     };
     const eventBelongsToTenant = async (event: unknown): Promise<boolean> => {
-      if (ctx.role === "admin") return true;
+      if (canAccessAllTenants(ctx.role)) return true;
       const resolved = await resolveEventTenant(event as { aggregateId?: string; aggregateType?: string; metadata?: Record<string, unknown> });
       // Unresolved events: deny by default to avoid leaking SYSTEM-level data
       // (worker lifecycle, lease state, scheduler events) to product tenants.
@@ -658,11 +906,15 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
   await registerLiveRoutes(app, {
     engine: container.liveEngine,
     broadcaster: container.liveBroadcaster,
-    ollama: container.ollama
+    llm: container.llm
   });
 
   // Sprint Next: cognition + replay + time-travel + failure intelligence
   await registerSprintNextRoutes(app, container);
+
+  // Determinism certifications — read (certification:read) + capture
+  // (certification:write). Mounted last so it shares the same guard/container.
+  await registerCertificationRoutes(app, container);
 }
 
 function requestContext(requestId: string, tenantId?: string) {

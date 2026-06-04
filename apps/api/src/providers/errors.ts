@@ -75,3 +75,27 @@ export class ProviderStructuredOutputError extends ProviderError {
     this.name = "ProviderStructuredOutputError";
   }
 }
+
+/**
+ * Authorization failure (HTTP 403) — the API key is valid but lacks permission
+ * for the requested resource (e.g. a gated model). Non-retryable: retrying with
+ * the same credentials cannot succeed.
+ */
+export class ProviderForbiddenError extends ProviderError {
+  constructor(provider: string) {
+    super(`${provider}: forbidden — the API key lacks access to this resource.`, provider);
+    this.name = "ProviderForbiddenError";
+  }
+}
+
+/**
+ * The requested model id does not exist or is not available to this account
+ * (HTTP 404 / invalid model name). Non-retryable — the caller must pick a
+ * valid model.
+ */
+export class ProviderModelNotFoundError extends ProviderError {
+  constructor(provider: string, public readonly model: string) {
+    super(`${provider}: model "${model}" not found or not available.`, provider);
+    this.name = "ProviderModelNotFoundError";
+  }
+}

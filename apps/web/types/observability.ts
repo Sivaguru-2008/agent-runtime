@@ -43,6 +43,8 @@ export interface Execution {
   startedAt: string;
   completedAt?: string;
   updatedAt: string;
+  /** Distributed trace correlation id, threaded from execution creation. */
+  traceId?: string;
 }
 
 export interface DomainEvent {
@@ -210,6 +212,10 @@ export interface CoordinationPressureNodeSummary {
 export interface ExecutionDetails {
   execution: Execution;
   executionId: string;
+  /** Distributed trace id (server-resolved from execution or its event log). */
+  traceId?: string;
+  /** Runtime correlation id of the request that produced this view. */
+  runtimeId?: string;
   events: DomainEvent[];
   timeline: TimelineFrame[];
   warnings: ObservabilityWarning[];

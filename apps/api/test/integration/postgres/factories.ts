@@ -70,10 +70,19 @@ export function makeCognitionGraph(opts: {
   seed: string;
   agentId?: string;
   executionId?: string;
+  tenantId?: string;
+  /**
+   * When true, seed a single handoff EXECUTOR(seq 1) → VERIFIER. Default off so
+   * the determinism suite's frame-count expectations are unchanged. Used by the
+   * branch-remap test to verify handoff `fromNodeId` is translated to the
+   * branch-local node id rather than dangling at the source id.
+   */
+  withHandoffs?: boolean;
 }): CognitionGraph {
   const cognitionId = deterministicId([opts.seed, "cognition"]);
   const executionId = opts.executionId ?? uuidFromHex(deterministicId([opts.seed, "execution"]));
   const agentId = opts.agentId ?? uuidFromHex(deterministicId([opts.seed, "agent"]));
+  const tenantId = opts.tenantId ?? "system";
   const baseTs = FIXED_EPOCH.getTime();
   const roles = ["PLANNER", "EXECUTOR", "VERIFIER", "MEMORY_MANAGER"] as const;
   const nodes: CognitionNode[] = roles.map((role, idx) => {
@@ -95,15 +104,19 @@ export function makeCognitionGraph(opts: {
       durationMs: 500
     };
   });
+  const handoffs: CognitionGraph["handoffs"] = opts.withHandoffs
+    ? [{ fromNodeId: nodes[1].id, toRole: "VERIFIER", reason: "verifier-recheck", carryOver: { from: "EXECUTOR" } }]
+    : [];
   return {
     id: cognitionId,
     executionId,
     agentId,
+    tenantId,
     phase: "COMPLETE",
     startedAt: toIso(new Date(baseTs)),
     completedAt: toIso(new Date(baseTs + roles.length * 1000)),
     nodes,
-    handoffs: [],
+    handoffs,
     output: { final: "ok" }
   };
 }

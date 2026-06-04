@@ -362,7 +362,7 @@ Full suite: **12 passing tests** (3 existing + 1 new file = 4 files).
 - **Scheduler integration** — wire `CognitionOrchestrator.run` through the
   distributed scheduler so cognitions lease workers and survive failover.
 - **Real model providers** — swap `DeterministicModelProvider` for the
-  existing `OllamaProvider` inside the `ExecutorAgent` when not in replay mode.
+  existing `GroqProvider` inside the `ExecutorAgent` when not in replay mode.
 - **Streaming the replay timeline** — replace the polling scrubber with an
   SSE-driven cursor for sub-100ms latency.
 - **Persistent cognition store** — add a Postgres adapter mirroring

@@ -10,7 +10,19 @@ import { acquireFencingToken, assertCanWrite } from "../../infrastructure/reliab
 export interface WorkerLifecycleConfig {
   heartbeatTtlMs: number;
   sweepIntervalMs: number;
+  /**
+   * Retention window for terminal (LOST/STOPPED) workers. Once a worker has
+   * been terminal for longer than this, the sweep permanently removes it from
+   * the registry. Defaults to 24h — long enough that recently-dead workers
+   * stay visible for diagnostics, short enough that abandoned rows (e.g. a
+   * renamed embedded worker) do not linger forever. Tunable via
+   * WORKER_REAP_AFTER_MS.
+   */
+  reapAfterMs?: number;
 }
+
+/** Default terminal-worker retention before reaping: 24 hours. */
+const DEFAULT_REAP_AFTER_MS = 24 * 60 * 60 * 1000;
 
 export interface RegisterWorkerInput {
   id: string;
@@ -161,12 +173,12 @@ export class WorkerLifecycleService {
     return updated;
   }
 
-  async sweep(): Promise<{ expired: RuntimeWorker[]; reclaimedLeases: number }> {
+  async sweep(): Promise<{ expired: RuntimeWorker[]; reclaimedLeases: number; reaped: RuntimeWorker[] }> {
     // TASK D1: Split-brain sweep fencing: only the active region sweeps stale workers.
     const held = acquireFencingToken();
     const now = this.clock.now();
     const expired = await this.registry.expireStale(now, this.config.heartbeatTtlMs);
-    let reclaimedLeases = 0;
+    const reclaimedSet = new Set<string>();
 
     assertCanWrite(held);
 
@@ -200,6 +212,7 @@ export class WorkerLifecycleService {
       const reclaimed = await this.leases.reclaimByWorker(worker.id, now);
       for (const lease of reclaimed) {
         assertCanWrite(held);
+        reclaimedSet.add(lease.executionId);
 
         // TASK B1+B2: recovery context propagation & causation chaining from lastEvent to WORKER_LOST
         const lastEvent = await this.publisher.eventStore.lastForExecution(lease.executionId);
@@ -226,12 +239,12 @@ export class WorkerLifecycleService {
           })
         );
       }
-      reclaimedLeases += reclaimed.length;
     }
 
     const expiredLeases = await this.leases.reclaimExpired(now);
     for (const lease of expiredLeases) {
       assertCanWrite(held);
+      reclaimedSet.add(lease.executionId);
 
       // TASK B1+B2: recovery context & causation chaining to the last event of the execution itself
       const lastEvent = await this.publisher.eventStore.lastForExecution(lease.executionId);
@@ -257,7 +270,23 @@ export class WorkerLifecycleService {
         })
       );
     }
-    return { expired, reclaimedLeases: reclaimedLeases + expiredLeases.length };
+    // Purge workers that have been terminal (LOST/STOPPED) beyond the retention
+    // window. Long-dead rows otherwise linger forever in the topology view and
+    // skew live-fleet aggregates. Recently-lost workers stay (within retention)
+    // for operator diagnostics.
+    assertCanWrite(held);
+    const reaped = await this.registry.reapTerminated(
+      now,
+      this.config.reapAfterMs ?? DEFAULT_REAP_AFTER_MS
+    );
+    for (const worker of reaped) {
+      this.logger?.info(
+        { workerId: worker.id, status: worker.status, lastHeartbeatAt: worker.lastHeartbeatAt },
+        "reaped terminated worker"
+      );
+    }
+
+    return { expired, reclaimedLeases: reclaimedSet.size, reaped };
   }
 
   start(): void {

@@ -38,12 +38,13 @@ import cors from "@fastify/cors";
 import { Redis } from "ioredis";
 import Fastify from "fastify";
 import type { AppConfig } from "./shared/config.js";
-import { createLogger } from "./infrastructure/logger.js";
+import { createLogger, trueClockTimestamp } from "./infrastructure/logger.js";
 import { createRedisClient } from "./infrastructure/reliability/redisClient.js";
 import { createRuntimeContainer } from "./application/runtimeContainer.js";
 import { registerRoutes } from "./interfaces/http/routes.js";
 import { registerOperatorRoutes } from "./interfaces/http/operatorRoutes.js";
 import { createId } from "./shared/id.js";
+import { RUNTIME_INSTANCE_ID } from "./interfaces/http/observabilityMetadata.js";
 import { createPgClient, type PgClient } from "./infrastructure/persistence/postgres/pgClient.js";
 import { registerApiKeyAuth } from "./infrastructure/security/apiKeyAuth.js";
 import { registerRateLimiter } from "./infrastructure/security/rateLimiter.js";
@@ -51,6 +52,9 @@ import { AuditLogger, registerAuditLogger } from "./infrastructure/security/audi
 import { QuotaEnforcer } from "./infrastructure/quota/quotaEnforcer.js";
 import "./infrastructure/security/fastifyTypes.js";
 import { registerAdminRoutes } from "./interfaces/http/adminRoutes.js";
+import { registerSignupRoutes } from "./interfaces/http/signupRoutes.js";
+import { registerFunnelAnalyticsRoutes } from "./interfaces/http/funnelRoutes.js";
+import { DEFAULT_ALERT_CONFIG } from "./application/analytics/funnelAlerts.js";
 
 // UUID-like segments that inflate histogram cardinality if left in paths.
 const ID_PATTERN = /\/[0-9a-f-]{8,}(?=\/|$)/gi;
@@ -96,9 +100,27 @@ export async function buildApp(config: AppConfig) {
       base: {
         service: "agent-runtime-api",
         environment: config.NODE_ENV
-      }
+      },
+      // Use the true clock for timestamps. Without this, Fastify builds its own
+      // pino with the DEFAULT timestamp (pino's epochTime → global Date.now),
+      // which executionEngine patches to throw S_UNSAFE_REPLAY inside an
+      // execution step. app.log is what processLifecycle's uncaughtException
+      // handler logs through, so a fatal raised inside a step would call the
+      // patched Date.now during timestamping and crash the whole process —
+      // masking the real error and taking the backend permanently offline.
+      timestamp: trueClockTimestamp
     },
-    genReqId: () => createId()
+    genReqId: () => createId(),
+    // Connection-drain policy on app.close():
+    //   development → true: destroy ALL open connections immediately, including
+    //     long-lived SSE streams. Without this a `tsx watch` restart would keep
+    //     the old process (and port 4000) alive for the whole drain window while
+    //     the dashboard's SSE connection refused to close — the "unreachable
+    //     after a save" symptom. Destroying them lets the newest instance bind
+    //     the port at once.
+    //   production → "idle": close idle keep-alive sockets immediately but let
+    //     in-flight requests finish, so a rolling deploy drains cleanly.
+    forceCloseConnections: config.NODE_ENV === "development" ? true : "idle"
   });
 
   const container = await createRuntimeContainer(config, logger);
@@ -142,7 +164,7 @@ export async function buildApp(config: AppConfig) {
   // AUTH_ENABLED=true + no DATABASE_URL would boot a server that rejected
   // every API key as "unknown". Refuse explicitly with a structured alert.
   let securityDb: PgClient | null = null;
-  if (config.DATABASE_URL && (config.AUTH_ENABLED || config.AUDIT_LOG_ENABLED || config.QUOTA_ENABLED)) {
+  if (config.DATABASE_URL) {
     const db = createPgClient(config.DATABASE_URL);
     securityDb = db;
     app.addHook("onClose", async () => {
@@ -172,14 +194,44 @@ export async function buildApp(config: AppConfig) {
     );
   }
 
+  // Expose the security store (or null in MEMORY mode) to request handlers that
+  // need a fire-and-forget write outside the runtime container — e.g. the
+  // task-creation handler stamping signups.activated_at on first activation.
+  app.decorate("securityDb", securityDb);
+
   // 1. API Key Authentication ─────────────────────────────────────────────────
   // Runs first in onRequest so tenant context is available for all subsequent hooks.
+  //
+  // Strict-environment guarantee (defense in depth): production / STRICT_PROD
+  // must run authenticated. loadConfig already rejects AUTH_ENABLED=false in
+  // those environments; we re-assert here and inside registerApiKeyAuth so the
+  // unauthenticated synthetic-tenant fallback can never be installed in prod
+  // through any boot path.
+  const authStrict = config.NODE_ENV === "production" || config.STRICT_PROD === true;
+  if (authStrict && !config.AUTH_ENABLED) {
+    logger.fatal(
+      { criticalAlert: true, env: config.NODE_ENV, strictProd: config.STRICT_PROD },
+      "[security][CRITICAL] AUTH_ENABLED=false in a strict environment — refusing to boot"
+    );
+    throw new Error(
+      "[security] Refusing to boot: AUTH_ENABLED must be true in production / STRICT_PROD."
+    );
+  }
+  // The public self-serve signup endpoint runs unauthenticated by design (the
+  // caller has no key yet — that is the whole point). We append it to the skip
+  // list unconditionally; the SIGNUP_ENABLED gate inside the route is what
+  // actually controls availability, so a disabled signup is still a clean 403,
+  // never a 401 that leaks the auth boundary.
+  const authSkipPaths = config.AUTH_SKIP_PATHS.split(",").map((p) => p.trim()).filter(Boolean);
+  if (!authSkipPaths.includes("/signup")) authSkipPaths.push("/signup");
   await registerApiKeyAuth(app, {
     redis: securityRedis,
     db: securityDb ?? createNoopPgClient(),
-    skipPaths: config.AUTH_SKIP_PATHS.split(",").map((p) => p.trim()).filter(Boolean),
+    skipPaths: authSkipPaths,
     cacheTtlSec: config.API_KEY_CACHE_TTL_SEC,
-    enabled: config.AUTH_ENABLED
+    enabled: config.AUTH_ENABLED,
+    strict: authStrict,
+    disabledFallbackRole: config.AUTH_DISABLED_FALLBACK_ROLE ?? "developer"
   });
 
   // 2. Rate Limiting ──────────────────────────────────────────────────────────
@@ -254,12 +306,21 @@ export async function buildApp(config: AppConfig) {
     (request as unknown as Record<string, unknown>)["_metricStart"] = performance.now();
   });
 
-  // Stamp the per-request id on every response so the frontend (cognition-api
-  // reads x-runtime-id at lib/cognition-api.ts) can correlate a UI-visible
-  // error with the exact server log line. Cheap, safe, no payload impact.
+  // Stamp identity headers on every response. Two DISTINCT ids:
+  //   x-runtime-id : the stable runtime-instance id (RUNTIME_INSTANCE_ID) — the
+  //                  same for every response from this process, so the console's
+  //                  "Runtime ID" field stops changing on each request and
+  //                  actually identifies the running runtime. cognition-api.ts
+  //                  reads this header into CognitionApiError.runtimeId.
+  //   x-request-id : the per-request id (request.id, logged as reqId) for
+  //                  correlating a single UI-visible error with its log line.
+  // Cheap, safe, no payload impact.
   app.addHook("onSend", async (request, reply, payload) => {
     if (!reply.getHeader("x-runtime-id")) {
-      reply.header("x-runtime-id", request.id);
+      reply.header("x-runtime-id", RUNTIME_INSTANCE_ID);
+    }
+    if (!reply.getHeader("x-request-id")) {
+      reply.header("x-request-id", request.id);
     }
     return payload;
   });
@@ -297,6 +358,24 @@ export async function buildApp(config: AppConfig) {
 
   // ── Phase 5: Admin routes (API key + tenant + DLQ management) ─────────────
   await registerAdminRoutes(app, securityDb);
+
+  // ── Self-serve onboarding (public POST /signup + admin /signups) ──────────
+  await registerSignupRoutes(app, securityDb, {
+    enabled: config.SIGNUP_ENABLED ?? false,
+    open: config.SIGNUP_OPEN ?? false,
+    inviteCodes: (config.SIGNUP_INVITE_CODES ?? "").split(",").map((c) => c.trim()).filter(Boolean),
+    defaultPlan: config.SIGNUP_DEFAULT_PLAN ?? "starter",
+    defaultRpm: config.SIGNUP_DEFAULT_RPM ?? 120
+  });
+
+  // ── Phase 2: Funnel analytics (cohorts, segments, compare, health, alerts) ─
+  await registerFunnelAnalyticsRoutes(app, securityDb, {
+    enabled: config.FUNNEL_ALERTS_ENABLED ?? DEFAULT_ALERT_CONFIG.enabled,
+    minActivationRate: config.FUNNEL_ALERT_MIN_ACTIVATION_RATE ?? DEFAULT_ALERT_CONFIG.minActivationRate,
+    activationWindowDays: config.FUNNEL_ALERT_ACTIVATION_WINDOW_DAYS ?? DEFAULT_ALERT_CONFIG.activationWindowDays,
+    minSample: config.FUNNEL_ALERT_MIN_SAMPLE ?? DEFAULT_ALERT_CONFIG.minSample,
+    maxSignupGapHours: config.FUNNEL_ALERT_MAX_SIGNUP_GAP_HOURS ?? DEFAULT_ALERT_CONFIG.maxSignupGapHours
+  });
 
   return app;
 }

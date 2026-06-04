@@ -258,6 +258,19 @@ export class SandboxedExecutionRepository implements ExecutionRepository {
     return [...merged.values()];
   }
 
+  async listByStatus(status: Execution["status"]): Promise<Execution[]> {
+    const list = await this.innerRepo.listByStatus(status);
+    const sandboxed = [...this.childExecutions.values()].filter((e) => e.status === status);
+    const merged = new Map<string, Execution>();
+    for (const e of list) {
+      merged.set(e.id, e);
+    }
+    for (const e of sandboxed) {
+      merged.set(e.id, e);
+    }
+    return [...merged.values()];
+  }
+
   async detectPartialCommit(executionId: string) {
     return { isConsistent: true, actualStatus: "RUNNING" as const };
   }

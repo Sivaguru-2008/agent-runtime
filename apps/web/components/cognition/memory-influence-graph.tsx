@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { MemoryInfluenceHeatmap } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export interface MemoryInfluenceGraphProps {
   influence: MemoryInfluenceHeatmap;
@@ -21,9 +23,11 @@ export function MemoryInfluenceGraph({ influence }: MemoryInfluenceGraphProps) {
 
   if (memories.length === 0) {
     return (
-      <Card className="p-4 bg-zinc-950/60 border-zinc-800">
-        <div className="text-sm font-medium text-zinc-200">Memory Influence</div>
-        <div className="text-xs text-zinc-500 mt-2">No memories consulted in this cognition.</div>
+      <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-2">
+        <ExplainLabel concept="memory-influence" as="span" className="text-sm font-medium text-zinc-200">
+          Memory Influence
+        </ExplainLabel>
+        <ExplainedEmptyState concept="memory-influence" className="border-0 bg-transparent py-4" />
       </Card>
     );
   }
@@ -32,7 +36,9 @@ export function MemoryInfluenceGraph({ influence }: MemoryInfluenceGraphProps) {
     <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-200">Memory Influence</div>
+          <ExplainLabel concept="memory-influence" as="span" className="text-sm font-medium text-zinc-200">
+            Memory Influence
+          </ExplainLabel>
           <div className="text-xs text-zinc-500">
             {memories.length} memories · {nodes.length} nodes
           </div>

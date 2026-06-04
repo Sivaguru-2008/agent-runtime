@@ -28,7 +28,9 @@ import {
   type ExecutionDiagnosis,
   type ReplayScrubberData
 } from "../../services/operator-api";
-import { AlertTriangle, ChevronLeft, ChevronRight, GitBranch, RefreshCw } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ChevronRight, GitBranch, RefreshCw, ShieldCheck } from "lucide-react";
+import { ExplainedEmptyState } from "../explain/empty-state";
+import { ExecutionMetadataPanel } from "../ui/execution-metadata-panel";
 
 const SEVERITY_ORDER: Record<string, number> = {
   CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3, INFO: 4
@@ -60,7 +62,7 @@ function ReplayScrubber({ data }: ScrubberProps) {
   const total = frames.length;
   const current = frames[frame];
 
-  if (!total) return <div className="text-xs text-zinc-600 p-2">No replay frames.</div>;
+  if (!total) return <div className="text-xs text-zinc-500 p-2">No replay frames captured for this execution yet — there are no recorded steps to scrub through.</div>;
 
   return (
     <div className="space-y-3">
@@ -219,6 +221,18 @@ export function FailureDiagnosticsPanel({ executionId, onReplay }: Props) {
     (a, b) => (SEVERITY_ORDER[a.severity] ?? 99) - (SEVERITY_ORDER[b.severity] ?? 99)
   );
 
+  const primaryTraceId = diagnosis.traceId ?? diagnosis.timeline.find((e) => e.traceId)?.traceId;
+  const topWarning = sortedWarnings[0];
+  const failureReason =
+    diagnosis.execution?.status === "FAILED" || diagnosis.dlqEntry
+      ? {
+          message:
+            diagnosis.dlqEntry?.lastError ?? topWarning?.description ?? topWarning?.title ?? "Execution failed",
+          code: diagnosis.dlqEntry ? "DEAD_LETTERED" : topWarning?.kind,
+          recoverable: !diagnosis.dlqEntry
+        }
+      : undefined;
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -246,6 +260,15 @@ export function FailureDiagnosticsPanel({ executionId, onReplay }: Props) {
           )}
         </div>
       </div>
+
+      {/* Execution identity + failure reason */}
+      <ExecutionMetadataPanel
+        executionId={executionId}
+        traceId={primaryTraceId}
+        runtimeId={diagnosis.runtimeId}
+        status={diagnosis.execution?.status}
+        failure={failureReason}
+      />
 
       {/* DLQ alert banner */}
       {diagnosis.dlqEntry && (
@@ -300,9 +323,12 @@ export function FailureDiagnosticsPanel({ executionId, onReplay }: Props) {
 
       {/* No warnings + no DLQ = healthy indication */}
       {sortedWarnings.length === 0 && !diagnosis.dlqEntry && (
-        <div className="text-zinc-500 text-sm p-3 border border-zinc-800 rounded-lg text-center">
-          No failure signals detected for this execution.
-        </div>
+        <ExplainedEmptyState
+          concept="self-healing-diagnostics"
+          icon={<ShieldCheck className="h-5 w-5 text-emerald-300" />}
+          title="No failure signals detected"
+          body="The platform's diagnostics found no anomalies, drift, or risks in this execution — it ran cleanly. This is the healthy state."
+        />
       )}
     </div>
   );

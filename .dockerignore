@@ -1,0 +1,31 @@
+# Never ship local installs / build outputs / secrets into the image context.
+**/node_modules
+**/dist
+**/.next
+**/tsconfig.tsbuildinfo
+
+# Logs & local runtime cruft
+*.log
+_dev*.log
+**/*.log
+
+# Secrets & local env
+**/.env
+**/.env.*
+!**/.env.example
+
+# VCS / editor / CI
+.git
+.github
+.vscode
+.idea
+.claude
+
+# Docs & tests aren't needed in the API image
+**/test
+**/__tests__
+docs
+
+# Container/compose files themselves
+docker-compose*.yml
+**/Dockerfile

@@ -23,6 +23,35 @@ export interface RuntimeWorker {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Worker statuses under which a worker is still part of the live fleet — it is
+ * actively heartbeating (or expected to). LOST (missed heartbeats, presumed
+ * dead) and STOPPED (gracefully shut down) are deliberately excluded: they are
+ * terminal and must NOT be counted toward live-fleet aggregates such as the
+ * mean heartbeat age, otherwise a single long-dead worker skews the figure
+ * arbitrarily (a worker dead for days dragged the "mean across live workers"
+ * to nonsensical values).
+ */
+export const LIVE_WORKER_STATUSES: ReadonlySet<WorkerStatus> = new Set<WorkerStatus>([
+  "REGISTERED",
+  "READY",
+  "BUSY",
+  "DRAINING"
+]);
+
+export function isLiveWorker(status: WorkerStatus): boolean {
+  return LIVE_WORKER_STATUSES.has(status);
+}
+
+/**
+ * Terminal worker statuses — the worker has left the fleet and is eligible for
+ * reaping (permanent removal from the registry) once it has been terminal
+ * beyond the retention window.
+ */
+export function isTerminatedWorker(status: WorkerStatus): boolean {
+  return status === "LOST" || status === "STOPPED";
+}
+
 export type LeaseStatus =
   | "LEASE_PENDING"
   | "LEASED"

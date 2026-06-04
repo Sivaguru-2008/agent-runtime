@@ -2,9 +2,10 @@
 
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import type { CognitionGraph, CognitionNode, AgentRole } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { StatusPill } from "@/components/explain/status-pill";
 
 const ROLE_COLOR: Record<AgentRole, string> = {
   PLANNER: "from-sky-500/40 to-sky-500/10 border-sky-500/50",
@@ -50,10 +51,12 @@ export function CognitionGraphView({ graph, activeNodeId, onNodeClick }: Cogniti
     <Card className="p-4 bg-zinc-950/60 border-zinc-800">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="text-sm font-medium text-zinc-200">Cognition Graph</div>
+          <ExplainLabel concept="cognition-graph" as="span" className="text-sm font-medium text-zinc-200">
+            Cognition Graph
+          </ExplainLabel>
           <div className="text-xs text-zinc-500">{graph.id.slice(0, 12)}… · {graph.nodes.length} nodes</div>
         </div>
-        <Badge variant="muted">{graph.phase}</Badge>
+        <StatusPill status={graph.phase} />
       </div>
 
       <div className="relative overflow-x-auto">

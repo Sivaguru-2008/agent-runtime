@@ -7,10 +7,16 @@ export class PostgresFailureSignalStore implements FailureSignalStore {
 
   async record(signal: FailureSignal): Promise<void> {
     await this.client.query(
+      // tenant_id (migration 0025) inherited from the owning execution. The
+      // text-compare subquery can never raise — an unresolvable execution
+      // simply yields 'system' (mirrors 0005's best-effort convention).
       `insert into failure_signals (
          id, cognition_id, execution_id, node_id, kind, severity, score,
-         summary, evidence, detected_at, detected_by
-       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+         summary, evidence, detected_at, detected_by, tenant_id
+       ) values (
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+         coalesce((select tenant_id from executions where id::text = $3::text), 'system')
+       )
        on conflict (id) do nothing`,
       [
         signal.id,

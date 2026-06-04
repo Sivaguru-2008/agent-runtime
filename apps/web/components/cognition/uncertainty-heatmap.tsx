@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import type { CognitionGraph } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export interface UncertaintyHeatmapProps {
   graph: CognitionGraph;
@@ -22,9 +24,11 @@ export function UncertaintyHeatmap({ graph }: UncertaintyHeatmapProps) {
 
   if (rows.length === 0) {
     return (
-      <Card className="p-4 bg-zinc-950/60 border-zinc-800">
-        <div className="text-sm font-medium text-zinc-200">Uncertainty Heatmap</div>
-        <div className="text-xs text-zinc-500 mt-2">No token streams captured yet.</div>
+      <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-2">
+        <ExplainLabel concept="uncertainty-heatmap" as="span" className="text-sm font-medium text-zinc-200">
+          Uncertainty Heatmap
+        </ExplainLabel>
+        <ExplainedEmptyState concept="uncertainty-heatmap" className="border-0 bg-transparent py-4" />
       </Card>
     );
   }
@@ -33,7 +37,9 @@ export function UncertaintyHeatmap({ graph }: UncertaintyHeatmapProps) {
     <Card className="p-4 bg-zinc-950/60 border-zinc-800 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-200">Uncertainty Heatmap</div>
+          <ExplainLabel concept="uncertainty-heatmap" as="span" className="text-sm font-medium text-zinc-200">
+            Uncertainty Heatmap
+          </ExplainLabel>
           <div className="text-xs text-zinc-500">
             {rows.length} node{rows.length === 1 ? "" : "s"} · {rows.reduce((acc, n) => acc + (n.tokenStream?.length ?? 0), 0)} tokens
           </div>

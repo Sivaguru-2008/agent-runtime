@@ -109,6 +109,7 @@ export class PostgresSnapshotStore implements SnapshotStore {
       agentId: snapshot.graph.agentId,
       parentCognitionId: snapshot.graph.parentCognitionId,
       parentNodeId: snapshot.graph.parentNodeId,
+      tenantId: snapshot.graph.tenantId,
       phase: snapshot.graph.phase,
       startedAt: snapshot.graph.startedAt,
       completedAt: snapshot.graph.completedAt,
@@ -119,11 +120,17 @@ export class PostgresSnapshotStore implements SnapshotStore {
     };
 
     // Integrity hash is computed over the FULL graph — the same payload
-    // we are about to persist verbatim into graph_full. After 0013, the
-    // verifier's recompute reads graph_full and gets byte-for-byte the
-    // same canonical projection. There is no remaining mutable join on
-    // the normal read path.
-    const integrityHash = computeSnapshotIntegrityHash(snapshot);
+    // we are about to persist verbatim into graph_full. We round-trip through
+    // JSON.parse(JSON.stringify(...)) so the hash covers the exact shape that
+    // Postgres jsonb will return on read — without residual `undefined` keys
+    // that JSON.stringify strips.  After 0013, the verifier's recompute reads
+    // graph_full and gets byte-for-byte the same canonical projection. There
+    // is no remaining mutable join on the normal read path.
+    const graphForHash = JSON.parse(JSON.stringify(snapshot.graph));
+    const integrityHash = computeSnapshotIntegrityHash({
+      ...snapshot,
+      graph: graphForHash
+    });
 
     await this.client.query(
       `insert into replay_snapshots (
@@ -295,27 +302,30 @@ export class PostgresSnapshotStore implements SnapshotStore {
              order by sequence asc`,
           [nodeIds]
         );
-        nodes = nodeRows.map((r) => ({
-          id: r.id,
-          cognitionId: r.cognition_id,
-          executionId: r.execution_id,
-          parentNodeId: r.parent_node_id ?? undefined,
-          sequence: r.sequence,
-          role: r.role,
-          phase: r.phase,
-          status: r.status,
-          inputFingerprint: r.input_fingerprint,
-          input: r.input,
-          output: r.output ?? undefined,
-          tokenStream: r.token_stream ?? undefined,
-          uncertainty: r.uncertainty ?? undefined,
-          memoryInfluence: r.memory_influence ?? undefined,
-          startedAt: r.started_at instanceof Date ? r.started_at.toISOString() : String(r.started_at),
-          completedAt: r.completed_at ? (r.completed_at instanceof Date ? r.completed_at.toISOString() : String(r.completed_at)) : undefined,
-          durationMs: r.duration_ms ?? undefined,
-          workerId: r.worker_id ?? undefined,
-          replayedFromNodeId: r.replayed_from_node_id ?? undefined
-        }));
+        nodes = nodeRows.map((r) => {
+          const node: Record<string, unknown> = {
+            id: r.id,
+            cognitionId: r.cognition_id,
+            executionId: r.execution_id,
+            sequence: r.sequence,
+            role: r.role,
+            phase: r.phase,
+            status: r.status,
+            inputFingerprint: r.input_fingerprint,
+            input: r.input,
+            startedAt: r.started_at instanceof Date ? r.started_at.toISOString() : String(r.started_at),
+          };
+          if (r.parent_node_id != null) node.parentNodeId = r.parent_node_id;
+          if (r.output != null) node.output = r.output;
+          if (r.token_stream != null) node.tokenStream = r.token_stream;
+          if (r.uncertainty != null) node.uncertainty = r.uncertainty;
+          if (r.memory_influence != null) node.memoryInfluence = r.memory_influence;
+          if (r.completed_at != null) node.completedAt = r.completed_at instanceof Date ? r.completed_at.toISOString() : String(r.completed_at);
+          if (r.duration_ms != null) node.durationMs = r.duration_ms;
+          if (r.worker_id != null) node.workerId = r.worker_id;
+          if (r.replayed_from_node_id != null) node.replayedFromNodeId = r.replayed_from_node_id;
+          return node;
+        });
       }
 
       const { rows: handoffRows } = await this.client.query<any>(
@@ -335,21 +345,29 @@ export class PostgresSnapshotStore implements SnapshotStore {
           carryOver: h.carry_over
         }));
 
-      graph = {
+      // Typed as the graph payload (not Record<string, unknown>) so the
+      // reconstructed shape is type-checked against CognitionGraph. The
+      // required fields are all set in this literal; the optional fields are
+      // added conditionally below. The conditional pattern still OMITS absent
+      // keys at runtime (TS typing does not emit `undefined` values), so the
+      // canonical projection the integrity hash covers is unchanged.
+      const reconstructed: ReplaySnapshot["graph"] = {
         id: thin.id,
         executionId: thin.executionId,
         agentId: thin.agentId,
-        parentCognitionId: thin.parentCognitionId ?? undefined,
-        parentNodeId: thin.parentNodeId ?? undefined,
         phase: thin.phase,
         startedAt: thin.startedAt,
-        completedAt: thin.completedAt ?? undefined,
-        output: thin.output ?? undefined,
-        ownerWorkerId: thin.ownerWorkerId ?? undefined,
-        uncertainty: thin.uncertainty ?? undefined,
         nodes,
         handoffs
       };
+      if (thin.parentCognitionId != null) reconstructed.parentCognitionId = thin.parentCognitionId;
+      if (thin.parentNodeId != null) reconstructed.parentNodeId = thin.parentNodeId;
+      if (thin.tenantId != null) reconstructed.tenantId = thin.tenantId;
+      if (thin.completedAt != null) reconstructed.completedAt = thin.completedAt;
+      if (thin.output != null) reconstructed.output = thin.output;
+      if (thin.ownerWorkerId != null) reconstructed.ownerWorkerId = thin.ownerWorkerId;
+      if (thin.uncertainty != null) reconstructed.uncertainty = thin.uncertainty;
+      graph = reconstructed;
     }
 
     return {

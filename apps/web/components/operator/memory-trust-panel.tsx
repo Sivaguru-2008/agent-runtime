@@ -15,6 +15,9 @@ import {
   RefreshCw,
   EyeOff
 } from "lucide-react";
+import { ExplainLabel } from "../explain/explain-label";
+import { ExplainedEmptyState } from "../explain/empty-state";
+import { StatusPill } from "../explain/status-pill";
 
 interface MemoryTrustPanelProps {
   cognitionId: string;
@@ -75,13 +78,12 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
 
   if (!data || !data.scoredMemories || data.scoredMemories.length === 0) {
     return (
-      <div className="text-center py-16 border border-dashed border-zinc-800 rounded-lg bg-zinc-950/50 space-y-3">
-        <Brain className="h-10 w-10 text-zinc-600 mx-auto" />
-        <h3 className="text-white font-medium">No Memories Retrieved</h3>
-        <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-          This execution did not trigger episodic or historical memory queries.
-        </p>
-      </div>
+      <ExplainedEmptyState
+        concept="memory-trust"
+        icon={<Brain className="h-10 w-10 text-zinc-600" />}
+        title="No memories retrieved"
+        body="This run didn't pull in any stored knowledge, so there's nothing to trust-score. This is normal for simple, self-contained tasks."
+      />
     );
   }
 
@@ -115,7 +117,7 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
         {/* Metric 1: Avg Trust */}
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md p-4 space-y-2 relative overflow-hidden">
           <div className="flex justify-between items-center text-zinc-500 text-xs font-medium uppercase tracking-wider">
-            <span>Average Trust Score</span>
+            <ExplainLabel concept="memory-trust-score">Average Trust Score</ExplainLabel>
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="flex items-baseline gap-2">
@@ -141,7 +143,7 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
         {/* Metric 2: Contamination Alerts */}
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md p-4 space-y-2">
           <div className="flex justify-between items-center text-zinc-500 text-xs font-medium uppercase tracking-wider">
-            <span>Contamination Alerts</span>
+            <ExplainLabel concept="contamination-alerts">Contamination Alerts</ExplainLabel>
             <ShieldAlert className="h-4 w-4 text-red-400" />
           </div>
           <div className="flex items-baseline gap-2">
@@ -164,7 +166,7 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
         {/* Metric 3: Stale Memories */}
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md p-4 space-y-2">
           <div className="flex justify-between items-center text-zinc-500 text-xs font-medium uppercase tracking-wider">
-            <span>Stale Memories</span>
+            <ExplainLabel concept="stale-memories">Stale Memories</ExplainLabel>
             <Clock className="h-4 w-4 text-amber-400" />
           </div>
           <div className="flex items-baseline gap-2">
@@ -179,7 +181,7 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
         {/* Metric 4: Suppressed Context */}
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md p-4 space-y-2">
           <div className="flex justify-between items-center text-zinc-500 text-xs font-medium uppercase tracking-wider">
-            <span>Suppressed Noise</span>
+            <ExplainLabel concept="suppressed-noise">Suppressed Noise</ExplainLabel>
             <EyeOff className="h-4 w-4 text-zinc-400" />
           </div>
           <div className="flex items-baseline gap-2">
@@ -211,13 +213,10 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
                     : "border-amber-800/50 bg-amber-950/10 hover:bg-amber-950/25"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 border rounded-full ${
-                    alert.severity === "CRITICAL"
-                      ? "border-red-700 bg-red-900/50 text-red-300"
-                      : "border-amber-700 bg-amber-900/50 text-amber-300"
-                  }`}>
-                    {alert.type}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5">
+                    <StatusPill status={alert.severity} dot={false} />
+                    <span className="text-[10px] font-extrabold uppercase text-zinc-400">{alert.type}</span>
                   </span>
                   <span className="text-zinc-600 text-xs font-mono truncate max-w-[150px]">
                     {alert.memoryId.slice(0, 10)}...
@@ -490,6 +489,7 @@ export function MemoryTrustPanel({ cognitionId }: MemoryTrustPanelProps) {
                         ))}
                       </div>
                     ) : (
+                      // explain-coverage-ignore: inline lineage node attribute (Retrieved Ancestors row), not a panel empty state
                       <span className="text-zinc-600 italic text-[11px]">No dependencies (Root source).</span>
                     )}
                   </div>

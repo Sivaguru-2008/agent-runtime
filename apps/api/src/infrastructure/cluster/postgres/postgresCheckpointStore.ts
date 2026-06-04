@@ -7,9 +7,14 @@ export class PostgresCheckpointStore implements CheckpointStore {
 
   async write(checkpoint: ExecutionCheckpoint): Promise<ExecutionCheckpoint> {
     const { rows } = await this.client.query<Row>(
+      // tenant_id (migration 0025) inherited from the owning execution via a
+      // zero-throw text-compare subquery; unresolvable → 'system'.
       `insert into execution_checkpoints (
-         id, execution_id, worker_id, sequence, phase, state, created_at
-       ) values ($1,$2,$3,$4,$5,$6,$7)
+         id, execution_id, worker_id, sequence, phase, state, created_at, tenant_id
+       ) values (
+         $1,$2,$3,$4,$5,$6,$7,
+         coalesce((select tenant_id from executions where id::text = $2::text), 'system')
+       )
        on conflict (id) do update set
          state = excluded.state,
          phase = excluded.phase
@@ -60,9 +65,10 @@ export class PostgresCheckpointStore implements CheckpointStore {
           for update
        )
        insert into execution_checkpoints (
-         id, execution_id, worker_id, sequence, phase, state, created_at
+         id, execution_id, worker_id, sequence, phase, state, created_at, tenant_id
        )
-       select $1, $2, $3, $4, $5, $6::jsonb, $7
+       select $1, $2, $3, $4, $5, $6::jsonb, $7,
+              coalesce((select tenant_id from executions where id::text = $2::text), 'system')
        from fence
        on conflict (execution_id, sequence) do update set
          phase      = excluded.phase,

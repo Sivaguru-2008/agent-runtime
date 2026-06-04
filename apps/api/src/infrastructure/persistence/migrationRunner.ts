@@ -63,6 +63,28 @@ export interface MigrationRunnerOptions {
     info: (obj: Record<string, unknown>, msg?: string) => void;
     warn: (obj: Record<string, unknown>, msg?: string) => void;
   };
+  /**
+   * Local-development checksum-recovery mode. DEV ONLY.
+   *
+   * When true, a checksum mismatch on an already-applied migration is NOT a
+   * fatal error. Instead the runner RE-APPLIES the on-disk file (every
+   * migration is idempotent by contract — see the module header) inside its
+   * normal transaction, then re-stamps the recorded checksum to the file's
+   * current hash and logs a loud warning. This recovers a developer database
+   * whose migration files drifted from what was recorded (e.g. a file edited
+   * after it was applied, or CRLF/line-ending churn) without resetting the DB.
+   *
+   * Consequences (why this must never be enabled in production):
+   *   • It TRUSTS that the on-disk file is semantically equivalent to what was
+   *     recorded. Because it re-applies idempotent DDL the schema is converged,
+   *     but it deliberately stops `MigrationChecksumError` from firing — the one
+   *     guard that detects a teammate silently mutating an applied migration.
+   *   • If a drifted file contained genuinely NEW, non-idempotent statements,
+   *     re-application could behave unexpectedly; the safety this normally
+   *     provides (refuse and escalate) is gone.
+   * The caller MUST refuse to set this in strict/production mode.
+   */
+  repairChecksumsInDev?: boolean;
 }
 
 export interface AppliedMigration {
@@ -76,6 +98,11 @@ export interface MigrationRunResult {
   applied: AppliedMigration[];
   /** Migrations that were already on record and skipped. */
   skipped: string[];
+  /**
+   * Migrations whose recorded checksum drifted from the on-disk file and were
+   * re-applied + re-stamped under `repairChecksumsInDev`. Empty in normal runs.
+   */
+  repaired: string[];
   /** True if schema.sql was executed (always true — schema.sql is idempotent). */
   schemaApplied: boolean;
 }
@@ -108,44 +135,43 @@ export class MigrationRunner {
 
     const applied: AppliedMigration[] = [];
     const skipped: string[] = [];
+    const repaired: string[] = [];
 
     for (const file of files) {
       const fullPath = resolve(this.opts.migrationsDir, file);
       const sql = await readFile(fullPath, "utf8");
       const checksum = sha256(sql);
 
-      const existing = appliedMap.get(file);
-      if (existing) {
-        if (existing !== checksum) {
-          // Tampering detected. Refuse to continue — a silently-mutated
-          // migration produces divergent schemas across deployments and is
-          // exactly the failure mode this runner exists to prevent.
-          throw new MigrationChecksumError(file, existing, checksum);
-        }
-        skipped.push(file);
-        continue;
-      }
-
       // Existing 0001-0003 migrations open their own `begin;` blocks. Detect
       // that and let them manage transaction boundaries. Otherwise wrap in a
       // transaction so a mid-statement failure rolls back cleanly.
       const managesOwnTransaction = /^\s*begin\s*;/im.test(sql);
 
-      if (managesOwnTransaction) {
-        await this.db.query(sql);
-        await this.db.query(
-          `insert into schema_migrations (filename, checksum) values ($1, $2)`,
-          [file, checksum]
+      const existing = appliedMap.get(file);
+      if (existing) {
+        if (existing === checksum) {
+          skipped.push(file);
+          continue;
+        }
+        if (!this.opts.repairChecksumsInDev) {
+          // Tampering detected. Refuse to continue — a silently-mutated
+          // migration produces divergent schemas across deployments and is
+          // exactly the failure mode this runner exists to prevent.
+          throw new MigrationChecksumError(file, existing, checksum);
+        }
+        // Local-dev recovery: re-apply the (idempotent) file and re-stamp the
+        // checksum to the on-disk hash. Loud on purpose — this bypasses the
+        // tamper guard and must never be reachable in strict/production mode.
+        this.opts.logger?.warn(
+          { filename: file, recordedChecksum: existing, observedChecksum: checksum },
+          "checksum drift — REPAIRING (repairChecksumsInDev): re-applying idempotent migration and re-stamping recorded checksum"
         );
-      } else {
-        await this.db.withTransaction(async (tx) => {
-          await tx.query(sql);
-          await tx.query(
-            `insert into schema_migrations (filename, checksum) values ($1, $2)`,
-            [file, checksum]
-          );
-        });
+        await this.applyMigration(file, sql, checksum, managesOwnTransaction, "repair");
+        repaired.push(file);
+        continue;
       }
+
+      await this.applyMigration(file, sql, checksum, managesOwnTransaction, "insert");
 
       const { rows: stamp } = await this.db.query<{ applied_at: Date | string }>(
         `select applied_at from schema_migrations where filename = $1`,
@@ -164,8 +190,43 @@ export class MigrationRunner {
     if (skipped.length) {
       this.opts.logger?.info({ skipped }, "migrations already on record — skipped");
     }
+    if (repaired.length) {
+      this.opts.logger?.warn(
+        { repaired },
+        "checksum drift repaired in dev recovery mode — disable repairChecksumsInDev once boot is green"
+      );
+    }
 
-    return { applied, skipped, schemaApplied: true };
+    return { applied, skipped, repaired, schemaApplied: true };
+  }
+
+  /**
+   * Run a migration file (respecting whether it manages its own transaction)
+   * and record its checksum. `mode: "insert"` writes a fresh schema_migrations
+   * row for a not-yet-applied migration; `mode: "repair"` re-stamps the
+   * checksum of an already-applied (but drifted) migration after re-running it.
+   */
+  private async applyMigration(
+    file: string,
+    sql: string,
+    checksum: string,
+    managesOwnTransaction: boolean,
+    mode: "insert" | "repair"
+  ): Promise<void> {
+    const stamp =
+      mode === "insert"
+        ? `insert into schema_migrations (filename, checksum) values ($1, $2)`
+        : `update schema_migrations set checksum = $2, applied_at = now() where filename = $1`;
+
+    if (managesOwnTransaction) {
+      await this.db.query(sql);
+      await this.db.query(stamp, [file, checksum]);
+    } else {
+      await this.db.withTransaction(async (tx) => {
+        await tx.query(sql);
+        await tx.query(stamp, [file, checksum]);
+      });
+    }
   }
 }
 

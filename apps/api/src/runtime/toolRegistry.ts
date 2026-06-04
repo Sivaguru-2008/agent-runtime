@@ -8,8 +8,10 @@
  * file.read        — Sandboxed filesystem read capped at FILE_READ_MAX_BYTES.
  *                    Path must resolve inside FILE_READ_BASE_PATH; traversal
  *                    attempts throw.
- * code.execute     — Runs JS in a Node.js `vm` sandbox with no require(),
- *                    no process access, and a hard wall-clock timeout.
+ * code.execute     — Runs JS in a jailed child Node process (Permission Model
+ *                    + scrubbed env + bare vm context). No filesystem, no
+ *                    network, no child processes, no secrets; hard memory and
+ *                    wall-clock limits. See runtime/sandbox/subprocessSandbox.ts.
  * memory.summarize — Thin text concatenation (real summarization delegated
  *                    to the model in a future pass).
  * runtime.inspect  — Diagnostic introspection (always available).
@@ -26,11 +28,11 @@
  *   returned object, surfacing in the execution event log automatically.
  */
 
-import vm from "node:vm";
 import path from "node:path";
 import fs from "node:fs/promises";
 import type { ToolExecutor } from "../domain/ports.js";
 import { throwIfAborted, composeAbortSignals } from "../providers/retry.js";
+import { runCodeInSandbox } from "./sandbox/subprocessSandbox.js";
 export { isReplaySafeTool, isToolSafe } from "./canonicalSemantics.js";
 
 export interface ToolRegistryConfig {
@@ -44,6 +46,8 @@ export interface ToolRegistryConfig {
   webSearchTimeoutMs?: number;
   /** Wall-clock timeout for code.execute in ms. Default 5 000. */
   codeExecuteTimeoutMs?: number;
+  /** V8 old-space ceiling for the code.execute child process in MB. Default 128. */
+  codeExecuteMemoryMb?: number;
 }
 
 type ToolInput = {
@@ -70,6 +74,7 @@ export class BuiltInToolExecutor implements ToolExecutor {
   private readonly fileReadMaxBytes: number;
   private readonly webSearchTimeoutMs: number;
   private readonly codeExecuteTimeoutMs: number;
+  private readonly codeExecuteMemoryMb: number;
   private readonly attemptMap = new Map<string, number>();
 
   constructor(config: ToolRegistryConfig = {}) {
@@ -78,6 +83,7 @@ export class BuiltInToolExecutor implements ToolExecutor {
     this.fileReadMaxBytes = config.fileReadMaxBytes ?? 32_768;
     this.webSearchTimeoutMs = config.webSearchTimeoutMs ?? 10_000;
     this.codeExecuteTimeoutMs = config.codeExecuteTimeoutMs ?? 5_000;
+    this.codeExecuteMemoryMb = config.codeExecuteMemoryMb ?? 128;
   }
 
   async execute(input: ToolInput): Promise<ToolOutput> {
@@ -313,77 +319,35 @@ export class BuiltInToolExecutor implements ToolExecutor {
     const code = String(args.code ?? "");
     if (!code.trim()) return { error: true, reason: "code.execute requires a non-empty code argument" };
 
+    // Cap untrusted source size before it ever leaves the parent: a multi-MB
+    // payload is never legitimate model output and only serves to stress the
+    // pipe / V8 parser. 256 KiB is generous for tool-authored snippets.
+    if (code.length > 256 * 1024) {
+      return { error: true, reason: "code.execute: code exceeds 256 KiB limit" };
+    }
+
     const timeoutMs = Math.min(
-      typeof args.timeoutMs === "number" ? args.timeoutMs : this.codeExecuteTimeoutMs,
+      typeof args.timeoutMs === "number" && args.timeoutMs > 0 ? args.timeoutMs : this.codeExecuteTimeoutMs,
       this.codeExecuteTimeoutMs
     );
 
-    const outputLines: string[] = [];
-    const sandboxConsole = {
-      log: (...a: unknown[]) => outputLines.push(a.map(String).join(" ")),
-      warn: (...a: unknown[]) => outputLines.push("[warn] " + a.map(String).join(" ")),
-      error: (...a: unknown[]) => outputLines.push("[error] " + a.map(String).join(" "))
-    };
-
-    // Build a locked-down sandbox — only safe globals, no require/process.
-    const sandbox = vm.createContext({
-      console: sandboxConsole,
-      Math,
-      JSON,
-      Array,
-      Object,
-      String,
-      Number,
-      Boolean,
-      Date,
-      RegExp,
-      Error,
-      Map,
-      Set,
-      Promise,
-      parseInt,
-      parseFloat,
-      isNaN,
-      isFinite,
-      encodeURIComponent,
-      decodeURIComponent,
-      undefined,
-      null: null
+    // Execution happens in a jailed child process (Node Permission Model +
+    // scrubbed env + bare vm context). The host realm — and every secret in
+    // it — is unreachable even if the in-process vm boundary is escaped. See
+    // runtime/sandbox/subprocessSandbox.ts for the threat model and the
+    // empirically-verified escape matrix in test/sandbox.escape.test.ts.
+    const result = await runCodeInSandbox(code, {
+      timeoutMs,
+      memoryMb: this.codeExecuteMemoryMb
     });
-
-    const started = Date.now();
-    let returnValue: unknown;
-    let execError: string | undefined;
-
-    try {
-      throwIfAborted(signal);
-      const script = new vm.Script(code, { filename: "agent-sandbox.js" });
-      returnValue = script.runInContext(sandbox, { timeout: timeoutMs });
-
-      // Unwrap Promises created inside the sandbox.
-      if (returnValue instanceof Promise) {
-        throwIfAborted(signal);
-        returnValue = await Promise.race([
-          returnValue,
-          new Promise((_, rej) =>
-            setTimeout(() => rej(new Error("async timeout")), timeoutMs)
-          )
-        ]);
-        throwIfAborted(signal);
-      }
-    } catch (err) {
-      execError = err instanceof Error ? err.message : String(err);
-    }
-
-    const output = outputLines.join("\n");
-    const elapsed = Date.now() - started;
+    throwIfAborted(signal);
 
     return {
-      output,
-      returnValue: returnValue !== undefined ? JSON.parse(JSON.stringify(returnValue, replacer)) : undefined,
-      error: execError,
-      executionTimeMs: elapsed,
-      timedOut: Boolean(execError?.includes("Script execution timed out") || execError?.includes("async timeout"))
+      output: result.output,
+      returnValue: result.returnValue,
+      error: result.error,
+      executionTimeMs: result.executionTimeMs,
+      timedOut: result.timedOut
     };
   }
 
@@ -404,11 +368,4 @@ export class BuiltInToolExecutor implements ToolExecutor {
       wordCount
     };
   }
-}
-
-// Safely serialize return values, dropping non-serializable entries.
-function replacer(_key: string, value: unknown): unknown {
-  if (typeof value === "function" || typeof value === "symbol") return undefined;
-  if (typeof value === "bigint") return value.toString();
-  return value;
 }

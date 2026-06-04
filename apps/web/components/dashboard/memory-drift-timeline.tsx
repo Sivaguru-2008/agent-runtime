@@ -3,23 +3,30 @@ import type { MemoryDriftReport } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatTime } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { GraphGuide } from "@/components/explain/graph-guide";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export function MemoryDriftTimeline({ drift }: { drift?: MemoryDriftReport }) {
   const points = drift?.points ?? [];
   const maxDrift = Math.max(0.0001, ...points.map((point) => point.driftFromPrevious));
+  const peakPct = Math.round((drift?.peakDrift ?? 0) * 100);
 
   return (
     <Card className="h-[360px]">
       <CardHeader>
-        <CardTitle>Memory Drift</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="memory-drift" as="span">Memory Drift</ExplainLabel>
+        </CardTitle>
         <div className="flex items-center gap-2">
-          <Badge variant="muted">peak {Math.round((drift?.peakDrift ?? 0) * 100)}%</Badge>
+          <Badge variant="muted">peak {peakPct}%</Badge>
           <Badge variant={drift?.warnings?.length ? "warning" : "muted"}>{drift?.warnings?.length ?? 0} warnings</Badge>
         </div>
       </CardHeader>
       <CardContent className="h-[305px] overflow-auto space-y-3">
         {points.length ? (
           <>
+            <GraphGuide concept="memory-drift" value={peakPct} />
             <div className="flex h-20 items-end gap-1 rounded-md border border-border bg-background p-2">
               {points.map((point) => {
                 const height = Math.max(6, (point.driftFromPrevious / maxDrift) * 100);
@@ -52,7 +59,7 @@ export function MemoryDriftTimeline({ drift }: { drift?: MemoryDriftReport }) {
             </div>
           </>
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No memory mutations recorded</div>
+          <ExplainedEmptyState concept="memory-drift" className="h-full justify-center border-0 bg-transparent" />
         )}
       </CardContent>
     </Card>

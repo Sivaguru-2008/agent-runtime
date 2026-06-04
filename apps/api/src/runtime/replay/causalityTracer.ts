@@ -39,6 +39,9 @@ export class CausalityTracer {
   ) {}
 
   async trace(signal: FailureSignal, frames: ReplayFrame[]): Promise<CausalChain> {
+    // `frames` comes from frame materialization upstream; normalize so the
+    // event-fallback / frame lookups can never throw on a non-array.
+    const safeFrames = Array.isArray(frames) ? frames.filter((f) => !!f) : [];
     const graph = signal.cognitionId
       ? await this.cognitions.getById(signal.cognitionId)
       : await this.cognitions.getByExecution(signal.executionId);
@@ -49,8 +52,10 @@ export class CausalityTracer {
     let rootCauseFrameIndex: number | undefined;
     let rootCauseDescription = "Unknown root cause";
 
-    if (graph && signal.nodeId) {
-      const nodeMap = new Map<string, CognitionNode>(graph.nodes.map((n) => [n.id, n]));
+    if (graph && Array.isArray(graph.nodes) && signal.nodeId) {
+      const nodeMap = new Map<string, CognitionNode>(
+        graph.nodes.filter((n) => !!n?.id).map((n) => [n.id, n])
+      );
       const terminalNode = nodeMap.get(signal.nodeId);
 
       if (terminalNode) {
@@ -80,7 +85,7 @@ export class CausalityTracer {
         // Find the root cause frame in the replay timeline.
         const rootNode = ancestorChain[ancestorChain.length - 1];
         if (rootNode) {
-          rootCauseFrameIndex = findFrameForNode(rootNode.id, frames, executionEvents);
+          rootCauseFrameIndex = findFrameForNode(rootNode.id, safeFrames, executionEvents);
           rootCauseDescription = buildRootCauseDescription(signal, rootNode, executionEvents);
         }
       }
@@ -88,7 +93,7 @@ export class CausalityTracer {
 
     // If we couldn't trace via node ancestry, fall back to event-level tracing.
     if (links.length === 0) {
-      const eventLinks = traceFromEvents(signal, executionEvents, frames);
+      const eventLinks = traceFromEvents(signal, executionEvents, safeFrames);
       links.push(...eventLinks.links);
       rootCauseFrameIndex = eventLinks.rootCauseFrameIndex;
       rootCauseDescription = eventLinks.description;
@@ -150,7 +155,10 @@ function describeNode(
     }
     case "RECURSION":
     case "EXECUTION_LOOP": {
-      return `${base} — inputFingerprint: ${node.inputFingerprint.slice(0, 12)}`;
+      // inputFingerprint is typed required, but malformed/legacy nodes may lack
+      // it — guard before slicing so a RECURSION/EXECUTION_LOOP trace can't throw.
+      const fp = typeof node.inputFingerprint === "string" ? node.inputFingerprint : "";
+      return `${base} — inputFingerprint: ${fp.slice(0, 12) || "n/a"}`;
     }
     case "TOOL_MISUSE": {
       const toolEvents = events.filter((e) => e.type === "TOOL_CALLED");
@@ -219,8 +227,10 @@ function traceFromEvents(
 ): { links: CausalLink[]; rootCauseFrameIndex?: number; description: string } {
   // Event-level fallback when we have no cognition graph.
   // Find the earliest relevant event sequence from the signal evidence.
-  const evidenceSeqs = signal.evidence
-    .filter((e) => e.eventSequence !== undefined)
+  // `evidence` may be null/undefined on a malformed signal — normalize first.
+  const evidenceList = Array.isArray(signal.evidence) ? signal.evidence : [];
+  const evidenceSeqs = evidenceList
+    .filter((e) => e && e.eventSequence !== undefined)
     .map((e) => e.eventSequence!)
     .sort((a, b) => a - b);
 

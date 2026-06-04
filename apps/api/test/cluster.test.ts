@@ -92,6 +92,8 @@ function buildHarness(clock: Clock = new SystemClock()) {
   return { lifecycle, scheduler, workers, leases, checkpoints, executions, agents, runtime, queries, eventStore, deadLetterQueue };
 }
 
+const ZERO_LOAD = { cpu: 0, memory: 0, inFlight: 0, queueDepth: 0, eventsPerSecond: 0 };
+
 describe("worker lifecycle", () => {
   it("registers a worker and marks it lost when heartbeats expire", async () => {
     const clock = new ManualClock(new Date("2026-05-22T00:00:00Z"));
@@ -117,7 +119,33 @@ describe("worker lifecycle", () => {
     const result = await lifecycle.sweep();
     expect(result.reclaimedLeases).toBe(1);
     const lease = await leases.getByExecution("exec-1");
-    expect(lease?.status).toBe("INVALIDATED");
+    expect(lease?.status).toBe("EXPIRED");
+  });
+
+  it("reaps workers terminal beyond the retention window but keeps recently-lost ones", async () => {
+    const clock = new ManualClock(new Date("2026-05-22T00:00:00Z"));
+    const { lifecycle, workers } = buildHarness(clock);
+    const base = clock.now().getTime();
+
+    // LOST 48h ago — past the 24h default retention → must be reaped.
+    await workers.register({
+      id: "ancient", host: "node", version: "0.1.0", capacity: 4,
+      status: "LOST", load: ZERO_LOAD,
+      startedAt: new Date(base - 49 * 3_600_000).toISOString(),
+      lastHeartbeatAt: new Date(base - 48 * 3_600_000).toISOString()
+    });
+    // LOST 1 min ago — within retention → must be kept for diagnostics.
+    await workers.register({
+      id: "recent", host: "node", version: "0.1.0", capacity: 4,
+      status: "LOST", load: ZERO_LOAD,
+      startedAt: new Date(base - 3_600_000).toISOString(),
+      lastHeartbeatAt: new Date(base - 60_000).toISOString()
+    });
+
+    const result = await lifecycle.sweep();
+    expect(result.reaped.map((w) => w.id)).toEqual(["ancient"]);
+    expect(await workers.getById("ancient")).toBeUndefined();
+    expect(await workers.getById("recent")).toBeDefined();
   });
 });
 
@@ -168,6 +196,45 @@ describe("distributed scheduler", () => {
     const recovered = await harness.scheduler.recover();
     expect(recovered).toBeGreaterThanOrEqual(1);
   });
+
+  it("dead-letters an execution whose recovery attempts are exhausted (poison via recovery path)", async () => {
+    const clock = new ManualClock(new Date("2026-05-22T00:00:00Z"));
+    const harness = buildHarness(clock);
+    await harness.lifecycle.register({ id: "worker-1", host: "embedded", version: "0.1.0", capacity: 4 });
+
+    // A RUNNING execution stranded by a previous incarnation.
+    const execId = "exec-poison";
+    await harness.executions.save({
+      id: execId,
+      agentId: "agent-poison",
+      status: "RUNNING",
+      input: { task: 1 },
+      tokenUsage: { prompt: 0, completion: 0, total: 0 },
+      tenantId: "system",
+      startedAt: clock.now().toISOString(),
+      updatedAt: clock.now().toISOString()
+    });
+
+    // Drive the lease attempt past maxPoisonPillAttempts (3) via acquire/reclaim
+    // cycles, leaving it EXPIRED at attempt 4 — recovery will classify it ABORTED.
+    for (let i = 0; i < 4; i++) {
+      await harness.leases.acquire({ executionId: execId, workerId: "phantom", ttlMs: 1, now: clock.now() });
+      clock.advance(1_000);
+      await harness.leases.reclaimExpired(clock.now());
+    }
+    expect((await harness.leases.getByExecution(execId))!.attempt).toBeGreaterThan(3);
+
+    await harness.scheduler.recover();
+
+    // The execution is finalized (no longer pinned RUNNING) and recorded in the DLQ.
+    expect((await harness.executions.getById(execId))!.status).toBe("DEAD_LETTERED");
+    expect(await harness.deadLetterQueue.getByExecution(execId)).toBeDefined();
+
+    // The lease is terminalized, so a subsequent recovery sweep does NOT
+    // re-surface it (no churn).
+    const reSurfaced = await harness.leases.reclaimExpired(clock.now());
+    expect(reSurfaced.map((l) => l.executionId)).not.toContain(execId);
+  });
 });
 
 describe("checkpointing", () => {
@@ -203,5 +270,32 @@ describe("cluster queries", () => {
     const overview = await harness.queries.overview();
     expect(overview.workers.total).toBe(1);
     expect(overview.leases.active).toBe(1);
+  });
+
+  it("excludes LOST workers from the mean heartbeat age (mean across live workers)", async () => {
+    const harness = buildHarness();
+    const now = Date.now();
+
+    // A live worker heartbeating ~3s ago.
+    await harness.workers.register({
+      id: "live-1", host: "node", version: "0.1.0", capacity: 4,
+      status: "READY", load: ZERO_LOAD,
+      startedAt: new Date(now - 3_000).toISOString(),
+      lastHeartbeatAt: new Date(now - 3_000).toISOString()
+    });
+    // A worker dead for 8 days — must NOT drag the live mean toward days.
+    await harness.workers.register({
+      id: "dead-1", host: "node", version: "0.1.0", capacity: 4,
+      status: "LOST", load: ZERO_LOAD,
+      startedAt: new Date(now - 8 * 86_400_000).toISOString(),
+      lastHeartbeatAt: new Date(now - 8 * 86_400_000).toISOString()
+    });
+
+    const overview = await harness.queries.overview();
+    expect(overview.workers.total).toBe(2);
+    expect(overview.workers.lost).toBe(1);
+    expect(overview.workers.ready).toBe(1);
+    // Were the LOST worker included, the mean would be ~4 days (~345_600_000ms).
+    expect(overview.meanHeartbeatAgeMs).toBeLessThan(60_000);
   });
 });

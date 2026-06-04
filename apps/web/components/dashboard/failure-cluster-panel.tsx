@@ -3,6 +3,8 @@ import type { FailureClusterReport } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTime } from "@/lib/utils";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export function FailureClusterPanel({ report }: { report?: FailureClusterReport }) {
   const clusters = report?.clusters ?? [];
@@ -10,7 +12,9 @@ export function FailureClusterPanel({ report }: { report?: FailureClusterReport 
   return (
     <Card className="h-[360px]">
       <CardHeader>
-        <CardTitle>Failure Clusters</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="failure-clusters" as="span">Failure Clusters</ExplainLabel>
+        </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant="muted">{clusters.length} clusters</Badge>
           <Badge variant="muted">{report?.totals.warnings ?? 0} warnings</Badge>
@@ -38,10 +42,11 @@ export function FailureClusterPanel({ report }: { report?: FailureClusterReport 
             <div className="mt-2 truncate font-mono text-[10px] text-muted-foreground">fp: {cluster.fingerprint}</div>
           </div>
         )) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
-            <ShieldCheck className="h-5 w-5 text-emerald-300" />
-            No recurring failures detected
-          </div>
+          <ExplainedEmptyState
+            concept="failure-clusters"
+            icon={<ShieldCheck className="h-5 w-5 text-emerald-300" />}
+            className="h-full justify-center border-0 bg-transparent"
+          />
         )}
       </CardContent>
     </Card>

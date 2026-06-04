@@ -28,6 +28,11 @@ export class FailureTimelineBuilder {
     signals: FailureSignal[],
     graph?: CognitionGraph
   ): FailureTimeline {
+    // Inputs originate from store reads and frame materialization; either can be
+    // null/undefined/non-array for a malformed or partially-persisted execution.
+    // Normalize once so no downstream `.length`/iteration can throw.
+    frames = Array.isArray(frames) ? frames.filter((f) => !!f) : [];
+    signals = Array.isArray(signals) ? signals.filter((s) => !!s) : [];
     if (frames.length === 0) {
       return emptyTimeline(signals, graph);
     }
@@ -48,7 +53,12 @@ export class FailureTimelineBuilder {
     for (const signal of signals) {
       const frameIndices = new Set<number>();
 
-      for (const ev of signal.evidence) {
+      // `evidence` is typed as an array but can be null/undefined on legacy or
+      // malformed signal rows — guard before iterating so one bad signal can't
+      // collapse the whole timeline with "evidence is not iterable".
+      const evidence = Array.isArray(signal.evidence) ? signal.evidence : [];
+      for (const ev of evidence) {
+        if (!ev) continue;
         if (ev.eventSequence !== undefined) {
           const idx = eventSeqToFrameIdx.get(ev.eventSequence);
           if (idx !== undefined) frameIndices.add(idx);
@@ -115,12 +125,16 @@ export class FailureTimelineBuilder {
           causalRole = "PROPAGATION";
         }
       }
+      // `preview` is normally always present, but a malformed/partial frame
+      // (e.g. a row written by an older builder) may lack it. Fall back to a
+      // neutral preview rather than throwing on `.label`/`.tone`.
+      const preview = frame.preview ?? { label: frame.eventType ?? "", tone: "neutral" as const };
       return {
         frameIndex: frame.index,
         eventSequence: frame.eventSequence,
         eventType: frame.eventType,
-        label: frame.preview.label,
-        tone: sigs.length > 0 ? overrideTone(sigs, frame.preview.tone) : frame.preview.tone,
+        label: preview.label ?? frame.eventType ?? "",
+        tone: sigs.length > 0 ? overrideTone(sigs, preview.tone) : preview.tone,
         signals: sigs,
         causalRole
       };
@@ -134,7 +148,10 @@ export class FailureTimelineBuilder {
     for (let start = 0; start < frames.length; start += BUCKET_SIZE) {
       const bucket = annotatedFrames.slice(start, start + BUCKET_SIZE);
       const bucketPenalty = bucket.reduce((acc, f) => {
-        const worst = f.signals.reduce((a, s) => Math.max(a, severityWeight(s.severity) * s.score), 0);
+        const worst = f.signals.reduce((a, s) => {
+          const score = Number.isFinite(s.score) ? s.score : 0;
+          return Math.max(a, severityWeight(s.severity) * score);
+        }, 0);
         return acc + worst;
       }, 0);
       const bucketHealth = Math.max(0, Math.round(100 - bucketPenalty * 10));

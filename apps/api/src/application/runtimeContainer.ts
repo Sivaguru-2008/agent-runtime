@@ -21,6 +21,7 @@ import { EventFactory } from "../infrastructure/events/eventFactory.js";
 import { InMemoryEventBus } from "../infrastructure/events/inMemoryEventBus.js";
 import { PersistedEventPublisher } from "../infrastructure/events/persistedEventPublisher.js";
 import { OutboxDispatcher } from "../infrastructure/events/outboxDispatcher.js";
+import { OutboxDlqRecoveryService } from "../infrastructure/events/outboxDlqRecoveryService.js";
 import { RedisEventBus } from "../infrastructure/events/redisEventBus.js";
 import { RedisStreamsEventBus } from "../infrastructure/events/redisStreamsEventBus.js";
 // InMemoryEventStore remains imported because the EventStore selection still
@@ -38,6 +39,9 @@ import { createPersistenceLayer, type PersistenceLayer } from "../infrastructure
 import { AgentRuntime } from "../runtime/agentRuntime.js";
 import { ExecutionEngine } from "../runtime/executionEngine.js";
 import { BuiltInToolExecutor } from "../runtime/toolRegistry.js";
+// Prompt-injection containment: policy gate around the tool executor.
+import { ToolPolicyExecutor } from "../runtime/toolPolicyExecutor.js";
+import { sideEffectCapabilityRegistry } from "../runtime/canonicalSemantics.js";
 // Audit CRITICAL-1: dedup wrapper + Postgres-backed store + in-memory no-op
 // for dev mode. Sits OUTERMOST of the tool-executor chain so a cached call
 // is short-circuited before metrics/CB even see it.
@@ -57,6 +61,7 @@ import { createModelProvider } from "../providers/providerFactory.js";
 import { DistributedScheduler } from "./cluster/distributedScheduler.js";
 import { WorkerLifecycleService } from "./cluster/workerLifecycle.js";
 import { BackgroundRecoveryLoop } from "./cluster/recoveryLoop.js";
+import { reconcileOrphanedExecutions } from "../runtime/recovery/orphanReconciler.js";
 import { WorkerExecutionLoop } from "./cluster/workerExecutionLoop.js";
 import { LeaseHeartbeatWorker } from "../infrastructure/cluster/leaseHeartbeatWorker.js";
 import { RetryCoordinator } from "../runtime/retry/retryCoordinator.js";
@@ -88,7 +93,7 @@ import {
 } from "../infrastructure/reliability/circuitBreakerAdapters.js";
 import type { DeadLetterQueue } from "../domain/clusterPorts.js";
 import { ClusterQueries } from "./cluster/clusterQueries.js";
-import { OllamaProvider } from "../providers/ollama.js";
+import { GroqProvider } from "../providers/GroqProvider.js";
 import { LiveExecutionEngine } from "../runtime/execution-engine.js";
 import { LiveEventBroadcaster } from "../events/live-broadcaster.js";
 // --- Phase 4: Observability wiring ---
@@ -103,6 +108,7 @@ import {
   MetricsToolExecutor,
   MetricsDeadLetterQueue
 } from "../infrastructure/metrics/instrumentedAdapters.js";
+import { CachingModelProvider, InMemoryResponseCache } from "../providers/responseCache.js";
 import { OperatorQueries } from "./queries/operatorQueries.js";
 import { ObservabilityQueries } from "./queries/observabilityQueries.js";
 // --- Sprint Next wiring ---
@@ -167,6 +173,13 @@ export interface RuntimeContainer {
   recoveryLoop: BackgroundRecoveryLoop;
   outboxDispatcher?: OutboxDispatcher;
   /**
+   * Out-of-band recovery for dead-lettered outbox events. Postgres-only;
+   * undefined in memory mode. Re-attempts delivery of events the dispatcher
+   * dead-lettered after exhausting retries, restoring the "every committed
+   * event is eventually delivered" guarantee for the DLQ path.
+   */
+  outboxDlqRecovery?: OutboxDlqRecoveryService;
+  /**
    * The cross-process job queue. Source of truth for execution dispatch in
    * the distributed topology. The API runtime enqueues; the worker process
    * consumes. Always set; in single-process mode it is the in-memory impl.
@@ -188,7 +201,8 @@ export interface RuntimeContainer {
   clusterQueries: ClusterQueries;
   streamBus?: StreamEventBus;
   workerId: string;
-  ollama: OllamaProvider;
+  /** The live-streaming LLM provider (Groq) backing the LiveExecutionEngine. */
+  llm: GroqProvider;
   liveEngine: LiveExecutionEngine;
   liveBroadcaster: LiveEventBroadcaster;
   // Sprint Next
@@ -481,7 +495,8 @@ export async function createRuntimeContainer(
     fileReadBasePath: config.FILE_READ_BASE_PATH,
     fileReadMaxBytes: config.FILE_READ_MAX_BYTES,
     webSearchTimeoutMs: config.TOOL_WEB_SEARCH_TIMEOUT_MS,
-    codeExecuteTimeoutMs: config.TOOL_CODE_EXECUTE_TIMEOUT_MS
+    codeExecuteTimeoutMs: config.TOOL_CODE_EXECUTE_TIMEOUT_MS,
+    codeExecuteMemoryMb: config.TOOL_CODE_EXECUTE_MEMORY_MB ?? 128
   });
 
   // Wrap with circuit breakers — all model calls and tool calls now fast-fail
@@ -492,8 +507,21 @@ export async function createRuntimeContainer(
   // ─── Phase 4: Metrics Instrumentation ────────────────────────────────────
   // Wrap at the outermost level (after circuit breakers) so that circuit-open
   // rejections are counted as errors in the model/tool totals.
-  const modelProvider = new MetricsModelProvider(cbModelProvider, metrics, config.MODEL_PROVIDER);
+  const metricsModelProvider = new MetricsModelProvider(cbModelProvider, metrics, config.MODEL_PROVIDER);
   const metricsToolExecutor = new MetricsToolExecutor(cbToolExecutor, metrics);
+
+  // ─── LLM response cache (optional, outermost) ────────────────────────────
+  // Wrapping OUTSIDE metrics is deliberate: a cache hit is not a provider call,
+  // so it must not increment modelProviderTotal or trip the circuit breaker.
+  // Only deterministic (temperature=0) completions are cached; everything else
+  // falls straight through (counted as `skip`). Disabled by default.
+  const modelProvider = config.LLM_RESPONSE_CACHE_ENABLED
+    ? new CachingModelProvider(metricsModelProvider, {
+        store: new InMemoryResponseCache(config.LLM_RESPONSE_CACHE_MAX_ENTRIES),
+        ttlMs: config.LLM_RESPONSE_CACHE_TTL_MS,
+        onResult: (event) => metrics.modelCacheTotal.inc({ event })
+      })
+    : metricsModelProvider;
 
   // Audit CRITICAL-1: tool dedup OUTERMOST. A cached call short-circuits
   // before metrics counts it, before the circuit breaker rate-limits it, and
@@ -526,13 +554,34 @@ export async function createRuntimeContainer(
     : new InMemoryFenceStore({ clock });
   const fenceProtocol = new FenceProtocol(fenceStore, { clock });
 
-  const toolExecutor = new DedupingToolExecutor(metricsToolExecutor, toolDedupStore, {
+  const dedupingToolExecutor = new DedupingToolExecutor(metricsToolExecutor, toolDedupStore, {
     resolveTenantId: () => "system",
     fence: fenceProtocol,
     defaultWorkerId: workerId,
     // Adapt pino's (obj, msg) signature to the wrapper's (msg, ctx) shape.
     logger: { warn: (msg, ctx) => logger.warn(ctx ?? {}, msg) }
   });
+
+  // ─── Prompt-injection containment: tool policy (OUTERMOST) ────────────────
+  // Sits outside dedup/metrics/circuit-breaker so a denied tool call never
+  // reserves a fence or produces a side effect. This is the single chokepoint
+  // shared by ExecutionEngine and ExecutorAgent — the model is an untrusted
+  // control-plane input and cannot authorize tools it requests. UNSAFE-class
+  // tools are always denied; TOOL_ALLOWLIST (when set) enforces strict mode.
+  const toolAllowlist = (config.TOOL_ALLOWLIST ?? "").split(",").map((t) => t.trim()).filter(Boolean);
+  const toolExecutor = new ToolPolicyExecutor(dedupingToolExecutor, {
+    allowlist: toolAllowlist,
+    capabilityOf: (name) => sideEffectCapabilityRegistry.get(name),
+    onDeny: ({ toolName, reason, executionId }) =>
+      logger.warn({ toolName, reason, executionId, securityEvent: "tool_policy_denied" }, "[security] tool call denied by policy")
+  });
+  logger.info(
+    {
+      toolPolicyMode: toolAllowlist.length > 0 ? `strict-allowlist(${toolAllowlist.length})` : "capability-baseline",
+      deniedCapabilities: ["UNSAFE"]
+    },
+    "[security] tool execution policy initialised"
+  );
 
   const engine = new ExecutionEngine(
     eventFactory,
@@ -553,7 +602,8 @@ export async function createRuntimeContainer(
     clock,
     {
       heartbeatTtlMs: config.WORKER_HEARTBEAT_TTL_MS,
-      sweepIntervalMs: config.WORKER_SWEEP_INTERVAL_MS
+      sweepIntervalMs: config.WORKER_SWEEP_INTERVAL_MS,
+      reapAfterMs: config.WORKER_REAP_AFTER_MS
     },
     logger
   );
@@ -702,13 +752,14 @@ export async function createRuntimeContainer(
 
   const clusterQueries = new ClusterQueries(workers, leases, executions, checkpoints);
 
-  const ollama = new OllamaProvider({
-    baseUrl: config.OLLAMA_URL,
-    model: config.OLLAMA_MODEL,
-    requestTimeoutMs: config.OLLAMA_REQUEST_TIMEOUT_MS
+  const llm = new GroqProvider({
+    apiKey: config.GROQ_API_KEY,
+    baseUrl: config.GROQ_BASE_URL,
+    model: config.MODEL_NAME ?? config.GROQ_MODEL,
+    requestTimeoutMs: config.GROQ_REQUEST_TIMEOUT_MS
   });
   const liveBroadcaster = new LiveEventBroadcaster();
-  const liveEngine = new LiveExecutionEngine(ollama, liveBroadcaster);
+  const liveEngine = new LiveExecutionEngine(llm, liveBroadcaster);
 
   // AgentRuntime ALWAYS enqueues onto the job queue. The queue is the
   // exclusive boundary between the API process and any worker process.
@@ -914,6 +965,22 @@ export async function createRuntimeContainer(
     recoveryLoop.start();
   }
 
+  // Startup reconciliation of leaseless orphans. The lease-based recovery loop
+  // above only re-drives executions that hold a lease (durable runloop). A
+  // cognition run that died between persistExecutionStart and
+  // persistExecutionTerminal leaves a RUNNING row with NO lease that nothing
+  // else reconciles. Finalize those as FAILED now — before the HTTP server
+  // accepts work, so there is no race with a live cognition run. Best-effort:
+  // a reconciliation failure must never abort startup.
+  try {
+    const reconciled = await reconcileOrphanedExecutions({ executions, leases, clock, logger });
+    if (reconciled.finalized > 0) {
+      logger.info(reconciled, "[startup] reconciled leaseless orphaned executions");
+    }
+  } catch (err) {
+    logger.error({ err }, "[startup] orphaned-execution reconciliation failed (non-fatal)");
+  }
+
   // --- Sprint Next: cognition, replay, failure intelligence ---
   const cognitions = persistence.cognitions;
   const lineage = persistence.lineage;
@@ -945,16 +1012,30 @@ export async function createRuntimeContainer(
       });
   });
 
+  // Real-LLM cognition is gated on the provider being non-deterministic. In the
+  // default/test path (MODEL_PROVIDER="deterministic") the planner + verifier
+  // receive NO provider and run their deterministic heuristics — preserving
+  // byte-for-byte replay and every existing test's behaviour. With a real
+  // provider wired (groq/openai/claude/failover) the planner decomposes and
+  // the verifier adjudicates via genuine model calls. The executor always uses
+  // the provider (it was already real, even in deterministic mode).
+  const cognitionModelProvider =
+    config.MODEL_PROVIDER === "deterministic" ? undefined : modelProvider;
+
   const roles = {
     PLANNER: new PlannerEnsemble(
-      [new PlannerAgent(), new PlannerAgent(), new PlannerAgent()],
+      [
+        new PlannerAgent(cognitionModelProvider),
+        new PlannerAgent(cognitionModelProvider),
+        new PlannerAgent(cognitionModelProvider)
+      ],
       new CriticAgent()
     ),
     // Phase 1: ExecutorAgent now receives the real ModelProvider AND the real
     // ToolExecutor so it can run the agentic tool-use loop (web.search,
     // file.read, code.execute) and produce genuinely real outputs.
     EXECUTOR: new ExecutorAgent(modelProvider, toolExecutor),
-    VERIFIER: new VerifierAgent(),
+    VERIFIER: new VerifierAgent(cognitionModelProvider),
     CRITIC: new CriticAgent(),
     MEMORY_MANAGER: new MemoryManagerAgent(memory, clock)
   } as const;
@@ -1102,7 +1183,7 @@ export async function createRuntimeContainer(
       modelProvider: config.MODEL_PROVIDER,
       modelName: config.MODEL_NAME ?? "(provider default)",
       toolWebSearch: config.BRAVE_API_KEY ? "brave" : "duckduckgo",
-      toolCodeExecute: `vm-sandbox/${config.TOOL_CODE_EXECUTE_TIMEOUT_MS}ms`
+      toolCodeExecute: `subprocess-jail/${config.TOOL_CODE_EXECUTE_TIMEOUT_MS}ms/${config.TOOL_CODE_EXECUTE_MEMORY_MB ?? 128}MB`
     },
     "runtime container ready"
   );
@@ -1116,6 +1197,7 @@ export async function createRuntimeContainer(
   // field on the container. Leave it undefined in memory mode.
   let outboxDispatcher: OutboxDispatcher | undefined;
   let outboxTimer: NodeJS.Timeout | undefined;
+  let outboxDlqRecovery: OutboxDlqRecoveryService | undefined;
 
   const isOutboxEnabled =
     config.ENABLE_OUTBOX_DISPATCH !== false &&
@@ -1138,6 +1220,17 @@ export async function createRuntimeContainer(
     }, 1000);
     outboxTimer.unref?.();
     logger.info("[outbox] database-backed Event Outbox Dispatcher loop started");
+
+    // Out-of-band recovery for dead-lettered outbox events. The dispatcher
+    // moves poison rows to event_outbox_dlq after exhausting retries; without
+    // this sweep those events would never reach the bus, breaking the
+    // "every committed event is eventually delivered" guarantee. Runs on a
+    // slower cadence than the dispatcher — these are already-failed events, so
+    // there is no latency budget to defend, only the eventual-delivery floor.
+    const dlqRecovery = new OutboxDlqRecoveryService(publisher, eventBus, persistence.pg, logger);
+    dlqRecovery.start(60_000);
+    outboxDlqRecovery = dlqRecovery;
+    logger.info("[outbox] dead-letter recovery sweep started");
   }
 
   return {
@@ -1152,6 +1245,7 @@ export async function createRuntimeContainer(
     eventStore,
     eventBus,
     outboxDispatcher,
+    outboxDlqRecovery,
     workers,
     leases,
     checkpoints,
@@ -1165,7 +1259,7 @@ export async function createRuntimeContainer(
     streamBus,
     workerId,
     deadLetterQueue,
-    ollama,
+    llm,
     liveEngine,
     liveBroadcaster,
     cognitions,
@@ -1205,6 +1299,7 @@ export async function createRuntimeContainer(
       if (heartbeatTimer) clearInterval(heartbeatTimer);
       if (pgPoolStatsTimer) clearInterval(pgPoolStatsTimer);
       if (outboxTimer) clearInterval(outboxTimer);
+      outboxDlqRecovery?.stop();
       if (role !== "api") {
         recoveryLoop.stop();
         workerLifecycle.stop();

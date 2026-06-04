@@ -17,6 +17,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { operatorApi, type WorkerHealthEntry } from "../../services/operator-api";
 import { AlertTriangle, CheckCircle, Clock, Cpu, HardDrive, Zap } from "lucide-react";
+import { ExplainLabel } from "../explain/explain-label";
+import { StatusPill } from "../explain/status-pill";
+import { ExplainedEmptyState } from "../explain/empty-state";
+import { GraphGuide } from "../explain/graph-guide";
 
 function UtilBar({ pct }: { pct: number }) {
   const colour =
@@ -28,22 +32,6 @@ function UtilBar({ pct }: { pct: number }) {
         style={{ width: `${Math.min(100, pct)}%` }}
       />
     </div>
-  );
-}
-
-function StatusChip({ status }: { status: WorkerHealthEntry["worker"]["status"] }) {
-  const map: Record<string, string> = {
-    READY: "bg-emerald-900/60 text-emerald-300 border-emerald-700",
-    BUSY: "bg-blue-900/60 text-blue-300 border-blue-700",
-    DRAINING: "bg-yellow-900/60 text-yellow-300 border-yellow-700",
-    LOST: "bg-red-900/60 text-red-300 border-red-700",
-    REGISTERED: "bg-zinc-800 text-zinc-400 border-zinc-600",
-    STOPPED: "bg-zinc-900 text-zinc-600 border-zinc-700"
-  };
-  return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded border ${map[status] ?? map["REGISTERED"]}`}>
-      {status}
-    </span>
   );
 }
 
@@ -85,9 +73,7 @@ export function WorkerHealthDashboard() {
   }
 
   if (!entries.length && lastFetch !== null) {
-    return (
-      <div className="text-zinc-500 text-sm p-4">No workers registered.</div>
-    );
+    return <ExplainedEmptyState concept="worker-health" />;
   }
 
   if (!entries.length) {
@@ -97,9 +83,13 @@ export function WorkerHealthDashboard() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">Worker Health</h2>
+        <ExplainLabel concept="worker-health" as="span" className="text-base font-semibold text-white">
+          Worker Health
+        </ExplainLabel>
         <span className="text-xs text-zinc-500">{entries.length} worker{entries.length !== 1 ? "s" : ""}</span>
       </div>
+
+      <GraphGuide concept="worker-health" />
 
       <div className="space-y-3">
         {entries.map(({ worker, heartbeatAgeMs, activeLeases, executionIds, utilizationPct }) => {
@@ -122,13 +112,13 @@ export function WorkerHealthDashboard() {
                     )}
                   </div>
                 </div>
-                <StatusChip status={worker.status} />
+                <StatusPill status={worker.status} />
               </div>
 
               {/* Utilisation bar */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs text-zinc-500">
-                  <span>Utilisation</span>
+                  <ExplainLabel concept="worker-utilisation">Utilisation</ExplainLabel>
                   <span className="text-white font-medium">{utilizationPct}%</span>
                 </div>
                 <UtilBar pct={utilizationPct} />
@@ -162,7 +152,7 @@ export function WorkerHealthDashboard() {
                 </div>
                 <div className={`flex items-center gap-1.5 ${heartbeatAlert ? "text-red-400" : heartbeatWarn ? "text-yellow-400" : "text-zinc-400"}`}>
                   <Clock className="h-3 w-3 shrink-0" />
-                  <span>Heartbeat</span>
+                  <ExplainLabel concept="heartbeat">Heartbeat</ExplainLabel>
                   <span className="ml-auto font-medium tabular-nums">
                     {formatMs(heartbeatAgeMs)} ago
                   </span>

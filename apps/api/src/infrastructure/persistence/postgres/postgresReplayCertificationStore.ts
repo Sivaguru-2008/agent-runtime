@@ -21,10 +21,17 @@ export class PostgresReplayCertificationStore implements ReplayCertificationStor
 
   async put(certification: ReplayCertification): Promise<void> {
     await this.client.query(
+      // tenant_id (migration 0025) keeps each tenant's determinism audit trail
+      // isolated. Prefer the caller-supplied tenant, fall back to the certified
+      // execution's tenant, then 'system'. Text-compare subquery can never
+      // raise — an unresolvable execution simply yields 'system'.
       `insert into replay_certifications (
          execution_id, workflow_version, event_count, last_event_sequence,
-         frame_digests, chain_hash, captured_at
-       ) values ($1, $2, $3, $4, $5::jsonb, $6, $7)`,
+         frame_digests, chain_hash, captured_at, tenant_id
+       ) values (
+         $1, $2, $3, $4, $5::jsonb, $6, $7,
+         coalesce($8::text, (select tenant_id from executions where id::text = $1::text), 'system')
+       )`,
       [
         certification.executionId,
         certification.workflowVersion,
@@ -32,7 +39,8 @@ export class PostgresReplayCertificationStore implements ReplayCertificationStor
         certification.lastEventSequence,
         JSON.stringify(certification.frameDigests),
         certification.chainHash,
-        certification.capturedAt
+        certification.capturedAt,
+        certification.tenantId ?? null
       ]
     );
   }
@@ -40,7 +48,7 @@ export class PostgresReplayCertificationStore implements ReplayCertificationStor
   async latest(executionId: string): Promise<ReplayCertification | undefined> {
     const { rows } = await this.client.query<CertificationRow>(
       `select execution_id, workflow_version, event_count, last_event_sequence,
-              frame_digests, chain_hash, captured_at, id
+              frame_digests, chain_hash, captured_at, id, tenant_id
          from replay_certifications
          where execution_id = $1
          order by captured_at desc, id desc
@@ -53,7 +61,7 @@ export class PostgresReplayCertificationStore implements ReplayCertificationStor
   async listForExecution(executionId: string): Promise<ReplayCertification[]> {
     const { rows } = await this.client.query<CertificationRow>(
       `select execution_id, workflow_version, event_count, last_event_sequence,
-              frame_digests, chain_hash, captured_at, id
+              frame_digests, chain_hash, captured_at, id, tenant_id
          from replay_certifications
          where execution_id = $1
          order by captured_at asc, id asc`,
@@ -72,6 +80,7 @@ interface CertificationRow {
   chain_hash: string;
   captured_at: Date | string;
   id: string | number;
+  tenant_id?: string | null;
 }
 
 function rowToCertification(row: CertificationRow): ReplayCertification {
@@ -85,7 +94,8 @@ function rowToCertification(row: CertificationRow): ReplayCertification {
     capturedAt:
       row.captured_at instanceof Date
         ? row.captured_at.toISOString()
-        : String(row.captured_at)
+        : String(row.captured_at),
+    ...(row.tenant_id != null ? { tenantId: row.tenant_id } : {})
   };
 }
 

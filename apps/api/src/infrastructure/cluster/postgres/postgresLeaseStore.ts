@@ -45,7 +45,7 @@ export class PostgresLeaseStore implements LeaseStore {
         `insert into execution_leases (
             execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt, lease_id,
             lease_epoch, fencing_token, ownership_version, worker_identity
-          ) values ($1, $2, $3, $3, $4, 'LEASED', $5, $6, $5, $5, $5, $2)
+          ) values ($1, $2, $3, $3, $4, 'LEASED', $5::bigint, $6, $5::bigint, $5::bigint, $5::bigint, $2)
           on conflict (execution_id) do update set
             worker_id = excluded.worker_id,
             acquired_at = excluded.acquired_at,
@@ -95,11 +95,22 @@ export class PostgresLeaseStore implements LeaseStore {
 
   async reclaimExpired(now: Date, limit: number = 10): Promise<ExecutionLease[]> {
     return this.client.withTransaction(async (tx) => {
+      // 'EXPIRED' is included deliberately. reclaimExpired flips a live lease to
+      // EXPIRED and hands it to scheduler.recover(), which then performs the
+      // durable takeoverRecovery (EXPIRED → RECOVERY_OWNED, attempt++). If the
+      // process crashes BETWEEN the flip and that takeover, the lease is left
+      // stranded at EXPIRED — and excluding EXPIRED here would mean it is never
+      // re-surfaced, so the execution stays RUNNING forever (a permanent
+      // orphan). Re-surfacing EXPIRED is safe and self-limiting: a successful
+      // recovery moves the lease to RECOVERY_OWNED with a future expiry (no
+      // longer expires_at < now), and terminal executions release their leases
+      // to INVALIDATED/TRANSFERRED — neither matches this scan again. Only a
+      // genuinely stranded recovery re-enters here.
       const { rows: expired } = await tx.query<LeaseRow>(
         `select execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt, lease_id,
                 lease_epoch, fencing_token, ownership_version, worker_identity
            from execution_leases
-           where status in ('LEASE_PENDING', 'LEASED', 'RENEWING', 'RECOVERY_OWNED') and expires_at < $1
+           where status in ('LEASE_PENDING', 'LEASED', 'RENEWING', 'RECOVERY_OWNED', 'EXPIRED') and expires_at < $1
            for update skip locked
            limit $2`,
         [toIso(now), limit]
@@ -123,7 +134,7 @@ export class PostgresLeaseStore implements LeaseStore {
   async reclaimByWorker(workerId: string, now: Date): Promise<ExecutionLease[]> {
     const { rows } = await this.client.query<LeaseRow>(
       `update execution_leases
-          set status = 'INVALIDATED', renewed_at = $2
+          set status = 'EXPIRED', renewed_at = $2, expires_at = $2::timestamptz - interval '1 second'
           where worker_id = $1 and status in ('LEASE_PENDING', 'LEASED', 'RENEWING', 'RECOVERY_OWNED')
           returning execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt, lease_id,
                     lease_epoch, fencing_token, ownership_version, worker_identity`,
@@ -161,11 +172,11 @@ export class PostgresLeaseStore implements LeaseStore {
                 renewed_at = $3,
                 expires_at = $4,
                 status = 'RECOVERY_OWNED',
-                attempt = $5,
+                attempt = $5::bigint,
                 lease_id = $6,
-                lease_epoch = $5,
-                fencing_token = $5,
-                ownership_version = $5,
+                lease_epoch = $5::bigint,
+                fencing_token = $5::bigint,
+                ownership_version = $5::bigint,
                 worker_identity = $2
             where execution_id = $1 and status = 'EXPIRED'
             returning execution_id, worker_id, acquired_at, renewed_at, expires_at, status, attempt, lease_id,

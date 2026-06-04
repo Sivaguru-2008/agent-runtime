@@ -17,7 +17,8 @@ import type { ExecutionDetails, GraphNode } from "@/types/observability";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatTime } from "@/lib/utils";
-import { statusVariant } from "./status";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { StatusPill } from "@/components/explain/status-pill";
 
 const nodeTypes = {
   cognition: CognitionNode
@@ -29,7 +30,9 @@ export function ExecutionGraph({ details }: { details?: ExecutionDetails }) {
   return (
     <Card className="h-[560px] overflow-hidden">
       <CardHeader>
-        <CardTitle>Execution DAG</CardTitle>
+        <CardTitle>
+          <ExplainLabel concept="cognition-graph" as="span">Execution DAG</ExplainLabel>
+        </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant="muted">{nodes.length} nodes</Badge>
           <Badge variant="muted">{edges.length} edges</Badge>
@@ -63,7 +66,7 @@ function CognitionNode({ data }: NodeProps<Node<CognitionNodeData>>) {
       <div className="flex items-center gap-2 border-b border-border px-3 py-2">
         <Icon className={cn("h-4 w-4", colorFor(data.kind, data.severity, intensity))} />
         <div className="min-w-0 flex-1 truncate text-xs font-semibold">{data.label}</div>
-        {data.severity ? <Badge variant={statusVariant(data.severity)}>{data.severity}</Badge> : null}
+        {data.severity ? <StatusPill status={data.severity} dot={false} /> : null}
       </div>
       <div className="space-y-2 px-3 py-2">
         <div className="flex items-center justify-between font-mono text-[11px] text-muted-foreground">

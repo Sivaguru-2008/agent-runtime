@@ -30,7 +30,7 @@ import { createHash } from "node:crypto";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { Redis } from "ioredis";
 import type { PgClient } from "../persistence/postgres/pgClient.js";
-import type { TenantContext, ApiKeyRole } from "./tenantContext.js";
+import { normalizeRole, type TenantContext, type ApiKeyRole } from "./tenantContext.js";
 
 export interface ApiKeyAuthOptions {
   redis: Redis | null;
@@ -38,6 +38,20 @@ export interface ApiKeyAuthOptions {
   skipPaths: string[];
   cacheTtlSec: number;
   enabled: boolean;
+  /**
+   * Strict environment (production / STRICT_PROD). When true, auth MUST be
+   * enabled — registering with `enabled:false` throws rather than installing
+   * the unauthenticated fallback. Defense in depth: loadConfig already rejects
+   * this combination, but the plugin refuses independently so no boot path can
+   * ever install the fallback in a strict environment.
+   */
+  strict: boolean;
+  /**
+   * Role granted to the synthetic tenant when auth is disabled (dev/test only).
+   * Defaults to the least-privileged useful role. NEVER "admin" implicitly —
+   * the previous behaviour silently granted admin to every caller.
+   */
+  disabledFallbackRole: ApiKeyRole;
 }
 
 interface CachedKeyData {
@@ -103,7 +117,9 @@ async function lookupFromPostgres(
   return {
     id: row.id,
     tenantId: row.tenant_id,
-    role: row.role,
+    // Normalize the legacy "readonly" label to "viewer" so any pre-migration
+    // key row keeps authenticating with the equivalent capability set.
+    role: normalizeRole(row.role),
     rateLimitRpm: row.rate_limit_rpm
   };
 }
@@ -127,20 +143,36 @@ export async function registerApiKeyAuth(
   opts: ApiKeyAuthOptions
 ): Promise<void> {
   if (!opts.enabled) {
-    // Auth disabled — log a warning so operators notice in production. Inject
-    // a synthetic admin-grade system tenant so downstream guards (tenant
-    // ownership, role checks) continue to behave consistently. This preserves
-    // the pre-hardening "anyone can do anything" semantics for in-memory
-    // tests and dev mode WITHOUT punching a hole in the production code path,
-    // because production deployments must set AUTH_ENABLED=true.
-    app.log.warn("API key authentication is DISABLED — all endpoints are publicly accessible");
+    // Defense in depth: a strict environment must NEVER install the
+    // unauthenticated fallback. loadConfig already rejects this combination;
+    // refusing here too means no alternate boot path (a future refactor, a
+    // direct buildApp caller, a test misconfiguration) can punch the hole.
+    if (opts.strict) {
+      throw new Error(
+        "[security] Refusing to register auth plugin with AUTH_ENABLED=false in a " +
+          "strict environment (production / STRICT_PROD). Unauthenticated endpoints " +
+          "are not acceptable in production."
+      );
+    }
+
+    // Auth disabled (dev/test only). Inject a synthetic tenant so downstream
+    // guards (tenant ownership, role checks) behave consistently — but with the
+    // configured fallback role, NOT admin. The pre-hardening code granted
+    // "admin" + unlimited rate to every unauthenticated caller; that
+    // privilege-escalation fallback is removed. Operators who need the
+    // operator/admin dashboard in a local unauthenticated run must opt in
+    // explicitly via AUTH_DISABLED_FALLBACK_ROLE.
+    app.log.warn(
+      { fallbackRole: opts.disabledFallbackRole },
+      "API key authentication is DISABLED — all endpoints are publicly accessible with the fallback role"
+    );
     app.addHook("onRequest", async (request: FastifyRequest) => {
       if (request.tenant) return;
       request.tenant = {
         tenantId: "system",
         apiKeyId: "auth-disabled",
-        role: "admin",
-        rateLimitRpm: Number.MAX_SAFE_INTEGER
+        role: opts.disabledFallbackRole,
+        rateLimitRpm: 100_000
       };
     });
     return;
@@ -194,7 +226,9 @@ export async function registerApiKeyAuth(
     const tenant: TenantContext = {
       tenantId: keyData.tenantId,
       apiKeyId: keyData.id,
-      role: keyData.role,
+      // Normalize again at the construction boundary: a Redis entry cached
+      // before the migration may still carry the legacy "readonly" label.
+      role: normalizeRole(keyData.role),
       rateLimitRpm: keyData.rateLimitRpm
     };
     request.tenant = tenant;

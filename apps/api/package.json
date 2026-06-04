@@ -5,9 +5,12 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
+    "predev": "node ../../scripts/free-api.mjs",
     "dev": "tsx watch src/server.ts",
     "dev:worker": "tsx watch src/workerProcess.ts",
-    "build": "tsc -p tsconfig.json",
+    "kill:api": "node ../../scripts/free-api.mjs",
+    "start:supervised": "node ../../scripts/supervisor.mjs",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "worker": "node dist/workerProcess.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",

@@ -12,6 +12,7 @@ import type { CheckpointStore, FencingToken } from "../domain/clusterPorts.js";
 import type { Agent, Execution, ExecutionStep, MemoryRecord, ToolCallRecord } from "../domain/model.js";
 import type { EventStore, ExecutionRepository, MemoryRepository, ModelProvider, ToolExecutor, CommitTransitionInput } from "../domain/ports.js";
 import { throwIfAborted } from "../providers/retry.js";
+import { trueDateNow } from "../shared/trueClock.js";
 import {
   assertRuntimeInvariant,
   assertTransition,
@@ -58,24 +59,44 @@ export function runWithUntrackedAllowed<T>(fn: () => T): T {
   return fn();
 }
 
+/**
+ * Run an awaited, trusted I/O effect (model provider fetch, memory search,
+ * tool execution) entirely OUTSIDE the determinism guard's AsyncLocalStorage
+ * context.
+ *
+ * Why exit() and not an `allowUntracked = true` boolean flip on the live store:
+ *   The recorded effect is genuine, inherently non-deterministic I/O — an HTTP
+ *   fetch through undici, a Postgres round-trip. undici schedules INTERNAL
+ *   continuations (e.g. node:internal/deps/undici processResponseEndOfBody)
+ *   that call Date.now() while finalizing the response body. Those
+ *   continuations capture whatever ALS context was active when the fetch was
+ *   initiated, and they can fire AFTER our `await` has already resolved.
+ *
+ *   A boolean flip restored in a `finally` is therefore racy: the trailing
+ *   undici continuation runs with the step's context still on the async stack
+ *   but `allowUntracked` already reset to false → PatchedDate.now() throws
+ *   InvariantViolation(S_UNSAFE_REPLAY) on trusted infrastructure I/O, even
+ *   though no step-body code did anything wrong.
+ *
+ *   exit() removes the store for the entire async subtree the effect spawns,
+ *   so every continuation it schedules inherits "no store" and the guard never
+ *   arms for them — regardless of when they fire. The guard stays fully armed
+ *   for step-body code before and after the effect: that code runs in the
+ *   caller's context, which exit() does not touch (the caller's `await` on the
+ *   returned promise resumes inside the original step context).
+ */
 export async function runWithUntrackedAllowedAsync<T>(fn: () => Promise<T>): Promise<T> {
-  const store = deterministicStorage.getStore();
-  if (store) {
-    const originalValue = store.allowUntracked;
-    store.allowUntracked = true;
-    try {
-      return await fn();
-    } finally {
-      store.allowUntracked = originalValue;
-    }
-  }
-  return await fn();
+  return await deterministicStorage.exit(fn);
 }
 
-// Monkey-patch global Math.random and Date to capture and block untracked nondeterminism inside steps
+// Monkey-patch global Math.random and Date to capture and block untracked nondeterminism inside steps.
+// trueClock captures the genuine Date.now BEFORE this patch installs (imports
+// evaluate before this module body), so infrastructure (logging, metrics) can
+// read wall-clock time without tripping the guard. Importing it here also
+// pins that evaluation order.
 const originalRandom = Math.random;
 const originalDate = Date;
-const originalDateNow = Date.now;
+const originalDateNow = trueDateNow;
 
 Math.random = function patchedRandom() {
   const store = deterministicStorage.getStore();

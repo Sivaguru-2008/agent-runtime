@@ -30,6 +30,7 @@ import { operatorApi, type TraceLineageEntry } from "../../services/operator-api
 import {
   AlertTriangle, ChevronDown, ChevronRight, GitBranch, Search
 } from "lucide-react";
+import { ExplainedEmptyState } from "../explain/empty-state";
 
 const AGGREGATE_COLOUR: Record<string, string> = {
   AGENT: "text-blue-400 border-blue-800",
@@ -276,9 +277,11 @@ export function EventTraceExplorer() {
       )}
 
       {result && result.eventCount === 0 && (
-        <div className="text-zinc-500 text-sm p-4 text-center border border-zinc-800 rounded-lg">
-          No events found for traceId: <span className="font-mono text-zinc-400">{traceId}</span>
-        </div>
+        <ExplainedEmptyState
+          concept="trace"
+          title="No events for this trace"
+          body={`Nothing was recorded under trace "${traceId}". Either the ID is wrong, or the request didn't generate any events. Paste a trace ID from a recent run to follow it across the system.`}
+        />
       )}
     </div>
   );

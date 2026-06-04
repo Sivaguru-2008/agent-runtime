@@ -108,6 +108,8 @@ export interface LeaseMapEntry {
 
 export interface ExecutionDiagnosis {
   executionId: string;
+  /** Distributed trace id for this execution, resolved from its event log. */
+  traceId: string | undefined;
   execution: { id: string; agentId: string; status: string; createdAt?: string; completedAt?: string } | undefined;
   checkpoint: ExecutionCheckpoint | undefined;
   lease: ExecutionLease | undefined;
@@ -424,8 +426,12 @@ export class OperatorQueries {
       recoveryCount: resumeEvents.filter(e => e.type === "EXECUTION_RESUMED").length
     };
 
+    const traceId =
+      execution?.traceId ?? timeline.find((t) => t.traceId)?.traceId ?? undefined;
+
     return {
       executionId,
+      traceId,
       execution: execution
         ? {
             id: execution.id,

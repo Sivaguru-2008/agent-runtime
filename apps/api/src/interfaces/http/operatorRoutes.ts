@@ -40,9 +40,10 @@ import type { RuntimeContainer } from "../../application/runtimeContainer.js";
 import { ObservabilityQueries } from "../../application/queries/observabilityQueries.js";
 import { OperatorQueries } from "../../application/queries/operatorQueries.js";
 import { NotFoundError } from "../../shared/errors.js";
-import { requireRole } from "../../infrastructure/security/rbac.js";
-import { requireTenant } from "../../infrastructure/security/tenantContext.js";
+import { requirePermission } from "../../infrastructure/security/rbac.js";
+import { requireTenant, canAccessAllTenants } from "../../infrastructure/security/tenantContext.js";
 import type { TenantGuard } from "../../infrastructure/security/tenantGuard.js";
+import { runtimeIdFor } from "./observabilityMetadata.js";
 
 export async function registerOperatorRoutes(
   app: FastifyInstance,
@@ -65,9 +66,14 @@ export async function registerOperatorRoutes(
     observability
   );
 
-  // All /operator routes are operator-only at minimum. Per-execution routes
-  // additionally validate tenant ownership unless the requester is admin.
-  const operatorOnly = requireRole("operator");
+  // /operator diagnostic READS require observability:read (operator/admin/owner
+  // plus the read-only auditor). The break-glass WRITE controls (pause, resume,
+  // inject, freeze) require recovery:execute. Replay scrubber data requires
+  // replay:read. Per-execution routes additionally validate tenant ownership
+  // unless the requester is owner/admin.
+  const operatorOnly = requirePermission("observability:read");
+  const recoveryControl = requirePermission("recovery:execute");
+  const replayRead = requirePermission("replay:read");
   const guard: TenantGuard = app.hasDecorator("tenantGuard")
     ? app.tenantGuard
     : container.tenantGuard;
@@ -109,14 +115,14 @@ export async function registerOperatorRoutes(
     // An operator is tenant-scoped; only admins may diagnose executions in
     // other tenants. This blocks horizontal privilege escalation between two
     // tenants that both happen to have operator-grade keys.
-    if (ctx.role !== "admin") {
+    if (!canAccessAllTenants(ctx.role)) {
       await guard.assertOwnsExecution(ctx, executionId);
     }
     const diagnosis = await operator.executionDiagnosis(executionId);
     if (!diagnosis.execution && diagnosis.eventCount === 0) {
       throw new NotFoundError("Execution", executionId);
     }
-    return diagnosis;
+    return { ...diagnosis, runtimeId: runtimeIdFor(request) };
   });
 
   // ── GET /operator/trace/:traceId ─────────────────────────────────────────
@@ -130,7 +136,7 @@ export async function registerOperatorRoutes(
     // For non-admin operators, strip events that don't belong to the caller's
     // tenant. A trace by definition follows one request's causal chain so we
     // expect the whole chain to share a tenant — but defensively filter.
-    if (ctx.role !== "admin") {
+    if (!canAccessAllTenants(ctx.role)) {
       // TraceLineageEntry doesn't currently carry tenantId; resolve via the
       // event's aggregate. A trace is one causal chain, so we expect a single
       // owning tenant — if any entry resolves to a different tenant, deny.
@@ -149,10 +155,10 @@ export async function registerOperatorRoutes(
   // ── GET /operator/replay/:executionId ────────────────────────────────────
   // Replay scrubber data: checkpoints, step frames, and branch pointers.
   // The frontend uses this to drive the time-travel scrubber UI.
-  app.get("/operator/replay/:executionId", { preHandler: operatorOnly }, async (request) => {
+  app.get("/operator/replay/:executionId", { preHandler: replayRead }, async (request) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
-    if (ctx.role !== "admin") {
+    if (!canAccessAllTenants(ctx.role)) {
       await guard.assertOwnsExecution(ctx, executionId);
     }
     return operator.replayScrubberData(executionId);
@@ -162,10 +168,10 @@ export async function registerOperatorRoutes(
   // Operator-initiated execution suspension. Writes a OPERATOR_PAUSE_REQUESTED
   // checkpoint so the execution engine suspends at its next checkpoint boundary.
   // Idempotent: calling twice returns ALREADY_PAUSED.
-  app.post("/operator/executions/:executionId/pause", { preHandler: operatorOnly }, async (request, reply) => {
+  app.post("/operator/executions/:executionId/pause", { preHandler: recoveryControl }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
-    if (ctx.role !== "admin") {
+    if (!canAccessAllTenants(ctx.role)) {
       await guard.assertOwnsExecution(ctx, executionId);
     }
     const existing = await container.checkpoints.latest(executionId);
@@ -189,10 +195,10 @@ export async function registerOperatorRoutes(
   // ── POST /operator/executions/:executionId/resume ────────────────────────
   // Cancels an operator pause. Writes an OPERATOR_RESUMED checkpoint so the
   // execution engine can continue from the last real checkpoint.
-  app.post("/operator/executions/:executionId/resume", { preHandler: operatorOnly }, async (request, reply) => {
+  app.post("/operator/executions/:executionId/resume", { preHandler: recoveryControl }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
-    if (ctx.role !== "admin") {
+    if (!canAccessAllTenants(ctx.role)) {
       await guard.assertOwnsExecution(ctx, executionId);
     }
     const existing = await container.checkpoints.latest(executionId);
@@ -215,10 +221,10 @@ export async function registerOperatorRoutes(
   // ── POST /operator/executions/:executionId/inject ────────────────────────
   // Queues a corrected input injection at the specified replay frame.
   // The injection is persisted as a checkpoint so replay can pick it up.
-  app.post("/operator/executions/:executionId/inject", { preHandler: operatorOnly }, async (request, reply) => {
+  app.post("/operator/executions/:executionId/inject", { preHandler: recoveryControl }, async (request, reply) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
-    if (ctx.role !== "admin") {
+    if (!canAccessAllTenants(ctx.role)) {
       await guard.assertOwnsExecution(ctx, executionId);
     }
     const { frameIndex, input, reason } = request.body as { frameIndex: number; input: Record<string, unknown>; reason: string };
@@ -278,14 +284,14 @@ export async function registerOperatorRoutes(
   });
 
   // POST /operator/freeze — operator force-freeze. Optional ttlMs.
-  app.post("/operator/freeze", { preHandler: operatorOnly }, async (request) => {
+  app.post("/operator/freeze", { preHandler: recoveryControl }, async (request) => {
     const body = (request.body ?? {}) as { reason?: string; ttlMs?: number };
     const reason = body.reason ?? "operator-manual";
     return container.reliability.freeze.forceFreeze(reason, body.ttlMs);
   });
 
   // DELETE /operator/freeze — release operator override.
-  app.delete("/operator/freeze", { preHandler: operatorOnly }, async () => {
+  app.delete("/operator/freeze", { preHandler: recoveryControl }, async () => {
     return container.reliability.freeze.releaseFreeze();
   });
 

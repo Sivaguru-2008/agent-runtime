@@ -20,6 +20,7 @@ import type {
 import type { Clock } from "../../shared/clock.js";
 import { toIso } from "../../shared/clock.js";
 import { deterministicId, fingerprint } from "../../shared/determinism.js";
+import { createId } from "../../shared/id.js";
 import { FrameBuilder } from "./frameBuilder.js";
 import { ReplayDiffEngine } from "./diffEngine.js";
 
@@ -69,6 +70,7 @@ export class ReplayEngine {
       id: sessionId,
       cognitionId,
       executionId: graph.executionId,
+      traceId,
       status: "READY",
       cursor: { frameIndex: 0, eventSequence: frames[0]?.eventSequence ?? 0, speed: 1 },
       frames,
@@ -78,10 +80,16 @@ export class ReplayEngine {
     await this.publisher.publish(
       this.eventFactory.create({
         type: "REPLAY_SESSION_CREATED",
-        aggregateId: cognitionId,
+        // Tie the event to the real executionId (every other EXECUTION-aggregate
+        // event does the same). Using cognitionId here produced an EXECUTION
+        // event whose aggregateId was NOT an execution: tenant resolution
+        // (resolveExecutionTenant) failed, and the dashboard's SSE handler
+        // auto-selected the cognitionId as if it were an execution, then 404'd
+        // on GET /executions/:id. cognitionId is preserved in the payload.
+        aggregateId: graph.executionId,
         aggregateType: "EXECUTION",
         payload: { sessionId: session.id, cognitionId, executionId: graph.executionId },
-        context: { traceId }
+        context: { traceId, causationId: createId() }
       })
     );
     return session;
@@ -257,24 +265,44 @@ export class ReplayEngine {
       await fingerprint(request.overrides ?? {})
     ]);
 
+    // Re-key ancestor nodes to branch-local deterministic IDs. A node ID must
+    // be unique per cognition; reusing the source IDs would collide source and
+    // branch in any per-cognition node index. The source ID is retained on
+    // `replayedFromNodeId` for lineage.
+    const branchNodes: CognitionNode[] = this.copyAncestry(source.nodes, sourceNode.sequence).map((node) => ({
+      ...node,
+      id: deterministicId([branchCognitionId, node.sequence, node.role, node.inputFingerprint]),
+      cognitionId: branchCognitionId,
+      replayedFromNodeId: node.id,
+      status: "REPLAYED"
+    }));
+    // Handoffs reference nodes BY ID (`fromNodeId`). Since the branch nodes were
+    // just re-keyed, every retained handoff's `fromNodeId` must be translated
+    // through the same source→branch map — otherwise the branch graph would
+    // carry handoffs pointing at node IDs that exist only in the source, which
+    // are silently dropped on snapshot hydration (visibleNodeIds filter) and
+    // break diff/lineage resolution.
+    const sourceToBranchNodeId = new Map(branchNodes.map((n) => [n.replayedFromNodeId as string, n.id]));
+
     const branchGraph: CognitionGraph = {
       id: branchCognitionId,
       executionId: deterministicId([branchCognitionId, "execution"]),
       agentId: source.agentId,
       parentCognitionId: source.id,
       parentNodeId: sourceNode.id,
+      tenantId: source.tenantId,
+      // Inherit the source's distributed trace id so a branch is observable as
+      // part of the original investigation, not as a disconnected new trace.
+      // (The branch *executionId* is derived afresh by design — only the trace
+      // correlation is shared, matching the operator's mental model.)
+      traceId: source.traceId,
       phase: "INIT",
       startedAt: toIso(this.clock.now()),
       ownerWorkerId: undefined,
-      nodes: this.copyAncestry(source.nodes, sourceNode.sequence).map((node) => ({
-        ...node,
-        cognitionId: branchCognitionId,
-        replayedFromNodeId: node.id,
-        status: "REPLAYED"
-      })),
-      handoffs: source.handoffs.filter((h) =>
-        source.nodes.find((n) => n.id === h.fromNodeId && n.sequence < sourceNode.sequence)
-      )
+      nodes: branchNodes,
+      handoffs: source.handoffs
+        .filter((h) => source.nodes.find((n) => n.id === h.fromNodeId && n.sequence < sourceNode.sequence))
+        .map((h) => ({ ...h, fromNodeId: sourceToBranchNodeId.get(h.fromNodeId) ?? h.fromNodeId }))
     };
 
     await this.cognitions.save(branchGraph);
@@ -314,7 +342,15 @@ export class ReplayEngine {
 
   async materializeFrames(graph: CognitionGraph): Promise<ReplayFrame[]> {
     const events = await this.events.listByExecution(graph.executionId);
-    return this.frameBuilder.build(events);
+    // REPLAY_SESSION_CREATED is a replay-viewer artifact, not part of the
+    // execution's causal log. The authoritative fix is at event linkage
+    // (deriveEventLinks / collectExecutionIds no longer link it to the
+    // execution), so new rows never reach this list. This filter is retained
+    // as defense for any legacy rows persisted while the event was still
+    // execution-linked — keeping frame counts (and the derived session id)
+    // stable regardless of how many replay sessions were opened.
+    const filtered = events.filter((e) => e.type !== "REPLAY_SESSION_CREATED");
+    return this.frameBuilder.build(filtered);
   }
 
   private copyAncestry(nodes: CognitionNode[], throughSequence: number): CognitionNode[] {

@@ -35,6 +35,9 @@ import { Badge } from "@/components/ui/badge";
 import type { ReplayFrame } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
 import { CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { ExplainLabel } from "@/components/explain/explain-label";
+import { GraphGuide } from "@/components/explain/graph-guide";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export interface ReplayDeterminismPanelProps {
   frames: ReplayFrame[];
@@ -107,11 +110,7 @@ export function ReplayDeterminismPanel({ frames, onSeekToFrame }: ReplayDetermin
   const report = useMemo(() => computeDeterminismReport(frames), [frames]);
 
   if (frames.length === 0) {
-    return (
-      <div className="text-zinc-500 text-sm p-4 text-center border border-zinc-800 rounded">
-        No replay frames to verify. Create a replay session first.
-      </div>
-    );
+    return <ExplainedEmptyState concept="determinism" />;
   }
 
   const scoreColor =
@@ -146,7 +145,9 @@ export function ReplayDeterminismPanel({ frames, onSeekToFrame }: ReplayDetermin
               <div className={cn("text-3xl font-bold font-mono", scoreColor)}>
                 {report.determinismScore}%
               </div>
-              <div className="text-xs text-zinc-500">deterministic replay score</div>
+              <ExplainLabel concept="determinism" className="text-xs text-zinc-500">
+                deterministic replay score
+              </ExplainLabel>
             </div>
           </div>
           <div className="text-right">
@@ -180,6 +181,9 @@ export function ReplayDeterminismPanel({ frames, onSeekToFrame }: ReplayDetermin
           />
         </div>
       </Card>
+
+      {/* Plain-language interpretation of the score */}
+      <GraphGuide concept="determinism" value={report.determinismScore} />
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">

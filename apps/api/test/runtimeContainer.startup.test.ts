@@ -62,11 +62,12 @@ function buildConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     WORKER_CAPACITY: 4,
     WORKER_HEARTBEAT_TTL_MS: 15_000,
     WORKER_SWEEP_INTERVAL_MS: 60_000,
+    WORKER_REAP_AFTER_MS: 86_400_000,
     EXECUTION_LEASE_TTL_MS: 30_000,
     SCHEDULER_POLL_INTERVAL_MS: 250,
-    OLLAMA_URL: "http://localhost:11434",
-    OLLAMA_MODEL: "llama3",
-    OLLAMA_REQUEST_TIMEOUT_MS: 120_000,
+    GROQ_BASE_URL: "https://api.groq.com/openai/v1",
+    GROQ_MODEL: "llama-3.3-70b-versatile",
+    GROQ_REQUEST_TIMEOUT_MS: 120_000,
     SSE_DEDUPE_WINDOW: 1024,
     WORKER_REGISTRATION_TIMEOUT_MS: 10_000,
     MODEL_PROVIDER: "deterministic",
@@ -151,6 +152,7 @@ class AlwaysFailingRegistry implements WorkerRegistry {
   async getById() { return undefined; }
   async list() { return []; }
   async expireStale() { return []; }
+  async reapTerminated() { return []; }
 }
 
 class StalledRegistry implements WorkerRegistry {
@@ -165,6 +167,7 @@ class StalledRegistry implements WorkerRegistry {
   async getById() { return undefined; }
   async list() { return []; }
   async expireStale() { return []; }
+  async reapTerminated() { return []; }
 }
 
 describe("createRuntimeContainer — fail-fast startup", () => {

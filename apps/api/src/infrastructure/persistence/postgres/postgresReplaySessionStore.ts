@@ -20,11 +20,21 @@ export class PostgresReplaySessionStore implements ReplaySessionStore {
   async put(session: ReplaySession): Promise<void> {
     await this.client.withTransaction(async (tx) => {
       await tx.query(
+        // tenant_id (migration 0025) is stamped on first insert and never
+        // rewritten on conflict — ownership is immutable. We prefer the
+        // caller-supplied tenant, fall back to the owning execution's tenant,
+        // and finally 'system'. The subquery is a text-compare so it can never
+        // raise (an unresolvable execution simply yields 'system'); it mirrors
+        // the best-effort backfill convention from 0005_tenant_propagation.sql.
         `insert into replay_sessions (
            id, cognition_id, execution_id, status,
            cursor_frame_index, cursor_event_sequence, cursor_speed,
-           forked_from_session_id, forked_from_frame_index, created_at, updated_at
-         ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, now())
+           forked_from_session_id, forked_from_frame_index, created_at, updated_at,
+           tenant_id
+         ) values (
+           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10, now(),
+           coalesce($11::text, (select tenant_id from executions where id::text = $3::text), 'system')
+         )
          on conflict (id) do update set
            status = excluded.status,
            cursor_frame_index = excluded.cursor_frame_index,
@@ -41,7 +51,8 @@ export class PostgresReplaySessionStore implements ReplaySessionStore {
           session.cursor.speed,
           session.forkedFrom?.sessionId ?? null,
           session.forkedFrom?.frameIndex ?? null,
-          session.createdAt
+          session.createdAt,
+          session.tenantId ?? null
         ]
       );
 
@@ -74,7 +85,7 @@ export class PostgresReplaySessionStore implements ReplaySessionStore {
     const { rows } = await this.client.query<SessionRow>(
       `select id, cognition_id, execution_id, status,
               cursor_frame_index, cursor_event_sequence, cursor_speed,
-              forked_from_session_id, forked_from_frame_index, created_at
+              forked_from_session_id, forked_from_frame_index, created_at, tenant_id
          from replay_sessions where id = $1`,
       [sessionId]
     );
@@ -88,7 +99,7 @@ export class PostgresReplaySessionStore implements ReplaySessionStore {
     const { rows } = await this.client.query<SessionRow>(
       `select id, cognition_id, execution_id, status,
               cursor_frame_index, cursor_event_sequence, cursor_speed,
-              forked_from_session_id, forked_from_frame_index, created_at
+              forked_from_session_id, forked_from_frame_index, created_at, tenant_id
          from replay_sessions
          where cognition_id = $1
          order by created_at desc`,
@@ -133,6 +144,7 @@ interface SessionRow {
   forked_from_session_id: string | null;
   forked_from_frame_index: number | null;
   created_at: Date | string;
+  tenant_id?: string | null;
 }
 
 interface FrameRow {
@@ -161,6 +173,7 @@ function rowToSession(row: SessionRow, frames: ReplayFrame[]): ReplaySession {
       row.forked_from_session_id && row.forked_from_frame_index !== null
         ? { sessionId: row.forked_from_session_id, frameIndex: row.forked_from_frame_index }
         : undefined,
-    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at)
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+    ...(row.tenant_id != null ? { tenantId: row.tenant_id } : {})
   };
 }

@@ -61,6 +61,20 @@ export class InMemoryWorkerRegistry implements WorkerRegistry {
     }
     return expired;
   }
+
+  async reapTerminated(now: Date, retentionMs: number): Promise<RuntimeWorker[]> {
+    const cutoff = now.getTime() - retentionMs;
+    const reaped: RuntimeWorker[] = [];
+    // Snapshot first — we mutate the map inside the loop.
+    for (const worker of [...this.workers.values()]) {
+      if (worker.status !== "LOST" && worker.status !== "STOPPED") continue;
+      if (new Date(worker.lastHeartbeatAt).getTime() < cutoff) {
+        this.workers.delete(worker.id);
+        reaped.push(worker);
+      }
+    }
+    return reaped;
+  }
 }
 
 export class InMemoryLeaseStore implements LeaseStore {
@@ -123,7 +137,20 @@ export class InMemoryLeaseStore implements LeaseStore {
   async reclaimExpired(now: Date): Promise<ExecutionLease[]> {
     const reclaimed: ExecutionLease[] = [];
     for (const lease of this.leases.values()) {
-      if (lease.status !== "LEASED" && lease.status !== "RENEWING" && lease.status !== "RECOVERY_OWNED" && lease.status !== "LEASE_PENDING") continue;
+      // 'EXPIRED' included so a recovery stranded between the reclaim flip and
+      // takeoverRecovery (e.g. a process crash) is re-surfaced rather than left
+      // orphaned. Mirrors PostgresLeaseStore.reclaimExpired — see the rationale
+      // there. Safe + self-limiting: successful recovery moves the lease to
+      // RECOVERY_OWNED with a future expiry; terminal executions release to
+      // INVALIDATED/TRANSFERRED. Neither re-enters this scan.
+      if (
+        lease.status !== "LEASED" &&
+        lease.status !== "RENEWING" &&
+        lease.status !== "RECOVERY_OWNED" &&
+        lease.status !== "LEASE_PENDING" &&
+        lease.status !== "EXPIRED"
+      )
+        continue;
       if (new Date(lease.expiresAt).getTime() < now.getTime()) {
         const next: ExecutionLease = { ...lease, status: "EXPIRED", renewedAt: toIso(now) };
         this.leases.set(lease.executionId, next);
@@ -137,7 +164,7 @@ export class InMemoryLeaseStore implements LeaseStore {
     const reclaimed: ExecutionLease[] = [];
     for (const lease of this.leases.values()) {
       if (lease.workerId !== workerId || (lease.status !== "LEASED" && lease.status !== "RENEWING" && lease.status !== "RECOVERY_OWNED" && lease.status !== "LEASE_PENDING")) continue;
-      const next: ExecutionLease = { ...lease, status: "INVALIDATED", renewedAt: toIso(now) };
+      const next: ExecutionLease = { ...lease, status: "EXPIRED", renewedAt: toIso(now), expiresAt: toIso(new Date(now.getTime() - 1000)) };
       this.leases.set(lease.executionId, next);
       reclaimed.push(next);
     }
@@ -188,7 +215,6 @@ export class InMemoryLeaseStore implements LeaseStore {
     if (lease.status !== "LEASED" && lease.status !== "RENEWING" && lease.status !== "RECOVERY_OWNED") return false;
     if (lease.attempt !== fencingToken) return false;
     if (leaseId !== undefined && lease.leaseId !== leaseId) return false;
-    if (new Date(lease.expiresAt).getTime() < Date.now()) return false;
     return true;
   }
 }

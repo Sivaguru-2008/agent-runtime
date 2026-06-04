@@ -57,8 +57,20 @@ interface ReplayStack {
   engine: ReplayEngine;
 }
 
+// Lifecycle registry for the ONLY owned resource each stack mints: its
+// PostgresEventStore. The connection-string constructor makes that store own
+// its own pg pool (ownsClient=true); the cognition/snapshot/session/branch
+// adapters merely borrow the shared harness.pg and are owned by the harness.
+// Every stack built here registers its event store so afterEach can close it
+// deterministically — otherwise the idle pool connections are force-terminated
+// (57P01 "terminating connection due to administrator command") when the
+// container stops in afterAll. Reaping is pop-and-clear, so each store is
+// closed exactly once (a double pg.Pool.end() would throw).
+const ownedEventStores: PostgresEventStore[] = [];
+
 function buildStack(): ReplayStack {
   const events = new PostgresEventStore(harness!.connectionString);
+  ownedEventStores.push(events);
   const cognitions = new PostgresCognitionRepository(harness!.pg);
   const snapshots = new PostgresSnapshotStore(harness!.pg);
   const sessions = new PostgresReplaySessionStore(harness!.pg);
@@ -81,6 +93,13 @@ async function seedFixture(seed: string) {
 }
 
 afterEach(async () => {
+  // Reap every owned event-store pool created during the test (see
+  // ownedEventStores). Close before reset; pop-and-clear guarantees exactly
+  // one close per store. Errors are intentionally NOT swallowed — a close()
+  // failure is a real lifecycle bug we want surfaced, not hidden.
+  while (ownedEventStores.length > 0) {
+    await ownedEventStores.pop()!.close();
+  }
   if (harness) await harness.reset();
 });
 
@@ -158,18 +177,15 @@ describe.skipIf(!harness)("ReplayEngine — stable identifiers", () => {
 
     // Two independent stacks (separate pools, separate engines) — same DB,
     // same event log, same cognition. The deterministic-ID derivation must
-    // yield the same session id.
+    // yield the same session id. Both stacks' event-store pools are owned by
+    // buildStack()'s registry and reaped in afterEach (see ownedEventStores),
+    // so no per-test close plumbing is needed here.
     const a = buildStack();
     const b = buildStack();
-    try {
-      const sessA = await a.engine.createSession(graph.id);
-      const sessB = await b.engine.createSession(graph.id);
-      expect(sessA.id).toBe(sessB.id);
-      expect(sessA.frames.length).toBe(sessB.frames.length);
-    } finally {
-      await a.events.close();
-      await b.events.close();
-    }
+    const sessA = await a.engine.createSession(graph.id);
+    const sessB = await b.engine.createSession(graph.id);
+    expect(sessA.id).toBe(sessB.id);
+    expect(sessA.frames.length).toBe(sessB.frames.length);
   });
 
   it("REPLAY_SESSION_CREATED carries a deterministic traceId", async () => {
@@ -186,6 +202,25 @@ describe.skipIf(!harness)("ReplayEngine — stable identifiers", () => {
     // sessionId is the same → traceId = deterministicId(["replay-trace", id]).
     expect(replayCreations[0].metadata.traceId).toBe(replayCreations[1].metadata.traceId);
     expect(sessA.id).toBe(sessB.id);
+  });
+
+  it("REPLAY_SESSION_CREATED is cognition-linked only — never enters the execution log", async () => {
+    // A replay session is a viewer artifact. It must NOT appear in
+    // listByExecution (which feeds divergence certification, parent-log
+    // watermark staleness, recovery cursor, and frame materialization) but MUST
+    // remain queryable by cognition for the operator timeline. Two createSession
+    // calls (deduped only by causationId) prove both rows are cognition-linked
+    // while neither pollutes the execution log.
+    const seed = suiteSeed("session-linkage");
+    const { graph, stack } = await seedFixture(seed);
+    await stack.engine.createSession(graph.id);
+    await stack.engine.createSession(graph.id);
+
+    const execEvents = await stack.events.listByExecution(graph.executionId);
+    expect(execEvents.some((e) => e.type === "REPLAY_SESSION_CREATED")).toBe(false);
+
+    const cogEvents = await stack.events.listByCognition(graph.id);
+    expect(cogEvents.filter((e) => e.type === "REPLAY_SESSION_CREATED").length).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -255,6 +290,39 @@ describe.skipIf(!harness)("ReplayEngine — branch consistency", () => {
       overrides: { seed: "beta" }
     });
     expect(p2.branchCognitionId).not.toBe(p1.branchCognitionId);
+  });
+
+  it("branch handoffs are remapped to branch-local node ids (no dangling fromNodeId)", async () => {
+    // Source graph carries a handoff EXECUTOR(seq 1) → VERIFIER. We branch at
+    // node seq 2, so the handoff's fromNode (seq 1 < 2) is retained in the
+    // branch. Branch nodes are re-keyed to branch-local deterministic ids, so
+    // the retained handoff's `fromNodeId` MUST be translated to the new id —
+    // otherwise it dangles at a source id that does not exist in the branch
+    // graph (silently dropped on hydration; breaks diff/lineage).
+    const seed = suiteSeed("branch-handoff");
+    const graph = makeCognitionGraph({ seed, withHandoffs: true });
+    await seedAgentAndExecution(harness!.pg, { agentId: graph.agentId, executionId: graph.executionId });
+    const stack = buildStack();
+    await stack.cognitions.save(graph);
+
+    const sourceNode = graph.nodes[2]; // VERIFIER, seq 2
+    const pointer = await stack.engine.branch({
+      sourceCognitionId: graph.id,
+      sourceNodeId: sourceNode.id,
+      overrides: { seed: "hand-A" }
+    });
+    const branch = await stack.cognitions.getById(pointer.branchCognitionId);
+    expect(branch).toBeDefined();
+    expect(branch!.handoffs.length).toBeGreaterThan(0);
+
+    const branchNodeIds = new Set(branch!.nodes.map((n) => n.id));
+    const sourceNodeIds = new Set(graph.nodes.map((n) => n.id));
+    for (const h of branch!.handoffs) {
+      // Resolves to a node that EXISTS in the branch graph...
+      expect(branchNodeIds.has(h.fromNodeId)).toBe(true);
+      // ...and no longer points at the (now-foreign) source node id.
+      expect(sourceNodeIds.has(h.fromNodeId)).toBe(false);
+    }
   });
 
   it("branched cognition's ancestor frames are bit-identical to source frames up to branch point", async () => {

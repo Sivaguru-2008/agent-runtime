@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, History, ShieldCheck, HelpCircle, Activity, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 import { formatDuration, formatTime } from "@/lib/utils";
 import type { LiveEvent } from "@/events/live-events";
 import type { LiveExecutionView } from "@/stores/execution-store";
@@ -175,11 +176,13 @@ export function LiveTimeline({ view }: Props) {
             </div>
           </div>
         ) : (
-          <div className="flex h-64 flex-col items-center justify-center text-sm text-zinc-500 border border-dashed border-zinc-800 rounded-lg bg-zinc-950/40">
-            <Sparkles className="h-5 w-5 text-zinc-600 mb-2 animate-pulse" />
-            <span>No active sandbox processes running.</span>
-            <span className="text-xs text-zinc-600 mt-1">Submit a goal from the agent explorer to boot the timeline.</span>
-          </div>
+          <ExplainedEmptyState
+            concept="timeline"
+            icon={<Sparkles className="h-5 w-5 animate-pulse" />}
+            title="No active sandbox processes running"
+            body="Submit a goal from the agent explorer to boot the timeline."
+            className="h-64"
+          />
         )}
       </CardContent>
     </Card>
@@ -212,54 +215,54 @@ function buildFrames(view?: LiveExecutionView): Frame[] {
 
     switch (event.type) {
       case "PROMPT_RECEIVED":
-        title = "Goal queued for active execution";
-        description = "Task configuration submitted to runtime. Compiling isolation policies.";
+        title = "Prompt received";
+        description = "Prompt submitted to the runtime; preparing the model call.";
         stateColor = "nominal";
-        explanation = "Establishes an isolated snapshot context. No state can bleed or leak outside this boundary.";
+        explanation = "The run starts from this prompt — every following frame is derived from it.";
         break;
       case "MODEL_START":
-        title = "Evaluating memory graph and planning execution";
-        description = `LLM thought loop triggered under model: ${event.model}.`;
+        title = "Model generation started";
+        description = `Calling model: ${event.model}.`;
         stateColor = "replay";
-        explanation = "Traces plan actions in order. Every thought is event-sourced to guarantee deterministic replay.";
+        explanation = "Token streaming begins; each token is captured for replay.";
         break;
       case "TOKEN_STREAM":
-        title = "LLM thought loop active";
-        description = `Streaming token sequence #${event.tokensSoFar} into active memory.`;
+        title = "Streaming tokens";
+        description = `Received ${event.tokensSoFar} token(s) so far.`;
         stateColor = "replay";
-        explanation = "Streaming output is incrementally captured. Keeps trace history intact if connection stalls.";
+        explanation = "Streamed output is captured incrementally so the trace survives a stalled connection.";
         break;
       case "MODEL_COMPLETE":
-        title = "LLM response parsed & state updated";
-        description = `Decision parsed successfully. Total usage: ${event.totalTokens} tokens.`;
+        title = "Model generation completed";
+        description = `Completed. Total usage: ${event.totalTokens} tokens.`;
         stateColor = "nominal";
-        explanation = "Committed planning outcomes to secure episodic database memory. The next step sequence is locked.";
+        explanation = "The model finished generating; final token usage is recorded.";
         break;
       case "MODEL_ERROR":
-        title = "LLM thought loop timeout/error";
-        description = `Simulating backoff & recovery. Code: ${event.code}.`;
-        stateColor = "warning";
-        explanation = "Safe retry triggered. The model provider context is refreshed without losing previously executed steps.";
+        title = "Model error";
+        description = `Generation failed${event.code ? ` (code: ${event.code})` : ""}${event.message ? `: ${event.message}` : ""}.`;
+        stateColor = "incident";
+        explanation = "The model provider returned an error for this run. The exact code/message is shown above.";
         break;
       case "EXECUTION_STATE":
         if (event.state === "FAILED") {
-          title = "Ledger write failed due to database timeout";
-          description = "Postgres connection timed out at 10.0.0.4. Halting transaction safely.";
+          title = "Execution failed";
+          description = "The run ended in a FAILED state. See the response/error for the originating reason.";
           stateColor = "incident";
-          explanation = "Hard-fencing locks abort stale worker writes, preventing ledger corruption and side-effects.";
+          explanation = "A terminal failure state was recorded for this execution.";
         } else if ((event.state as string) === "REPLAYING" || (event.state as string) === "RECOVERING") {
-          title = "Retrying failed ledger operation";
-          description = "Stripe API bypassed. Reprocessing from last verified checkpoint.";
+          title = `Execution ${String(event.state).toLowerCase()}`;
+          description = "The runtime is re-deriving state from a durable checkpoint.";
           stateColor = "recovery";
-          explanation = "Fenced execution matches transaction sequence signatures. Suppresses secondary payment charges.";
+          explanation = "Recovery resumes work without repeating already-committed steps.";
         } else if (event.state === "COMPLETED") {
-          title = "Workflow completed safely";
-          description = "Ledger successfully committed and Stripe protected. State locked.";
+          title = "Execution completed";
+          description = "The run completed successfully; state is sealed in the event log.";
           stateColor = "nominal";
-          explanation = "End of transaction cycle. Zero duplicate side-effects. 100% data consistency.";
+          explanation = "End of the run — the trace is marked complete.";
         } else {
-          title = `Status changed to: ${event.state}`;
-          description = "Monitoring workflow progression within nominal limits.";
+          title = `Status: ${event.state}`;
+          description = "Execution state transition.";
           stateColor = "nominal";
         }
         break;

@@ -49,6 +49,21 @@ export class AgentMetrics {
   readonly executionDuration: Histogram<string>;
   /** Cumulative completed executions by agent and final status. */
   readonly executionTotal: Counter<string>;
+  /**
+   * Per-tenant operation accounting for multi-tenant observability, billing,
+   * and quota dashboards. Deliberately a SEPARATE counter rather than a
+   * `tenant_id` label bolted onto the high-frequency histograms above: those
+   * are intentionally cardinality-bounded (agent_id/worker_id/provider from
+   * small operator-controlled sets), and a per-tenant label on a latency
+   * histogram would multiply series by the tenant count and blow up the TSDB.
+   *
+   * Cardinality here is bounded by (tenant count × small fixed `operation`
+   * enum: execution_started | execution_completed | execution_failed). Tenant
+   * count is the natural billing dimension, so this is the one place an
+   * unbounded-ish tenant label is acceptable — and it is additive, so no
+   * existing call site changes its label set.
+   */
+  readonly tenantOperationsTotal: Counter<string>;
 
   // ── Queue + Scheduling ───────────────────────────────────────────────────
   /** Executions waiting for a free worker lease. Spike → scheduler saturation. */
@@ -112,6 +127,20 @@ export class AgentMetrics {
   readonly modelProviderTotal: Counter<string>;
   /** Tokens consumed by type. Cost accounting and quota monitoring. */
   readonly modelTokensTotal: Counter<string>;
+  /**
+   * Estimated USD spend by provider and model, derived from token usage and
+   * the price table in providers/cost.ts. Monotonic — divide by a time window
+   * (rate()) for $/min, or sum for cumulative spend. Pairs with
+   * modelTokensTotal: tokens are the durable truth, cost is the recomputable
+   * dollar projection.
+   */
+  readonly modelCostUsdTotal: Counter<string>;
+  /**
+   * Response-cache outcomes by event (hit | miss | skip). hit/(hit+miss) is the
+   * cache hit ratio — every hit is a saved upstream call and zero billed
+   * tokens. `skip` counts non-deterministic requests that bypassed the cache.
+   */
+  readonly modelCacheTotal: Counter<string>;
   /**
    * D2 — failover transitions inside the FailoverModelProvider chain.
    * Labelled by `from` (provider that failed) and `to` (provider chosen
@@ -251,6 +280,13 @@ export class AgentMetrics {
       registers: [this.registry]
     });
 
+    this.tenantOperationsTotal = new Counter({
+      name: "agent_tenant_operations_total",
+      help: "Per-tenant operation accounting (multi-tenant billing/quota visibility)",
+      labelNames: ["tenant_id", "operation"],
+      registers: [this.registry]
+    });
+
     // ── Queue + Scheduling ─────────────────────────────────────────────────
     this.queueDepth = new Gauge({
       name: "agent_queue_depth",
@@ -357,6 +393,20 @@ export class AgentMetrics {
       name: "agent_model_tokens_total",
       help: "Total tokens processed by provider and type (prompt | completion)",
       labelNames: ["provider", "token_type"],
+      registers: [this.registry]
+    });
+
+    this.modelCostUsdTotal = new Counter({
+      name: "agent_model_cost_usd_total",
+      help: "Estimated USD spend by provider and model (derived from token usage)",
+      labelNames: ["provider", "model"],
+      registers: [this.registry]
+    });
+
+    this.modelCacheTotal = new Counter({
+      name: "agent_model_cache_total",
+      help: "LLM response cache outcomes (hit | miss | skip)",
+      labelNames: ["event"],
       registers: [this.registry]
     });
 

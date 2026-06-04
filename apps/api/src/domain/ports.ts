@@ -142,6 +142,12 @@ export interface ExecutionRepository {
   isOutboxEnabled?(): boolean;
   getById(id: string): Promise<Execution | undefined>;
   listByAgent(agentId: string): Promise<Execution[]>;
+  /**
+   * List every execution currently in `status`. Used by startup reconciliation
+   * to find executions left non-terminal by a previous process incarnation
+   * (e.g. a cognition run interrupted before its terminal reflection).
+   */
+  listByStatus(status: Execution["status"]): Promise<Execution[]>;
 }
 
 export interface MemoryRepository {

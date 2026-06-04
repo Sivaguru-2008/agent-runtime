@@ -1,34 +1,34 @@
 /**
- * Adapts the existing OllamaProvider streaming generator to the
- * ModelProvider domain port.
+ * Adapts GroqProvider's streaming generator to the ModelProvider domain port.
  *
- * Operational impact  : streams tokens in real time from a local Ollama
- *   daemon and fires `onToken` per chunk, enabling live SSE to the UI.
- * Replay implications : token sequence captured in cognition graph for exact
- *   replay even though Ollama output is non-deterministic across calls.
- * Failure modes       : OllamaUnavailableError is re-thrown as
- *   ProviderNetworkError so the shared retry policy handles it uniformly.
- * Observability       : final chunk carries Ollama's own eval counts which
- *   are used for token accounting; falls back to character-based estimate.
+ * Operational impact  : streams tokens in real time from Groq's OpenAI-compatible
+ *   API and fires `onToken` per chunk, enabling live SSE to the UI.
+ * Replay implications : token sequence captured in the cognition graph for exact
+ *   replay even though model output is non-deterministic across calls.
+ * Failure modes       : GroqUnavailableError is re-thrown as ProviderNetworkError
+ *   so the shared retry policy handles it uniformly; typed HTTP errors raised by
+ *   GroqProvider (auth/rate-limit/server/model-not-found) propagate unchanged.
+ * Observability       : the final chunk carries Groq's own usage counts which
+ *   are used for token accounting; falls back to a character-based estimate.
  */
 
 import type { ModelProvider } from "../domain/ports.js";
 import type { Agent, MemoryRecord } from "../domain/model.js";
-import { OllamaProvider, OllamaUnavailableError } from "./ollama.js";
+import { GroqProvider, GroqUnavailableError } from "./GroqProvider.js";
 import { ProviderNetworkError } from "./errors.js";
 import { withRetry, defaultRetryOptions, type RetryOptions, throwIfAborted, emitTokenIfLive } from "./retry.js";
 import { extractStructuredOutput } from "./structuredOutput.js";
 
-export interface OllamaModelProviderConfig {
+export interface GroqModelProviderConfig {
   retry?: Partial<RetryOptions>;
 }
 
-export class OllamaModelProvider implements ModelProvider {
+export class GroqModelProvider implements ModelProvider {
   private readonly retryOpts: RetryOptions;
 
   constructor(
-    private readonly ollama: OllamaProvider,
-    config: OllamaModelProviderConfig = {}
+    private readonly groq: GroqProvider,
+    config: GroqModelProviderConfig = {}
   ) {
     this.retryOpts = { ...defaultRetryOptions, ...config.retry };
   }
@@ -48,7 +48,7 @@ export class OllamaModelProvider implements ModelProvider {
     const output = extractStructuredOutput(result.text, {
       agentId: input.agent.id,
       executionId: input.execution.id,
-      model: this.ollama.modelName,
+      model: this.groq.modelName,
       result: result.text
     });
 
@@ -73,7 +73,7 @@ export class OllamaModelProvider implements ModelProvider {
     let outputTokens = 0;
 
     try {
-      for await (const chunk of this.ollama.runPrompt({ prompt, system, signal })) {
+      for await (const chunk of this.groq.runPrompt({ prompt, system, signal })) {
         if (chunk.token) {
           tokens.push(chunk.token);
           // Guarded dispatch closes the for-await microtask-boundary window
@@ -82,13 +82,13 @@ export class OllamaModelProvider implements ModelProvider {
           emitTokenIfLive(signal, onToken, chunk.token, 1.0);
         }
         if (chunk.done) {
-          inputTokens = chunk.promptEvalCount ?? 0;
-          outputTokens = chunk.evalCount ?? 0;
+          if (chunk.promptEvalCount !== undefined) inputTokens = chunk.promptEvalCount;
+          if (chunk.evalCount !== undefined) outputTokens = chunk.evalCount;
         }
       }
     } catch (err) {
-      if (err instanceof OllamaUnavailableError) {
-        throw new ProviderNetworkError("ollama", err);
+      if (err instanceof GroqUnavailableError) {
+        throw new ProviderNetworkError("groq", err);
       }
       throw err;
     }

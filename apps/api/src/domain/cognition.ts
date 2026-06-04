@@ -153,6 +153,14 @@ export interface CognitionGraph {
    * cannot silently default to the `system` tenant.
    */
   tenantId?: string;
+  /**
+   * Distributed trace correlation id, generated at cognition creation and
+   * propagated onto every event the orchestrator emits (event.metadata.traceId).
+   * Persisted here so the cognition/replay DTOs can return it directly without
+   * an event scan. Optional on the type for back-compat with replay fixtures and
+   * the Postgres repository (which resolves it from the event log when absent).
+   */
+  traceId?: string;
   phase: CognitionPhase;
   startedAt: string;
   completedAt?: string;

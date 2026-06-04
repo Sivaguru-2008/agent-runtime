@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cognitionApi, type BranchPointer, type ReplayDiff } from "@/lib/cognition-api";
 import { cn } from "@/lib/utils";
+import { ExplainedEmptyState } from "@/components/explain/empty-state";
 
 export interface BranchDivergenceProps {
   sourceCognitionId: string;
@@ -37,13 +38,7 @@ export function BranchDivergence({ sourceCognitionId, branches }: BranchDivergen
   }, [selected?.branchCognitionId]);
 
   if (branches.length === 0) {
-    return (
-      <Card className="p-4 bg-zinc-950/60 border-zinc-800">
-        <div className="text-sm text-zinc-400">
-          No branches yet. Use <span className="text-zinc-200">⑂ branch</span> on the scrubber to fork from any frame.
-        </div>
-      </Card>
-    );
+    return <ExplainedEmptyState concept="branch" />;
   }
 
   return (

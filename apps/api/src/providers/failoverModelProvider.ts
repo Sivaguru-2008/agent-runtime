@@ -6,7 +6,7 @@
  *
  * Contract preservation:
  *   - Implements the same ModelProvider interface as ClaudeProvider /
- *     OpenAIProvider / OllamaModelProvider. Callers (executionEngine,
+ *     OpenAIProvider / GroqModelProvider. Callers (executionEngine,
  *     stream pipeline) do not need to change.
  *   - `onToken` callbacks are forwarded unmodified to the underlying
  *     provider that ultimately produced the response. Streaming
@@ -79,6 +79,15 @@ export class FailoverModelProvider implements ModelProvider {
           "check MODEL_FAILOVER_CHAIN and that API keys are present for the chosen providers."
       );
     }
+  }
+
+  /**
+   * Ordered names of the configured links (primary → … → terminal fallback).
+   * Exposed for boot-time observability (logging the resolved chain) and tests;
+   * does not expose the underlying provider instances.
+   */
+  get linkNames(): readonly string[] {
+    return this.opts.links.map((l) => l.name);
   }
 
   async complete(

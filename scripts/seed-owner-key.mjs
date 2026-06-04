@@ -55,7 +55,17 @@ async function main() {
   }
   const { tenant, name, force } = parseArgs(process.argv.slice(2));
 
-  const pool = new pg.Pool({ connectionString: databaseUrl });
+  // Mirror the API's TLS handling (pgClient.resolvePoolSsl): managed Postgres
+  // refuses non-TLS connections, so DATABASE_SSL must be honoured here too or
+  // seeding the bootstrap owner key against a hosted DB fails with a TLS error.
+  const sslMode = (process.env.DATABASE_SSL ?? "").trim().toLowerCase();
+  const ssl =
+    sslMode === "require" || sslMode === "no-verify" || sslMode === "prefer"
+      ? { rejectUnauthorized: false }
+      : sslMode === "verify-full" || sslMode === "verify-ca" || sslMode === "strict" || sslMode === "true"
+        ? { rejectUnauthorized: true }
+        : false;
+  const pool = new pg.Pool({ connectionString: databaseUrl, ssl });
   try {
     // The tenant must exist (FK). 'system' is seeded by migration 0002.
     const { rows: tenantRows } = await pool.query("select id from tenants where id = $1", [tenant]);

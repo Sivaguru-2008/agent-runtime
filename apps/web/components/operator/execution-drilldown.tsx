@@ -24,10 +24,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { operatorApi, type ExecutionDiagnosis } from "../../services/operator-api";
+import { ExecutionMetadataPanel } from "../ui/execution-metadata-panel";
 import {
   AlertTriangle, CheckCircle, ChevronDown, ChevronRight,
   Clock, Hash, Layers, Search, Shield, Zap
 } from "lucide-react";
+import { StatusPill } from "../explain/status-pill";
+import { translateStatus } from "../../lib/explain/status";
 
 function formatMs(ms: number | undefined): string {
   if (ms === undefined || ms === null) return "—";
@@ -142,6 +145,25 @@ export function ExecutionDrilldown({ executionId }: Props) {
     ? timeline.filter((e) => e.traceId?.includes(traceIdFilter))
     : timeline;
 
+  // Trace id for this run — server-resolved, falling back to the first event
+  // carrying one. Surfaced (copyable) so an operator can pivot to the Trace
+  // explorer without scanning the log.
+  const primaryTraceId = diagnosis.traceId ?? timeline.find((e) => e.traceId)?.traceId;
+  // Build a concrete failure reason from the strongest available signal:
+  // DLQ last error → most-severe warning → bare status. Avoids a naked FAILED.
+  const topWarning =
+    warnings.find((w) => w.severity === "CRITICAL") ??
+    warnings.find((w) => w.severity === "HIGH") ??
+    warnings[0];
+  const failureReason =
+    execution?.status === "FAILED" || dlqEntry
+      ? {
+          message: dlqEntry?.lastError ?? topWarning?.description ?? topWarning?.title ?? "Execution failed",
+          code: dlqEntry ? "DEAD_LETTERED" : topWarning?.kind,
+          recoverable: !dlqEntry
+        }
+      : undefined;
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -152,17 +174,7 @@ export function ExecutionDrilldown({ executionId }: Props) {
         </div>
         <div className="flex items-center gap-2">
           {execution && (
-            <span
-              className={`text-xs px-2 py-0.5 rounded border font-medium ${
-                execution.status === "FAILED"
-                  ? "border-red-600 bg-red-950/30 text-red-300"
-                  : execution.status === "COMPLETED"
-                  ? "border-emerald-600 bg-emerald-950/30 text-emerald-300"
-                  : "border-blue-600 bg-blue-950/30 text-blue-300"
-              }`}
-            >
-              {execution.status}
-            </span>
+            <StatusPill status={execution.status} />
           )}
           {dlqEntry && (
             <span className="text-xs px-2 py-0.5 rounded border border-red-700 bg-red-950/40 text-red-400 font-medium">
@@ -171,6 +183,15 @@ export function ExecutionDrilldown({ executionId }: Props) {
           )}
         </div>
       </div>
+
+      {/* Execution identity + failure reason */}
+      <ExecutionMetadataPanel
+        executionId={executionId}
+        traceId={primaryTraceId}
+        runtimeId={diagnosis.runtimeId}
+        status={execution?.status}
+        failure={failureReason}
+      />
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -196,7 +217,7 @@ export function ExecutionDrilldown({ executionId }: Props) {
         {checkpoint && (
           <div className="bg-zinc-900 border border-zinc-800 rounded p-3 space-y-1">
             <div className="text-xs text-zinc-500 uppercase tracking-wide">Last Checkpoint</div>
-            <div className="text-sm font-medium text-white">{checkpoint.phase}</div>
+            <div className="text-sm font-medium text-white" title={checkpoint.phase}>{translateStatus(checkpoint.phase).label}</div>
             <div className="text-xs text-zinc-500">seq {checkpoint.sequence} · {formatTimestamp(checkpoint.createdAt)}</div>
           </div>
         )}
@@ -205,7 +226,7 @@ export function ExecutionDrilldown({ executionId }: Props) {
             <div className="text-xs text-zinc-500 uppercase tracking-wide">Active Lease Owner</div>
             <div className="text-sm font-medium text-white font-mono text-xs truncate" title={lease.workerId}>{lease.workerId}</div>
             <div className="text-xs text-zinc-500 flex items-center justify-between">
-              <span>attempt #{lease.attempt} · {lease.status}</span>
+              <span>attempt #{lease.attempt} · <span title={lease.status}>{translateStatus(lease.status).label}</span></span>
               {diagnosis.heartbeatFreshnessMs !== undefined && (
                 <span className="text-[10px] text-zinc-400">fresh: {formatMs(diagnosis.heartbeatFreshnessMs)}</span>
               )}

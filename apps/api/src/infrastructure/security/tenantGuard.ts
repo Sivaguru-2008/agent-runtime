@@ -111,14 +111,14 @@ export class TenantGuard {
   }
 
   async resolveCognitionTenant(cognitionId: string): Promise<string | null> {
-    // cognition_graphs.execution_id → executions.tenant_id
+    // cognition_graphs carries its own tenant_id (backfilled to 'system' for
+    // pre-RBAC rows). Resolve directly — the old join to executions was both a
+    // uuid=text type error and a format mismatch (executions.id is a dashed
+    // uuid; cognition_graphs.execution_id stores the dashless hex form).
     return this.lookup(
       "cognition",
       cognitionId,
-      `select e.tenant_id
-         from cognition_graphs cg
-         join executions e on e.id = cg.execution_id
-        where cg.id = $1`
+      "select tenant_id from cognition_graphs where id = $1"
     );
   }
 
@@ -126,23 +126,16 @@ export class TenantGuard {
     return this.lookup(
       "replay-session",
       sessionId,
-      `select e.tenant_id
-         from replay_sessions rs
-         join cognition_graphs cg on cg.id = rs.cognition_id
-         join executions e on e.id = cg.execution_id
-        where rs.id = $1`
+      "select tenant_id from replay_sessions where id = $1"
     );
   }
 
   async resolveBranchTenant(branchId: string): Promise<string | null> {
+    // replay_branches is keyed by branch_cognition_id (no `id` column).
     return this.lookup(
       "replay-branch",
       branchId,
-      `select e.tenant_id
-         from replay_branches rb
-         join cognition_graphs cg on cg.id = rb.source_cognition_id
-         join executions e on e.id = cg.execution_id
-        where rb.id = $1`
+      "select tenant_id from replay_branches where branch_cognition_id = $1"
     );
   }
 
@@ -150,10 +143,7 @@ export class TenantGuard {
     return this.lookup(
       "failure-signal",
       signalId,
-      `select e.tenant_id
-         from failure_signals fs
-         join executions e on e.id = fs.execution_id
-        where fs.id = $1`
+      "select tenant_id from failure_signals where id = $1"
     );
   }
 
@@ -161,10 +151,7 @@ export class TenantGuard {
     return this.lookup(
       "checkpoint",
       checkpointId,
-      `select e.tenant_id
-         from execution_checkpoints ec
-         join executions e on e.id = ec.execution_id
-        where ec.id = $1`
+      "select tenant_id from execution_checkpoints where id = $1"
     );
   }
 
@@ -248,6 +235,16 @@ export class TenantGuard {
       // in dev) fall through to permit-when-not-found to avoid breaking the
       // existing in-memory test path.
       if (err instanceof ResourceTenantNotResolvableError) throw err;
+      // A malformed identifier — e.g. a non-uuid string handed to a uuid-keyed
+      // column — makes Postgres raise 22P02 (invalid_text_representation). A
+      // value that can't even be a valid key can never own a row, so treat it
+      // exactly like "no such resource" instead of leaking an opaque 500 to the
+      // operator (the Root Cause panel rendered this as
+      // "INTERNAL_ERROR (500): Unexpected runtime error").
+      if ((err as { code?: string } | null)?.code === "22P02") {
+        if (this.opts.permitWhenNotFound) return null;
+        throw new ResourceTenantNotResolvableError(resourceType, resourceId);
+      }
       if (this.opts.permitWhenNotFound) return null;
       throw err;
     }

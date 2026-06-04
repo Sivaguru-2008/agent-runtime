@@ -237,7 +237,7 @@ describe.skipIf(!harness)("PostgresLeaseStore — reclaimExpired (FOR UPDATE SKI
 
     const reclaimed = await leases!.reclaimByWorker("dead", now);
     expect(reclaimed.map((l) => l.executionId).sort()).toEqual(["e1", "e2"]);
-    expect(reclaimed.every((l) => l.status === "INVALIDATED")).toBe(true);
+    expect(reclaimed.every((l) => l.status === "EXPIRED")).toBe(true);
     // Other worker's lease is untouched.
     expect((await leases!.getByExecution("e3"))!.status).toBe("LEASED");
   });
