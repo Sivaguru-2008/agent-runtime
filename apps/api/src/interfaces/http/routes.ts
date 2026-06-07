@@ -318,6 +318,34 @@ export async function registerRoutes(app: FastifyInstance, container: RuntimeCon
       });
     }
 
+    // Fastify's own request-level errors (empty or malformed JSON body,
+    // unsupported media type, payload too large, body-schema validation) carry a
+    // 4xx `statusCode` and a stable `code`. They fire in the body-parsing /
+    // validation phase BEFORE any route handler runs, so no per-route guard can
+    // catch them. These are CLIENT errors, not server faults — yet without this
+    // they fell through to the opaque INTERNAL_ERROR (500) below. The concrete
+    // incident: a bodyless `POST … application/json` (the dashboard's
+    // full-analysis call) raised FST_ERR_CTP_EMPTY_JSON_BODY and the Root Cause
+    // panel rendered it as "INTERNAL_ERROR (500): Unexpected runtime error".
+    // Honour Fastify's classification and return the real 4xx with a clear,
+    // non-opaque message. (5xx statusCodes still fall through to the catch-all so
+    // genuine server faults keep their correlation id + server-side stack.)
+    const clientStatus = (error as { statusCode?: number }).statusCode;
+    if (typeof clientStatus === "number" && clientStatus >= 400 && clientStatus < 500) {
+      const code = (error as { code?: string }).code ?? "BAD_REQUEST";
+      app.log.warn(
+        {
+          requestId: request.id,
+          url: request.url,
+          method: request.method,
+          code,
+          statusCode: clientStatus
+        },
+        "[CLIENT_ERROR] request rejected in parsing/validation phase"
+      );
+      return reply.status(clientStatus).send({ error: code, message: error.message });
+    }
+
     // Catch-all. Stamp a correlation id so a frontend 500 can be grepped back
     // to the originating server log line. The stack is logged server-side
     // (never returned to clients) so we keep the existing information-disclosure

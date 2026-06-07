@@ -11,7 +11,11 @@ import {
 } from "../../runtime/confidence/confidencePolicyEngine.js";
 import { requirePermission } from "../../infrastructure/security/rbac.js";
 import { requireTenant, canAccessAllTenants } from "../../infrastructure/security/tenantContext.js";
-import type { TenantGuard } from "../../infrastructure/security/tenantGuard.js";
+import {
+  type TenantGuard,
+  CrossTenantAccessError,
+  ResourceTenantNotResolvableError
+} from "../../infrastructure/security/tenantGuard.js";
 import { runtimeIdFor, resolveTraceId } from "./observabilityMetadata.js";
 
 const checkpointSchema = z.object({
@@ -674,7 +678,6 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
     handler: async (request) => {
     const ctx = requireTenant(request);
     const { executionId } = request.params as { executionId: string };
-    await guard.assertOwnsExecution(ctx, executionId);
 
     // Every stage of the full-analysis pipeline (report, timeline, causality,
     // branch analysis) is a SEPARATE failure domain. A throw in any one — a
@@ -700,6 +703,40 @@ export async function registerSprintNextRoutes(app: FastifyInstance, container: 
       );
       degradations.push({ stage, error: err.message });
     };
+
+    // ── Stage: ownership check ────────────────────────────────────────────────
+    // Resolving the execution's owning tenant runs BEFORE the analysis stages and
+    // talks to Postgres directly (developer-role dashboards do NOT bypass it —
+    // only owner/admin do). A genuine cross-tenant access — or an unresolvable
+    // resource — must still deny: those map to 403 and are NEVER downgraded. But
+    // an UNEXPECTED infrastructure error here (a tenant_id column missing from an
+    // out-of-sync migration, a dropped pool connection, a malformed id) would
+    // otherwise escape every guard below and surface as the opaque
+    // "INTERNAL_ERROR (500): Unexpected runtime error" this endpoint exists to
+    // prevent. Fail CLOSED without leaking: no tenant data has been resolved yet,
+    // so record the degradation and return a well-formed, tenant-data-free
+    // envelope — the Root Cause panel then renders a clear degraded state instead
+    // of a scary 500.
+    try {
+      await guard.assertOwnsExecution(ctx, executionId);
+    } catch (err) {
+      if (err instanceof CrossTenantAccessError || err instanceof ResourceTenantNotResolvableError) {
+        throw err; // security boundary — mapped to 403, never softened to 200
+      }
+      recordStageError("ownership-check", err);
+      return {
+        executionId,
+        cognitionId: undefined,
+        report: container.failureEngine.buildReport(executionId, undefined, []),
+        timeline: null,
+        topCausality: null,
+        branchCount: 0,
+        suggestBranch: false,
+        branchSuggestion: null,
+        degraded: true,
+        errors: degradations
+      };
+    }
 
     // ── Stage: cognition graph lookup ─────────────────────────────────────────
     let graph: Awaited<ReturnType<typeof container.cognitions.getByExecution>> = undefined;

@@ -49,11 +49,10 @@ export function BackendOfflineBanner() {
     return (
       <div
         role="status"
-        className="fixed inset-x-0 top-0 z-[1000] flex items-center justify-center gap-2 bg-emerald-600/95 px-4 py-1.5 text-center text-sm font-medium text-white shadow-lg"
+        className="fixed bottom-4 right-4 z-[1000] flex items-center gap-2 rounded-lg bg-emerald-600/95 px-3 py-2 text-sm font-medium text-white shadow-lg ring-1 ring-emerald-300/30"
       >
         <span className="inline-block h-2 w-2 rounded-full bg-white" />
         Backend reconnected on {health.host}:{health.port}
-        {health.runtimeId ? ` · ${health.runtimeId}` : ""}
       </div>
     );
   }
@@ -65,7 +64,7 @@ export function BackendOfflineBanner() {
     <div
       role="alert"
       aria-live="assertive"
-      className="fixed inset-x-0 top-0 z-[1000] border-b border-red-400/40 bg-red-700/95 px-4 py-2 text-white shadow-xl backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-[1000] border-t border-red-400/40 bg-red-700/95 px-4 py-2 text-white shadow-xl backdrop-blur"
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">

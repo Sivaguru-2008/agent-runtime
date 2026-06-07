@@ -26,6 +26,13 @@ const STRIPPED_RESPONSE_HEADERS = new Set([
   "keep-alive",
 ]);
 
+// "Null body" HTTP statuses: the Web Response/NextResponse constructor throws
+// "Invalid response status code" if handed a non-null body for any of these, and
+// response.blob() is always a non-null Blob (even when empty). Forward them with
+// a null body so a backend 204/205/304 (e.g. POST /auth/visit → 204) proxies
+// cleanly instead of crashing the route into an opaque 500.
+const NULL_BODY_STATUSES = new Set([204, 205, 304]);
+
 function sanitizeHeaders(src: Headers): Headers {
   const out = new Headers();
   src.forEach((value, key) => {
@@ -321,7 +328,8 @@ async function handleProxy(req: NextRequest, pathParts: string[]) {
     );
   }
 
-  return new NextResponse(responseData, {
+  const responseBody = NULL_BODY_STATUSES.has(response.status) ? null : responseData;
+  return new NextResponse(responseBody, {
     status: response.status,
     headers: forwardHeaders,
   });

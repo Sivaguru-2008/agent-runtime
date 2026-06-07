@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import { registerSprintNextRoutes } from "../src/interfaces/http/sprintNextRoutes.js";
-import { createPermissiveTenantGuard } from "../src/infrastructure/security/tenantGuard.js";
+import {
+  createPermissiveTenantGuard,
+  CrossTenantAccessError,
+  ResourceTenantNotResolvableError,
+  type TenantGuard
+} from "../src/infrastructure/security/tenantGuard.js";
 import { FailureIntelligenceEngine } from "../src/runtime/failure/failureIntelligenceEngine.js";
 import type { RuntimeContainer } from "../src/application/runtimeContainer.js";
 import type { FailureSignal, FailureSeverity } from "../src/domain/failure.js";
@@ -108,6 +113,8 @@ interface HarnessOptions {
   materializeFrames?: () => Promise<ReplayFrame[]>;
   listByCognition?: () => Promise<FailureSignal[]>;
   listForCognition?: () => Promise<unknown[]>;
+  /** Override the tenant guard to exercise the ownership-check path. */
+  tenantGuard?: Pick<TenantGuard, "assertOwnsExecution">;
 }
 
 // buildReport only reads its arguments — the constructor deps are never touched
@@ -128,7 +135,7 @@ function buildContainer(opts: HarnessOptions): RuntimeContainer {
   const branches = opts.branches ?? [];
 
   const container = {
-    tenantGuard: createPermissiveTenantGuard(),
+    tenantGuard: opts.tenantGuard ?? createPermissiveTenantGuard(),
     clock: { now: () => new Date(NOW_ISO) },
     cognitions: {
       getByExecution: opts.getByExecution ?? (async () => graph),
@@ -164,12 +171,16 @@ async function buildApp(container: RuntimeContainer): Promise<FastifyInstance> {
   app.addHook("onRequest", async (request) => {
     request.tenant = ADMIN_TENANT;
   });
-  // Mirror the production global catch-all (routes.ts setErrorHandler): ANY
-  // unmapped throw that escapes a handler becomes a 500. If the route ever lets
-  // a stage throw escape again, these tests will see a 500 and fail.
-  app.setErrorHandler((_error, _request, reply) =>
-    reply.status(500).send({ error: "INTERNAL_ERROR", message: "Unexpected runtime error" })
-  );
+  // Mirror the production global catch-all (routes.ts setErrorHandler): the
+  // tenant-isolation breaches map to 403 (never softened), and ANY other unmapped
+  // throw that escapes a handler becomes a 500. If the route ever lets a stage
+  // throw escape again, these tests will see a 500 and fail.
+  app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof CrossTenantAccessError || error instanceof ResourceTenantNotResolvableError) {
+      return reply.status(403).send({ error: "FORBIDDEN", message: "Cross-tenant access denied" });
+    }
+    return reply.status(500).send({ error: "INTERNAL_ERROR", message: "Unexpected runtime error" });
+  });
   await registerSprintNextRoutes(app, container);
   await app.ready();
   return app;
@@ -343,6 +354,68 @@ describe("full-analysis route — returns 200, never 500", () => {
     expect(body.timeline).toBeNull();
     expect(body.topCausality).toBeNull();
     expect(body.report.healthScore).toBe(100);
+  });
+
+  // ── Ownership check: the one stage that runs BEFORE the per-stage guards ─────
+
+  it("ownership resolution hits an unexpected infra error: 200, degraded, no 500", async () => {
+    // A developer-role dashboard does not bypass the guard, so assertOwnsExecution
+    // runs a real DB query. A missing tenant_id column (out-of-sync migration) or
+    // a dropped connection used to escape every guard → opaque INTERNAL_ERROR 500.
+    const res = await inject(
+      "GET",
+      buildContainer({
+        graph: makeGraph([makeNode({ sequence: 0, role: "PLANNER" })]),
+        signals: [makeSignal()],
+        frames: [makeFrame(0)],
+        tenantGuard: {
+          assertOwnsExecution: async () => {
+            const err = new Error('column "tenant_id" does not exist') as Error & { code: string };
+            err.code = "42703";
+            throw err;
+          }
+        }
+      })
+    );
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.degraded).toBe(true);
+    expect(body.errors.map((e: { stage: string }) => e.stage)).toContain("ownership-check");
+    // Fail closed: no tenant data resolved, well-formed empty envelope.
+    expect(body.report.healthScore).toBe(100);
+    expect(body.report.totalSignals).toBe(0);
+    expect(body.timeline).toBeNull();
+    expect(body.topCausality).toBeNull();
+  });
+
+  it("cross-tenant access is NEVER softened to 200 — propagates as 403", async () => {
+    const res = await inject(
+      "GET",
+      buildContainer({
+        graph: makeGraph([makeNode({ sequence: 0, role: "PLANNER" })]),
+        tenantGuard: {
+          assertOwnsExecution: async () => {
+            throw new CrossTenantAccessError("execution");
+          }
+        }
+      })
+    );
+    expect(res.statusCode).toBe(403);
+    expect(res.json().error).toBe("FORBIDDEN");
+  });
+
+  it("unresolvable tenant is NEVER softened to 200 — propagates as 403", async () => {
+    const res = await inject(
+      "GET",
+      buildContainer({
+        tenantGuard: {
+          assertOwnsExecution: async () => {
+            throw new ResourceTenantNotResolvableError("execution", "exec-1");
+          }
+        }
+      })
+    );
+    expect(res.statusCode).toBe(403);
   });
 
   it("branch analysis throws: 200, degraded, branchCount falls back to 0", async () => {

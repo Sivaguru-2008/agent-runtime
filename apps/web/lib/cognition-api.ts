@@ -30,17 +30,64 @@ export class CognitionApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Fetch with bounded retry on transient upstream failures (network error or
+ * 5xx). Opt-in via request()'s `retryOn5xx`, and used ONLY for read-only calls:
+ * during a local backend restart the durable API briefly 5xx's (or the proxy
+ * returns 503), which would otherwise surface as a scary INTERNAL_ERROR card for
+ * a sub-second blip. Mutating calls never opt in, so a retry cannot double-submit
+ * a side effect.
+ */
+async function fetchWithRetry(url: string, init: RequestInit, retries: number): Promise<Response> {
+  let attempt = 0;
+  while (true) {
+    try {
+      const res = await fetch(url, init);
+      if (res.status >= 500 && attempt < retries) {
+        attempt++;
+        await delay(300 * attempt);
+        continue;
+      }
+      return res;
+    } catch (err) {
+      if (attempt < retries) {
+        attempt++;
+        await delay(300 * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
+async function request<T>(
+  path: string,
+  init?: RequestInit,
+  opts?: { retryOn5xx?: number }
+): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
-      ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...init?.headers
+    // Only advertise a JSON body when one is actually sent. A bodyless POST
+    // (e.g. full-analysis, which POSTs with no payload) carrying
+    // `Content-Type: application/json` makes the backend's JSON body parser
+    // reject the empty body — Fastify raises FST_ERR_CTP_EMPTY_JSON_BODY in the
+    // parsing phase, before the route handler runs, which surfaced to the Root
+    // Cause panel as the opaque `INTERNAL_ERROR (500): Unexpected runtime error`.
+    const hasBody = init?.body !== undefined && init?.body !== null;
+    response = await fetchWithRetry(
+      `${API_BASE}${path}`,
+      {
+        ...init,
+        headers: {
+          ...(hasBody ? { "Content-Type": "application/json" } : {}),
+          ...init?.headers
+        },
+        cache: "no-store"
       },
-      cache: "no-store"
-    });
+      opts?.retryOn5xx ?? 0
+    );
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.warn("[COGNITION_API_FAILURE]", {
@@ -723,7 +770,13 @@ export const cognitionApi = {
 
   // Phase 6: Full analysis — analyze + timeline + causality in one call
   runFullAnalysis: async (executionId: string) => {
-    const res = await request<FullAnalysisResult>(`/executions/${executionId}/full-analysis`, { method: "POST" });
+    // Read-only call (the route is read-only): retry transient 5xx/503 from a
+    // backend restart so a sub-second blip doesn't render a hard INTERNAL_ERROR.
+    const res = await request<FullAnalysisResult>(
+      `/executions/${executionId}/full-analysis`,
+      { method: "POST" },
+      { retryOn5xx: 2 }
+    );
     return {
       executionId: res?.executionId ?? "",
       cognitionId: res?.cognitionId,
