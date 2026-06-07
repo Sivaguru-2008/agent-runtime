@@ -11,6 +11,15 @@
  * operator needs to know whether to restart the API.
  *
  * Cadence: 5s when healthy, 2s when offline so recovery is detected quickly.
+ *
+ * Flap resistance: a single missed or slow probe must NOT flip the banner to
+ * "offline". In local dev the API runs under `tsx watch`, which frees port 4000
+ * for ~1-3s on every source edit, and a GC pause under load can blow past the
+ * 4s probe timeout — both are transient and self-heal on the very next probe.
+ * The hook therefore debounces: it declares "offline" only after
+ * OFFLINE_AFTER_FAILURES consecutive failed probes, and snaps straight back to
+ * "online" on the first success. This keeps a genuine outage visible within a
+ * couple of seconds while eliminating the false-positive flapping.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -39,6 +48,10 @@ const API_PORT = Number(process.env.NEXT_PUBLIC_API_PORT ?? 4000);
 const POLL_OK_MS = 5_000;
 const POLL_DOWN_MS = 2_000;
 const PROBE_TIMEOUT_MS = 4_000;
+// Consecutive failed probes required before the banner declares "offline".
+// 2 × POLL_DOWN_MS ≈ a ~2s grace that rides through a tsx-watch reload window
+// or a GC pause, without hiding a real outage for long.
+const OFFLINE_AFTER_FAILURES = 2;
 
 export function useBackendHealth(): BackendHealth {
   const [health, setHealth] = useState<BackendHealth>({
@@ -55,8 +68,26 @@ export function useBackendHealth(): BackendHealth {
   const lastSuccessRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
+  // Consecutive-failure counter for the offline debounce (see OFFLINE_AFTER_FAILURES).
+  const failuresRef = useRef(0);
 
   const probe = useCallback(async () => {
+    // Debounced failure: count consecutive misses and only flip to "offline"
+    // once OFFLINE_AFTER_FAILURES is reached. Until then keep the prior status
+    // (so a single blip never shows the banner) while still recording the reason.
+    const registerFailure = (reason: string) => {
+      failuresRef.current += 1;
+      if (cancelledRef.current) return;
+      const goOffline = failuresRef.current >= OFFLINE_AFTER_FAILURES;
+      setHealth((prev) => ({
+        ...prev,
+        status: goOffline ? "offline" : prev.status,
+        lastSuccessAt: lastSuccessRef.current,
+        lastFailureReason: reason,
+        ...(goOffline ? { latencyMs: null } : {})
+      }));
+    };
+
     const started = performance.now();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
@@ -80,6 +111,7 @@ export function useBackendHealth(): BackendHealth {
       if (healthy) {
         const now = new Date().toISOString();
         lastSuccessRef.current = now;
+        failuresRef.current = 0; // recovery: reset the debounce immediately
         if (!cancelledRef.current) {
           setHealth((prev) => ({
             ...prev,
@@ -95,15 +127,7 @@ export function useBackendHealth(): BackendHealth {
 
       const reason =
         body?.message ?? body?.error ?? `HTTP ${res.status} ${res.statusText || ""}`.trim();
-      if (!cancelledRef.current) {
-        setHealth((prev) => ({
-          ...prev,
-          status: "offline",
-          lastSuccessAt: lastSuccessRef.current,
-          lastFailureReason: reason,
-          latencyMs: null
-        }));
-      }
+      registerFailure(reason);
       return false;
     } catch (err) {
       const reason =
@@ -112,15 +136,7 @@ export function useBackendHealth(): BackendHealth {
           : err instanceof Error
             ? err.message
             : String(err);
-      if (!cancelledRef.current) {
-        setHealth((prev) => ({
-          ...prev,
-          status: "offline",
-          lastSuccessAt: lastSuccessRef.current,
-          lastFailureReason: reason,
-          latencyMs: null
-        }));
-      }
+      registerFailure(reason);
       return false;
     } finally {
       clearTimeout(timeout);
