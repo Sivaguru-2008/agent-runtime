@@ -45,7 +45,7 @@
 | P0.3 | Publish SDK (EN-2) | 🟡 | npm package | ONLY blocker: run `npm login`, then `npm publish` in packages/sdk |
 | P0.4 | Invite-gated signup | ⬜ | working signup | — |
 | P0.5 | Stranger smoke test | ⬜ | time-to-first-replay | — |
-| P1.1 | Interview pipeline | ⬜ | 40 targets | tracker ready: `docs/ops/05` |
+| P1.1 | Interview pipeline | 🟡 | 40 targets | kit READY: `docs/gtm/outreach-kit.md` (40 named companies + 3 messages + cadence) — needs LinkedIn sourcing + send |
 | P1.2 | 20 interviews | ⬜ | 20 notes | folder+template ready: `docs/gtm/interviews/` |
 | P1.3 | Demo video | ⬜ | 2:30 video | script: blueprint §8 (your screen/voice) |
 | P1.4 | ICP doc | ⬜ | icp.md | shell ready: `docs/gtm/icp.md` |
