@@ -87,11 +87,17 @@ export function assertSideEffectSuppressed(input: {
 
 /**
  * Fence and ownership must remain active during replay — never bypassed.
+ *
+ * When `currentAttempt` (the authoritative lease attempt from the durable
+ * lease store) is supplied, the fence must be at least that fresh — a token
+ * minted under a reclaimed lease carries a lower attempt and is rejected
+ * before it can authorize any replay action (L2).
  */
 export function assertReplayFenceContext(input: {
   execution: Execution;
   fence?: FencingToken;
   phase: string;
+  currentAttempt?: number;
 }): void {
   if (!input.fence) return;
   validateFencingToken({
@@ -107,6 +113,20 @@ export function assertReplayFenceContext(input: {
     "Replay fence violation: fence executionId must match replay child execution",
     { executionId: input.execution.id, fenceExecutionId: input.fence.executionId }
   );
+  if (input.currentAttempt !== undefined) {
+    assertRuntimeInvariant(
+      "L2",
+      input.fence.attempt >= input.currentAttempt,
+      `Replay fence violation: stale fence attempt ${input.fence.attempt} is below the authoritative lease attempt ${input.currentAttempt} during '${input.phase}'`,
+      {
+        executionId: input.execution.id,
+        workerId: input.fence.workerId,
+        fenceAttempt: input.fence.attempt,
+        currentAttempt: input.currentAttempt,
+        phase: input.phase
+      }
+    );
+  }
 }
 
 /**

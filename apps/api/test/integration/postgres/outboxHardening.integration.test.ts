@@ -311,9 +311,13 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
           item.ev.metadata.idempotencyKey
         ]
       );
+      // visible_after is stamped JS-side rather than left to the column's
+      // DB-side now() default: the dispatcher claims `visible_after <= $1`
+      // with a JS-captured timestamp, so any DB-vs-JS clock skew could leave
+      // a default-stamped row unclaimable for the first tick (flake).
       await harness!.pg.query(
-        `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key)
-         values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8)`,
+        `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, visible_after)
+         values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9)`,
         [
           item.id,
           item.ev.id,
@@ -322,7 +326,8 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
           JSON.stringify(item.ev.payload),
           JSON.stringify(item.ev.metadata),
           item.seq,
-          item.ev.metadata.idempotencyKey
+          item.ev.metadata.idempotencyKey,
+          new Date(Date.now() - 60_000).toISOString()
         ]
       );
     }
@@ -386,10 +391,13 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
       ]
     );
 
-    // Insert directly into outbox with retry_count = 5 (at MAX_RETRIES limit)
+    // Insert directly into outbox with retry_count = 5 (at MAX_RETRIES limit).
+    // visible_after is stamped JS-side (not the DB-side now() default) so the
+    // dispatcher's JS-timestamped `visible_after <= $1` claim cannot miss the
+    // row under DB-vs-JS clock skew (flake).
     await harness!.pg.query(
-      `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, retry_count)
-       values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, 1, $7, 5)`,
+      `insert into event_outbox (id, event_id, execution_id, event_type, payload, metadata, sequence, idempotency_key, retry_count, visible_after)
+       values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, 1, $7, 5, $8)`,
       [
         uuidFromHex(deterministicId([seed, "outbox-poison"])),
         ev.id,
@@ -397,7 +405,8 @@ describe.skipIf(!harness)("Postgres Outbox + Atomic Terminal Commit Hardening", 
         ev.type,
         JSON.stringify(ev.payload),
         JSON.stringify(ev.metadata),
-        ev.metadata.idempotencyKey
+        ev.metadata.idempotencyKey,
+        new Date(Date.now() - 60_000).toISOString()
       ]
     );
 

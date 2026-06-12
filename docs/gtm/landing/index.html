@@ -3,135 +3,407 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Reliability Runtime for Production AI Agents</title>
-  <meta name="description" content="Event-sourced execution, SQL-level fencing, and deterministic replay so AI agents never double-charge Stripe — even when a worker crashes mid-refund." />
+  <meta name="color-scheme" content="dark" />
+  <title>Runloop — Logs are testimony. Replay is evidence.</title>
+  <meta name="description" content="Runloop records every AI-agent action as a cryptographically fenced, deterministically replayable trace. When someone asks what your agent did and why, you show proof — not logs." />
 
-  <!-- Open Graph / social preview -->
-  <meta property="og:title" content="We make it safe for AI agents to touch money in production" />
-  <meta property="og:description" content="Your agent issues a $150 refund, the next step fails, the retry fires — and the customer is refunded twice. We make that structurally impossible." />
+  <!-- Open Graph -->
+  <meta property="og:title" content="Logs are testimony. Replay is evidence." />
+  <meta property="og:description" content="The proof layer for AI agents. Fenced execution, deterministic replay, forensic reconstruction — an audit artifact, not a story stitched from logs." />
   <meta property="og:type" content="website" />
-  <!-- <meta property="og:image" content="REPLACE_OG_IMAGE_URL" /> -->
 
   <!--
-    P1.5 landing page. Self-contained — deploy by dragging this folder to Netlify/Vercel/GitHub Pages.
-    BEFORE PUBLISHING, replace every REPLACE_* token below:
-      REPLACE_DEMO_VIDEO_EMBED  → YouTube embed URL (e.g. https://www.youtube.com/embed/XXXX)
-      REPLACE_DEPLOY_URL        → your hosted API base URL (P0.2)
-      REPLACE_SIGNUP_URL        → <deploy-url>/signup (P0.4)
-      REPLACE_DOCS_URL          → docs link (fencing + replay guarantees)
-      REPLACE_PKG               → published npm package name (P0.3)
-      REPLACE_UTM               → ?utm_source=landing&utm_medium=cta (so the funnel attributes it)
-    The CTA links carry UTM so the funnel analytics you shipped attributes signups to this page.
+    Self-contained landing page. Deploy by dragging this folder to any static host.
+    BEFORE PUBLISHING, replace:
+      REPLACE_FOUNDER_EMAIL → the founder's real email (both demo CTAs)
+    The /signup links assume the page is served from the same origin as the app.
   -->
+
+  <script>document.documentElement.classList.add('js')</script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background:#070708; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    :root { color-scheme: dark; }
+    body {
+      background: #09090b;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .mono { font-family: ui-monospace, "Cascadia Code", "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace; }
+    ::selection { background: #065f46; color: #ecfdf5; }
+
+    /* Entrance fade — one per section, motion-gated, JS-gated (no-JS users see everything) */
+    @media (prefers-reduced-motion: no-preference) {
+      html.js .fade { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+      html.js .fade.in { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Typing cursor on the currently-typing span of the hero trace */
+    #trace .cur::after { content: '▍'; color: #34d399; animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
   </style>
 </head>
-<body class="text-zinc-100 antialiased">
+<body class="bg-zinc-950 text-zinc-200 antialiased">
 
-  <!-- Nav -->
-  <header class="flex items-center justify-between max-w-6xl mx-auto px-6 py-5">
-    <div class="font-semibold tracking-tight">Agent Reliability Runtime</div>
-    <nav class="flex items-center gap-3 text-sm">
-      <a href="REPLACE_DOCS_URL" class="text-zinc-400 hover:text-zinc-100 transition">Docs</a>
-      <a href="#how" class="text-zinc-400 hover:text-zinc-100 transition hidden sm:inline">How it works</a>
-      <a href="REPLACE_SIGNUP_URLREPLACE_UTM"
-         class="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 font-medium transition">Get an API key</a>
+  <!-- ===== Header ===== -->
+  <header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+    <div class="flex items-baseline gap-3">
+      <span class="mono text-base font-semibold tracking-tight text-zinc-100">runloop</span>
+      <span class="hidden text-sm text-zinc-500 sm:inline">the proof layer for AI agents</span>
+    </div>
+    <nav aria-label="Header">
+      <a href="https://github.com/Sivaguru-2008/agent-runtime"
+         class="mono text-sm text-zinc-400 transition hover:text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400"
+         aria-label="Runloop source code on GitHub">GitHub ↗</a>
     </nav>
   </header>
 
-  <!-- Hero -->
-  <section class="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
-    <p class="text-blue-400 text-sm font-medium mb-4">For teams running AI agents that touch money or infrastructure</p>
-    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
-      Your AI agents will fail silently.<br />
-      <span class="text-blue-400">We make it safe to fail in production.</span>
-    </h1>
-    <p class="mt-6 text-lg text-zinc-400 max-w-2xl mx-auto">
-      The transactional, event-sourced runtime that prevents data corruption, duplicate
-      side-effects, and runaway LLM loops when external infrastructure fails — so a Stripe
-      refund is <em>never</em> issued twice.
-    </p>
-    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-      <a href="REPLACE_SIGNUP_URLREPLACE_UTM"
-         class="w-full sm:w-auto rounded-lg bg-blue-600 hover:bg-blue-500 px-6 py-3 font-semibold transition">
-        Deploy your first agent
-      </a>
-      <a href="#demo"
-         class="w-full sm:w-auto rounded-lg border border-zinc-700 hover:border-blue-500 px-6 py-3 font-semibold text-zinc-300 hover:text-blue-300 transition">
-        Watch the 2:30 demo
-      </a>
-    </div>
-    <div class="mt-6 inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2 mono text-sm text-zinc-300">
-      <span class="text-zinc-500">$</span> npm install REPLACE_PKG
-    </div>
-  </section>
+  <main>
 
-  <!-- The failure narrative -->
-  <section class="max-w-3xl mx-auto px-6 py-10">
-    <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6">
-      <h2 class="text-lg font-semibold text-rose-400">The silent failure mode</h2>
-      <p class="mt-3 text-zinc-300 leading-relaxed">
-        An agent issues a <span class="text-zinc-100 font-medium">$150 Stripe refund</span>. The next step —
-        logging it to your database — times out. Your retry logic fires and re-runs the agent's plan.
-        The agent calls Stripe again.
-      </p>
-      <p class="mt-3 text-zinc-400 leading-relaxed">
-        You just refunded the customer twice. LLM agents plan steps <em>dynamically</em>, so a naive retry
-        re-runs the whole plan — every external call repeats. Money moves twice. State corrupts.
-      </p>
-    </div>
-  </section>
-
-  <!-- Demo video -->
-  <section id="demo" class="max-w-4xl mx-auto px-6 py-12">
-    <h2 class="text-2xl font-bold text-center">See a worker crash mid-refund — and recover safely</h2>
-    <p class="mt-2 text-center text-zinc-400">Kill the worker mid-execution. A standby hydrates from the last checkpoint, skips the already-done refund (fenced 🔒), and finishes the ledger write. Charged once.</p>
-    <div class="mt-6 aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
-      <!-- Replace src with your unlisted YouTube embed (P1.3). Fallback: link the mp4 directly. -->
-      <iframe class="w-full h-full" src="REPLACE_DEMO_VIDEO_EMBED" title="Demo: Stripe is never double-charged"
-              frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-  </section>
-
-  <!-- How it works -->
-  <section id="how" class="max-w-5xl mx-auto px-6 py-12">
-    <h2 class="text-2xl font-bold text-center">How it works</h2>
-    <div class="mt-8 grid gap-5 sm:grid-cols-3">
-      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <div class="text-emerald-400 font-semibold">1 · Event sourcing</div>
-        <p class="mt-2 text-sm text-zinc-400 leading-relaxed">Every step is an append-only event, not a mutable row that races under recovery. State is rebuilt by replaying the log.</p>
+    <!-- ===== 1 · Hero ===== -->
+    <section class="fade mx-auto max-w-6xl px-6 pb-20 pt-12 sm:pt-20">
+      <div class="max-w-[40rem]">
+        <p class="mono text-xs uppercase tracking-[0.25em] text-emerald-400">For agents that touch money</p>
+        <h1 class="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-zinc-100 sm:text-5xl">
+          Logs are testimony.<br />Replay is evidence.
+        </h1>
+        <p class="mt-6 max-w-[42ch] text-lg leading-relaxed text-zinc-400">
+          We record every agent action inside a cryptographic fence, then replay it deterministically.
+          What you hand the auditor is an artifact, not a story.
+        </p>
+        <div class="mt-9 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+          <a href="mailto:REPLACE_FOUNDER_EMAIL?subject=Runloop%20compliance%20demo"
+             aria-label="Book a 30-minute compliance demo by email"
+             class="rounded-md bg-emerald-500 px-6 py-3 font-semibold text-zinc-950 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400">
+            Book a 30-minute compliance demo
+          </a>
+          <a href="/signup"
+             aria-label="Sign up and run Runloop on your own agent"
+             class="mono text-sm text-zinc-400 underline decoration-zinc-700 underline-offset-4 transition hover:text-emerald-400 hover:decoration-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400">
+            Run it on your own agent →
+          </a>
+        </div>
       </div>
-      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <div class="text-blue-400 font-semibold">2 · SQL-level fencing</div>
-        <p class="mt-2 text-sm text-zinc-400 leading-relaxed">Each side effect reserves a deterministic idempotency key in the same transaction that validates the worker's fence token. A stale worker is rejected at the database.</p>
-      </div>
-      <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <div class="text-indigo-400 font-semibold">3 · Deterministic replay</div>
-        <p class="mt-2 text-sm text-zinc-400 leading-relaxed">Rewind any failed run from any point. A chain-hash divergence detector makes replays verifiable — you can prove no external call was duplicated.</p>
-      </div>
-    </div>
-    <p class="mt-6 text-center text-sm text-zinc-500">One Node process + Postgres. No Redis, no Kubernetes to try it.</p>
-  </section>
 
-  <!-- CTA / design partner -->
-  <section class="max-w-3xl mx-auto px-6 py-16 text-center">
-    <h2 class="text-2xl font-bold">Run agents that touch money or infra?</h2>
-    <p class="mt-3 text-zinc-400">I'm pre-customers and looking for 5 design partners. Free early access + hands-on help getting it running on one real failure case, in exchange for 30 minutes of honest feedback.</p>
-    <div class="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-      <a href="REPLACE_SIGNUP_URLREPLACE_UTM"
-         class="w-full sm:w-auto rounded-lg bg-blue-600 hover:bg-blue-500 px-6 py-3 font-semibold transition">Deploy your first agent</a>
-      <a href="mailto:REPLACE_FOUNDER_EMAIL?subject=Design%20partner%20—%20agent%20reliability"
-         class="w-full sm:w-auto rounded-lg border border-zinc-700 hover:border-blue-500 px-6 py-3 font-semibold text-zinc-300 hover:text-blue-300 transition">Talk to me</a>
-    </div>
-  </section>
+      <!-- Hero artifact: a verified replay, not a screenshot -->
+      <figure class="mt-16">
+        <div class="overflow-hidden rounded-lg border border-zinc-800 bg-black/60 shadow-2xl shadow-emerald-950/20">
+          <div class="flex items-center gap-2 border-b border-zinc-800/80 px-4 py-2.5">
+            <span class="h-2.5 w-2.5 rounded-full bg-zinc-700" aria-hidden="true"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-zinc-700" aria-hidden="true"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-zinc-700" aria-hidden="true"></span>
+            <span class="mono ml-3 text-xs text-zinc-500">replay verification — exec_9f2e41c7</span>
+          </div>
+          <div class="overflow-x-auto px-5 py-5">
+<pre id="trace" aria-hidden="true" class="mono text-[11px] leading-[1.9] sm:text-[13px]"><span class="text-zinc-500">$ runloop replay exec_9f2e41c7 --verify</span>
 
-  <footer class="max-w-6xl mx-auto px-6 py-10 border-t border-zinc-900 text-sm text-zinc-600 flex flex-col sm:flex-row justify-between gap-2">
-    <span>Agent Reliability Runtime</span>
-    <span><a href="REPLACE_DOCS_URL" class="hover:text-zinc-400">Docs</a> · <a href="REPLACE_DEPLOY_URL" class="hover:text-zinc-400">Hosted API</a></span>
+<span class="text-zinc-600">[001]</span> <span class="text-zinc-300">input     dispute.review    case=cs_77f3a2    amount=$184.00</span>
+<span class="text-zinc-600">[002]</span> <span class="text-zinc-300">decision  refund.approve    rule=DISPUTE_AUTO_v12   config=cfg_0bb41e</span>
+<span class="text-zinc-600">[003]</span> <span class="text-zinc-300">effect    stripe.refund     idem=fnc_8a31…e9d2      fired=exactly-once</span>
+<span class="text-zinc-600">[004]</span> <span class="text-zinc-300">fence     seal=</span><span class="text-emerald-400/90">a3f81c…b7042e</span><span class="text-zinc-300">  events=14   no-insert · no-delete · no-reorder</span>
+
+<span class="font-semibold text-emerald-400">REPLAY: IDENTICAL ✓</span><span class="text-zinc-500">   14/14 events matched · decision path byte-identical</span></pre>
+          </div>
+        </div>
+        <figcaption class="sr-only">
+          Terminal output of a verified Runloop replay: the recorded input, the decision and the rule
+          that produced it, the side effect that fired exactly once, the cryptographic fence seal,
+          and a verdict line reading REPLAY: IDENTICAL — 14 of 14 events matched, decision path byte-identical.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ===== 2 · The incident strip ===== -->
+    <section class="fade border-y border-zinc-900 bg-black" aria-labelledby="incident-h">
+      <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">01 · the incident</p>
+        <h2 id="incident-h" class="sr-only">The incident</h2>
+        <div class="mt-6 max-w-[62ch] space-y-5 text-xl leading-relaxed text-zinc-300 sm:text-2xl">
+          <p><span class="mono text-emerald-400">9:04 a.m.</span> Your payment agent refunded the same customer twice. The retry looked safe — the first call had timed out.</p>
+          <p>Remediation took twenty minutes. Then the second question: prove what it did, and why — and whether it's about to happen 500 more times.</p>
+          <p class="text-zinc-500">You opened the logs. The logs were written to debug crashes, not to reconstruct decisions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3 · Scenario cards ===== -->
+    <section class="fade mx-auto max-w-6xl px-6 py-20 sm:py-24" aria-labelledby="scenarios-h">
+      <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">02 · the questions</p>
+      <h2 id="scenarios-h" class="mt-4 max-w-[30ch] text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        Three questions an auditor will ask. Three answers a trace gives.
+      </h2>
+
+      <div class="mt-12 grid grid-cols-12 gap-5">
+        <article class="col-span-12 rounded-lg border border-zinc-800 bg-zinc-900/40 p-6 md:col-span-4">
+          <p class="mono text-xs text-zinc-600">case/01</p>
+          <h3 class="mt-2 text-lg font-semibold text-zinc-100">The Double Charge</h3>
+          <p class="mt-4 text-sm italic leading-relaxed text-zinc-400">
+            “Show me the second refund — and why your system fired it.”
+          </p>
+          <p class="mt-4 border-t border-zinc-800 pt-4 text-sm leading-relaxed text-zinc-300">
+            It didn't fire, and the trace proves it. Inside the fence, side effects execute exactly once.
+            The retry is recorded arriving and being absorbed against the original effect's idempotency key.
+            One refund, one effect, provably.
+          </p>
+        </article>
+
+        <article class="col-span-12 rounded-lg border border-zinc-800 bg-zinc-900/40 p-6 md:col-span-4">
+          <p class="mono text-xs text-zinc-600">case/02</p>
+          <h3 class="mt-2 text-lg font-semibold text-zinc-100">The Contested Decision</h3>
+          <p class="mt-4 text-sm italic leading-relaxed text-zinc-400">
+            “Your agent declined this dispute. Which rule fired, under which configuration?”
+          </p>
+          <p class="mt-4 border-t border-zinc-800 pt-4 text-sm leading-relaxed text-zinc-300">
+            The trace reconstructs the decision: exact input, the config version active at that moment,
+            the rule that fired, the effect it caused. Replay it and the same decision falls out,
+            identically. The match is the evidence.
+          </p>
+        </article>
+
+        <article class="col-span-12 rounded-lg border border-zinc-800 bg-zinc-900/40 p-6 md:col-span-4">
+          <p class="mono text-xs text-zinc-600">case/03</p>
+          <h3 class="mt-2 text-lg font-semibold text-zinc-100">One-off, or 500 More Times</h3>
+          <p class="mt-4 text-sm italic leading-relaxed text-zinc-400">
+            “Is this an isolated decision, or is it in the queue right now?”
+          </p>
+          <p class="mt-4 border-t border-zinc-800 pt-4 text-sm leading-relaxed text-zinc-300">
+            We scan recorded traces for the same input-and-rule pattern. You answer with a count:
+            how many executions match, which are still pending, what they would do.
+            A query over evidence, not a guess.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== 4 · How it works ===== -->
+    <section class="fade border-t border-zinc-900 bg-zinc-950" aria-labelledby="how-h">
+      <div class="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+        <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">03 · the mechanism</p>
+        <h2 id="how-h" class="mt-4 text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+          Why this is proof, not telemetry
+        </h2>
+
+        <ol class="mt-12 grid grid-cols-12 gap-x-5 gap-y-10">
+          <li class="col-span-12 md:col-span-4">
+            <p class="mono text-3xl text-emerald-500/80">01</p>
+            <h3 class="mt-3 text-lg font-semibold text-zinc-100">Fenced execution</h3>
+            <p class="mt-3 max-w-[40ch] text-sm leading-relaxed text-zinc-400">
+              Every agent action is appended to a cryptographically fenced event sequence.
+              Events can't be inserted, deleted, or reordered after the fact.
+              Side effects execute exactly once, even across retries and crashes.
+            </p>
+          </li>
+          <li class="col-span-12 md:col-span-4">
+            <p class="mono text-3xl text-emerald-500/80">02</p>
+            <h3 class="mt-3 text-lg font-semibold text-zinc-100">Deterministic replay</h3>
+            <p class="mt-3 max-w-[40ch] text-sm leading-relaxed text-zinc-400">
+              Re-run any execution and get identical decisions. A replay that provably matches
+              its original is not a re-telling. It's a demonstration.
+            </p>
+          </li>
+          <li class="col-span-12 md:col-span-4">
+            <p class="mono text-3xl text-emerald-500/80">03</p>
+            <h3 class="mt-3 text-lg font-semibold text-zinc-100">Forensic reconstruction</h3>
+            <p class="mt-3 max-w-[40ch] text-sm leading-relaxed text-zinc-400">
+              For any decision: the input, the active config, the rule that fired, the side effect
+              it caused. Then pattern detection — one-off, or about to happen 500 more times.
+            </p>
+          </li>
+        </ol>
+
+        <!-- Visual metaphor: sticky note vs evidence bag -->
+        <div class="mt-16 grid grid-cols-12 items-stretch gap-5">
+          <figure class="col-span-12 flex flex-col items-center rounded-lg border border-zinc-800 bg-zinc-900/30 p-8 sm:col-span-6">
+            <svg viewBox="0 0 160 140" class="h-32 w-auto" role="img" aria-label="A sticky note with handwritten lines and a curled corner, representing a log line">
+              <g transform="rotate(-4 80 70)">
+                <path d="M35 25 h90 v88 l-14 14 h-76 z" fill="#18181b" stroke="#52525b" stroke-width="1.5"/>
+                <path d="M111 127 l14 -14 h-14 z" fill="#27272a" stroke="#52525b" stroke-width="1.5"/>
+                <path d="M47 48 q20 -5 38 0 t28 -2" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M47 66 q24 4 40 -1 t24 2" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M47 84 q18 -4 30 1 t20 -3" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M47 102 q14 3 22 0" fill="none" stroke="#71717a" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
+            </svg>
+            <figcaption class="mt-5 text-center">
+              <p class="mono text-xs uppercase tracking-widest text-zinc-500">a log line</p>
+              <p class="mt-2 max-w-[36ch] text-sm leading-relaxed text-zinc-400">
+                A sticky note. Anyone can write one. Anyone can lose one. Anyone can replace one.
+              </p>
+            </figcaption>
+          </figure>
+
+          <figure class="col-span-12 flex flex-col items-center rounded-lg border border-emerald-500/30 bg-emerald-500/[0.04] p-8 sm:col-span-6">
+            <svg viewBox="0 0 160 140" class="h-32 w-auto" role="img" aria-label="A sealed tamper-evident evidence bag with a hash printed on the seal, representing a fenced trace">
+              <path d="M40 38 h80 v84 a6 6 0 0 1 -6 6 h-68 a6 6 0 0 1 -6 -6 z" fill="#09090b" stroke="#3f3f46" stroke-width="1.5"/>
+              <rect x="36" y="22" width="88" height="20" rx="3" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+              <text x="80" y="36" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="9" fill="#34d399">SEAL a3f81c…b7042e</text>
+              <path d="M52 66 h56 M52 80 h56 M52 94 h38" stroke="#3f3f46" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="104" cy="104" r="13" fill="#09090b" stroke="#10b981" stroke-width="1.5"/>
+              <path d="M98 104 l4.5 4.5 l8 -9" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <figcaption class="mt-5 text-center">
+              <p class="mono text-xs uppercase tracking-widest text-emerald-400">a fenced trace</p>
+              <p class="mt-2 max-w-[36ch] text-sm leading-relaxed text-zinc-400">
+                An evidence bag. Sealed at write time. Tamper-evident forever. Opening it leaves a mark.
+              </p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5 · Comparison ===== -->
+    <section class="fade mx-auto max-w-6xl px-6 py-20 sm:py-24" aria-labelledby="compare-h">
+      <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">04 · the category</p>
+      <h2 id="compare-h" class="mt-4 max-w-[36ch] text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        Observability shows what happened. Durable execution re-runs work. Proof does more.
+      </h2>
+
+      <div class="mt-12 grid grid-cols-12 gap-5">
+        <div class="col-span-12 rounded-lg border border-zinc-800 p-6 md:col-span-4">
+          <h3 class="mono text-sm uppercase tracking-widest text-zinc-400">Observability</h3>
+          <p class="mt-4 text-base font-medium text-zinc-200">Shows what happened.</p>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-400">
+            Logs, metrics, traces — written by the same system that's under question, stored in
+            mutable indexes. Built for debugging. It answers “where did it break?”
+          </p>
+        </div>
+
+        <div class="col-span-12 rounded-lg border border-zinc-800 p-6 md:col-span-4">
+          <h3 class="mono text-sm uppercase tracking-widest text-zinc-400">Durable execution</h3>
+          <p class="mt-4 text-base font-medium text-zinc-200">Re-runs work.</p>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-400">
+            Retries workflows until they complete. Built for uptime. It answers “did it finish?” —
+            and says nothing about whether the record can be trusted later.
+          </p>
+        </div>
+
+        <div class="col-span-12 rounded-lg border border-emerald-500/50 bg-emerald-500/[0.05] p-6 md:col-span-4">
+          <h3 class="mono flex items-center justify-between text-sm uppercase tracking-widest text-emerald-400">
+            Proof <span class="rounded border border-emerald-500/40 px-1.5 py-0.5 text-[10px] text-emerald-400">runloop</span>
+          </h3>
+          <p class="mt-4 text-base font-medium text-zinc-100">Shows what happened — and that it couldn't have been forged.</p>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-300">
+            Fenced events, exactly-once effects, deterministic replay. Built for the audit.
+            It answers “can you prove it?”
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 6 · Regulatory urgency ===== -->
+    <section class="fade border-y border-zinc-900 bg-black" aria-labelledby="reg-h">
+      <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <div class="flex items-start gap-5">
+          <svg viewBox="0 0 24 24" class="mt-1 h-8 w-8 shrink-0" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Scales of justice icon">
+            <path d="M12 3v18M5 21h14M12 6l-6 2 6-2 6 2M6 8l-3 6a4 4 0 0 0 6 0zM18 8l-3 6a4 4 0 0 0 6 0z"/>
+          </svg>
+          <div>
+            <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">05 · the deadline</p>
+            <h2 id="reg-h" class="mt-3 text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+              Traceability is no longer a preference
+            </h2>
+            <div class="mt-6 max-w-[68ch] space-y-4 text-base leading-relaxed text-zinc-400">
+              <p>
+                <span class="text-zinc-200">EU AI Act, Article 12 —</span> high-risk AI systems must
+                automatically record events over their lifetime, sufficient to trace the system's functioning.
+              </p>
+              <p>
+                <span class="text-zinc-200">US banking supervision —</span> model-risk guidance is applied
+                to AI systems in production, including the ability to reconstruct and validate individual decisions.
+              </p>
+              <p class="text-zinc-300">
+                The question is coming. Only the answer is optional.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 7 · Founder ===== -->
+    <section class="fade mx-auto max-w-6xl px-6 py-20 sm:py-24" aria-labelledby="founder-h">
+      <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">06 · who built this</p>
+      <h2 id="founder-h" class="sr-only">From the founder</h2>
+      <blockquote class="mt-6 max-w-[58ch] border-l-2 border-emerald-500/60 pl-6">
+        <p class="text-lg leading-relaxed text-zinc-300">
+          I spent years in payment risk, watching teams reconstruct incidents from half-remembered
+          configs and logs that almost agreed with each other. Remediation was never the hard part.
+          The proof was. I built Runloop so the next 9 a.m. incident ends with an artifact, not an apology.
+        </p>
+        <footer class="mono mt-5 text-sm text-zinc-500">— Sivaguru, founder</footer>
+      </blockquote>
+    </section>
+
+    <!-- ===== 8 · Final CTA ===== -->
+    <section class="fade border-t border-zinc-900" aria-labelledby="cta-h">
+      <div class="mx-auto max-w-6xl px-6 py-20 text-center sm:py-28">
+        <p class="mono text-xs uppercase tracking-[0.25em] text-zinc-600">07 · the next step</p>
+        <h2 id="cta-h" class="mx-auto mt-4 max-w-[24ch] text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
+          Bring us one incident you couldn't fully explain.
+        </h2>
+        <p class="mx-auto mt-5 max-w-[48ch] text-base leading-relaxed text-zinc-400">
+          We'll walk through what its trace would have looked like — input, config, rule, effect,
+          and the replay that settles it.
+        </p>
+        <div class="mt-9 flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <a href="mailto:REPLACE_FOUNDER_EMAIL?subject=Runloop%20compliance%20demo"
+             aria-label="Book a 30-minute compliance demo by email"
+             class="rounded-md bg-emerald-500 px-6 py-3 font-semibold text-zinc-950 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400">
+            Book a 30-minute compliance demo
+          </a>
+          <a href="/signup"
+             aria-label="Sign up and run Runloop on your own agent"
+             class="mono text-sm text-zinc-400 underline decoration-zinc-700 underline-offset-4 transition hover:text-emerald-400 hover:decoration-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400">
+            Run it on your own agent →
+          </a>
+        </div>
+        <p class="mono mt-7 text-xs text-zinc-600">No deployment needed for the first conversation.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== 9 · Footer ===== -->
+  <footer class="border-t border-zinc-900">
+    <div class="mono mx-auto flex max-w-6xl flex-col gap-3 px-6 py-10 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
+      <span>runloop · © 2026</span>
+      <span class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <a href="https://github.com/Sivaguru-2008/agent-runtime" class="transition hover:text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400" aria-label="Runloop source code on GitHub">GitHub</a>
+        <a href="https://www.npmjs.com/package/@agent-platform/sdk" class="transition hover:text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400" aria-label="Runloop SDK on npm">npm: @agent-platform/sdk</a>
+        <span>MIT license</span>
+      </span>
+    </div>
   </footer>
+
+  <script>
+  (() => {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pre = document.getElementById('trace');
+    if (!reduced && pre) {
+      const spans = [...pre.querySelectorAll('span')];
+      const texts = spans.map(s => s.textContent);
+      spans.forEach(s => s.textContent = '');
+      let si = 0, ci = 0;
+      (function tick() {
+        spans[si].classList.add('cur');
+        ci += 2;
+        spans[si].textContent = texts[si].slice(0, ci);
+        if (ci >= texts[si].length) { spans[si].classList.remove('cur'); si += 1; ci = 0; }
+        if (si < spans.length) setTimeout(tick, 14);
+      })();
+    }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade').forEach(el => io.observe(el));
+  })();
+  </script>
 
 </body>
 </html>

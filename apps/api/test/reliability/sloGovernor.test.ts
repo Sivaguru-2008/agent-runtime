@@ -100,15 +100,19 @@ describe("DeployFreezeController", () => {
     expect(d.reason).toContain("planned-maintenance");
   });
 
-  it("operator override auto-releases past TTL", async () => {
+  it("operator override auto-releases past TTL", () => {
     const slo = new SloGovernor();
     for (const def of defaultSloLadder()) slo.register(def);
     const freeze = new DeployFreezeController(slo);
+    // decision() takes an explicit nowMs, so the TTL boundary is tested with
+    // controlled timestamps rather than a real sleep (which flaked under
+    // full-suite load when the 10ms TTL elapsed before the first decision).
+    const beforeFreeze = Date.now();
     freeze.forceFreeze("brief", 10);
-    const before = freeze.decision();
+    const afterFreeze = Date.now();
+    const before = freeze.decision(beforeFreeze);
     expect(before.frozen).toBe(true);
-    await new Promise((r) => setTimeout(r, 30));
-    const after = freeze.decision();
+    const after = freeze.decision(afterFreeze + 11);
     expect(after.frozen).toBe(false);
   });
 

@@ -64,15 +64,31 @@ export class CentralizedReplayEnforcer {
 
   /**
    * Enforces fence and ownership validation. Never bypassed.
+   *
+   * `currentAttempt` is the authoritative lease attempt read from the durable
+   * lease store. When the caller holds it (recovery, replay re-drive, any path
+   * where the fence may have outlived its lease), a fence below it is stale
+   * and rejected (L2). Without it only shape and ownership-identity are
+   * checked — freshness requires an authority to compare against.
    */
-  static validateFence(execution: Execution, fence?: FencingToken, phase: string = "replay"): void {
+  static validateFence(
+    execution: Execution,
+    fence?: FencingToken,
+    phase: string = "replay",
+    currentAttempt?: number
+  ): void {
     assertRuntimeInvariant(
       "RP1",
       fence !== undefined && fence !== null,
       `Replay fence violation: replay execution '${execution.id}' cannot bypass ownership or fence validation during '${phase}'`,
       { executionId: execution.id }
     );
-    assertReplayFenceContext({ execution, fence, phase });
+    assertReplayFenceContext({
+      execution,
+      fence,
+      phase,
+      ...(currentAttempt !== undefined ? { currentAttempt } : {})
+    });
   }
 
   /**

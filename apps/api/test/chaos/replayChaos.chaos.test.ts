@@ -171,16 +171,22 @@ describe.skipIf(!harness)("Consolidated Replay Chaos & Hardening Tests - Testcon
 
     expect(secondLease!.attempt).toBeGreaterThan(firstLease!.attempt);
 
+    // The durable lease store is the authority on the current attempt — the
+    // enforcer compares each presented fence against it (L2 freshness).
+    const authoritativeLease = await leases.getByExecution(childExecutionId);
+    const currentAttempt = Number(authoritativeLease!.attempt);
+    expect(currentAttempt).toBe(Number(secondLease!.attempt));
+
     let deadFailed = false;
     try {
-      CentralizedReplayEnforcer.validateFence(childExec!, staleFence, "replay.begin");
+      CentralizedReplayEnforcer.validateFence(childExec!, staleFence, "replay.begin", currentAttempt);
     } catch (e) {
       deadFailed = true;
     }
 
     let freshSucceeded = false;
     try {
-      CentralizedReplayEnforcer.validateFence(childExec!, freshFence, "replay.begin");
+      CentralizedReplayEnforcer.validateFence(childExec!, freshFence, "replay.begin", currentAttempt);
       freshSucceeded = true;
     } catch (e) {}
 
@@ -357,19 +363,22 @@ describe("Consolidated Replay Chaos & Hardening Tests - High-Fidelity In-Memory 
     const staleFence: FencingToken = { executionId: childExecutionId, workerId: "stale-worker", attempt: 1 };
     const freshFence: FencingToken = { executionId: childExecutionId, workerId: "fresh-worker", attempt: 2 };
 
-    // Stale worker rejected because enforcer / monotonicity requires fresh fence validation
+    // The fresh worker's lease attempt (2) is the authoritative current attempt.
+    const currentAttempt = freshFence.attempt;
+
+    // Stale worker rejected: its fence attempt is below the authoritative lease attempt (L2)
     let deadFailed = false;
     try {
-      CentralizedReplayEnforcer.validateFence(childExec, staleFence, "replay.begin");
+      CentralizedReplayEnforcer.validateFence(childExec, staleFence, "replay.begin", currentAttempt);
       validateFencingMonotonicity(staleFence.attempt, childExec.status, "stale-worker");
     } catch (e) {
       deadFailed = true;
     }
 
-    // Attempt 2 accepted if we assert fence details
+    // Attempt 2 accepted: matches the authoritative lease attempt
     let freshSucceeded = false;
     try {
-      CentralizedReplayEnforcer.validateFence(childExec, freshFence, "replay.begin");
+      CentralizedReplayEnforcer.validateFence(childExec, freshFence, "replay.begin", currentAttempt);
       validateFencingMonotonicity(freshFence.attempt, childExec.status, "fresh-worker");
       freshSucceeded = true;
     } catch (e) {}

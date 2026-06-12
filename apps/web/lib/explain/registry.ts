@@ -126,14 +126,14 @@ export const CONCEPTS: Record<string, Concept> = {
   "executions-failed": {
     id: "executions-failed",
     label: "Failures",
-    short: "Tasks that ended in an error.",
-    what: "The number of executions that stopped without completing successfully.",
-    why: "The single most important reliability signal.",
-    whyCare: "Failures mean a user request didn't get answered. A rising count is your first alarm.",
-    example: "Of 100 runs, 3 hit an error and stopped → Failures = 3.",
-    dataSource: "Executions with status FAILED.",
-    healthy: "0, or a tiny fraction of total runs.",
-    warning: "A steady trickle of failures.",
+    short: "Tasks that have ever ended in an error (all-time count).",
+    what: "The all-time number of executions that stopped without completing successfully. It is a history counter, not the current failure rate — it includes old runs whose workers were since marked LOST and tasks that were later quarantined or recovered.",
+    why: "The single most important reliability signal — read as a trend, not a snapshot.",
+    whyCare: "Failures mean a user request didn't get answered. The count never resets, so a large but flat number is history; a number that is climbing right now is your first alarm.",
+    example: "Of 100 runs ever submitted, 3 hit an error and stopped → Failures = 3, even if all 3 happened weeks ago.",
+    dataSource: "All-time count of executions with status FAILED. Never resets, so it can read high next to healthy current-state metrics.",
+    healthy: "Flat over time, or a tiny fraction of total runs.",
+    warning: "A steady trickle of new failures.",
     critical: "Failures climbing faster than completions.",
     howToFix: [
       "Open the Failure tab and read the root-cause summary for the most recent failure.",
@@ -143,8 +143,8 @@ export const CONCEPTS: Record<string, Concept> = {
     interpret: (v) =>
       band(v, [
         { max: 0, level: "healthy", reading: "No failures recorded.", impact: "Every task that ran, succeeded." },
-        { max: 5, level: "warning", reading: `${v} failure(s) recorded.`, impact: "Some requests did not complete.", recommendation: "Open the Failure tab to read the root cause." },
-        { max: 1000000, level: "critical", reading: `${v} failures recorded.`, impact: "A meaningful share of work is failing.", recommendation: "Check Failure Clusters for a common root cause to fix once." },
+        { max: 5, level: "warning", reading: `${v} failure(s) recorded all-time.`, impact: "Some requests did not complete.", recommendation: "Open the Failure tab to read the root cause." },
+        { max: 1000000, level: "critical", reading: `${v} failures recorded all-time.`, impact: "If this is climbing, a meaningful share of work is failing; if it is flat, this is history, not a live problem.", recommendation: "Check Failure Clusters for a common root cause to fix once." },
       ]),
   },
   "tokens-total": {

@@ -7,6 +7,12 @@
       "runtimeArgs": ["run", "preview", "-w", "apps/web"],
       "port": 3100,
       "autoPort": true
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", "docs/gtm/landing", "-p", "3105", "-c-1"],
+      "port": 3105
     }
   ]
 }

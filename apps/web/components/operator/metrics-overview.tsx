@@ -147,6 +147,7 @@ export function MetricsOverview() {
             label="Failed"
             concept="executions-failed"
             value={executions.failed}
+            sub="all-time"
             icon={<AlertTriangle className="h-3 w-3" />}
             warn={executions.failed > 0}
             alert={executions.failed > 10}
