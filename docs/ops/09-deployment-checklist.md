@@ -27,6 +27,7 @@
 - [ ] `EVENT_BUS_DRIVER=memory` (SSE via Postgres LISTEN/NOTIFY — **no Redis**, leave `REDIS_URL` unset).
 - [ ] `RUNTIME_MODE=single` (V1 single-process topology).
 - [ ] `MODEL_PROVIDER=failover`, `MODEL_FAILOVER_CHAIN=groq,deterministic` (a Groq outage degrades, never 500s — see memory `project_provider-outage-resilience`).
+- [ ] If enabling human sign-in (`USER_AUTH_ENABLED=true`): set `FOUNDER_EMAILS` to your email, or `/admin/founder/*` (founder dashboard + user directory) is 403 for everyone — boot logging `founderCount: 0` is the tell.
 
 ---
 
