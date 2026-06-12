@@ -6,6 +6,9 @@
   "main": "dist/server.js",
   "scripts": {
     "predev": "node ../../scripts/free-api.mjs",
+    "demo": "tsx demo/double-charge.ts",
+    "demo:loop": "tsx demo/runaway-loop.ts",
+    "demo:all": "npm run demo && npm run demo:loop",
     "dev": "tsx watch src/server.ts",
     "dev:worker": "tsx watch src/workerProcess.ts",
     "kill:api": "node ../../scripts/free-api.mjs",
