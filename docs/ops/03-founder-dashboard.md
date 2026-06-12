@@ -8,12 +8,12 @@
 
 ## ▶ RIGHT NOW
 
-- **Today's date:** `2026-06-04`
+- **Today's date:** `2026-06-12`
 - **Current phase:** `Phase 0 — Ship What Exists`
-- **Current sprint:** `Sprint 1 (Week 1)`
+- **Current sprint:** `Sprint 2 (Week 2 — W1 produced no market contact; see report)`
 - **Sprint headline outcome:** `A stranger can sign up + npm install + reach a replay in ≤10 min`
-- **Today's primary artifact (the ONE thing):** `____________________`
-- **Days into the 90:** `0 / 90`
+- **Today's primary artifact (the ONE thing):** `code pushed to main + /compliance page live + SDK ready to publish (blocked: npm login)`
+- **Days into the 90:** `8 / 90`
 
 ---
 
@@ -40,9 +40,9 @@
 
 | ID | Task | Status | Artifact | Blocker |
 |---|---|---|---|---|
-| P0.1 | Commit & push | ⬜ | code on main | — |
+| P0.1 | Commit & push | ✅ | code on main (2026-06-12: demos, fixes, /compliance, docs) | — |
 | P0.2 | Deploy API (EN-1) | ⬜ | public URL | — |
-| P0.3 | Publish SDK (EN-2) | 🟡 | npm package | typecheck+build VERIFIED green; needs `npm publish` (your account) |
+| P0.3 | Publish SDK (EN-2) | 🟡 | npm package | ONLY blocker: run `npm login`, then `npm publish` in packages/sdk |
 | P0.4 | Invite-gated signup | ⬜ | working signup | — |
 | P0.5 | Stranger smoke test | ⬜ | time-to-first-replay | — |
 | P1.1 | Interview pipeline | ⬜ | 40 targets | tracker ready: `docs/ops/05` |
@@ -85,7 +85,7 @@
 
 | Week | Conversations | What a user did | Evidence of demand | Headline shipped? | Drift? |
 |---|---|---|---|---|---|
-| W1 | | | | | |
+| W1 | 0 | — | none | partial (code shipped, nothing public) | YES — all editor work, zero outside contact |
 | W2 | | | | | |
 | W3 | | | | | |
 | W4 | | | | | |
