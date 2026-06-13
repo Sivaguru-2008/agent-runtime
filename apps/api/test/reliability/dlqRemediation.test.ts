@@ -10,7 +10,7 @@
  *   - Passive region: tick skips all entries (split-brain protection).
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import pino from "pino";
 import { DlqRemediationService } from "../../src/application/cluster/dlqRemediationService.js";
 import type { DeadLetterQueue } from "../../src/domain/clusterPorts.js";
@@ -52,6 +52,13 @@ function buildEntry(overrides: Partial<DeadLetterEntry> = {}): DeadLetterEntry {
 describe("DlqRemediationService", () => {
   beforeEach(() => {
     __resetRegionAwarenessForTests({ regionId: "us-east-1", primaryRegionId: "us-east-1" });
+  });
+
+  // Some tests flip the region to a non-primary us-west-2; restore the global
+  // singleton afterward so a leaked non-active region can't make a downstream
+  // suite's split-brain guard reject writes (cluster.test "recovered=0" flake).
+  afterEach(() => {
+    __resetRegionAwarenessForTests();
   });
 
   it("succeeds and resolves entry on first happy-path attempt", async () => {

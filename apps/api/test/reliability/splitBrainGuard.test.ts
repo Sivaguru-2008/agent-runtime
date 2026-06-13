@@ -8,7 +8,7 @@
  *   - withFencingGuard wraps both steps and rejects mid-flight failovers.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
   __resetRegionAwarenessForTests,
   getRegionAwareness
@@ -27,6 +27,13 @@ describe("SplitBrainGuard", () => {
       regionId: "us-east-1",
       primaryRegionId: "us-east-1"
     });
+  });
+
+  // These tests promote the region (bumping the fencing token) and flip it to
+  // a non-primary us-west-2. Restore the global singleton afterward so the
+  // leaked state can't fail a downstream suite's writes (cluster.test flake).
+  afterEach(() => {
+    __resetRegionAwarenessForTests();
   });
 
   it("issues a fencing token when this region is active", () => {

@@ -2,10 +2,18 @@
  * V3 — Degradation classifier + readiness probe tests.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { DegradationClassifier } from "../../src/infrastructure/reliability/degradationClassifier.js";
 import { ReadinessProbe } from "../../src/infrastructure/reliability/readinessProbe.js";
 import { __resetRegionAwarenessForTests } from "../../src/infrastructure/reliability/regionAwareness.js";
+
+// These tests mutate the process-wide RegionAwareness singleton (e.g. to a
+// non-primary us-west-2). Restore it after each test so a leaked non-active
+// region can't make a downstream suite's split-brain guard reject writes —
+// the documented cause of cluster.test's "recovered=0" flake.
+afterEach(() => {
+  __resetRegionAwarenessForTests();
+});
 
 describe("DegradationClassifier", () => {
   beforeEach(() => {

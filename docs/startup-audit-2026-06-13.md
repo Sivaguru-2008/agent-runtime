@@ -181,3 +181,61 @@ the outreach kit.
 
 *Next audit: day 45 (≈ 2026-07-19), against the pivot/persevere thresholds in
 `docs/ops/04-kpi-dashboard.md`.*
+
+---
+
+## 6. Fix log — 2026-06-13 (assistant pass)
+
+A single working session cleared every assistant-executable item in the queue.
+Founder-calendar items (Tier 1: publish, deploy, outreach, video) are untouched —
+they remain the only things that move the company.
+
+**Hygiene (Tier 2):**
+- **C1 — LICENSE in SDK** ✅ Copied the repo-root MIT `LICENSE` into `packages/sdk`;
+  `npm pack --dry-run` now ships it (35 files, 28 kB, `LICENSE` present).
+- **C2 — git identity** ✅ Set repo-local `user.email` to the GitHub noreply
+  (`254448481+Sivaguru-2008@users.noreply.github.com`) so commits attribute.
+- **C3 — dead demo CTA** ✅ Filled `REPLACE_FOUNDER_EMAIL` with `sivagurumurugan1@gmail.com`
+  in `apps/web/app/compliance/page.tsx` and both CTAs in `docs/gtm/landing/index.html`.
+  Swap for a `founders@` alias / Calendly before a wider launch.
+- **C4 — FOUNDER_EMAILS** ✅ Already documented in the deploy checklist prod-env section.
+- **B2 — `.next` build guard** ✅ Already enforced by `scripts/guard-web-build.mjs`
+  (it correctly refused a build mid-session while a dev server held port 3000).
+
+**Tier-3 (fixed early, all bounded):**
+- **B3 — fence-enforcer defect** ✅ Root cause: `CentralizedReplayEnforcer.validateFence`
+  only checked fence *shape* and ownership identity, never *freshness* against the
+  authoritative lease attempt — so a fence minted under a reclaimed lease was not
+  distinguished from a current one (the replayChaos scenario-2 edge case). Added an
+  optional `currentAttempt` authority param; a fence whose attempt is below it is now
+  rejected (L2). New unit suite `test/fence/replayFenceFreshness.test.ts` (6 cases) locks
+  it on every platform; the in-memory + Testcontainers chaos scenarios were updated to
+  pass the authoritative attempt. **The "proof layer" pitch's own edge case is now closed.**
+- **B4 — flaky tests** ✅ 2 of 3 fixed and verified under the full unit suite (905/905 ×3);
+  the 3rd is integration-only and Docker would not start in this environment:
+  - `sloGovernor` "operator override auto-releases past TTL" — replaced the real
+    `setTimeout(30ms)` sleep with explicit `nowMs` timestamps (the controller already
+    accepts an injected clock), removing the timing race.
+  - `cluster` "recovers executions whose leases expire" — **real root cause found**:
+    `degradation`/`dlqRemediation`/`splitBrainGuard` tests mutate the process-wide
+    `RegionAwareness` singleton (to a non-primary `us-west-2`) and never restored it,
+    so a later `recover()` hit `acquireFencingToken()` → `NonPrimaryWriteError`, which
+    `recoverOne` swallows → `recovered=0`. Added `afterEach` singleton-restore to all
+    three leaking suites and a defensive reset in `cluster.test.ts`.
+  - `outboxHardening` (integration) — stamped `visible_after` JS-side at insert time
+    (was relying on the DB-side `now()` default), matching the dispatcher's JS-side
+    `visible_after <= $1` claim and removing the documented clock-skew race. Fix is
+    test-only; **not run locally — Docker Desktop would not start in this environment.**
+- **B7 — failures-metric scoping** ✅ Labeled the operator "Failed" KPI `all-time` and
+  rewrote the `executions-failed` explain-registry entry to say plainly that it is a
+  never-resetting history counter, not the current failure rate — so a large-but-flat
+  number reads as history, not an alarm. (Answers "why 43?" before a partner has to ask.)
+- **B8 — Next.js** ✅ Bumped `15.5.18 → 15.5.19` (latest 15.x; held off the 16.x major).
+  Web typecheck + 56 tests + `next build` (20 routes) all green; runtime verified clean
+  in the preview (no console errors).
+
+**Verification matrix (this pass):** API typecheck ✅ · API unit 905/905 ✅ (×3, was 899 —
++6 fence-freshness) · web typecheck ✅ · web 56/56 ✅ · `next build` ✅ · SDK 73/73 ✅ ·
+SDK `npm pack` ✅. Not run: integration + chaos-Testcontainers suites (Docker unavailable
+in this environment) — the only unverified change there is the test-only `outboxHardening`
+seed fix.

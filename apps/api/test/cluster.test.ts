@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { SystemClock, type Clock } from "../src/shared/clock.js";
+import { __resetRegionAwarenessForTests } from "../src/infrastructure/reliability/regionAwareness.js";
 import { EventFactory } from "../src/infrastructure/events/eventFactory.js";
 import { InMemoryEventBus } from "../src/infrastructure/events/inMemoryEventBus.js";
 import { PersistedEventPublisher } from "../src/infrastructure/events/persistedEventPublisher.js";
@@ -93,6 +94,17 @@ function buildHarness(clock: Clock = new SystemClock()) {
 }
 
 const ZERO_LOAD = { cpu: 0, memory: 0, inFlight: 0, queueDepth: 0, eventsPerSecond: 0 };
+
+// Recovery sweeps go through the split-brain guard, which reads the
+// process-wide RegionAwareness singleton. A prior suite may have left that
+// singleton as a non-active region (e.g. us-west-2) — which would make
+// acquireFencingToken() throw inside recover(), the swallowed error
+// surfacing as the historical "recovered=0" flake. Reset to a clean active
+// primary before each test so this suite is self-sufficient regardless of
+// file execution order.
+beforeEach(() => {
+  __resetRegionAwarenessForTests();
+});
 
 describe("worker lifecycle", () => {
   it("registers a worker and marks it lost when heartbeats expire", async () => {

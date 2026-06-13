@@ -23,12 +23,13 @@ import {
  * replayable execution trace is.
  *
  * Static by design: no client state, no API calls, renders even when the
- * runtime is down. The only personalization is FOUNDER_EMAIL, which follows
- * the same REPLACE_FOUNDER_EMAIL token convention as docs/gtm/landing.
+ * runtime is down. The only personalization is FOUNDER_EMAIL, the demo-CTA
+ * contact (kept in sync with docs/gtm/landing).
  */
 
-// Swap before sending the page to a prospect (same token as docs/gtm/landing).
-const FOUNDER_EMAIL = "REPLACE_FOUNDER_EMAIL";
+// Founder contact for the demo CTA. Swap for a founders@ alias or a Calendly
+// link before a wider launch (same channel as docs/gtm/landing).
+const FOUNDER_EMAIL = "sivagurumurugan1@gmail.com";
 const DEMO_MAILTO = `mailto:${FOUNDER_EMAIL}?subject=${encodeURIComponent(
   "Compliance demo — provable AI agent execution"
 )}`;
