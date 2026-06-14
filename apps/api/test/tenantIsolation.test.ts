@@ -25,8 +25,10 @@ import { QuotaEnforcer } from "../src/infrastructure/quota/quotaEnforcer.js";
 import {
   TenantGuard,
   createPermissiveTenantGuard,
-  ResourceTenantNotResolvableError
+  ResourceTenantNotResolvableError,
+  CrossTenantAccessError
 } from "../src/infrastructure/security/tenantGuard.js";
+import type { TenantContext } from "../src/infrastructure/security/tenantContext.js";
 
 // ── Minimal Groq stub — yields one token then completes. ──────────────────
 function stubGroq(model = "stub-model") {
@@ -251,6 +253,61 @@ describe("L-2 — malformed id (Postgres 22P02) is not an opaque 500", () => {
     };
     const guard = new TenantGuard({ db: db as never, permitWhenNotFound: false });
     await expect(guard.resolveExecutionTenant("11111111111111111111111111111111")).rejects.toBe(boom);
+  });
+});
+
+// ── L-3: an orphaned execution (cognition/checkpoints exist, but the
+// `executions` summary row is missing or pruned) must still resolve its owning
+// tenant so the operator console can diagnose it. This is the bug behind the
+// "FORBIDDEN (403): Cross-tenant access denied" the console showed for a stuck
+// execution that genuinely belonged to the operator's own tenant.
+describe("L-3 — orphaned execution resolves tenant from non-summary tables", () => {
+  // Stub: the fast executions-PK lookup finds nothing; the broad UNION (which
+  // includes cognition_graphs/checkpoints/dead-letters) resolves `broadTenant`.
+  function dbOrphan(broadTenant: string | null) {
+    const db = {
+      async query(sql: string) {
+        const isBroad = /cognition_graphs|union all/i.test(sql);
+        if (isBroad) {
+          return broadTenant === null
+            ? { rows: [], rowCount: 0 }
+            : { rows: [{ tenant_id: broadTenant }], rowCount: 1 };
+        }
+        return { rows: [], rowCount: 0 }; // executions summary row missing
+      },
+      async withTransaction(fn: (tx: unknown) => unknown) { return fn(db); },
+      async close() { /* noop */ }
+    };
+    return db;
+  }
+
+  const orphanId = "3beb80137b2abadee5e25b955ec7aac2";
+  const operator = (tenantId: string): TenantContext => ({
+    tenantId, apiKeyId: "k", role: "operator", rateLimitRpm: 0
+  });
+
+  it("resolves the owning tenant when the executions summary row is missing", async () => {
+    const guard = new TenantGuard({ db: dbOrphan("system") as never, permitWhenNotFound: false });
+    await expect(guard.resolveExecutionTenant(orphanId)).resolves.toBe("system");
+  });
+
+  it("permits the owning tenant's operator to diagnose its orphaned execution", async () => {
+    const guard = new TenantGuard({ db: dbOrphan("system") as never, permitWhenNotFound: false });
+    await expect(guard.assertOwnsExecution(operator("system"), orphanId)).resolves.toBeUndefined();
+  });
+
+  it("still denies a DIFFERENT tenant (no IDOR weakening from the broad resolver)", async () => {
+    const guard = new TenantGuard({ db: dbOrphan("system") as never, permitWhenNotFound: false });
+    await expect(guard.assertOwnsExecution(operator("tenant-b"), orphanId)).rejects.toBeInstanceOf(
+      CrossTenantAccessError
+    );
+  });
+
+  it("a truly unknown id (no record in any table) still denies under the strict guard", async () => {
+    const guard = new TenantGuard({ db: dbOrphan(null) as never, permitWhenNotFound: false });
+    await expect(guard.resolveExecutionTenant("deadbeefdeadbeefdeadbeefdeadbeef")).rejects.toBeInstanceOf(
+      ResourceTenantNotResolvableError
+    );
   });
 });
 

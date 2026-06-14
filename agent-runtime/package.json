@@ -1,0 +1,20 @@
+{
+  "name": "agent-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The unified runtime intelligence layer: an 8-stage pipeline that predicts, watches, intervenes, explains, and learns from every LLM run — built on agent-fence.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo": "tsx src/cli.ts",
+    "demo:replay": "tsx src/cli.ts --replay"
+  }
+}

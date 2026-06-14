@@ -611,23 +611,46 @@ export class CognitionOrchestrator {
     if (!repo) return;
     try {
       const existing = await repo.getById(executionId);
-      if (!existing) return;
+      // If persistExecutionStart never managed to write the row (a swallowed
+      // transient error, or a failure before it ran), there is no row to update.
+      // Update-only here would leave the cognition ORPHANED forever — a saved
+      // graph pointing at a non-existent execution that the operator console
+      // can never diagnose (it 404s). Materialise the row from the terminal
+      // graph instead, so every finished cognition has a diagnosable execution.
+      // We can only safely create a tenant-isolated row when the graph carries
+      // its tenant; without it, keep the old no-op rather than write an
+      // untenanted row the repository would (correctly) reject.
+      if (!existing && !graph.tenantId) return;
+      const now = toIso(this.deps.clock.now());
+      const base: Execution =
+        existing ?? {
+          id: executionId,
+          agentId: graph.agentId,
+          parentExecutionId: undefined,
+          status: "RUNNING",
+          input: {},
+          tokenUsage: { prompt: 0, completion: 0, total: 0 },
+          startedAt: graph.startedAt ?? now,
+          updatedAt: now,
+          tenantId: graph.tenantId!,
+          traceId: graph.traceId
+        };
       const isFailed = graph.phase === "FAILED" || !!failure;
-      const tokenUsage = deriveTokenUsage(graph) ?? existing.tokenUsage;
+      const tokenUsage = deriveTokenUsage(graph) ?? base.tokenUsage;
       const updated: Execution = {
-        ...existing,
+        ...base,
         status: isFailed ? "FAILED" : "COMPLETED",
-        output: graph.output && typeof graph.output === "object" ? graph.output : existing.output,
+        output: graph.output && typeof graph.output === "object" ? graph.output : base.output,
         failure: isFailed
           ? {
               message: failure?.message ?? extractGraphErrorMessage(graph) ?? "Cognition failed",
               code: failure?.type,
               recoverable: failure?.recoverable ?? true
             }
-          : existing.failure,
+          : base.failure,
         tokenUsage,
-        completedAt: graph.completedAt ?? toIso(this.deps.clock.now()),
-        updatedAt: toIso(this.deps.clock.now())
+        completedAt: graph.completedAt ?? now,
+        updatedAt: now
       };
       await repo.save(updated);
     } catch {
