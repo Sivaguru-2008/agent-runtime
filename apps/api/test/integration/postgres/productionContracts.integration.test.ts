@@ -46,7 +46,7 @@ import type { ReplayOutcome, AnomalyIndexEntry } from "../../../src/domain/failu
 // returns valid IDs. No exporter is configured (OTEL_EXPORTER_OTLP_ENDPOINT
 // unset in tests) so spans are dropped on the floor — what we verify is
 // CONTEXT propagation, not export wire format.
-await startTracing({ serviceName: "agent-runtime-api-prodcontracts", role: "api" });
+await startTracing({ serviceName: "agent-runtime-api-prodcontracts", role: "api", samplingRatio: 1.0 });
 
 afterAll(async () => {
   await shutdownTracing();
@@ -295,7 +295,8 @@ describe("D5 — strict-prod config enforcement", () => {
     const c = loadConfig({
       NODE_ENV: "development",
       DATABASE_URL: "postgres://example/db",
-      STRICT_PROD: "true"
+      STRICT_PROD: "true",
+      AUTH_ENABLED: "true"
     } as unknown as NodeJS.ProcessEnv);
     expect(c.STRICT_PROD).toBe(true);
   });

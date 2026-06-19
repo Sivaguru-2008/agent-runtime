@@ -129,21 +129,29 @@ async function startContainerHarness(): Promise<PgHarness | null> {
   const client = createPgClient(connectionString);
   await applySchema(client);
 
-  return {
+  const harnessObj: PgHarness = {
     connectionString,
     pg: client,
     source: "testcontainer",
     async restart() {
+      try {
+        await harnessObj.pg.close();
+      } catch {
+        // swallow
+      }
       await container.restart();
+      harnessObj.connectionString = container.getConnectionUri();
+      harnessObj.pg = createPgClient(harnessObj.connectionString);
     },
     async reset() {
-      await truncateAll(client);
+      await truncateAll(harnessObj.pg);
     },
     async stop() {
-      try { await client.close(); } catch { /* swallow */ }
+      try { await harnessObj.pg.close(); } catch { /* swallow */ }
       try { await container.stop(); } catch { /* swallow */ }
     }
   };
+  return harnessObj;
 }
 
 async function startExternalHarness(externalUrl: string): Promise<PgHarness> {

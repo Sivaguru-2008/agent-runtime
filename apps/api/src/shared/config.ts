@@ -476,6 +476,31 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
 
   const parsed = configSchema.parse(env);
 
+  // L-1: defense in depth. The app-layer bootstrap also refuses to boot
+  // without DATABASE_URL in production, but rejecting earlier in loadConfig
+  // gives a clearer error and prevents the runtime container from being
+  // built only to be torn down moments later. AUTH_ENABLED is already
+  // required in production above; DATABASE_URL is required for AUTH so
+  // this catches the misconfiguration of AUTH_ENABLED=false in production
+  // without a database — which would otherwise silently boot a fully
+  // permissive tenant guard.
+  if (parsed.NODE_ENV === "production" && !parsed.DATABASE_URL) {
+    throw new Error(
+      "[L-1] DATABASE_URL is required when NODE_ENV=production — " +
+        "the strict TenantGuard cannot resolve resource ownership without a database."
+    );
+  }
+
+  // Staging mirrors production's durability contract. Auth knobs are still
+  // operator-controlled (QA may run with AUTH disabled against scratch data),
+  // but the durable storage path is non-negotiable.
+  if (parsed.NODE_ENV === "staging" && !parsed.DATABASE_URL) {
+    throw new Error(
+      "DATABASE_URL is required when NODE_ENV=staging — staging mirrors " +
+        "the production durability contract."
+    );
+  }
+
   if (parsed.EVENT_STORE_DRIVER === "postgres" && !parsed.DATABASE_URL) {
     throw new Error("DATABASE_URL is required when EVENT_STORE_DRIVER=postgres");
   }
@@ -589,31 +614,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         throw new Error("GOOGLE_CLIENT_ID is required when USER_AUTH_ENABLED=true in production.");
       }
     }
-  }
-
-  // L-1: defense in depth. The app-layer bootstrap also refuses to boot
-  // without DATABASE_URL in production, but rejecting earlier in loadConfig
-  // gives a clearer error and prevents the runtime container from being
-  // built only to be torn down moments later. AUTH_ENABLED is already
-  // required in production above; DATABASE_URL is required for AUTH so
-  // this catches the misconfiguration of AUTH_ENABLED=false in production
-  // without a database — which would otherwise silently boot a fully
-  // permissive tenant guard.
-  if (parsed.NODE_ENV === "production" && !parsed.DATABASE_URL) {
-    throw new Error(
-      "[L-1] DATABASE_URL is required when NODE_ENV=production — " +
-        "the strict TenantGuard cannot resolve resource ownership without a database."
-    );
-  }
-
-  // Staging mirrors production's durability contract. Auth knobs are still
-  // operator-controlled (QA may run with AUTH disabled against scratch data),
-  // but the durable storage path is non-negotiable.
-  if (parsed.NODE_ENV === "staging" && !parsed.DATABASE_URL) {
-    throw new Error(
-      "DATABASE_URL is required when NODE_ENV=staging — staging mirrors " +
-        "the production durability contract."
-    );
   }
 
   if (parsed.AUDIT_LOG_ENABLED && parsed.PERSISTENCE_DRIVER !== "postgres") {
