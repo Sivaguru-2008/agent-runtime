@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { rmSync } from "node:fs";
 import { SqliteStorage } from "../src/storage/sqlite";
 import type { CommittedEffect } from "../src/storage/base";
 
@@ -81,5 +84,41 @@ describe("SqliteStorage", () => {
     await expect(s.updateIntentStatus(id, "COMMITTED")).resolves.toBeUndefined();
 
     await s.close();
+  });
+
+  // (c) No silent in-memory commit fallback: a committed effect written to a
+  // file-backed adapter must still be there after the handle is closed and a
+  // fresh adapter reopens the same file. If commits lived only in memory, the
+  // reopened store would read null and the effect could fire again.
+  describe("durability (no in-memory commit loss)", () => {
+    const created: string[] = [];
+    afterEach(() => {
+      for (const p of created.splice(0)) {
+        for (const suffix of ["", "-wal", "-shm"]) {
+          try {
+            rmSync(p + suffix, { force: true });
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+    });
+
+    it("persists committed effects across a close + reopen of the same file", async () => {
+      const path = join(tmpdir(), `fence-durability-${randomUUID()}.db`);
+      created.push(path);
+
+      const first = new SqliteStorage(path);
+      await first.init();
+      await first.putCommitted(effect({ operationId: "op-durable" }));
+      await first.close(); // simulate the process dying
+
+      const reopened = new SqliteStorage(path);
+      await reopened.init();
+      const got = await reopened.getCommitted("op-durable");
+      expect(got).not.toBeNull();
+      expect(JSON.parse(got!.response)).toEqual({ ok: true });
+      await reopened.close();
+    });
   });
 });

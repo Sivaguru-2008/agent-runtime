@@ -9,6 +9,13 @@ import { PostgresStorage } from "./storage/postgres";
 
 export type StorageOption = "sqlite" | "postgres" | StorageAdapter;
 
+/**
+ * Injectable wall clock. Returns "now" as a `Date`. Defaults to the system
+ * clock; override it in tests or under a determinism guard. The fence never
+ * reads the wall clock directly — every timestamp flows through here.
+ */
+export type Clock = () => Date;
+
 export interface FenceConfig {
   /** Map of tool name -> IRREVERSIBLE | IDEMPOTENT. */
   effects: EffectMap;
@@ -26,6 +33,15 @@ export interface FenceConfig {
   defaultEffect?: EffectType;
   /** On storage failure, execute the tool anyway. Default: true (fail open). */
   failOpen?: boolean;
+  /**
+   * Before suppressing a duplicate, re-verify that the recorded effect's input
+   * hash matches the current call's input hash. Defends against returning a
+   * stale response if an `operation_id` ever resolves to a row with a different
+   * input. Default: true (on).
+   */
+  verifyInputHash?: boolean;
+  /** Injectable wall clock for audit timestamps. Default: system clock. */
+  clock?: Clock;
   logger?: LoggerOptions | FenceLogger;
 }
 
@@ -52,6 +68,8 @@ export class Fence {
   private readonly storage: StorageAdapter;
   private readonly logger: FenceLogger;
   private readonly failOpen: boolean;
+  private readonly verifyInputHash: boolean;
+  private readonly clock: Clock;
   private readonly configRunId?: string;
   private ready: Promise<void> | null = null;
 
@@ -63,7 +81,14 @@ export class Fence {
     this.storage = resolveStorage(config);
     this.logger = createLogger(config.logger ?? {});
     this.failOpen = config.failOpen ?? true;
+    this.verifyInputHash = config.verifyInputHash ?? true;
+    this.clock = config.clock ?? (() => new Date());
     this.configRunId = config.runId;
+  }
+
+  /** Current time as an ISO-8601 string, sourced from the injected clock. */
+  private nowIso(): string {
+    return this.clock().toISOString();
   }
 
   private ensureReady(): Promise<void> {
@@ -122,17 +147,28 @@ export class Fence {
       return exec();
     }
 
-    if (existing) {
+    if (existing && (!this.verifyInputHash || existing.inputHash === inputHash)) {
       this.logger.suppressed({ tool: toolName, operationId, runId });
       await this.recordIntentSafe({
         id: randomUUID(),
         operationId,
         toolName,
         input: safeStringify(input),
-        intendedAt: nowIso(),
+        intendedAt: this.nowIso(),
         status: "SUPPRESSED",
       });
       return safeParse(existing.response);
+    }
+
+    if (existing) {
+      // The operation id matched but the recorded input hash does not. Returning
+      // the stored response could hand back a stale result for a different
+      // input, so refuse to suppress: fall through and execute as a fresh
+      // effect. (Only reachable via a hash collision or a buggy adapter.)
+      this.logger.warn(
+        "committed-effect input hash mismatch; not suppressing",
+        { tool: toolName, operationId }
+      );
     }
 
     // 2) Record intent, then execute the real side effect.
@@ -142,7 +178,7 @@ export class Fence {
       operationId,
       toolName,
       input: safeStringify(input),
-      intendedAt: nowIso(),
+      intendedAt: this.nowIso(),
       status: "PENDING",
     });
 
@@ -167,7 +203,7 @@ export class Fence {
         toolName,
         inputHash,
         response: safeStringify(result),
-        committedAt: nowIso(),
+        committedAt: this.nowIso(),
       });
       await this.updateIntentSafe(intentId, "COMMITTED");
       if (inserted) {
@@ -252,10 +288,6 @@ export function resolveStorage(config: FenceConfig): StorageAdapter {
       storage
     )}". Use "sqlite", "postgres", or a StorageAdapter.`
   );
-}
-
-function nowIso(): string {
-  return new Date().toISOString();
 }
 
 function errMsg(err: unknown): string {

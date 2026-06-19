@@ -11,6 +11,7 @@ export { Fence, withRun, resolveStorage } from "./fence";
 export type {
   FenceConfig,
   StorageOption,
+  Clock,
   Dispatch,
   WrappedDispatch,
   CallOptions,
