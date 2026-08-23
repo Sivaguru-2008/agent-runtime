@@ -1,0 +1,24 @@
+{
+  "phase": "seed",
+  "pid": 40752,
+  "scorer": "groq:openai/gpt-oss-120b",
+  "mode": "semantic",
+  "projection": "declared",
+  "crashPoint": "after_local_commit",
+  "reachedCrashPoint": false,
+  "events": [
+    {
+      "type": "COMMITTED",
+      "tool": "wire_money",
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "pid": 40752
+    }
+  ],
+  "decisions": [],
+  "judgeCalls": 0,
+  "judgeTokens": 0,
+  "judgeLatencyMs": 0,
+  "judgeAbstentions": 0,
+  "judgeTransportFailures": 0,
+  "judgeBatchAttempts": 0
+}

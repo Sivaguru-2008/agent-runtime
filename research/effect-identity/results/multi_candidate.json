@@ -1,0 +1,4275 @@
+{
+  "generatedAt": "2026-08-16T12:32:45.259Z",
+  "judge": "llama-3.1-8b-instant",
+  "judgeMeta": {
+    "judge": "llama-3.1-8b-instant",
+    "family": "llama",
+    "comparisons": 3000,
+    "batchSize": 20,
+    "calls": 128,
+    "inputTokens": 219281,
+    "outputTokens": 50084,
+    "meanCallLatencyMs": 860,
+    "meanComparisonLatencyMs": 37,
+    "wallClockMs": 2642972,
+    "parse": {
+      "batches": 111,
+      "batchAttempts": 128,
+      "batchRetries": 17,
+      "transportFailures": 17,
+      "batchesWithViolations": 0,
+      "probabilityScaleBatches": 0,
+      "pairsScored": 2220,
+      "abstentions": 0,
+      "byStatus": {
+        "ok": 2220,
+        "ok_pct_suffix": 0,
+        "missing": 0,
+        "not_a_number": 0,
+        "non_integer": 0,
+        "out_of_range": 0
+      },
+      "ambiguousAcceptedZeroOne": 2192,
+      "samples": []
+    }
+  },
+  "K": 50,
+  "nDiffUnits": 40,
+  "nSameUnits": 20,
+  "nTestDiffUnits": 20,
+  "calibration": {
+    "corpusDiffN": 205,
+    "corpusSameN": 248,
+    "inExperimentDiffN": 20,
+    "tLo": 0.5499999999999999,
+    "maxCertifiableM": {
+      "0.01": 2,
+      "0.05": 10,
+      "0.1": 20
+    },
+    "requiredNForM": {
+      "1": {
+        "0.01": 99,
+        "0.05": 19,
+        "0.1": 9
+      },
+      "2": {
+        "0.01": 199,
+        "0.05": 39,
+        "0.1": 19
+      },
+      "5": {
+        "0.01": 499,
+        "0.05": 99,
+        "0.1": 49
+      },
+      "10": {
+        "0.01": 999,
+        "0.05": 199,
+        "0.1": 99
+      },
+      "25": {
+        "0.01": 2499,
+        "0.05": 499,
+        "0.1": 249
+      },
+      "50": {
+        "0.01": 4999,
+        "0.05": 999,
+        "0.1": 499
+      }
+    }
+  },
+  "grid": [
+    {
+      "alpha": 0.01,
+      "m": 1,
+      "thresholds": {
+        "uncorrected": 0.91,
+        "bonferroni": 0.91,
+        "setconformal": 0.91,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 1,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 37,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.01,
+      "m": 2,
+      "thresholds": {
+        "uncorrected": 0.91,
+        "bonferroni": 0.91,
+        "setconformal": 0.91,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 2,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 74,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.01,
+      "m": 5,
+      "thresholds": {
+        "uncorrected": 0.91,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 5,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 185,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.01,
+      "m": 10,
+      "thresholds": {
+        "uncorrected": 0.91,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 10,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 370,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.01,
+      "m": 25,
+      "thresholds": {
+        "uncorrected": 0.91,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 25,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 925,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.01,
+      "m": 50,
+      "thresholds": {
+        "uncorrected": 0.91,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 50,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 1850,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.05,
+      "m": 1,
+      "thresholds": {
+        "uncorrected": 0.9,
+        "bonferroni": 0.9,
+        "setconformal": 0.9,
+        "inExperimentBonferroni": 0
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": 0,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 1,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 37,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.05,
+      "m": 2,
+      "thresholds": {
+        "uncorrected": 0.9,
+        "bonferroni": 0.9055555555555556,
+        "setconformal": 0.9055555555555556,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.9055555555555556,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.9055555555555556,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 2,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 74,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.05,
+      "m": 5,
+      "thresholds": {
+        "uncorrected": 0.9,
+        "bonferroni": 0.91,
+        "setconformal": 0.91,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 5,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 185,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.05,
+      "m": 10,
+      "thresholds": {
+        "uncorrected": 0.9,
+        "bonferroni": 0.91,
+        "setconformal": 0.91,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 10,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 370,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.05,
+      "m": 25,
+      "thresholds": {
+        "uncorrected": 0.9,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 25,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 925,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.05,
+      "m": 50,
+      "thresholds": {
+        "uncorrected": 0.9,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 50,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 1850,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.1,
+      "m": 1,
+      "thresholds": {
+        "uncorrected": 0.8928571428571429,
+        "bonferroni": 0.8928571428571429,
+        "setconformal": 0.8928571428571429,
+        "inExperimentBonferroni": 0
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": 0,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 1,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 37,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.1,
+      "m": 2,
+      "thresholds": {
+        "uncorrected": 0.8928571428571429,
+        "bonferroni": 0.9,
+        "setconformal": 0.9,
+        "inExperimentBonferroni": 0
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.9,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": 0,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 2,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 74,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.1,
+      "m": 5,
+      "thresholds": {
+        "uncorrected": 0.8928571428571429,
+        "bonferroni": 0.9055555555555556,
+        "setconformal": 0.9055555555555556,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.9055555555555556,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.9055555555555556,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 5,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 185,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.1,
+      "m": 10,
+      "thresholds": {
+        "uncorrected": 0.8928571428571429,
+        "bonferroni": 0.91,
+        "setconformal": 0.91,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": 0.91,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 10,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 370,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.1,
+      "m": 25,
+      "thresholds": {
+        "uncorrected": 0.8928571428571429,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          },
+          "silentEscape": {
+            "value": 0.5,
+            "successes": 10,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.2992980081982123,
+              "hi": 0.7007019918017877
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 25,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 925,
+        "tokensPerComparison": 90
+      }
+    },
+    {
+      "alpha": 0.1,
+      "m": 50,
+      "thresholds": {
+        "uncorrected": 0.8928571428571429,
+        "bonferroni": null,
+        "setconformal": null,
+        "inExperimentBonferroni": null
+      },
+      "rules": {
+        "uncorrected": {
+          "tHi": 0.8928571428571429,
+          "wrongSuppression": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "bonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "setconformal": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        },
+        "inExperimentBonferroni": {
+          "tHi": null,
+          "wrongSuppression": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "friction": {
+            "value": 0.65,
+            "successes": 13,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.43285427668523624,
+              "hi": 0.818808175898918
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "flaggedEscape": {
+            "value": 0.7,
+            "successes": 14,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.4810271816464765,
+              "hi": 0.8545227551323956
+            }
+          },
+          "silentEscape": {
+            "value": 0.3,
+            "successes": 6,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.1454772448676043,
+              "hi": 0.5189728183535235
+            }
+          }
+        }
+      },
+      "cost": {
+        "comparisonsPerDispatch": 50,
+        "meanComparisonLatencyMs": 37,
+        "estimatedJudgeLatencyMsPerDispatch": 1850,
+        "tokensPerComparison": 90
+      }
+    }
+  ],
+  "maxScoreGrowth": [
+    {
+      "m": 1,
+      "n": 20,
+      "meanMaxScore": 0,
+      "medianMaxScore": 0,
+      "p90MaxScore": 0,
+      "maxMaxScore": 0
+    },
+    {
+      "m": 2,
+      "n": 20,
+      "meanMaxScore": 0,
+      "medianMaxScore": 0,
+      "p90MaxScore": 0,
+      "maxMaxScore": 0
+    },
+    {
+      "m": 5,
+      "n": 20,
+      "meanMaxScore": 0,
+      "medianMaxScore": 0,
+      "p90MaxScore": 0,
+      "maxMaxScore": 0
+    },
+    {
+      "m": 10,
+      "n": 20,
+      "meanMaxScore": 0,
+      "medianMaxScore": 0,
+      "p90MaxScore": 0,
+      "maxMaxScore": 0
+    },
+    {
+      "m": 25,
+      "n": 20,
+      "meanMaxScore": 0,
+      "medianMaxScore": 0,
+      "p90MaxScore": 0,
+      "maxMaxScore": 0
+    },
+    {
+      "m": 50,
+      "n": 20,
+      "meanMaxScore": 0.65,
+      "medianMaxScore": 1,
+      "p90MaxScore": 1,
+      "maxMaxScore": 1
+    }
+  ]
+}

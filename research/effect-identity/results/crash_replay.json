@@ -1,0 +1,4444 @@
+{
+  "generatedAt": "2026-08-16T12:30:15.569Z",
+  "live": false,
+  "nTrials": 48,
+  "judge": "lexical-offline",
+  "judgeFamily": "llama",
+  "paraphrasePool": {
+    "generator": "llama-3.3-70b-versatile",
+    "family": "llama",
+    "size": 53,
+    "rejected": 2
+  },
+  "crossFamily": false,
+  "thresholds": {
+    "tHi": 0.9,
+    "tLo": 0.5499999999999999,
+    "source": "layered_lexical_alpha_0.05",
+    "judge": "llama-3.3-70b-versatile"
+  },
+  "crashPoints": [
+    "before_fence",
+    "after_L0",
+    "after_witness",
+    "after_judge",
+    "before_external_effect",
+    "during_external_commit_window",
+    "after_external_effect_before_local_commit",
+    "after_local_commit"
+  ],
+  "commitWindowPoints": [
+    "during_external_commit_window",
+    "after_external_effect_before_local_commit"
+  ],
+  "byCrashPoint": {
+    "before_fence": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "doubleFireRate": {
+          "value": 0.8333333333333334,
+          "successes": 5,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.43649717781352987,
+            "hi": 0.9699466302516935
+          }
+        },
+        "meanWiredUSD": 1430,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_L0": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "doubleFireRate": {
+          "value": 0.8333333333333334,
+          "successes": 5,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.43649717781352987,
+            "hi": 0.9699466302516935
+          }
+        },
+        "meanWiredUSD": 1430,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_witness": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "doubleFireRate": {
+          "value": 0.8333333333333334,
+          "successes": 5,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.43649717781352987,
+            "hi": 0.9699466302516935
+          }
+        },
+        "meanWiredUSD": 1430,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_judge": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "before_external_effect": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 6,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "pendingOrphanTrials": 6,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "during_external_commit_window": {
+      "isCommitWindow": true,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 6,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2080,
+        "crashPointReached": {
+          "value": 0.8333333333333334,
+          "successes": 5,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.43649717781352987,
+            "hi": 0.9699466302516935
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.3333333333333333,
+          "successes": 2,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09677141110578041,
+            "hi": 0.700006684861608
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0.6666666666666666,
+          "successes": 4,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.299993315138392,
+            "hi": 0.9032285888942195
+          }
+        },
+        "pendingOrphanTrials": 5,
+        "crossProcessSuppressions": 2,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_external_effect_before_local_commit": {
+      "isCommitWindow": true,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 6,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "doubleFireRate": {
+          "value": 0.8333333333333334,
+          "successes": 5,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.43649717781352987,
+            "hi": 0.9699466302516935
+          }
+        },
+        "meanWiredUSD": 1950,
+        "crashPointReached": {
+          "value": 0.6666666666666666,
+          "successes": 4,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.299993315138392,
+            "hi": 0.9032285888942195
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.3333333333333333,
+          "successes": 2,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09677141110578041,
+            "hi": 0.700006684861608
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0.6666666666666666,
+          "successes": 4,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.299993315138392,
+            "hi": 0.9032285888942195
+          }
+        },
+        "pendingOrphanTrials": 4,
+        "crossProcessSuppressions": 2,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_local_commit": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 6,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2210,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 6,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6096657120978346,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.16666666666666666,
+          "successes": 1,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03005336974830658,
+            "hi": 0.5635028221864702
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 6,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.39033428790216534
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    }
+  },
+  "overall": {
+    "syntactic": {
+      "nTrials": 48,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 48,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.07410012966611748
+        }
+      },
+      "meanWiredUSD": 2047.5,
+      "totalWiredUSD": 98280,
+      "windowSuspectFlagged": {
+        "value": 0,
+        "successes": 0,
+        "n": 48,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.07410012966611748
+        }
+      }
+    },
+    "semantic": {
+      "nTrials": 48,
+      "exactlyOnceRate": {
+        "value": 0.08333333333333333,
+        "successes": 4,
+        "n": 48,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.032883756818091775,
+          "hi": 0.1955330179036728
+        }
+      },
+      "meanWiredUSD": 1706.25,
+      "totalWiredUSD": 81900,
+      "windowSuspectFlagged": {
+        "value": 0.2916666666666667,
+        "successes": 14,
+        "n": 48,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.18241578926516536,
+          "hi": 0.431792598095717
+        }
+      }
+    }
+  },
+  "defensibleOnly": {
+    "syntactic": {
+      "nTrials": 36,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 36,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.09641862859446367
+        }
+      },
+      "meanWiredUSD": 1950,
+      "totalWiredUSD": 70200,
+      "windowSuspectFlagged": {
+        "value": 0,
+        "successes": 0,
+        "n": 36,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.09641862859446367
+        }
+      }
+    },
+    "semantic": {
+      "nTrials": 36,
+      "exactlyOnceRate": {
+        "value": 0.08333333333333333,
+        "successes": 3,
+        "n": 36,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.02874861133599338,
+          "hi": 0.2182669124927263
+        }
+      },
+      "meanWiredUSD": 1603.3333333333333,
+      "totalWiredUSD": 57720,
+      "windowSuspectFlagged": {
+        "value": 0.16666666666666666,
+        "successes": 6,
+        "n": 36,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.07870447595018112,
+          "hi": 0.3189079431127947
+        }
+      }
+    }
+  },
+  "commitWindowOnly": {
+    "syntactic": {
+      "nTrials": 12,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.24249400665524085
+        }
+      },
+      "meanWiredUSD": 2340,
+      "totalWiredUSD": 28080,
+      "windowSuspectFlagged": {
+        "value": 0,
+        "successes": 0,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.24249400665524085
+        }
+      }
+    },
+    "semantic": {
+      "nTrials": 12,
+      "exactlyOnceRate": {
+        "value": 0.08333333333333333,
+        "successes": 1,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.014865094404917095,
+          "hi": 0.35387991114111694
+        }
+      },
+      "meanWiredUSD": 2015,
+      "totalWiredUSD": 24180,
+      "windowSuspectFlagged": {
+        "value": 0.6666666666666666,
+        "successes": 8,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.39062208887279953,
+          "hi": 0.8618799089087867
+        }
+      }
+    }
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "paraphraseA": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment#88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 us dollars",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "re: shipment 88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 10800,
+            "crash": 32400,
+            "replay": 36312
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 9316,
+            "crash": 13016,
+            "replay": 28848
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "paraphraseA": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "Reference Shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "relating to shipment 88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 11932,
+            "crash": 35120,
+            "replay": 12292
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 3732,
+            "crash": 14484,
+            "replay": 12336
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 Dollars (United States)",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment Number: 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 8584,
+            "crash": 33452,
+            "replay": 952
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33392,
+            "crash": 34292,
+            "replay": 32304
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment ID 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 11188,
+            "crash": 30096,
+            "replay": 29344
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 10728,
+            "crash": 36080,
+            "replay": 31636
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 4,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment 88213 details"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars united states",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "shipment number: 88213"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 26300,
+            "crash": 28600,
+            "replay": 36044
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 1268,
+            "crash": 34028,
+            "replay": 3044
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 5,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780 US",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "88213 shipment"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 8860,
+            "crash": 21656,
+            "replay": 16044
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35700,
+            "crash": 34300,
+            "replay": 17248
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 6,
+      "paraphraseA": {
+        "amount_text": "$780 US",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "88213 shipment"
+      },
+      "paraphraseB": {
+        "amount_text": "780 USD only",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "88213 - shipment ref"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 6760,
+            "crash": 34564,
+            "replay": 32792
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34656,
+            "crash": 5668,
+            "replay": 22396
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 7,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow Freight Corp",
+        "reference": "Relating to shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight Incorporated",
+        "reference": "Shipment number: 88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34044,
+            "crash": 34468,
+            "replay": 27080
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 31276,
+            "crash": 20052,
+            "replay": 33976
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 8,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars united states",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "shipment number: 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven hundred eighty US dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 29272,
+            "crash": 32104,
+            "replay": 31080
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35792,
+            "crash": 36216,
+            "replay": 21052
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 9,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars united states",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "shipment number: 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35448,
+            "crash": 36296,
+            "replay": 10720
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 31988,
+            "crash": 26504,
+            "replay": 30256
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 10,
+      "paraphraseA": {
+        "amount_text": "780 US$",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "88213 shipment"
+      },
+      "paraphraseB": {
+        "amount_text": "780 us dollars",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "re: shipment 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 27708,
+            "crash": 35132,
+            "replay": 29408
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34560,
+            "crash": 9880,
+            "replay": 10672
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 11,
+      "paraphraseA": {
+        "amount_text": "seven hundred and eighty USD",
+        "beneficiary_text": "MARLOW-FREIGHT",
+        "reference": "88213 shipment"
+      },
+      "paraphraseB": {
+        "amount_text": "780 us dollars",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "re: shipment 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 10800,
+            "crash": 9316,
+            "replay": 13016
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 28848,
+            "crash": 34976,
+            "replay": 35120
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 12,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Group",
+        "reference": "pertaining to shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 21952,
+            "crash": 34164,
+            "replay": 30208
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35804,
+            "crash": 16840,
+            "replay": 3676
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 13,
+      "paraphraseA": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment#88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars united states",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "shipment number: 88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35676,
+            "crash": 28216,
+            "replay": 34292
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 35752,
+            "crash": 34268,
+            "replay": 15480
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 14,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "USD780.00",
+        "beneficiary_text": "Marlow Freight Co.",
+        "reference": "for shipment number 88213"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34728,
+            "crash": 21088,
+            "replay": 33228
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 19980,
+            "crash": 300,
+            "replay": 31912
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 15,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred And Eighty Dollars",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 USD",
+        "beneficiary_text": "Marlow Freight Ltd.",
+        "reference": "Shipment No. 88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33400,
+            "crash": 28200,
+            "replay": 31992
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 10632,
+            "crash": 29680,
+            "replay": 22992
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 16,
+      "paraphraseA": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight Ltd.",
+        "reference": "re: shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven Hundred & Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Ref shipment 88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 32800,
+            "crash": 36528,
+            "replay": 4604
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34812,
+            "crash": 35700,
+            "replay": 20292
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 17,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred & Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Ref shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven Hundred Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34564,
+            "crash": 26036,
+            "replay": 26704
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 1232,
+            "crash": 34380,
+            "replay": 31260
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.98
+          ],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 18,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "the Marlow Freight company",
+        "reference": "shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 USD",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "Related to shipment # 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 25436,
+            "crash": 20148,
+            "replay": 33304
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 31676,
+            "crash": 14752,
+            "replay": 32712
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 19,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "the Marlow Freight company",
+        "reference": "shipment no. 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 36460,
+            "crash": 17580,
+            "replay": 27000
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33816,
+            "crash": 13988,
+            "replay": 26416
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 20,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred Eighty USD",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "Shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 USD only",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "88213 - shipment ref"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 29268,
+            "crash": 29972,
+            "replay": 21848
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 25508,
+            "crash": 30608,
+            "replay": 32616
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 21,
+      "paraphraseA": {
+        "amount_text": "780 USD only",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "88213 - shipment ref"
+      },
+      "paraphraseB": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment#88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33936,
+            "crash": 35124,
+            "replay": 35036
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 36312,
+            "crash": 36496,
+            "replay": 18072
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 22,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred & Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Ref shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "For shipment 88213"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 24004,
+            "crash": 34968,
+            "replay": 31760
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33564,
+            "crash": 7396,
+            "replay": 17984
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 23,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "relating to shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 8020,
+            "crash": 6320,
+            "replay": 35804
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 9816,
+            "crash": 34944,
+            "replay": 28864
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 24,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "Marlow Freight Limited",
+        "reference": "88213 shipment payment"
+      },
+      "paraphraseB": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35264,
+            "crash": 36568,
+            "replay": 9520
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 32332,
+            "crash": 34896,
+            "replay": 31292
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 25,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred Eighty Dollars (US)",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "Shipment No. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 usd only",
+        "beneficiary_text": "Marlow Freight Company LLC",
+        "reference": "88213 - shipment payment"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34360,
+            "crash": 34272,
+            "replay": 35524
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 26300,
+            "crash": 4060,
+            "replay": 7812
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 26,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "the Marlow Freight company",
+        "reference": "shipment no. 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 34868,
+            "crash": 12220,
+            "replay": 32416
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 6236,
+            "crash": 9940,
+            "replay": 33328
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 27,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred Eighty USD",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "Shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "For shipment 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 33512,
+            "crash": 11908,
+            "replay": 33916
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35908,
+            "crash": 36148,
+            "replay": 34308
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 28,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven hundred eighty US dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 27876,
+            "crash": 20292,
+            "replay": 25808
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 27232,
+            "crash": 26704,
+            "replay": 5668
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 29,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "related to shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight Incorporated",
+        "reference": "Shipment number: 88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 22396,
+            "crash": 35260,
+            "replay": 25436
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 20148,
+            "crash": 33304,
+            "replay": 29660
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 30,
+      "paraphraseA": {
+        "amount_text": "USD780.00",
+        "beneficiary_text": "Marlow Freight Co.",
+        "reference": "for shipment number 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 USD",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "for shipment #88213"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 32544,
+            "crash": 3388,
+            "replay": 31604
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 19888,
+            "crash": 36040,
+            "replay": 35052
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 31,
+      "paraphraseA": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "For shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 26136,
+            "crash": 2396,
+            "replay": 22824
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34932,
+            "crash": 35016,
+            "replay": 4148
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 32,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred And Eighty United States Dollars",
+        "beneficiary_text": "Marlow Freight Corp",
+        "reference": "payment for shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven hundred eighty US dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35928,
+            "crash": 7092,
+            "replay": 34880
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 5472,
+            "crash": 35020,
+            "replay": 29336
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 33,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow Freight Corp",
+        "reference": "Relating to shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven Hundred Eighty USD",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35632,
+            "crash": 34860,
+            "replay": 11456
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35004,
+            "crash": 33664,
+            "replay": 30384
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 34,
+      "paraphraseA": {
+        "amount_text": "Seven hundred eighty US dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment number 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 29196,
+            "crash": 24124,
+            "replay": 33052
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 17188,
+            "crash": 12336,
+            "replay": 8584
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 35,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred And Eighty Dollars",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 USD",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "shipment # 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 32976,
+            "crash": 952,
+            "replay": 30652
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 23108,
+            "crash": 33800,
+            "replay": 33376
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 36,
+      "paraphraseA": {
+        "amount_text": "Seven Hundred Eighty Dollars (US)",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "Shipment No. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "the Marlow Freight company",
+        "reference": "shipment no. 88213"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 12824,
+            "crash": 34356,
+            "replay": 32656
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 5856,
+            "crash": 19748,
+            "replay": 35924
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 37,
+      "paraphraseA": {
+        "amount_text": "USD780",
+        "beneficiary_text": "marlow freight",
+        "reference": "shipment 88213 payment"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven Hundred And Eighty Dollars",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33712,
+            "crash": 36772,
+            "replay": 33992
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 34028,
+            "crash": 33116,
+            "replay": 31284
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 38,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment 88213 details"
+      },
+      "paraphraseB": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 8724,
+            "crash": 11884,
+            "replay": 25816
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 3736,
+            "crash": 1764,
+            "replay": 36800
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 39,
+      "paraphraseA": {
+        "amount_text": "780.00 USD",
+        "beneficiary_text": "Marlow Freight Ltd.",
+        "reference": "Shipment No. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven Hundred & Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Ref shipment 88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 31544,
+            "crash": 35852,
+            "replay": 34724
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 36596,
+            "crash": 35388,
+            "replay": 33944
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 40,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "related to shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 usd",
+        "beneficiary_text": "marlow freight",
+        "reference": "88213 shipment"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 32508,
+            "crash": 30396,
+            "replay": 8816
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 30068,
+            "crash": 2784,
+            "replay": 15040
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 41,
+      "paraphraseA": {
+        "amount_text": "780 USD",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "Seven Hundred & Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Ref shipment 88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 22396,
+            "crash": 19328,
+            "replay": 28688
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 20148,
+            "crash": 34280,
+            "replay": 32544
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 42,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment 88213 details"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 30528,
+            "crash": 30320,
+            "replay": 33816
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 900,
+            "crash": 9084,
+            "replay": 32788
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 43,
+      "paraphraseA": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight Incorporated",
+        "reference": "Shipment number: 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment 88213 details"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 1324,
+            "crash": 26504,
+            "replay": 25508
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 22556,
+            "crash": 32616,
+            "replay": 20500
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 44,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow Freight Corp",
+        "reference": "Relating to shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "USD780",
+        "beneficiary_text": "marlow freight",
+        "reference": "shipment 88213 payment"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 15192,
+            "crash": 34552,
+            "replay": 36344
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33172,
+            "crash": 14748,
+            "replay": 30552
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 45,
+      "paraphraseA": {
+        "amount_text": "780 USD",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "for shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "usd 780",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "shp 88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 19592,
+            "crash": 27016,
+            "replay": 10620
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 19684,
+            "crash": 26916,
+            "replay": 33520
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 46,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 usd",
+        "beneficiary_text": "marlow freight",
+        "reference": "88213 shipment"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 17984,
+            "crash": 34980,
+            "replay": 33904
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 8020,
+            "crash": 35360,
+            "replay": 28216
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressions": 2,
+          "suppressionLayers": [
+            "L1",
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95,
+            0.95
+          ],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 47,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.5499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 9816,
+            "crash": 36076,
+            "replay": 27456
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 35264,
+            "crash": 9996,
+            "replay": 12824
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    }
+  ]
+}

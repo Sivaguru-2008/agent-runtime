@@ -1,0 +1,181 @@
+{
+  "$comment": [
+    "THE reproducibility configuration. Every decision that could change a reported",
+    "number is recorded here rather than living in a script's default argument, so",
+    "that 'we used alpha = 0.05' is checkable rather than assertable. `verify.js`",
+    "reads this file and fails the build when the artifact and this record disagree.",
+    "",
+    "Two things are deliberately NOT here. Model weights are not ours to pin, so the",
+    "judge identifiers are recorded with the date they were reached and the paper",
+    "says that a re-run against a silently updated endpoint is a different",
+    "experiment. And the human annotation labels do not exist yet: the study is",
+    "PENDING, and the config records its design so that the absence is legible."
+  ],
+  "artifactVersion": "2.0.0",
+  "generatedFor": "Effect Identity for Non-Deterministic Agents",
+  "runtime": { "node": ">=20.11.0", "dependencies": "none" },
+
+  "corpora": {
+    "v1": {
+      "file": "corpus/pairs.jsonl",
+      "scores": "corpus/scores.jsonl",
+      "nPairs": 955,
+      "rngSeed": 20260712,
+      "generatedAt": "2026-08-15T10:07:37.040Z",
+      "toolTable": "src/tools.js",
+      "status": "FROZEN",
+      "frozenBecause": [
+        "It is the record the previously reported results rest on.",
+        "Two of its four generator arms (llama-3.3-70b-versatile, and the",
+        "llama-3.1-8b-instant used by the multi-candidate experiment) are no longer",
+        "reachable on this key, so regenerating would silently produce a different",
+        "corpus under the same name."
+      ],
+      "splits": { "cal": 453, "test": 457, "attack": 45, "method": "50/50 stratified by (category, generator), fixed seed; attack categories held out of calibration entirely" }
+    },
+    "v2ext": {
+      "file": "corpus/pairs-v2ext.jsonl",
+      "scores": "corpus/scores-v2ext.jsonl",
+      "rngSeed": 20260818,
+      "toolTable": "src/toolsV2.js",
+      "status": "ADDITIVE",
+      "note": "Strictly additive to v1. Never merged into corpus/pairs.jsonl; analyses report v1, the extension, and their union separately.",
+      "splitMethod": "deterministic alternation within each (category, tool, generator) stratum; attack categories are split='attack' and never enter calibration"
+    },
+    "ladder": {
+      "file": "corpus/ladder.jsonl",
+      "scores": "corpus/scores-ladder.jsonl",
+      "definition": "src/corpus/schemaLevels.js",
+      "levels": ["L1_loose", "L2_moderate", "L3_strict"],
+      "note": "One act family declared three ways. Every pair exists at every level, so level comparisons are paired item-by-item."
+    }
+  },
+
+  "judges": {
+    "reachedOn": "2026-08-18",
+    "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+    "temperature": 0,
+    "batchSize": 10,
+    "maxAttemptsPerBatch": 3,
+    "promptModule": "src/judge.js",
+    "promptExport": "JUDGE_SYSTEM",
+    "scoreField": "p_same_pct",
+    "scoreContract": "integer 0-100 only; 0.95 is REJECTED rather than rescaled; out-of-range values are rejected rather than clamped; a pair that never receives an admissible value is recorded as null (abstention) and never imputed",
+    "models": {
+      "openai/gpt-oss-120b": { "family": "gpt-oss", "role": "primary" },
+      "openai/gpt-oss-20b": { "family": "gpt-oss", "role": "reported" },
+      "qwen/qwen3.6-27b": { "family": "qwen", "role": "cross-family" },
+      "allam-2-7b": { "family": "allam", "role": "cross-family candidate" },
+      "llama-3.3-70b-versatile": { "family": "llama", "role": "v1 only — endpoint no longer available on this key" },
+      "llama-3.1-8b-instant": { "family": "llama", "role": "v1 multi-candidate experiment only — endpoint no longer available on this key" }
+    },
+    "admission": {
+      "module": "src/judgeAdmission.js",
+      "minCoverage": 0.8,
+      "minDistinctValues": 2,
+      "minAuc": 0.6,
+      "rationale": "Coverage alone is insufficient. A judge that answers every pair with the same number has 100% coverage, produces a threshold equal to that constant, suppresses nothing under the strict inequality, and therefore reports 0% wrong-suppression and 0% deduplication — the same fake-perfect row an abstaining judge produces. Both routes are closed."
+    }
+  },
+
+  "calibration": {
+    "module": "src/conformal.js",
+    "alphaReported": [0.01, 0.05],
+    "alphaPrimary": 0.05,
+    "gamma": 0.05,
+    "thresholdConstruction": "t_hi(m) = ceil((n+1)(1 - alpha/m))-th smallest calibration score; +Infinity when that index exceeds n",
+    "multiplicity": "Bonferroni over the candidate set (union bound, valid under arbitrary dependence). Direct set-conformal calibration is implemented for comparison.",
+    "escalationFloor": "t_lo = floor((n+1)*gamma)-th smallest SAME-pair score, capped at t_hi",
+    "poolRule": "MUST be drawn from the configuration's own jurisdiction — the pairs its layers actually route to the judge. Enforced in src/evaluate.js:jurisdictionFilter.",
+    "abstentions": "dropped from the pool; excluded from the max; can never suppress"
+  },
+
+  "canonicalisation": {
+    "module": "src/canonicalize.js",
+    "policies": {
+      "id": "NFC + trim, case-SENSITIVE",
+      "ci": "NFC + trim + lowercase",
+      "num": "numeric normal form; thousands separators stripped; trailing zeros dropped",
+      "text": "NFC + trim + internal whitespace collapse; deliberately NOT semantic"
+    },
+    "operationId": "H(runId || tool || H(canonical(input)))",
+    "witnessProjections": {
+      "declared": "canonical values of all non-text fields",
+      "tightened": "the above plus the numeric magnitudes each free-text field mentions"
+    }
+  },
+
+  "statistics": {
+    "module": "src/stats.js",
+    "intervalMethod": "Wilson score, 95%",
+    "intervalRationale": "Wald collapses to zero width at p=0 and p=1, which is exactly where the headline rates sit",
+    "pairedTest": "exact two-sided McNemar over discordant items",
+    "multipleComparisons": "Holm-Bonferroni, applied WITHIN a family (liveness and safety corrected separately)",
+    "reliability": ["Fleiss kappa", "Cohen kappa pairwise", "Krippendorff alpha (nominal)"],
+    "zeroReporting": "rates that are zero by construction are marked and distinguished from zeros that are sample estimates"
+  },
+
+  "experiments": {
+    "corpusV1": "node src/corpus/generate.js",
+    "corpusV2": "node src/corpus/generateV2.js --generator openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.6-27b",
+    "ladderOnly": "node src/corpus/generateV2.js --offline --only ladder",
+    "scoreV1": "node src/experiments/score.js --judges openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.6-27b",
+    "scoreV2": "node src/experiments/scoreV2.js --pairs corpus/pairs-v2ext.jsonl --out corpus/scores-v2ext-<judge>.jsonl --judges <judge>",
+    "mergeScores": "node src/experiments/mergeScores.js --tag pairs-v2ext --out corpus/scores-v2ext.jsonl",
+    "baselineMatrix": "node src/experiments/baselineMatrix.js --corpus v1|v2ext|union",
+    "schemaLadder": "node src/experiments/schemaLadder.js",
+    "attackMatrix": "node src/experiments/attackMatrix.js --corpus v1|v2ext|union",
+    "conformalAudit": "node src/experiments/conformalAudit.js --corpus v1",
+    "crashReplayV2": "node src/experiments/crashReplayV2.js --trials 48 --arms duplicate,distinct --judge openai/gpt-oss-120b",
+    "annotationExport": "node src/experiments/annotation.js --export",
+    "annotationIngest": "node src/experiments/annotation.js --ingest",
+    "verify": "node src/experiments/verify.js"
+  },
+
+  "crashReplay": {
+    "trialsPerArm": 48,
+    "arms": ["duplicate", "distinct"],
+    "crashPoints": [
+      "before_fence", "after_L0", "after_witness", "after_judge",
+      "before_external_effect", "during_external_commit_window",
+      "after_external_effect_before_local_commit", "after_local_commit"
+    ],
+    "commitWindowPoints": ["during_external_commit_window", "after_external_effect_before_local_commit"],
+    "rngSeed": 20260818,
+    "paraphrasePoolGenerator": "llama-3.3-70b-versatile",
+    "crossFamilyRequired": true,
+    "crossFamilyRationale": "a judge scoring paraphrases written by its own family is partly measuring self-recognition",
+    "thresholdSource": "results/residual_calibration.json -> <judge>_a0.05_residualOnly (the jurisdiction-matched hardened configuration)",
+    "providerIdempotency": "ABSENT BY DESIGN — the mock provider presents no idempotency key, so the commit window stays open and measurable rather than being closed by an assumption"
+  },
+
+  "humanAnnotation": {
+    "status": "PENDING",
+    "harness": "src/experiments/annotation.js",
+    "strata": 11,
+    "perStratumTarget": 15,
+    "plannedAnnotators": 3,
+    "adjudication": "majority of 3; non-majority items go to a fourth independent adjudicator",
+    "reliability": ["Fleiss kappa", "Krippendorff alpha", "per-stratum agreement", "adjudication rate"],
+    "blinding": "annotators see the two calls only; no labels, predictions, thresholds, attack flags; presentation order and A/B assignment randomised",
+    "whatRemains": "collect responses-<name>.csv from at least 3 independent annotators, plus responses-adjudicator-<name>.csv for non-majority items",
+    "mayNotBeCited": "No number from this study may appear in the manuscript until results/human_annotation.json reports status COMPLETE."
+  },
+
+  "assertions": {
+    "enforcedBy": "src/experiments/verify.js",
+    "list": [
+      "calibration and test splits share no pair id",
+      "attack pairs never appear in the calibration split",
+      "every stored score is null or an exact integer percent in [0,1]",
+      "no score was clamped into range",
+      "abstentions are stored as null and are absent from every calibration pool",
+      "no abstention results in a SUPPRESS decision",
+      "every judge reported with rates satisfies the admission rule",
+      "candidate-set multiplicity never exceeds the certified capacity without the threshold becoming +Infinity",
+      "every configuration's calibration pool is drawn from its own jurisdiction",
+      "labels are exactly SAME or DIFF",
+      "the human-annotation result file does not claim COMPLETE while no responses exist"
+    ]
+  }
+}

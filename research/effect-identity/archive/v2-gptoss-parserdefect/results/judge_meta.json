@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-08-13T14:27:45.450Z",
+  "pairs": 780,
+  "batchSize": 12,
+  "models": {
+    "openai_gpt_oss_120b": {
+      "model": "openai/gpt-oss-120b",
+      "family": "gpt-oss",
+      "calls": 65,
+      "inputTokens": 80887,
+      "outputTokens": 51446,
+      "meanCallLatencyMs": 2776,
+      "wallClockMs": 941699,
+      "batchSize": 12,
+      "failedBatches": 0,
+      "defaultedPairs": 0
+    }
+  }
+}

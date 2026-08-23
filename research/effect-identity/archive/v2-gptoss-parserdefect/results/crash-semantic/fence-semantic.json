@@ -1,0 +1,78 @@
+{
+  "committed": {
+    "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490": {
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213"
+      },
+      "canonical": "{\"amount_text\":\"$780.00\",\"beneficiary_text\":\"Marlow Freight\",\"reference\":\"Shipment 88213\"}",
+      "semProjection": "{}",
+      "inputHash": "e1e39ad46ce4cdd5e769f134e668d764efe5e3f263d8450be89e42f103897253",
+      "response": {
+        "wireId": "wire_001",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 35240,
+      "committedAt": "2026-08-13T14:45:56.965Z"
+    },
+    "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c": {
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "runId": "order-88213",
+      "tool": "send_receipt",
+      "input": {
+        "to": "ops@example.com",
+        "note": "wire sent for shipment 88213"
+      },
+      "canonical": "{\"note\":\"wire sent for shipment 88213\",\"to\":\"ops@example.com\"}",
+      "semProjection": "{\"to\":\"ops@example.com\"}",
+      "inputHash": "98b782d7a5fb364500b61326e44efe6590195a7af42679bdc3d5dff70d947be4",
+      "response": {
+        "messageId": "rcpt_001",
+        "status": "SENT"
+      },
+      "pid": 22296,
+      "committedAt": "2026-08-13T14:45:58.131Z"
+    }
+  },
+  "intents": [
+    {
+      "tool": "wire_money",
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "status": "PENDING",
+      "at": "2026-08-13T14:45:56.960Z"
+    },
+    {
+      "tool": "wire_money",
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "status": "COMMITTED",
+      "at": "2026-08-13T14:45:56.965Z"
+    },
+    {
+      "tool": "wire_money",
+      "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+      "status": "SUPPRESSED",
+      "layer": "L1",
+      "matchedOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 0.99,
+      "at": "2026-08-13T14:45:58.126Z"
+    },
+    {
+      "tool": "send_receipt",
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "status": "PENDING",
+      "at": "2026-08-13T14:45:58.130Z"
+    },
+    {
+      "tool": "send_receipt",
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "status": "COMMITTED",
+      "at": "2026-08-13T14:45:58.132Z"
+    }
+  ],
+  "flags": []
+}

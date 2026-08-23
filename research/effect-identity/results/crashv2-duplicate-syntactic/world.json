@@ -1,0 +1,41 @@
+{
+  "wires": [
+    {
+      "wireId": "wire_001",
+      "pid": 3660,
+      "phase": "seed",
+      "amountUSD": 780,
+      "act": "act1",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      }
+    },
+    {
+      "wireId": "wire_002",
+      "pid": 38888,
+      "phase": "crash",
+      "amountUSD": 780,
+      "act": "act1",
+      "input": {
+        "amount_text": "usd 780",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "shp 88213 — installment 1 of 2"
+      }
+    },
+    {
+      "wireId": "wire_003",
+      "pid": 39296,
+      "phase": "replay",
+      "amountUSD": 780,
+      "act": "act1",
+      "input": {
+        "amount_text": "Seven Hundred Eighty US Dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment #88213 — installment 1 of 2"
+      }
+    }
+  ],
+  "receipts": []
+}

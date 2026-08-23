@@ -1,0 +1,19 @@
+{
+  "phase": "seed",
+  "pid": 9816,
+  "scorer": "lexical-offline",
+  "mode": "syntactic",
+  "crashPoint": "after_local_commit",
+  "reachedCrashPoint": false,
+  "events": [
+    {
+      "type": "COMMITTED",
+      "tool": "wire_money",
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "pid": 9816
+    }
+  ],
+  "judgeCalls": 0,
+  "judgeTokens": 0,
+  "judgeLatencyMs": 0
+}

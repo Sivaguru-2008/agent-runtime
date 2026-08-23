@@ -1,0 +1,267 @@
+{
+  "generator": "openai/gpt-oss-120b",
+  "generatedAt": "2026-08-13T13:26:20.836Z",
+  "pool": [
+    {
+      "amount_text": "USD 780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty US dollars",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Ref 88213"
+    },
+    {
+      "amount_text": "$780",
+      "beneficiary_text": "Marlow Freight.",
+      "reference": "For shipment 88213"
+    },
+    {
+      "amount_text": "US$ 780",
+      "beneficiary_text": "Marlow FREIGHT",
+      "reference": "Shipment #88213"
+    },
+    {
+      "amount_text": "780 US dollars",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment No. 88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty USD",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Ref: 88213"
+    },
+    {
+      "amount_text": "USD seven hundred eighty",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213."
+    },
+    {
+      "amount_text": "US$780",
+      "beneficiary_text": "Marlow FREIGHT",
+      "reference": "Shipment #88213."
+    },
+    {
+      "amount_text": "780 dollars (US)",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Ref 88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty (USD)",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Shipment No 88213"
+    },
+    {
+      "amount_text": "$780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213"
+    },
+    {
+      "amount_text": "USD 780",
+      "beneficiary_text": "Marlow Freight Inc.",
+      "reference": "Shipment #88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty dollars",
+      "beneficiary_text": "Marlow Freight Co.",
+      "reference": "Ref 88213"
+    },
+    {
+      "amount_text": "US$ 780.00",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Reference: 88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty USD",
+      "beneficiary_text": "Marlow FREIGHT",
+      "reference": "Shipment No. 88213"
+    },
+    {
+      "amount_text": "780 US dollars",
+      "beneficiary_text": "Marlow Freight Ltd.",
+      "reference": "Shipment number 88213"
+    },
+    {
+      "amount_text": "US dollars 780",
+      "beneficiary_text": "Marlow Freight (Shipping)",
+      "reference": "Shipment: 88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty (780) USD",
+      "beneficiary_text": "MarlowFreight",
+      "reference": "Shipment (88213)"
+    },
+    {
+      "amount_text": "USD 780 dollars",
+      "beneficiary_text": "Marlow Freight LLC",
+      "reference": "Shipment # 88213"
+    },
+    {
+      "amount_text": "$780 US dollars",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213"
+    },
+    {
+      "amount_text": "USD 780",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Shipment #88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty US dollars",
+      "beneficiary_text": "MARLOW FREIGHT",
+      "reference": "Shipment No. 88213"
+    },
+    {
+      "amount_text": "US$780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "For shipment 88213"
+    },
+    {
+      "amount_text": "780 USD",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Shipment #: 88213"
+    },
+    {
+      "amount_text": "$780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment – 88213"
+    },
+    {
+      "amount_text": "seven hundred eighty dollars",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment – 88213"
+    },
+    {
+      "amount_text": "USD 780.00",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213"
+    },
+    {
+      "amount_text": "780 US dollars",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment No 88213"
+    },
+    {
+      "amount_text": "Seven hundred eighty USD",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Ref 88213"
+    },
+    {
+      "amount_text": "780 US dollars",
+      "beneficiary_text": "Marlow FREIGHT",
+      "reference": "Shipment #88213"
+    },
+    {
+      "amount_text": "USD 780",
+      "beneficiary_text": "Marlow Freight.",
+      "reference": "Shipment No. 88213"
+    },
+    {
+      "amount_text": "seven hundred eighty dollars",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Ref: 88213"
+    },
+    {
+      "amount_text": "$ 780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment‑88213"
+    },
+    {
+      "amount_text": "780$",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment/88213"
+    },
+    {
+      "amount_text": "US$ 780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213."
+    },
+    {
+      "amount_text": "seven hundred eighty US dollars",
+      "beneficiary_text": "Marlow freight",
+      "reference": "Ref #88213"
+    },
+    {
+      "amount_text": "780 dollars (USD)",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment No 88213"
+    },
+    {
+      "amount_text": "US$ 780",
+      "beneficiary_text": "Marlow Freight.",
+      "reference": "Ref: 88213"
+    },
+    {
+      "amount_text": "seven hundred eighty US dollars",
+      "beneficiary_text": "Marlow Freight -",
+      "reference": "Shipment ID 88213"
+    },
+    {
+      "amount_text": "780 US dollars",
+      "beneficiary_text": "Marlow Freight (carrier)",
+      "reference": "Shipment No. 88213"
+    },
+    {
+      "amount_text": "US dollars 780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment 88213"
+    },
+    {
+      "amount_text": "USD 780.00",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment #: 88213"
+    },
+    {
+      "amount_text": "seven hundred eighty USD",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Reference 88213"
+    },
+    {
+      "amount_text": "780 USD",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment # 88213"
+    },
+    {
+      "amount_text": "US$780",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Shipment No 88213"
+    },
+    {
+      "amount_text": "780 US$",
+      "beneficiary_text": "Marlow Freight",
+      "reference": "Ship 88213"
+    },
+    {
+      "amount_text": "seven hundred eighty dollars",
+      "beneficiary_text": "MARLOW FREIGHT",
+      "reference": "shipment #88213"
+    },
+    {
+      "amount_text": "USD 780",
+      "beneficiary_text": "Marlow Freight Ltd",
+      "reference": "ref: shipment 88213"
+    },
+    {
+      "amount_text": "780.00 US dollars",
+      "beneficiary_text": "marlow freight",
+      "reference": "for shipment no. 88213"
+    },
+    {
+      "amount_text": "$780",
+      "beneficiary_text": "Marlow  Freight",
+      "reference": "Shipment number 88213"
+    },
+    {
+      "amount_text": "seven hundred and eighty USD",
+      "beneficiary_text": "MARLOW-FREIGHT",
+      "reference": "88213 shipment"
+    },
+    {
+      "amount_text": "780 dollars exactly",
+      "beneficiary_text": "Marlow Freight Co",
+      "reference": "covering shipment 88213"
+    }
+  ],
+  "rejected": 1
+}

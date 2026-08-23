@@ -1,0 +1,14 @@
+{
+  "trial": 29,
+  "paraphrase": {
+    "amount_text": "seven hundred eighty dollars",
+    "beneficiary_text": "MARLOW FREIGHT",
+    "reference": "shipment #88213"
+  },
+  "crashPoint": "post_commit",
+  "thresholds": {
+    "tHi": 0.1,
+    "tLo": 0.009000000000000001
+  },
+  "judgeModel": "openai/gpt-oss-120b"
+}

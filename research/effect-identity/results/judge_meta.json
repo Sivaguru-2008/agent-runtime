@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-08-23T18:33:56.842Z",
+  "pairs": 955,
+  "batchSize": 10,
+  "models": {
+    "openai_gpt_oss_120b": {
+      "model": "openai/gpt-oss-120b",
+      "family": "gpt-oss",
+      "calls": 4,
+      "inputTokens": 4345,
+      "outputTokens": 2709,
+      "meanCallLatencyMs": 2061,
+      "wallClockMs": 54910,
+      "batchSize": 10,
+      "parse": {
+        "batches": 4,
+        "batchAttempts": 4,
+        "batchRetries": 0,
+        "transportFailures": 0,
+        "batchesWithViolations": 0,
+        "probabilityScaleBatches": 0,
+        "pairsScored": 35,
+        "abstentions": 0,
+        "byStatus": {
+          "ok": 35,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousAcceptedZeroOne": 0,
+        "samples": []
+      },
+      "abstentions": 0,
+      "scoredPairs": 955
+    },
+    "qwen_qwen3_6_27b": {
+      "model": "qwen/qwen3.6-27b",
+      "family": "qwen",
+      "calls": 2,
+      "inputTokens": 1738,
+      "outputTokens": 4530,
+      "meanCallLatencyMs": 4799,
+      "wallClockMs": 108165,
+      "batchSize": 6,
+      "parse": {
+        "batches": 81,
+        "batchAttempts": 239,
+        "batchRetries": 158,
+        "transportFailures": 237,
+        "batchesWithViolations": 0,
+        "probabilityScaleBatches": 0,
+        "pairsScored": 12,
+        "abstentions": 473,
+        "byStatus": {
+          "ok": 12,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousAcceptedZeroOne": 6,
+        "samples": []
+      },
+      "abstentions": 473,
+      "scoredPairs": 482
+    }
+  }
+}

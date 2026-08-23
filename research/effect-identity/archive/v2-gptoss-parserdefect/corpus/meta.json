@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-08-13T13:23:47.357Z",
+  "rngSeed": 20260712,
+  "generation": {
+    "generators": [
+      "llama-3.3-70b-versatile",
+      "openai/gpt-oss-120b"
+    ],
+    "perGenerator": {
+      "llama-3.3-70b-versatile": {
+        "s2Dropped": 6,
+        "s4Dropped": 18,
+        "s2Kept": 62,
+        "s4Kept": 50
+      },
+      "openai/gpt-oss-120b": {
+        "s2Dropped": 5,
+        "s4Dropped": 2,
+        "s2Kept": 63,
+        "s4Kept": 66
+      }
+    }
+  },
+  "counts": {
+    "S1_mechanical": {
+      "total": 68,
+      "cal": 34,
+      "test": 34,
+      "attack": 0,
+      "label": "SAME"
+    },
+    "S3_loose_value": {
+      "total": 15,
+      "cal": 7,
+      "test": 8,
+      "attack": 0,
+      "label": "SAME"
+    },
+    "D1_near_miss": {
+      "total": 251,
+      "cal": 125,
+      "test": 126,
+      "attack": 0,
+      "label": "DIFF"
+    },
+    "D2_legit_repeat": {
+      "total": 150,
+      "cal": 75,
+      "test": 75,
+      "attack": 0,
+      "label": "DIFF"
+    },
+    "D3_semantic_diff": {
+      "total": 10,
+      "cal": 5,
+      "test": 5,
+      "attack": 0,
+      "label": "DIFF"
+    },
+    "D4a_field_injection": {
+      "total": 20,
+      "cal": 0,
+      "test": 0,
+      "attack": 20,
+      "label": "DIFF"
+    },
+    "D4b_text_injection": {
+      "total": 25,
+      "cal": 0,
+      "test": 0,
+      "attack": 25,
+      "label": "DIFF"
+    },
+    "S2_paraphrase": {
+      "total": 125,
+      "cal": 62,
+      "test": 63,
+      "attack": 0,
+      "label": "SAME"
+    },
+    "S4_adversarial": {
+      "total": 116,
+      "cal": 58,
+      "test": 58,
+      "attack": 0,
+      "label": "SAME"
+    }
+  },
+  "byGenerator": {
+    "llama-3.3-70b-versatile": {
+      "total": 112,
+      "cal": 56,
+      "test": 56,
+      "attack": 0
+    },
+    "openai/gpt-oss-120b": {
+      "total": 129,
+      "cal": 64,
+      "test": 65,
+      "attack": 0
+    }
+  },
+  "totals": {
+    "pairs": 780,
+    "same": 324,
+    "diff": 456
+  }
+}

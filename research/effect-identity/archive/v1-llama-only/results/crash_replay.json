@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-07-13T02:53:00.960Z",
+  "live": true,
+  "runs": {
+    "syntactic": {
+      "mode": "syntactic",
+      "scorer": "groq:llama-3.3-70b-versatile",
+      "pids": {
+        "processA": 26772,
+        "processB": 27080
+      },
+      "wiresSent": 2,
+      "totalWiredUSD": 1560,
+      "receiptsSent": 1,
+      "eventsA": [
+        {
+          "type": "COMMITTED",
+          "tool": "wire_money",
+          "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+          "pid": 26772
+        }
+      ],
+      "eventsB": [
+        {
+          "type": "COMMITTED",
+          "tool": "wire_money",
+          "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+          "pid": 27080
+        },
+        {
+          "type": "COMMITTED",
+          "tool": "send_receipt",
+          "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+          "pid": 27080
+        }
+      ]
+    },
+    "semantic": {
+      "mode": "semantic",
+      "scorer": "groq:llama-3.3-70b-versatile",
+      "pids": {
+        "processA": 7488,
+        "processB": 40160
+      },
+      "wiresSent": 1,
+      "totalWiredUSD": 780,
+      "receiptsSent": 1,
+      "eventsA": [
+        {
+          "type": "COMMITTED",
+          "tool": "wire_money",
+          "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+          "pid": 7488
+        }
+      ],
+      "eventsB": [
+        {
+          "type": "SUPPRESSED",
+          "layer": "L1",
+          "tool": "wire_money",
+          "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+          "matchedOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+          "score": 1,
+          "pid": 40160
+        },
+        {
+          "type": "COMMITTED",
+          "tool": "send_receipt",
+          "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+          "pid": 40160
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "syntacticDoubleWired": true,
+    "semanticExactlyOnce": true,
+    "semanticSuppressionEvent": {
+      "type": "SUPPRESSED",
+      "layer": "L1",
+      "tool": "wire_money",
+      "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+      "matchedOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 1,
+      "pid": 40160
+    },
+    "crossProcess": true
+  }
+}

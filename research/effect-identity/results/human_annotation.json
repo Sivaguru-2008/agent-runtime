@@ -1,0 +1,19 @@
+{
+  "status": "PENDING",
+  "reason": "annotation sheet exported, but no responses-*.csv present — no human labels exist",
+  "sheetItems": 154,
+  "strata": {
+    "same_mechanical": 15,
+    "same_paraphrase": 15,
+    "same_loose_value": 15,
+    "same_adversarial": 15,
+    "diff_near_miss": 15,
+    "diff_text_only": 15,
+    "diff_semantic": 15,
+    "attack_field": 15,
+    "attack_text": 15,
+    "attack_encoding": 15,
+    "misdeclared": 4
+  },
+  "note": "This file exists so the ABSENCE of the study is machine-checkable. Nothing here is a result, and no number in the manuscript may cite it."
+}

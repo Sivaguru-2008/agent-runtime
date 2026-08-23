@@ -1,0 +1,2229 @@
+{
+  "generatedAt": "2026-07-13T02:53:56.252Z",
+  "gamma": 0.05,
+  "configs": {
+    "layered_judge_alpha_0.01": {
+      "alpha": 0.01,
+      "scorer": "judge",
+      "tHi": null,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.35789473684210527,
+      "flaggedEscape": 0.45263157894736844,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.75,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.7741935483870968,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.5909090909090909,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "hardened_judge_alpha_0.01": {
+      "alpha": 0.01,
+      "scorer": "judge",
+      "tHi": null,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.35789473684210527,
+      "flaggedEscape": 0.45263157894736844,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.75,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.7741935483870968,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.5909090909090909,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "layered_judge_alpha_0.02": {
+      "alpha": 0.02,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "hardened_judge_alpha_0.02": {
+      "alpha": 0.02,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "layered_judge_alpha_0.05": {
+      "alpha": 0.05,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "hardened_judge_alpha_0.05": {
+      "alpha": 0.05,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "layered_judge_alpha_0.1": {
+      "alpha": 0.1,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "hardened_judge_alpha_0.1": {
+      "alpha": 0.1,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "layered_judge_alpha_0.2": {
+      "alpha": 0.2,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "hardened_judge_alpha_0.2": {
+      "alpha": 0.2,
+      "scorer": "judge",
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "layered_lexical_alpha_0.01": {
+      "alpha": 0.01,
+      "scorer": "lexical",
+      "tHi": null,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0.1527777777777778,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.35789473684210527,
+      "flaggedEscape": 0.631578947368421,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 1,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.44,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 1,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.9545454545454546,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "hardened_lexical_alpha_0.01": {
+      "alpha": 0.01,
+      "scorer": "lexical",
+      "tHi": null,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0.1527777777777778,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.35789473684210527,
+      "flaggedEscape": 0.631578947368421,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 1,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.44,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 1,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0.9545454545454546,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "layered_lexical_alpha_0.02": {
+      "alpha": 0.02,
+      "scorer": "lexical",
+      "tHi": 0.91,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0.1527777777777778,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.45263157894736844,
+      "flaggedEscape": 0.5368421052631579,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.44,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.03225806451612903,
+          "escalate": 0.967741935483871,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.045454545454545456,
+          "escalate": 0.9090909090909091,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "hardened_lexical_alpha_0.02": {
+      "alpha": 0.02,
+      "scorer": "lexical",
+      "tHi": 0.91,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0.1527777777777778,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.45263157894736844,
+      "flaggedEscape": 0.5368421052631579,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.44,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.03225806451612903,
+          "escalate": 0.967741935483871,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.045454545454545456,
+          "escalate": 0.9090909090909091,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "layered_lexical_alpha_0.05": {
+      "alpha": 0.05,
+      "scorer": "lexical",
+      "tHi": 0.9055555555555556,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0.041666666666666664,
+      "friction": 0.1111111111111111,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.4842105263157895,
+      "flaggedEscape": 0.5052631578947369,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0.12,
+          "escalate": 0.32,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.06451612903225806,
+          "escalate": 0.9354838709677419,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.13636363636363635,
+          "escalate": 0.8181818181818182,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "hardened_lexical_alpha_0.05": {
+      "alpha": 0.05,
+      "scorer": "lexical",
+      "tHi": 0.9055555555555556,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0.041666666666666664,
+      "friction": 0.1111111111111111,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.4842105263157895,
+      "flaggedEscape": 0.5052631578947369,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0.12,
+          "escalate": 0.32,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.06451612903225806,
+          "escalate": 0.9354838709677419,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.13636363636363635,
+          "escalate": 0.8181818181818182,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "layered_lexical_alpha_0.1": {
+      "alpha": 0.1,
+      "scorer": "lexical",
+      "tHi": 0.9,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0.08333333333333333,
+      "friction": 0.06944444444444445,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.4842105263157895,
+      "flaggedEscape": 0.5052631578947369,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0.24,
+          "escalate": 0.2,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.06451612903225806,
+          "escalate": 0.9354838709677419,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.13636363636363635,
+          "escalate": 0.8181818181818182,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "hardened_lexical_alpha_0.1": {
+      "alpha": 0.1,
+      "scorer": "lexical",
+      "tHi": 0.9,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0.08333333333333333,
+      "friction": 0.06944444444444445,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.4842105263157895,
+      "flaggedEscape": 0.5052631578947369,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0.24,
+          "escalate": 0.2,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.06451612903225806,
+          "escalate": 0.9354838709677419,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.13636363636363635,
+          "escalate": 0.8181818181818182,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "layered_lexical_alpha_0.2": {
+      "alpha": 0.2,
+      "scorer": "lexical",
+      "tHi": 0.8833333333333333,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": false,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0.1388888888888889,
+      "friction": 0.013888888888888888,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.5157894736842106,
+      "flaggedEscape": 0.47368421052631576,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0.4,
+          "escalate": 0.04,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.12903225806451613,
+          "escalate": 0.8709677419354839,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.18181818181818182,
+          "escalate": 0.7727272727272727,
+          "execute": 0.045454545454545456
+        }
+      }
+    },
+    "hardened_lexical_alpha_0.2": {
+      "alpha": 0.2,
+      "scorer": "lexical",
+      "tHi": 0.8833333333333333,
+      "tLo": 0.5,
+      "nCalDiff": 71,
+      "nCalSame": 58,
+      "witness": true,
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0.1388888888888889,
+      "friction": 0.013888888888888888,
+      "correctExecute": 0.8472222222222222,
+      "dedup": 0.5157894736842106,
+      "flaggedEscape": 0.47368421052631576,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.875,
+          "escalate": 0.125,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0.4,
+          "escalate": 0.04,
+          "execute": 0.56
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.12903225806451613,
+          "escalate": 0.8709677419354839,
+          "execute": 0
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.18181818181818182,
+          "escalate": 0.7727272727272727,
+          "execute": 0.045454545454545456
+        }
+      }
+    }
+  },
+  "baselines": {
+    "B0_noFence": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0,
+      "flaggedEscape": 0,
+      "silentEscape": 1,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        }
+      }
+    },
+    "B1_exactString": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0,
+      "flaggedEscape": 0,
+      "silentEscape": 1,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        }
+      }
+    },
+    "B2_canonicalL0": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.35789473684210527,
+      "flaggedEscape": 0,
+      "silentEscape": 0.6421052631578947,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        }
+      }
+    },
+    "B4_rawJudge_0.5": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.6736842105263158,
+      "flaggedEscape": 0,
+      "silentEscape": 0.3263157894736842,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 0.6176470588235294,
+          "escalate": 0,
+          "execute": 0.38235294117647056
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "B4_rawJudge_0.9": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.6736842105263158,
+      "flaggedEscape": 0,
+      "silentEscape": 0.3263157894736842,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 0.6176470588235294,
+          "escalate": 0,
+          "execute": 0.38235294117647056
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "B4_rawJudge_0.95": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.6736842105263158,
+      "flaggedEscape": 0,
+      "silentEscape": 0.3263157894736842,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 0.6176470588235294,
+          "escalate": 0,
+          "execute": 0.38235294117647056
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    }
+  },
+  "sweeps": {
+    "calibrationSize": [
+      {
+        "n": 10,
+        "alpha": 0.05,
+        "resamples": 300,
+        "pThresholdInfinite": 1,
+        "meanWrongSuppression": 0,
+        "maxWrongSuppression": 0
+      },
+      {
+        "n": 20,
+        "alpha": 0.05,
+        "resamples": 300,
+        "pThresholdInfinite": 0,
+        "meanWrongSuppression": 0.0012037037037037036,
+        "maxWrongSuppression": 0.3611111111111111
+      },
+      {
+        "n": 30,
+        "alpha": 0.05,
+        "resamples": 300,
+        "pThresholdInfinite": 0,
+        "meanWrongSuppression": 0,
+        "maxWrongSuppression": 0
+      },
+      {
+        "n": 50,
+        "alpha": 0.05,
+        "resamples": 300,
+        "pThresholdInfinite": 0,
+        "meanWrongSuppression": 0,
+        "maxWrongSuppression": 0
+      },
+      {
+        "n": 71,
+        "alpha": 0.05,
+        "resamples": 300,
+        "pThresholdInfinite": 0,
+        "meanWrongSuppression": 0,
+        "maxWrongSuppression": 0
+      }
+    ]
+  },
+  "ablations": {
+    "noL0": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.6736842105263158,
+      "flaggedEscape": 0,
+      "silentEscape": 0.3263157894736842,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 0.6176470588235294,
+          "escalate": 0,
+          "execute": 0.38235294117647056
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "noEscalation": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0,
+      "correctExecute": 1,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0,
+      "silentEscape": 0.18947368421052632,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0,
+          "execute": 0.25
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0,
+          "execute": 1
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0,
+          "execute": 0.22580645161290322
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0,
+          "execute": 0.4090909090909091
+        }
+      }
+    },
+    "noCalibration": {
+      "nSame": 95,
+      "nDiff": 72,
+      "wrongSuppression": 0,
+      "friction": 0.3611111111111111,
+      "correctExecute": 0.6388888888888888,
+      "dedup": 0.8105263157894737,
+      "flaggedEscape": 0.17894736842105263,
+      "silentEscape": 0.010526315789473684,
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 34,
+          "label": "SAME",
+          "suppress": 1,
+          "escalate": 0,
+          "execute": 0
+        },
+        "S3_loose_value": {
+          "n": 8,
+          "label": "SAME",
+          "suppress": 0.75,
+          "escalate": 0.25,
+          "execute": 0
+        },
+        "D1_near_miss": {
+          "n": 42,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.38095238095238093,
+          "execute": 0.6190476190476191
+        },
+        "D2_legit_repeat": {
+          "n": 25,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.32,
+          "execute": 0.68
+        },
+        "D3_semantic_diff": {
+          "n": 5,
+          "label": "DIFF",
+          "suppress": 0,
+          "escalate": 0.4,
+          "execute": 0.6
+        },
+        "S2_paraphrase": {
+          "n": 31,
+          "label": "SAME",
+          "suppress": 0.7741935483870968,
+          "escalate": 0.1935483870967742,
+          "execute": 0.03225806451612903
+        },
+        "S4_adversarial": {
+          "n": 22,
+          "label": "SAME",
+          "suppress": 0.5909090909090909,
+          "escalate": 0.4090909090909091,
+          "execute": 0
+        }
+      }
+    },
+    "judgeJurisdiction": {
+      "nTest": 167,
+      "settledByL0": 0.20359281437125748,
+      "settledByWitness": 0.20958083832335328,
+      "needsJudge": 0.5868263473053892
+    }
+  },
+  "distributions": {
+    "judge": {
+      "same": {
+        "n": 119,
+        "min": 0,
+        "q10": 0.5,
+        "q25": 0.5,
+        "median": 1,
+        "q75": 1,
+        "q90": 1,
+        "max": 1
+      },
+      "diff": {
+        "n": 188,
+        "min": 0,
+        "q10": 0,
+        "q25": 0,
+        "median": 0,
+        "q75": 0.5,
+        "q90": 1,
+        "max": 1
+      },
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 68,
+          "min": 0.5,
+          "q10": 0.5,
+          "q25": 0.5,
+          "median": 1,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        },
+        "S3_loose_value": {
+          "n": 15,
+          "min": 0.5,
+          "q10": 0.5,
+          "q25": 0.5,
+          "median": 1,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        },
+        "D1_near_miss": {
+          "n": 83,
+          "min": 0,
+          "q10": 0,
+          "q25": 0,
+          "median": 0,
+          "q75": 0.5,
+          "q90": 0.5,
+          "max": 0.5
+        },
+        "D2_legit_repeat": {
+          "n": 50,
+          "min": 0,
+          "q10": 0,
+          "q25": 0,
+          "median": 0,
+          "q75": 0.5,
+          "q90": 0.5,
+          "max": 0.5
+        },
+        "D3_semantic_diff": {
+          "n": 10,
+          "min": 0,
+          "q10": 0,
+          "q25": 0,
+          "median": 0.5,
+          "q75": 0.5,
+          "q90": 0.5,
+          "max": 0.5
+        },
+        "D4a_field_injection": {
+          "n": 20,
+          "min": 0,
+          "q10": 0.5,
+          "q25": 0.5,
+          "median": 1,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        },
+        "D4b_text_injection": {
+          "n": 25,
+          "min": 0,
+          "q10": 0,
+          "q25": 0,
+          "median": 0.5,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        },
+        "S2_paraphrase": {
+          "n": 61,
+          "min": 0,
+          "q10": 0.5,
+          "q25": 0.5,
+          "median": 1,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        },
+        "S4_adversarial": {
+          "n": 43,
+          "min": 0.5,
+          "q10": 0.5,
+          "q25": 0.5,
+          "median": 1,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        }
+      }
+    },
+    "lexical": {
+      "same": {
+        "n": 119,
+        "min": 0.44999999999999996,
+        "q10": 0.71,
+        "q25": 0.8166666666666667,
+        "median": 0.85,
+        "q75": 0.8928571428571429,
+        "q90": 0.95,
+        "max": 0.98
+      },
+      "diff": {
+        "n": 188,
+        "min": 0,
+        "q10": 0.02,
+        "q25": 0.02,
+        "median": 0.08333333333333333,
+        "q75": 0.21875,
+        "q90": 0.9,
+        "max": 0.91
+      },
+      "perCategory": {
+        "S1_mechanical": {
+          "n": 68,
+          "min": 1,
+          "q10": 1,
+          "q25": 1,
+          "median": 1,
+          "q75": 1,
+          "q90": 1,
+          "max": 1
+        },
+        "S3_loose_value": {
+          "n": 15,
+          "min": 0.8833333333333333,
+          "q10": 0.9,
+          "q25": 0.95,
+          "median": 0.95,
+          "q75": 0.95,
+          "q90": 0.98,
+          "max": 0.98
+        },
+        "D1_near_miss": {
+          "n": 83,
+          "min": 0,
+          "q10": 0.02,
+          "q25": 0.02,
+          "median": 0.02,
+          "q75": 0.02,
+          "q90": 0.15,
+          "max": 0.22916666666666666
+        },
+        "D2_legit_repeat": {
+          "n": 50,
+          "min": 0.20833333333333334,
+          "q10": 0.21875,
+          "q25": 0.21875,
+          "median": 0.8833333333333333,
+          "q75": 0.9,
+          "q90": 0.91,
+          "max": 0.91
+        },
+        "D3_semantic_diff": {
+          "n": 10,
+          "min": 0,
+          "q10": 0.024193548387096774,
+          "q25": 0.03125,
+          "median": 0.0625,
+          "q75": 0.08333333333333333,
+          "q90": 0.75,
+          "max": 0.75
+        },
+        "D4a_field_injection": {
+          "n": 20,
+          "min": 0.02,
+          "q10": 0.02,
+          "q25": 0.02,
+          "median": 0.02,
+          "q75": 0.02,
+          "q90": 0.02,
+          "max": 0.02
+        },
+        "D4b_text_injection": {
+          "n": 25,
+          "min": 0.08928571428571429,
+          "q10": 0.1,
+          "q25": 0.109375,
+          "median": 0.109375,
+          "q75": 0.109375,
+          "q90": 0.125,
+          "max": 0.125
+        },
+        "S2_paraphrase": {
+          "n": 61,
+          "min": 0.47,
+          "q10": 0.75,
+          "q25": 0.8166666666666667,
+          "median": 0.85,
+          "q75": 0.87,
+          "q90": 0.9,
+          "max": 0.95
+        },
+        "S4_adversarial": {
+          "n": 43,
+          "min": 0.44999999999999996,
+          "q10": 0.71,
+          "q25": 0.8,
+          "median": 0.8357142857142857,
+          "q75": 0.87,
+          "q90": 0.91,
+          "max": 0.95
+        }
+      }
+    }
+  },
+  "l0": {
+    "sameCaughtByL0": 0.35789473684210527,
+    "diffCaughtByL0": 0,
+    "perCategoryL0": {
+      "S1_mechanical": 1,
+      "S3_loose_value": 0,
+      "D1_near_miss": 0,
+      "D2_legit_repeat": 0,
+      "D3_semantic_diff": 0,
+      "S2_paraphrase": 0,
+      "S4_adversarial": 0
+    }
+  },
+  "attacks": {
+    "rawJudge": {
+      "n": 45,
+      "wrongSuppression_D4a_field": 0.5,
+      "wrongSuppression_D4b_text": 0.36
+    },
+    "layered_judge_alpha_0.05": {
+      "n": 45,
+      "wrongSuppression_D4a_field": 0.5,
+      "wrongSuppression_D4b_text": 0.36
+    },
+    "hardened_judge_alpha_0.05": {
+      "n": 45,
+      "wrongSuppression_D4a_field": 0,
+      "wrongSuppression_D4b_text": 0.36
+    }
+  }
+}

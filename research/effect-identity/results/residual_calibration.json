@@ -1,0 +1,2683 @@
+{
+  "generatedAt": "2026-08-17T13:23:57.826Z",
+  "gamma": 0.05,
+  "configs": {
+    "openai_gpt_oss_120b_a0.01_asPublished": {
+      "judge": "openai_gpt_oss_120b",
+      "alpha": 0.01,
+      "pool": "asPublished",
+      "tHi": 0.85,
+      "tLo": 0.8,
+      "nCalDiff": 205,
+      "nCalSame": 214,
+      "certifiableM": 2,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0.0048543689320388345,
+          "successes": 1,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0008574298980504186,
+            "hi": 0.026980056809881543
+          }
+        },
+        "friction": {
+          "value": 0.0048543689320388345,
+          "successes": 1,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0008574298980504186,
+            "hi": 0.026980056809881543
+          }
+        },
+        "dedup": {
+          "value": 0.852589641434263,
+          "successes": 214,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.8034256041836453,
+            "hi": 0.8911238651965973
+          }
+        },
+        "silentEscape": {
+          "value": 0.05976095617529881,
+          "successes": 15,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03654686884632264,
+            "hi": 0.0962472965037702
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.08764940239043825,
+          "successes": 22,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0585940331000327,
+            "hi": 0.1291362484722262
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0.008403361344537815,
+          "successes": 1,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0014849430400896285,
+            "hi": 0.04606788543307778
+          }
+        },
+        "friction": {
+          "value": 0.008403361344537815,
+          "successes": 1,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0014849430400896285,
+            "hi": 0.04606788543307778
+          }
+        },
+        "dedup": {
+          "value": 0.8294930875576036,
+          "successes": 180,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.77383123379021,
+            "hi": 0.8736921106199749
+          }
+        },
+        "silentEscape": {
+          "value": 0.06912442396313365,
+          "successes": 15,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.042334458243399105,
+            "hi": 0.1109042452202052
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.10138248847926268,
+          "successes": 22,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.06790836797182181,
+            "hi": 0.14872422935012228
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0.84,
+          "successes": 21,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6534637839282114,
+            "hi": 0.9359654854332355
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.01_residualOnly": {
+      "judge": "openai_gpt_oss_120b",
+      "alpha": 0.01,
+      "pool": "residualOnly",
+      "tHi": 0.95,
+      "tLo": 0.8,
+      "nCalDiff": 117,
+      "nCalSame": 214,
+      "certifiableM": 1,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.018306481675656787
+          }
+        },
+        "friction": {
+          "value": 0.009708737864077669,
+          "successes": 2,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0026665364740969914,
+            "hi": 0.034701955266110154
+          }
+        },
+        "dedup": {
+          "value": 0.199203187250996,
+          "successes": 50,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.1544913660104803,
+            "hi": 0.25298338045044283
+          }
+        },
+        "silentEscape": {
+          "value": 0.05976095617529881,
+          "successes": 15,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03654686884632264,
+            "hi": 0.0962472965037702
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.7410358565737052,
+          "successes": 186,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6834959936716319,
+            "hi": 0.7913090108199462
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.031271680241939506
+          }
+        },
+        "friction": {
+          "value": 0.01680672268907563,
+          "successes": 2,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.004621175448157974,
+            "hi": 0.059212801256237346
+          }
+        },
+        "dedup": {
+          "value": 0.07373271889400922,
+          "successes": 16,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.045891749298720017,
+            "hi": 0.11640322471607568
+          }
+        },
+        "silentEscape": {
+          "value": 0.06912442396313365,
+          "successes": 15,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.042334458243399105,
+            "hi": 0.1109042452202052
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.8571428571428571,
+          "successes": 186,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.8043627897306371,
+            "hi": 0.8974981779866962
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0.4,
+          "successes": 10,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.23403302377747973,
+            "hi": 0.5926054264103301
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_asPublished": {
+      "judge": "openai_gpt_oss_120b",
+      "alpha": 0.05,
+      "pool": "asPublished",
+      "tHi": 0.2,
+      "tLo": 0.2,
+      "nCalDiff": 205,
+      "nCalSame": 214,
+      "certifiableM": 10,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0.024271844660194174,
+          "successes": 5,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.010411030069398898,
+            "hi": 0.05555047676763377
+          }
+        },
+        "friction": {
+          "value": 0,
+          "successes": 0,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.018306481675656787
+          }
+        },
+        "dedup": {
+          "value": 1,
+          "successes": 251,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.984926083697406,
+            "hi": 1
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.015073916302594106
+          }
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.015073916302594106
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0.04201680672268908,
+          "successes": 5,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.018078474459665823,
+            "hi": 0.09459894693841323
+          }
+        },
+        "friction": {
+          "value": 0,
+          "successes": 0,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.031271680241939506
+          }
+        },
+        "dedup": {
+          "value": 1,
+          "successes": 217,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9826053548042667,
+            "hi": 1
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.017394645195733326
+          }
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.017394645195733326
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0.88,
+          "successes": 22,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7004420607907267,
+            "hi": 0.9583318284955964
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_residualOnly": {
+      "judge": "openai_gpt_oss_120b",
+      "alpha": 0.05,
+      "pool": "residualOnly",
+      "tHi": 0.8,
+      "tLo": 0.8,
+      "nCalDiff": 117,
+      "nCalSame": 214,
+      "certifiableM": 5,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0.009708737864077669,
+          "successes": 2,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0026665364740969914,
+            "hi": 0.034701955266110154
+          }
+        },
+        "friction": {
+          "value": 0,
+          "successes": 0,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.018306481675656787
+          }
+        },
+        "dedup": {
+          "value": 0.9402390438247012,
+          "successes": 236,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9037527034962298,
+            "hi": 0.9634531311536774
+          }
+        },
+        "silentEscape": {
+          "value": 0.05976095617529881,
+          "successes": 15,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03654686884632264,
+            "hi": 0.0962472965037702
+          }
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.015073916302594106
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0.01680672268907563,
+          "successes": 2,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.004621175448157974,
+            "hi": 0.059212801256237346
+          }
+        },
+        "friction": {
+          "value": 0,
+          "successes": 0,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.031271680241939506
+          }
+        },
+        "dedup": {
+          "value": 0.9308755760368663,
+          "successes": 202,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.8890957547797949,
+            "hi": 0.9576655417566009
+          }
+        },
+        "silentEscape": {
+          "value": 0.06912442396313365,
+          "successes": 15,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.042334458243399105,
+            "hi": 0.1109042452202052
+          }
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.017394645195733326
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0.84,
+          "successes": 21,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6534637839282114,
+            "hi": 0.9359654854332355
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_asPublished": {
+      "judge": "openai_gpt_oss_20b",
+      "alpha": 0.01,
+      "pool": "asPublished",
+      "tHi": 1,
+      "tLo": 0,
+      "nCalDiff": 205,
+      "nCalSame": 214,
+      "certifiableM": 2,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.018306481675656787
+          }
+        },
+        "friction": {
+          "value": 0.08737864077669903,
+          "successes": 18,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.055985109530487055,
+            "hi": 0.13387946272612292
+          }
+        },
+        "dedup": {
+          "value": 0.13545816733067728,
+          "successes": 34,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09858000717317408,
+            "hi": 0.18332647363708374
+          }
+        },
+        "silentEscape": {
+          "value": 0.0199203187250996,
+          "successes": 5,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.008538053656468272,
+            "hi": 0.04577594566195874
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.8446215139442231,
+          "successes": 212,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7946469618718504,
+            "hi": 0.884206474302059
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.031271680241939506
+          }
+        },
+        "friction": {
+          "value": 0.15126050420168066,
+          "successes": 18,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09787297206229482,
+            "hi": 0.226459376341747
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.017394645195733326
+          }
+        },
+        "silentEscape": {
+          "value": 0.02304147465437788,
+          "successes": 5,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.009881167688609183,
+            "hi": 0.05279483026308114
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.9769585253456221,
+          "successes": 212,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9472051697369189,
+            "hi": 0.9901188323113909
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.13319225093904846
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_residualOnly": {
+      "judge": "openai_gpt_oss_20b",
+      "alpha": 0.01,
+      "pool": "residualOnly",
+      "tHi": 1,
+      "tLo": 0,
+      "nCalDiff": 117,
+      "nCalSame": 214,
+      "certifiableM": 1,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.018306481675656787
+          }
+        },
+        "friction": {
+          "value": 0.08737864077669903,
+          "successes": 18,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.055985109530487055,
+            "hi": 0.13387946272612292
+          }
+        },
+        "dedup": {
+          "value": 0.13545816733067728,
+          "successes": 34,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09858000717317408,
+            "hi": 0.18332647363708374
+          }
+        },
+        "silentEscape": {
+          "value": 0.0199203187250996,
+          "successes": 5,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.008538053656468272,
+            "hi": 0.04577594566195874
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.8446215139442231,
+          "successes": 212,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7946469618718504,
+            "hi": 0.884206474302059
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.031271680241939506
+          }
+        },
+        "friction": {
+          "value": 0.15126050420168066,
+          "successes": 18,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09787297206229482,
+            "hi": 0.226459376341747
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.017394645195733326
+          }
+        },
+        "silentEscape": {
+          "value": 0.02304147465437788,
+          "successes": 5,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.009881167688609183,
+            "hi": 0.05279483026308114
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.9769585253456221,
+          "successes": 212,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9472051697369189,
+            "hi": 0.9901188323113909
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.13319225093904846
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_asPublished": {
+      "judge": "openai_gpt_oss_20b",
+      "alpha": 0.05,
+      "pool": "asPublished",
+      "tHi": 0.1,
+      "tLo": 0,
+      "nCalDiff": 205,
+      "nCalSame": 214,
+      "certifiableM": 10,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0.02912621359223301,
+          "successes": 6,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.013415748908940033,
+            "hi": 0.062076762960367814
+          }
+        },
+        "friction": {
+          "value": 0.05825242718446602,
+          "successes": 12,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.03363340273290411,
+            "hi": 0.0990451393300548
+          }
+        },
+        "dedup": {
+          "value": 0.9760956175298805,
+          "successes": 245,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9488385765973533,
+            "hi": 0.9889994074810533
+          }
+        },
+        "silentEscape": {
+          "value": 0.0199203187250996,
+          "successes": 5,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.008538053656468272,
+            "hi": 0.04577594566195874
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.00398406374501992,
+          "successes": 1,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0007036316145222193,
+            "hi": 0.022218301291238467
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0.05042016806722689,
+          "successes": 6,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.023310322236378966,
+            "hi": 0.105648247392928
+          }
+        },
+        "friction": {
+          "value": 0.10084033613445378,
+          "successes": 12,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.05863029619742646,
+            "hi": 0.16801516281924794
+          }
+        },
+        "dedup": {
+          "value": 0.9723502304147466,
+          "successes": 211,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9410001629749887,
+            "hi": 0.9872675685221297
+          }
+        },
+        "silentEscape": {
+          "value": 0.02304147465437788,
+          "successes": 5,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.009881167688609183,
+            "hi": 0.05279483026308114
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.004608294930875576,
+          "successes": 1,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0008139409183967536,
+            "hi": 0.025636974828527965
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0.28,
+          "successes": 7,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.14283853850956563,
+            "hi": 0.47576605190361576
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_residualOnly": {
+      "judge": "openai_gpt_oss_20b",
+      "alpha": 0.05,
+      "pool": "residualOnly",
+      "tHi": 0.95,
+      "tLo": 0,
+      "nCalDiff": 117,
+      "nCalSame": 214,
+      "certifiableM": 5,
+      "overall": {
+        "nSame": 251,
+        "nDiff": 206,
+        "wrongSuppression": {
+          "value": 0.014563106796116505,
+          "successes": 3,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0049649131654717,
+            "hi": 0.04193458360701061
+          }
+        },
+        "friction": {
+          "value": 0.07281553398058252,
+          "successes": 15,
+          "n": 206,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.04462064799273644,
+            "hi": 0.11665090916704798
+          }
+        },
+        "dedup": {
+          "value": 0.8207171314741036,
+          "successes": 206,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7685397074342422,
+            "hi": 0.8632256291206677
+          }
+        },
+        "silentEscape": {
+          "value": 0.0199203187250996,
+          "successes": 5,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.008538053656468272,
+            "hi": 0.04577594566195874
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.1593625498007968,
+          "successes": 40,
+          "n": 251,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.11926721446006598,
+            "hi": 0.20972736596919134
+          }
+        }
+      },
+      "residualOnly": {
+        "nSame": 217,
+        "nDiff": 119,
+        "wrongSuppression": {
+          "value": 0.025210084033613446,
+          "successes": 3,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.008610231289265302,
+            "hi": 0.07150489364635793
+          }
+        },
+        "friction": {
+          "value": 0.12605042016806722,
+          "successes": 15,
+          "n": 119,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.07789721130352727,
+            "hi": 0.19759169240683083
+          }
+        },
+        "dedup": {
+          "value": 0.7926267281105991,
+          "successes": 172,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7338238322599636,
+            "hi": 0.8412493477406903
+          }
+        },
+        "silentEscape": {
+          "value": 0.02304147465437788,
+          "successes": 5,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.009881167688609183,
+            "hi": 0.05279483026308114
+          }
+        },
+        "flaggedEscape": {
+          "value": 0.18433179723502305,
+          "successes": 40,
+          "n": 217,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.13838833209257823,
+            "hi": 0.24125713515081104
+          }
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0.28,
+          "successes": 7,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.14283853850956563,
+            "hi": 0.47576605190361576
+          }
+        }
+      }
+    }
+  },
+  "jurisdiction": {
+    "test": {
+      "n": 457,
+      "certifier": {
+        "value": 0.07439824945295405,
+        "successes": 34,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.05372588068028822,
+          "hi": 0.10216603712706007
+        }
+      },
+      "refuter": {
+        "value": 0.19037199124726478,
+        "successes": 87,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.15701615832954263,
+          "hi": 0.22888978701616325
+        }
+      },
+      "residual": {
+        "value": 0.7352297592997812,
+        "successes": 336,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.6929385604433594,
+          "hi": 0.7735993256014223
+        }
+      }
+    },
+    "testSame": {
+      "n": 251,
+      "certifier": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "refuter": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "residual": {
+        "value": 0.8645418326693227,
+        "successes": 217,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.8166735263629162,
+          "hi": 0.9014199928268259
+        }
+      }
+    },
+    "testDiff": {
+      "n": 206,
+      "certifier": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "refuter": {
+        "value": 0.4223300970873786,
+        "successes": 87,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.3569073176378995,
+          "hi": 0.49059660184569753
+        }
+      },
+      "residual": {
+        "value": 0.5776699029126213,
+        "successes": 119,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.5094033981543024,
+          "hi": 0.6430926823621005
+        }
+      }
+    }
+  },
+  "tightened": {
+    "openai_gpt_oss_120b_a0.01": {
+      "tHi": null,
+      "tLo": 0.8,
+      "nCalDiff": 35,
+      "certifiableM": 0,
+      "judgeJurisdiction": {
+        "value": 0.5645514223194749,
+        "successes": 258,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.5187420145155673,
+          "hi": 0.609284661189745
+        }
+      },
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.8047808764940239,
+        "successes": 202,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.751305665336437,
+          "hi": 0.8490676048058063
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0.0048543689320388345,
+        "successes": 1,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0008574298980504186,
+          "hi": 0.026980056809881543
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.13319225093904846
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05": {
+      "tHi": 0.95,
+      "tLo": 0.8,
+      "nCalDiff": 35,
+      "certifiableM": 1,
+      "judgeJurisdiction": {
+        "value": 0.5645514223194749,
+        "successes": 258,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.5187420145155673,
+          "hi": 0.609284661189745
+        }
+      },
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.199203187250996,
+        "successes": 50,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.1544913660104803,
+          "hi": 0.25298338045044283
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.7410358565737052,
+        "successes": 186,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.6834959936716319,
+          "hi": 0.7913090108199462
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0.0048543689320388345,
+        "successes": 1,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0008574298980504186,
+          "hi": 0.026980056809881543
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.13319225093904846
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01": {
+      "tHi": null,
+      "tLo": 0,
+      "nCalDiff": 35,
+      "certifiableM": 0,
+      "judgeJurisdiction": {
+        "value": 0.5645514223194749,
+        "successes": 258,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.5187420145155673,
+          "hi": 0.609284661189745
+        }
+      },
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.8446215139442231,
+        "successes": 212,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7946469618718504,
+          "hi": 0.884206474302059
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.043689320388349516,
+        "successes": 9,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.023152710959694008,
+          "hi": 0.08093281600643935
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.13319225093904846
+          }
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05": {
+      "tHi": 1,
+      "tLo": 0,
+      "nCalDiff": 35,
+      "certifiableM": 1,
+      "judgeJurisdiction": {
+        "value": 0.5645514223194749,
+        "successes": 258,
+        "n": 457,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.5187420145155673,
+          "hi": 0.609284661189745
+        }
+      },
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.8446215139442231,
+        "successes": 212,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7946469618718504,
+          "hi": 0.884206474302059
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.043689320388349516,
+        "successes": 9,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.023152710959694008,
+          "hi": 0.08093281600643935
+        }
+      },
+      "attacks": {
+        "D4a_field_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 20,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.16112515805281938
+          }
+        },
+        "D4b_text_injection": {
+          "value": 0,
+          "successes": 0,
+          "n": 25,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.13319225093904846
+          }
+        }
+      }
+    }
+  },
+  "ablations": {
+    "openai_gpt_oss_120b_a0.01_hardened": {
+      "tHi": 0.95,
+      "tLo": 0.8,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.199203187250996,
+        "successes": 50,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.1544913660104803,
+          "hi": 0.25298338045044283
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.7410358565737052,
+        "successes": 186,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.6834959936716319,
+          "hi": 0.7913090108199462
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0.009708737864077669,
+        "successes": 2,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0026665364740969914,
+          "hi": 0.034701955266110154
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.01_minusL0": {
+      "tHi": 0.95,
+      "tLo": 0.85,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.11952191235059761,
+        "successes": 30,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.08501769096541653,
+          "hi": 0.165496723432175
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.7330677290836654,
+        "successes": 184,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.6751302421053659,
+          "hi": 0.7839787291798791
+        }
+      },
+      "silentEscape": {
+        "value": 0.14741035856573706,
+        "successes": 37,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.10887613480340277,
+          "hi": 0.1965743958163548
+        }
+      },
+      "friction": {
+        "value": 0.0048543689320388345,
+        "successes": 1,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0008574298980504186,
+          "hi": 0.026980056809881543
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.01_minusWitness": {
+      "tHi": 0.85,
+      "tLo": 0.8,
+      "nCalDiff": 205,
+      "wrongSuppression": {
+        "value": 0.0048543689320388345,
+        "successes": 1,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0008574298980504186,
+          "hi": 0.026980056809881543
+        }
+      },
+      "dedup": {
+        "value": 0.852589641434263,
+        "successes": 214,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.8034256041836453,
+          "hi": 0.8911238651965973
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.08764940239043825,
+        "successes": 22,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0585940331000327,
+          "hi": 0.1291362484722262
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0.0048543689320388345,
+        "successes": 1,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0008574298980504186,
+          "hi": 0.026980056809881543
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.01_minusBand": {
+      "tHi": 0.95,
+      "tLo": 0.95,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.199203187250996,
+        "successes": 50,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.1544913660104803,
+          "hi": 0.25298338045044283
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.8007968127490039,
+        "successes": 201,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7470166195495571,
+          "hi": 0.8455086339895197
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.01_minusCalibration": {
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.014563106796116505,
+        "successes": 3,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0049649131654717,
+          "hi": 0.04193458360701061
+        }
+      },
+      "dedup": {
+        "value": 0.9960159362549801,
+        "successes": 250,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9777816987087616,
+          "hi": 0.999296368385478
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.00398406374501992,
+        "successes": 1,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0007036316145222193,
+          "hi": 0.022218301291238467
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_hardened": {
+      "tHi": 0.8,
+      "tLo": 0.8,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.009708737864077669,
+        "successes": 2,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0026665364740969914,
+          "hi": 0.034701955266110154
+        }
+      },
+      "dedup": {
+        "value": 0.9402390438247012,
+        "successes": 236,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9037527034962298,
+          "hi": 0.9634531311536774
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_minusL0": {
+      "tHi": 0.8,
+      "tLo": 0.8,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.009708737864077669,
+        "successes": 2,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0026665364740969914,
+          "hi": 0.034701955266110154
+        }
+      },
+      "dedup": {
+        "value": 0.9402390438247012,
+        "successes": 236,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9037527034962298,
+          "hi": 0.9634531311536774
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_minusWitness": {
+      "tHi": 0.2,
+      "tLo": 0.2,
+      "nCalDiff": 205,
+      "wrongSuppression": {
+        "value": 0.02912621359223301,
+        "successes": 6,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013415748908940033,
+          "hi": 0.062076762960367814
+        }
+      },
+      "dedup": {
+        "value": 1,
+        "successes": 251,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.984926083697406,
+          "hi": 1
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_minusBand": {
+      "tHi": 0.8,
+      "tLo": 0.8,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.009708737864077669,
+        "successes": 2,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0026665364740969914,
+          "hi": 0.034701955266110154
+        }
+      },
+      "dedup": {
+        "value": 0.9402390438247012,
+        "successes": 236,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9037527034962298,
+          "hi": 0.9634531311536774
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.05976095617529881,
+        "successes": 15,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03654686884632264,
+          "hi": 0.0962472965037702
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_120b_a0.05_minusCalibration": {
+      "tHi": 0.5,
+      "tLo": 0.5,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.014563106796116505,
+        "successes": 3,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0049649131654717,
+          "hi": 0.04193458360701061
+        }
+      },
+      "dedup": {
+        "value": 0.9960159362549801,
+        "successes": 250,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9777816987087616,
+          "hi": 0.999296368385478
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.00398406374501992,
+        "successes": 1,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0007036316145222193,
+          "hi": 0.022218301291238467
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_hardened": {
+      "tHi": 1,
+      "tLo": 0,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.8446215139442231,
+        "successes": 212,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7946469618718504,
+          "hi": 0.884206474302059
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.08737864077669903,
+        "successes": 18,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.055985109530487055,
+          "hi": 0.13387946272612292
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_minusL0": {
+      "tHi": 1,
+      "tLo": 0.9,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.9721115537848606,
+        "successes": 244,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9435634718389174,
+          "hi": 0.9864264956363225
+        }
+      },
+      "silentEscape": {
+        "value": 0.027888446215139442,
+        "successes": 7,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013573504363677508,
+          "hi": 0.056436528161082675
+        }
+      },
+      "friction": {
+        "value": 0.02912621359223301,
+        "successes": 6,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013415748908940033,
+          "hi": 0.062076762960367814
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_minusWitness": {
+      "tHi": 1,
+      "tLo": 0,
+      "nCalDiff": 205,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.8446215139442231,
+        "successes": 212,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7946469618718504,
+          "hi": 0.884206474302059
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.13592233009708737,
+        "successes": 28,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09574212401643316,
+          "hi": 0.18943249856292854
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_minusBand": {
+      "tHi": 1,
+      "tLo": 1,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      },
+      "dedup": {
+        "value": 0.13545816733067728,
+        "successes": 34,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.09858000717317408,
+          "hi": 0.18332647363708374
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.8645418326693227,
+        "successes": 217,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.8166735263629162,
+          "hi": 0.9014199928268259
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.01_minusCalibration": {
+      "tHi": 0.5,
+      "tLo": 0,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.02912621359223301,
+        "successes": 6,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013415748908940033,
+          "hi": 0.062076762960367814
+        }
+      },
+      "dedup": {
+        "value": 0.9760956175298805,
+        "successes": 245,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9488385765973533,
+          "hi": 0.9889994074810533
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.00398406374501992,
+        "successes": 1,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0007036316145222193,
+          "hi": 0.022218301291238467
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.05825242718446602,
+        "successes": 12,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03363340273290411,
+          "hi": 0.0990451393300548
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_hardened": {
+      "tHi": 0.95,
+      "tLo": 0,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.014563106796116505,
+        "successes": 3,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0049649131654717,
+          "hi": 0.04193458360701061
+        }
+      },
+      "dedup": {
+        "value": 0.8207171314741036,
+        "successes": 206,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7685397074342422,
+          "hi": 0.8632256291206677
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.1593625498007968,
+        "successes": 40,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.11926721446006598,
+          "hi": 0.20972736596919134
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.07281553398058252,
+        "successes": 15,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.04462064799273644,
+          "hi": 0.11665090916704798
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_minusL0": {
+      "tHi": 0.95,
+      "tLo": 0.9,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.014563106796116505,
+        "successes": 3,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0049649131654717,
+          "hi": 0.04193458360701061
+        }
+      },
+      "dedup": {
+        "value": 0.8047808764940239,
+        "successes": 202,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.751305665336437,
+          "hi": 0.8490676048058063
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.16733067729083664,
+        "successes": 42,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.1262431140654924,
+          "hi": 0.21844749957009804
+        }
+      },
+      "silentEscape": {
+        "value": 0.027888446215139442,
+        "successes": 7,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013573504363677508,
+          "hi": 0.056436528161082675
+        }
+      },
+      "friction": {
+        "value": 0.014563106796116505,
+        "successes": 3,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0049649131654717,
+          "hi": 0.04193458360701061
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_minusWitness": {
+      "tHi": 0.1,
+      "tLo": 0,
+      "nCalDiff": 205,
+      "wrongSuppression": {
+        "value": 0.02912621359223301,
+        "successes": 6,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013415748908940033,
+          "hi": 0.062076762960367814
+        }
+      },
+      "dedup": {
+        "value": 0.9760956175298805,
+        "successes": 245,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9488385765973533,
+          "hi": 0.9889994074810533
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.00398406374501992,
+        "successes": 1,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0007036316145222193,
+          "hi": 0.022218301291238467
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.10679611650485436,
+        "successes": 22,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.07159049916573652,
+          "hi": 0.1563980932199741
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_minusBand": {
+      "tHi": 0.95,
+      "tLo": 0.95,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.014563106796116505,
+        "successes": 3,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0049649131654717,
+          "hi": 0.04193458360701061
+        }
+      },
+      "dedup": {
+        "value": 0.8207171314741036,
+        "successes": 206,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7685397074342422,
+          "hi": 0.8632256291206677
+        }
+      },
+      "flaggedEscape": {
+        "value": 0,
+        "successes": 0,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.015073916302594106
+        }
+      },
+      "silentEscape": {
+        "value": 0.17928286852589642,
+        "successes": 45,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.13677437087933236,
+          "hi": 0.2314602925657579
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.018306481675656787
+        }
+      }
+    },
+    "openai_gpt_oss_20b_a0.05_minusCalibration": {
+      "tHi": 0.5,
+      "tLo": 0,
+      "nCalDiff": 117,
+      "wrongSuppression": {
+        "value": 0.02912621359223301,
+        "successes": 6,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.013415748908940033,
+          "hi": 0.062076762960367814
+        }
+      },
+      "dedup": {
+        "value": 0.9760956175298805,
+        "successes": 245,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9488385765973533,
+          "hi": 0.9889994074810533
+        }
+      },
+      "flaggedEscape": {
+        "value": 0.00398406374501992,
+        "successes": 1,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0007036316145222193,
+          "hi": 0.022218301291238467
+        }
+      },
+      "silentEscape": {
+        "value": 0.0199203187250996,
+        "successes": 5,
+        "n": 251,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.008538053656468272,
+          "hi": 0.04577594566195874
+        }
+      },
+      "friction": {
+        "value": 0.05825242718446602,
+        "successes": 12,
+        "n": 206,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03363340273290411,
+          "hi": 0.0990451393300548
+        }
+      }
+    }
+  }
+}

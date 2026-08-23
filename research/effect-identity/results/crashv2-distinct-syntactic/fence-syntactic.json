@@ -1,0 +1,127 @@
+{
+  "committed": {
+    "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085": {
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "canonical": "{\"amount_text\":\"$780.00\",\"beneficiary_text\":\"Marlow Freight\",\"reference\":\"Shipment 88213 — installment 1 of 2\"}",
+      "semProjection": "{}",
+      "inputHash": "31f32669ce73ce3cccb6b2027778e9c285971d10bae8fe1fe775d7793cc3282b",
+      "response": {
+        "wireId": "wire_1",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 39472,
+      "committedAt": "2026-08-18T06:48:28.878Z"
+    },
+    "faf309e4159c26427401d62c118cde7872eca5df21f2eb6d4763d5f64edd772f": {
+      "operationId": "faf309e4159c26427401d62c118cde7872eca5df21f2eb6d4763d5f64edd772f",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213 — installment 2 of 2"
+      },
+      "canonical": "{\"amount_text\":\"seven hundred eighty dollars\",\"beneficiary_text\":\"MARLOW FREIGHT\",\"reference\":\"shipment #88213 — installment 2 of 2\"}",
+      "semProjection": "{}",
+      "inputHash": "275ecf33cf48194ada2590b26fdf6c7aac2ca9f23cb5d60a3811054af6234008",
+      "response": {
+        "wireId": "wire_2",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 38724,
+      "committedAt": "2026-08-18T06:48:28.989Z"
+    },
+    "e26f9eb4b24fb4d1d135db105ee264db0fe5e172814df5f4dfa467a829dd7aae": {
+      "operationId": "e26f9eb4b24fb4d1d135db105ee264db0fe5e172814df5f4dfa467a829dd7aae",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "seven hundred eighty dollars US",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "relating to shipment 88213 — installment 2 of 2"
+      },
+      "canonical": "{\"amount_text\":\"seven hundred eighty dollars US\",\"beneficiary_text\":\"Marlow Freight Inc.\",\"reference\":\"relating to shipment 88213 — installment 2 of 2\"}",
+      "semProjection": "{}",
+      "inputHash": "d74ee688099bb4d5e59ffae09e70acf176395201e402a36209183b4928beeec6",
+      "response": {
+        "wireId": "wire_3",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 35456,
+      "committedAt": "2026-08-18T06:48:29.088Z"
+    }
+  },
+  "intents": [
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "status": "PENDING",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "semProjection": "{}",
+      "at": "2026-08-18T06:48:28.874Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "status": "COMMITTED",
+      "at": "2026-08-18T06:48:28.879Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "faf309e4159c26427401d62c118cde7872eca5df21f2eb6d4763d5f64edd772f",
+      "status": "PENDING",
+      "input": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213 — installment 2 of 2"
+      },
+      "semProjection": "{}",
+      "at": "2026-08-18T06:48:28.984Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "faf309e4159c26427401d62c118cde7872eca5df21f2eb6d4763d5f64edd772f",
+      "status": "COMMITTED",
+      "at": "2026-08-18T06:48:28.989Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "e26f9eb4b24fb4d1d135db105ee264db0fe5e172814df5f4dfa467a829dd7aae",
+      "status": "PENDING",
+      "input": {
+        "amount_text": "seven hundred eighty dollars US",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "relating to shipment 88213 — installment 2 of 2"
+      },
+      "semProjection": "{}",
+      "at": "2026-08-18T06:48:29.083Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "e26f9eb4b24fb4d1d135db105ee264db0fe5e172814df5f4dfa467a829dd7aae",
+      "status": "COMMITTED",
+      "at": "2026-08-18T06:48:29.089Z"
+    }
+  ],
+  "flags": []
+}

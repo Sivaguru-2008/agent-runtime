@@ -1,0 +1,12 @@
+{
+  "pid": 26772,
+  "scorer": "groq:llama-3.3-70b-versatile",
+  "events": [
+    {
+      "type": "COMMITTED",
+      "tool": "wire_money",
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "pid": 26772
+    }
+  ]
+}

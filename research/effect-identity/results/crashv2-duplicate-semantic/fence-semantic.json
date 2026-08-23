@@ -1,0 +1,71 @@
+{
+  "committed": {
+    "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085": {
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "canonical": "{\"amount_text\":\"$780.00\",\"beneficiary_text\":\"Marlow Freight\",\"reference\":\"Shipment 88213 — installment 1 of 2\"}",
+      "semProjection": "{}",
+      "inputHash": "31f32669ce73ce3cccb6b2027778e9c285971d10bae8fe1fe775d7793cc3282b",
+      "response": {
+        "wireId": "wire_1",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 40752,
+      "committedAt": "2026-08-18T06:42:54.571Z"
+    }
+  },
+  "intents": [
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "status": "PENDING",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "semProjection": "{}",
+      "at": "2026-08-18T06:42:54.568Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "status": "COMMITTED",
+      "at": "2026-08-18T06:42:54.571Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "26ca6f02d5ffa1e927e459753cba653f4c14f48ddca64842d4e9b6271bb4bf75",
+      "status": "SUPPRESSED",
+      "layer": "L1",
+      "matchedOperationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "score": 0.97,
+      "m": 1,
+      "tHi": 0.8,
+      "at": "2026-08-18T06:42:57.396Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "54f7ac73a91a2f101e9310d60d598b266dc49a8f1060a1b51b3cd708e418028a",
+      "status": "SUPPRESSED",
+      "layer": "L1",
+      "matchedOperationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "score": 0.98,
+      "m": 1,
+      "tHi": 0.8,
+      "at": "2026-08-18T06:42:58.787Z"
+    }
+  ],
+  "flags": []
+}

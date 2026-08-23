@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-08-18T15:35:30.332Z",
+  "alpha": 0.05,
+  "judgesConsidered": [
+    "llama_3_3_70b_versatile",
+    "openai_gpt_oss_120b",
+    "qwen_qwen3_6_27b",
+    "openai_gpt_oss_20b"
+  ],
+  "judgesAdmitted": [],
+  "admission": {
+    "llama_3_3_70b_versatile": {
+      "admitted": false,
+      "reasons": [
+        "coverage 3.0% < 80% — too few scores to calibrate or to measure"
+      ],
+      "diagnostics": {
+        "n": 1998,
+        "coverage": {
+          "value": 0.03003003003003003,
+          "successes": 60,
+          "n": 1998,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.023401325741620106,
+            "hi": 0.038462443876604524
+          }
+        },
+        "abstentions": 1938,
+        "distinctValues": 2,
+        "auc": 1,
+        "sameMean": 1,
+        "diffMean": 0,
+        "separation": 1,
+        "atExtremesShare": 1,
+        "supportsEscalationBand": false
+      }
+    },
+    "openai_gpt_oss_120b": {
+      "admitted": false,
+      "reasons": [
+        "coverage 47.8% < 80% — too few scores to calibrate or to measure"
+      ],
+      "diagnostics": {
+        "n": 1998,
+        "coverage": {
+          "value": 0.477977977977978,
+          "successes": 955,
+          "n": 1998,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.4561384690003554,
+            "hi": 0.4999020058273358
+          }
+        },
+        "abstentions": 1043,
+        "distinctValues": 24,
+        "auc": 0.9565754315648841,
+        "sameMean": 0.9215831663326605,
+        "diffMean": 0.14662280701754402,
+        "separation": 0.7749603593151164,
+        "atExtremesShare": 0.07225130890052356,
+        "supportsEscalationBand": true
+      }
+    },
+    "qwen_qwen3_6_27b": {
+      "admitted": false,
+      "reasons": [
+        "coverage 23.5% < 80% — too few scores to calibrate or to measure"
+      ],
+      "diagnostics": {
+        "n": 1998,
+        "coverage": {
+          "value": 0.23523523523523523,
+          "successes": 470,
+          "n": 1998,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.21715624959613417,
+            "hi": 0.2543303682186059
+          }
+        },
+        "abstentions": 1528,
+        "distinctValues": 6,
+        "auc": 0.9681561003917017,
+        "sameMean": 0.9957377049180326,
+        "diffMean": 0.12234513274336282,
+        "separation": 0.8733925721746698,
+        "atExtremesShare": 0.9063829787234042,
+        "supportsEscalationBand": false
+      }
+    },
+    "openai_gpt_oss_20b": {
+      "admitted": false,
+      "reasons": [
+        "coverage 47.8% < 80% — too few scores to calibrate or to measure"
+      ],
+      "diagnostics": {
+        "n": 1998,
+        "coverage": {
+          "value": 0.477977977977978,
+          "successes": 955,
+          "n": 1998,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.4561384690003554,
+            "hi": 0.4999020058273358
+          }
+        },
+        "abstentions": 1043,
+        "distinctValues": 6,
+        "auc": 0.9622556516541856,
+        "sameMean": 0.9579158316633253,
+        "diffMean": 0.05603070175438598,
+        "separation": 0.9018851299089393,
+        "atExtremesShare": 0.8513089005235602,
+        "supportsEscalationBand": true
+      }
+    }
+  },
+  "declared": {},
+  "tightened": {}
+}

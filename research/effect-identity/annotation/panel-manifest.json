@@ -1,0 +1,46 @@
+{
+  "channel": "M (model panel)",
+  "ranAt": "2026-08-23T18:29:48.475Z",
+  "barredFromPanel": "openai/gpt-oss-120b",
+  "barredBecause": "supplies the scores used by the headline re-derivation; using it as an annotator would be circular",
+  "oneItemPerCall": true,
+  "temperature": 0,
+  "panel": [
+    {
+      "name": "compound",
+      "model": "groq/compound",
+      "role": "annotator",
+      "family": "llama-based (Groq compound)",
+      "alsoAReportedJudge": false
+    },
+    {
+      "name": "compound-mini",
+      "model": "groq/compound-mini",
+      "role": "annotator",
+      "family": "llama-based (Groq compound)",
+      "alsoAReportedJudge": false
+    },
+    {
+      "name": "qwen27b",
+      "model": "qwen/qwen3.6-27b",
+      "role": "annotator",
+      "family": "qwen",
+      "alsoAReportedJudge": true
+    },
+    {
+      "name": "adjudicator-safeguard20b",
+      "model": "openai/gpt-oss-safeguard-20b",
+      "role": "adjudicator",
+      "family": "gpt-oss (safeguard fine-tune)",
+      "alsoAReportedJudge": false
+    }
+  ],
+  "results": [
+    {
+      "name": "compound",
+      "answered": 4,
+      "nonResponse": 0
+    }
+  ],
+  "note": "Channel M is a model panel. It is not a human study and is not reported as one."
+}

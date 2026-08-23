@@ -1,0 +1,18 @@
+{
+  "model": "llama-3.3-70b-versatile",
+  "updatedAt": "2026-08-13T14:43:27.872Z",
+  "scores": {
+    "D2_legit_repeat_351": 0,
+    "D1_near_miss_282": 0,
+    "D1_near_miss_167": 0,
+    "D2_legit_repeat_381": 0,
+    "S1_mechanical_068": 1,
+    "S2_paraphrase_671": 1,
+    "D1_near_miss_273": 0,
+    "D1_near_miss_178": 0,
+    "S4_adversarial_774": 1,
+    "S1_mechanical_023": 1,
+    "D2_legit_repeat_399": 1,
+    "D2_legit_repeat_408": 0
+  }
+}
