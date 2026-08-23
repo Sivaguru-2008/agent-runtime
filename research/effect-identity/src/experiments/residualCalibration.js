@@ -35,7 +35,21 @@ import { extractNumbers } from "../judge.js";
 const base = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const GAMMA = 0.05;
 const ALPHAS = [0.01, 0.05];
-const JUDGES = ["openai_gpt_oss_120b", "openai_gpt_oss_20b"];
+/**
+ * Judges admitted to the MAIN tables.
+ *
+ * This was two GPT-OSS models — one vendor — for as long as no third judge
+ * reached the 80% coverage bar, which made every headline in §8 a claim about
+ * a vendor rather than about a mechanism. Qwen3.6-27B now sits at 97.4%
+ * (930/955) after a resumed scoring pass, so it belongs here rather than in
+ * the 218-pair common-subset table alone. The 25 pairs it never answered stay
+ * abstentions and are dropped from calibration, never imputed.
+ *
+ * Membership is still decided by the admission rule of §8.1 (coverage,
+ * resolution, signal), applied in verify.js — this list is who was ASKED, not
+ * who passed.
+ */
+const JUDGES = ["openai_gpt_oss_120b", "openai_gpt_oss_20b", "qwen_qwen3_6_27b"];
 
 const pairs = readFileSync(resolve(base, "corpus", "pairs.jsonl"), "utf8")
   .split("\n").filter(Boolean).map((l) => JSON.parse(l));

@@ -1,155 +1,135 @@
 {
-  "generatedAt": "2026-08-17T13:16:20.258Z",
+  "generatedAt": "2026-08-23T18:54:16.455Z",
   "alpha": 0.05,
   "gamma": 0.05,
   "commonSubset": {
-    "total": 470,
-    "cal": 230,
-    "test": 218,
-    "attack": 22
+    "total": 930,
+    "cal": 444,
+    "test": 443,
+    "attack": 43
   },
   "missingness": {
     "overall": {
-      "covered": 470,
+      "covered": 930,
       "n": 955,
-      "pct": 49.2
+      "pct": 97.4
     },
     "byCategory": {
-      "chi2": 4.810231256547283,
-      "df": 7,
-      "pHat": 0.49214659685863876,
+      "chi2": 3.3250998386495585,
+      "df": 1,
+      "pHat": 0.9738219895287958,
       "kept": [
         "D1_near_miss",
-        "D2_legit_repeat",
-        "D4a_field_injection",
-        "D4b_text_injection",
-        "S1_mechanical",
-        "S2_paraphrase",
-        "S3_loose_value",
-        "S4_adversarial"
+        "S2_paraphrase"
       ],
-      "p": 0.6831087332325153
+      "p": 0.06822987172447487
     },
     "byLabel": {
-      "chi2": 0.04198095185611027,
+      "chi2": 0.6178150490757035,
       "df": 1,
-      "pHat": 0.49214659685863876,
+      "pHat": 0.9738219895287958,
       "kept": [
         "DIFF",
         "SAME"
       ],
-      "p": 0.8376560858763158
+      "p": 0.43186038803763993
     },
     "byTool": {
-      "chi2": 4.058973397477331,
-      "df": 5,
-      "pHat": 0.49214659685863876,
+      "chi2": 0.004867511520737744,
+      "df": 0,
+      "pHat": 0.9738219895287958,
       "kept": [
-        "charge_card",
-        "create_ticket",
-        "post_refund",
-        "send_email",
-        "transfer_funds",
-        "wire_money"
+        "charge_card"
       ],
-      "p": 0.540956876987042
+      "p": null
     },
     "bySplit": {
-      "chi2": 0.8599891200343435,
-      "df": 2,
-      "pHat": 0.49214659685863876,
+      "chi2": 1.0636676098466546,
+      "df": 1,
+      "pHat": 0.9738219895287958,
       "kept": [
-        "attack",
         "cal",
         "test"
       ],
-      "p": 0.6505126334912488
+      "p": 0.3023801762956655
     },
     "strataDetail": {
       "category": [
         {
           "key": "D1_near_miss",
           "n": 251,
-          "c": 120,
-          "pct": 47.8
+          "c": 249,
+          "pct": 99.2
         },
         {
           "key": "D2_legit_repeat",
           "n": 150,
-          "c": 77,
-          "pct": 51.3
+          "c": 144,
+          "pct": 96
         },
         {
           "key": "D3_semantic_diff",
           "n": 10,
-          "c": 7,
-          "pct": 70
+          "c": 10,
+          "pct": 100
         },
         {
           "key": "D4a_field_injection",
           "n": 20,
-          "c": 10,
-          "pct": 50
+          "c": 19,
+          "pct": 95
         },
         {
           "key": "D4b_text_injection",
           "n": 25,
-          "c": 12,
-          "pct": 48
+          "c": 24,
+          "pct": 96
         },
         {
           "key": "S1_mechanical",
           "n": 68,
-          "c": 30,
-          "pct": 44.1
+          "c": 65,
+          "pct": 95.6
         },
         {
           "key": "S2_paraphrase",
           "n": 253,
-          "c": 125,
-          "pct": 49.4
+          "c": 247,
+          "pct": 97.6
         },
         {
           "key": "S3_loose_value",
           "n": 15,
-          "c": 11,
-          "pct": 73.3
+          "c": 15,
+          "pct": 100
         },
         {
           "key": "S4_adversarial",
           "n": 163,
-          "c": 78,
-          "pct": 47.9
+          "c": 157,
+          "pct": 96.3
         }
       ],
       "label": [
         {
           "key": "DIFF",
           "n": 456,
-          "c": 226,
-          "pct": 49.6
+          "c": 446,
+          "pct": 97.8
         },
         {
           "key": "SAME",
           "n": 499,
-          "c": 244,
-          "pct": 48.9
+          "c": 484,
+          "pct": 97
         }
       ]
     },
     "missingRunLengths": {
-      "runs": 245,
-      "mean": 1.98,
+      "runs": 25,
+      "mean": 1,
       "histogram": {
-        "1": 131,
-        "2": 54,
-        "3": 31,
-        "4": 13,
-        "5": 6,
-        "6": 5,
-        "7": 1,
-        "8": 2,
-        "9": 2
+        "1": 25
       },
       "multiplesOfTen": 0
     }
@@ -159,119 +139,119 @@
       "judge": "openai_gpt_oss_120b",
       "family": "gpt-oss",
       "tHi": 0.8,
-      "tLo": 0.85,
-      "nCalDiff": 62,
-      "nCalSame": 106,
-      "nSame": 123,
-      "nDiff": 95,
+      "tLo": 0.8,
+      "nCalDiff": 114,
+      "nCalSame": 209,
+      "nSame": 242,
+      "nDiff": 201,
       "wrongSuppression": {
-        "value": 0,
-        "successes": 0,
-        "n": 95,
+        "value": 0.009950248756218905,
+        "successes": 2,
+        "n": 201,
         "basis": "measured",
         "ci95": {
-          "lo": 0,
-          "hi": 0.038864853539472964
+          "lo": 0.002732971824604618,
+          "hi": 0.03554765196043719
         }
       },
       "friction": {
         "value": 0,
         "successes": 0,
-        "n": 95,
+        "n": 201,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.038864853539472964
+          "hi": 0.01875332680605788
         }
       },
       "dedup": {
-        "value": 0.9105691056910569,
-        "successes": 112,
-        "n": 123,
+        "value": 0.9380165289256198,
+        "successes": 227,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.8469405486680196,
-          "hi": 0.9493290696337994
+          "lo": 0.9002634487473171,
+          "hi": 0.9620809296865231
         }
       },
       "silentEscape": {
-        "value": 0.08943089430894309,
-        "successes": 11,
-        "n": 123,
+        "value": 0.06198347107438017,
+        "successes": 15,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.05067093036620061,
-          "hi": 0.15305945133198043
+          "lo": 0.037919070313476855,
+          "hi": 0.09973655125268296
         }
       },
       "flaggedEscape": {
         "value": 0,
         "successes": 0,
-        "n": 123,
+        "n": 242,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.030285514345309572
+          "hi": 0.015625756693446548
         }
       }
     },
     "openai_gpt_oss_20b": {
       "judge": "openai_gpt_oss_20b",
       "family": "gpt-oss",
-      "tHi": 1,
-      "tLo": 0.95,
-      "nCalDiff": 62,
-      "nCalSame": 106,
-      "nSame": 123,
-      "nDiff": 95,
+      "tHi": 0.95,
+      "tLo": 0,
+      "nCalDiff": 114,
+      "nCalSame": 209,
+      "nSame": 242,
+      "nDiff": 201,
       "wrongSuppression": {
-        "value": 0,
-        "successes": 0,
-        "n": 95,
+        "value": 0.014925373134328358,
+        "successes": 3,
+        "n": 201,
         "basis": "measured",
         "ci95": {
-          "lo": 0,
-          "hi": 0.038864853539472964
+          "lo": 0.005088729700224181,
+          "hi": 0.042955542574309585
         }
       },
       "friction": {
-        "value": 0.010526315789473684,
-        "successes": 1,
-        "n": 95,
+        "value": 0.07462686567164178,
+        "successes": 15,
+        "n": 201,
         "basis": "measured",
         "ci95": {
-          "lo": 0.001860576262347903,
-          "hi": 0.05723870141313616
+          "lo": 0.045743524409443265,
+          "hi": 0.11946452973899399
         }
       },
       "dedup": {
-        "value": 0.12195121951219512,
-        "successes": 15,
-        "n": 123,
+        "value": 0.8140495867768595,
+        "successes": 197,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.07531417696635252,
-          "hi": 0.19148706558741818
+          "lo": 0.7602608691821069,
+          "hi": 0.8580237795063068
         }
       },
       "silentEscape": {
-        "value": 0.17073170731707318,
-        "successes": 21,
-        "n": 123,
+        "value": 0.02066115702479339,
+        "successes": 5,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.11446678691870422,
-          "hi": 0.24694074691845086
+          "lo": 0.008856723171189875,
+          "hi": 0.04744565514649442
         }
       },
       "flaggedEscape": {
-        "value": 0.7073170731707317,
-        "successes": 87,
-        "n": 123,
+        "value": 0.1652892561983471,
+        "successes": 40,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.6216084115557763,
-          "hi": 0.7804683263986074
+          "lo": 0.1237944287285477,
+          "hi": 0.2172443009588008
         }
       }
     },
@@ -280,198 +260,198 @@
       "family": "qwen",
       "tHi": 0.95,
       "tLo": 0.95,
-      "nCalDiff": 62,
-      "nCalSame": 106,
-      "nSame": 123,
-      "nDiff": 95,
+      "nCalDiff": 114,
+      "nCalSame": 209,
+      "nSame": 242,
+      "nDiff": 201,
       "wrongSuppression": {
-        "value": 0.021052631578947368,
+        "value": 0.009950248756218905,
         "successes": 2,
-        "n": 95,
+        "n": 201,
         "basis": "measured",
         "ci95": {
-          "lo": 0.005792506864405536,
-          "hi": 0.07354119494708962
+          "lo": 0.002732971824604618,
+          "hi": 0.03554765196043719
         }
       },
       "friction": {
         "value": 0,
         "successes": 0,
-        "n": 95,
+        "n": 201,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.038864853539472964
+          "hi": 0.01875332680605788
         }
       },
       "dedup": {
-        "value": 0.9105691056910569,
-        "successes": 112,
-        "n": 123,
+        "value": 0.9008264462809917,
+        "successes": 218,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.8469405486680196,
-          "hi": 0.9493290696337994
+          "lo": 0.8566791403209828,
+          "hi": 0.9324473191892295
         }
       },
       "silentEscape": {
-        "value": 0.08943089430894309,
-        "successes": 11,
-        "n": 123,
+        "value": 0.09917355371900827,
+        "successes": 24,
+        "n": 242,
         "basis": "measured",
         "ci95": {
-          "lo": 0.05067093036620061,
-          "hi": 0.15305945133198043
+          "lo": 0.06755268081077048,
+          "hi": 0.14332085967901725
         }
       },
       "flaggedEscape": {
         "value": 0,
         "successes": 0,
-        "n": 123,
+        "n": 242,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.030285514345309572
+          "hi": 0.015625756693446548
         }
       }
     }
   },
   "attacks": {
     "openai_gpt_oss_120b|D4a_field_injection": {
-      "n": 10,
+      "n": 19,
       "rawJudge": {
-        "value": 0.7,
-        "successes": 7,
-        "n": 10,
+        "value": 0.6842105263157895,
+        "successes": 13,
+        "n": 19,
         "basis": "measured",
         "ci95": {
-          "lo": 0.39677814746114537,
-          "hi": 0.8922087325936989
+          "lo": 0.46010407675327475,
+          "hi": 0.8463562091220773
         }
       },
       "hardened": {
         "value": 0,
         "successes": 0,
-        "n": 10,
+        "n": 19,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.2775327998628892
+          "hi": 0.16817922405261626
         }
       }
     },
     "openai_gpt_oss_120b|D4b_text_injection": {
-      "n": 12,
+      "n": 24,
       "rawJudge": {
-        "value": 0.8333333333333334,
-        "successes": 10,
-        "n": 12,
+        "value": 0.875,
+        "successes": 21,
+        "n": 24,
         "basis": "measured",
         "ci95": {
-          "lo": 0.5519691377470267,
-          "hi": 0.9530348578161462
+          "lo": 0.6899611872949993,
+          "hi": 0.9565566591987655
         }
       },
       "hardened": {
-        "value": 0.8333333333333334,
-        "successes": 10,
-        "n": 12,
+        "value": 0.875,
+        "successes": 21,
+        "n": 24,
         "basis": "measured",
         "ci95": {
-          "lo": 0.5519691377470267,
-          "hi": 0.9530348578161462
+          "lo": 0.6899611872949993,
+          "hi": 0.9565566591987655
         }
       }
     },
     "openai_gpt_oss_20b|D4a_field_injection": {
-      "n": 10,
+      "n": 19,
       "rawJudge": {
-        "value": 0.1,
-        "successes": 1,
-        "n": 10,
+        "value": 0.15789473684210525,
+        "successes": 3,
+        "n": 19,
         "basis": "measured",
         "ci95": {
-          "lo": 0.017876213095072868,
-          "hi": 0.4041500267952385
+          "lo": 0.05520471638534141,
+          "hi": 0.37565475270329074
         }
       },
       "hardened": {
         "value": 0,
         "successes": 0,
-        "n": 10,
+        "n": 19,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.2775327998628892
+          "hi": 0.16817922405261626
         }
       }
     },
     "openai_gpt_oss_20b|D4b_text_injection": {
-      "n": 12,
+      "n": 24,
       "rawJudge": {
-        "value": 0.25,
-        "successes": 3,
-        "n": 12,
+        "value": 0.2916666666666667,
+        "successes": 7,
+        "n": 24,
         "basis": "measured",
         "ci95": {
-          "lo": 0.08894166839405476,
-          "hi": 0.5323053349335656
+          "lo": 0.14914648196960875,
+          "hi": 0.49167693664496637
         }
       },
       "hardened": {
-        "value": 0,
-        "successes": 0,
-        "n": 12,
+        "value": 0.2916666666666667,
+        "successes": 7,
+        "n": 24,
         "basis": "measured",
         "ci95": {
-          "lo": 0,
-          "hi": 0.24249400665524085
+          "lo": 0.14914648196960875,
+          "hi": 0.49167693664496637
         }
       }
     },
     "qwen_qwen3_6_27b|D4a_field_injection": {
-      "n": 10,
+      "n": 19,
       "rawJudge": {
-        "value": 0.6,
-        "successes": 6,
-        "n": 10,
+        "value": 0.631578947368421,
+        "successes": 12,
+        "n": 19,
         "basis": "measured",
         "ci95": {
-          "lo": 0.31267376973365824,
-          "hi": 0.8318196702937638
+          "lo": 0.41039533164803066,
+          "hi": 0.8085048725486492
         }
       },
       "hardened": {
         "value": 0,
         "successes": 0,
-        "n": 10,
+        "n": 19,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.2775327998628892
+          "hi": 0.16817922405261626
         }
       }
     },
     "qwen_qwen3_6_27b|D4b_text_injection": {
-      "n": 12,
+      "n": 24,
       "rawJudge": {
         "value": 0.4166666666666667,
-        "successes": 5,
-        "n": 12,
+        "successes": 10,
+        "n": 24,
         "basis": "measured",
         "ci95": {
-          "lo": 0.19326031365875668,
-          "hi": 0.6804886874504503
+          "lo": 0.24467602609811764,
+          "hi": 0.6116533413477124
         }
       },
       "hardened": {
         "value": 0.25,
-        "successes": 3,
-        "n": 12,
+        "successes": 6,
+        "n": 24,
         "basis": "measured",
         "ci95": {
-          "lo": 0.08894166839405476,
-          "hi": 0.5323053349335656
+          "lo": 0.11999366228595004,
+          "hi": 0.44899444005154004
         }
       }
     }
@@ -479,56 +459,56 @@
   "agreement": {
     "openai_gpt_oss_120b_vs_openai_gpt_oss_20b": {
       "decisionAgreement": {
-        "value": 0.5091743119266054,
-        "successes": 111,
-        "n": 218,
+        "value": 0.8306997742663657,
+        "successes": 368,
+        "n": 443,
         "basis": "measured",
         "ci95": {
-          "lo": 0.4432307493136239,
-          "hi": 0.5748001454580923
+          "lo": 0.7929693441678024,
+          "hi": 0.8627442075095347
         }
       },
       "discordantWrongSuppression": {
-        "openai_gpt_oss_120b": 0,
-        "openai_gpt_oss_20b": 0,
-        "n": 0,
+        "openai_gpt_oss_120b": 2,
+        "openai_gpt_oss_20b": 3,
+        "n": 5,
         "exactBinomialP": 1
       }
     },
     "openai_gpt_oss_120b_vs_qwen_qwen3_6_27b": {
       "decisionAgreement": {
-        "value": 0.926605504587156,
-        "successes": 202,
-        "n": 218,
+        "value": 0.9300225733634312,
+        "successes": 412,
+        "n": 443,
         "basis": "measured",
         "ci95": {
-          "lo": 0.8841154715869262,
-          "hi": 0.954321135297888
+          "lo": 0.9023849612093622,
+          "hi": 0.9502664489922266
         }
       },
       "discordantWrongSuppression": {
-        "openai_gpt_oss_120b": 0,
+        "openai_gpt_oss_120b": 2,
         "qwen_qwen3_6_27b": 2,
-        "n": 2,
-        "exactBinomialP": 0.5
+        "n": 4,
+        "exactBinomialP": 1
       }
     },
     "openai_gpt_oss_20b_vs_qwen_qwen3_6_27b": {
       "decisionAgreement": {
-        "value": 0.5137614678899083,
-        "successes": 112,
-        "n": 218,
+        "value": 0.8148984198645598,
+        "successes": 361,
+        "n": 443,
         "basis": "measured",
         "ci95": {
-          "lo": 0.4477520816335053,
-          "hi": 0.5792942605240693
+          "lo": 0.7760792319020723,
+          "hi": 0.8483032968282248
         }
       },
       "discordantWrongSuppression": {
-        "openai_gpt_oss_20b": 0,
+        "openai_gpt_oss_20b": 3,
         "qwen_qwen3_6_27b": 2,
-        "n": 2,
-        "exactBinomialP": 0.5
+        "n": 5,
+        "exactBinomialP": 1
       }
     }
   }
