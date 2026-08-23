@@ -1,0 +1,636 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage[a4paper,margin=0.75in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{balance}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\aeq}{\approx_t}
+\newcommand{\aneq}{\not\approx_t}
+\newcommand{\Res}{\mathrm{Res}_t}
+\newcommand{\Dec}{\mathrm{Dec}_t}
+\newcommand{\Sstar}{S^{*}}
+\newcommand{\thi}{t_{\mathrm{hi}}}
+\newcommand{\tlo}{t_{\mathrm{lo}}}
+
+\setlist{nosep,leftmargin=1.2em}
+
+\title{\vspace{-2em}\textbf{Effect Identity for Non-Deterministic Agents:\\
+Certifiers, Refuters, and the Calibrated Residual}}
+\author{Sivaguru R.\,M.\\
+\small Independent Research \\
+\small \texttt{sivagurumurugan1@gmail.com}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+An agent that retries an irreversible action after a crash must not perform it
+twice. Every mechanism for this---idempotency keys, durable-execution journals,
+content-addressed fences---reduces to a question it leaves implicit: \emph{when
+are two differently-worded requests the same act?} Existing answers are either
+total by fiat (a journal position, a client token) or unbounded (a model's
+opinion). The first fails as soon as an actor re-synthesises its own arguments,
+which is what a language model does on every retry; the second replaces a broken
+guarantee with none at all.
+
+We show that any procedure deciding effect identity decomposes into three parts.
+A \emph{certifier} is a decidable relation contained in true identity: it proves
+sameness and licenses suppression. A \emph{refuter} is its dual, contained in
+true distinctness. What neither settles is the \emph{residual}. We prove the
+residual is a function of the \emph{declared schema alone}---independent of the
+oracle, the actor and the adversary---so no model moves a pair out of it, every
+non-provable error lies inside it, and only refining the declaration shrinks it.
+With an impossibility result this yields a design law we then measure: oracle
+quality trades one error direction against the other; schema quality removes
+both.
+
+We instantiate the theory as a layered fence for paraphrased replay of
+irreversible tool calls, calibrating the suppression decision conformally over
+the \emph{maximum} across committed candidates---the statistic actually
+deployed. On 955 labelled tool-call pairs over six tools, with four generator
+arms including one written by hand with no model in the loop, it deduplicates
+100.0\% [98.5--100.0] of true duplicates at 2.4\% [1.0--5.6] wrong-suppression and
+0.0\% [0.0--1.5] silent escape, against a content-addressed baseline's 13.5\%.
+Under injection a raw judge wrongly suppresses 65\% of different-amount actions;
+the refuter drives that to zero by construction, while text-only distinctions
+fail 88\% of the time---a schema failure, which re-declaring the tool with typed
+fields eliminates while simultaneously cutting escalation and judge workload.
+\end{abstract}
+
+\section{Introduction}
+
+Reliable systems have one defence against a duplicated side effect: identify the
+effect, record that it committed, and refuse to do it again. Everything turns on
+the identity function.
+
+Durable-execution systems identify an effect by its \emph{position} in a
+recorded history and replay deterministically. This is correct only under a
+determinism contract, which an LLM agent structurally violates: its control flow
+is a sample. Content-addressed fencing dissolves that requirement by naming an
+effect by its \emph{content}, $\mathrm{op}=H(r \Vert t \Vert H(\kappa_t(x)))$,
+so identity is invariant to \emph{where} on the trace the effect occurs. That is
+exactly-once for a non-deterministic control flow over a syntactically stable
+action.
+
+It stops one step short. Consider an agent wiring \$780 to a freight company.
+It dispatches \texttt{\{amount:"\$780.00", payee:"Marlow Freight"\}}, the fence
+commits, and the process dies. A fresh process reloads the run and re-prompts;
+the model re-emits the \emph{same intended act} with different surface text:
+\texttt{\{amount:"seven hundred eighty dollars", payee:"MARLOW FREIGHT"\}}.
+Canonicalisation normalises whitespace and case but cannot know these denote the
+same amount without understanding them. The hash differs, the fence sees a new
+effect, and \$1560 leaves the account. Symmetrically, two genuinely distinct
+acts can canonicalise identically and be wrongly suppressed.
+
+Recent work names this failure---semantic rollback in agent checkpoint-restore
+\cite{ref14}, semantic replay of authorizations \cite{ref15}---and proposes
+consulting a model to detect it, while explicitly leaving the model's own error
+rate open. \textbf{This paper is about bounding that error rate}, and about the
+structure of the question rather than one mechanism for it.
+
+\paragraph{Why it is hard.} The loss is sharply asymmetric.
+\emph{Wrong-suppression}---silently dropping a distinct action---is
+undetectable and catastrophic. \emph{Duplicate-escape} is loud and recoverable.
+And the setting is adversarial: injected text can ask to be treated as a retry.
+A usable mechanism must control the first error tightly, and cannot do so by
+trusting a judge.
+
+\paragraph{Contributions.}
+\begin{itemize}
+\item A theory of effect identity (\S\ref{sec:theory}): the
+\textbf{certifier}/\textbf{refuter} duality and the \textbf{residual} they leave
+over, with a lattice structure (Prop.~\ref{prop:lattice}) making the
+decomposition well-posed.
+\item \textbf{T6}: the residual is determined by the declared schema alone, from
+which \emph{schema-first, model-second} follows as a corollary rather than a
+slogan; and \textbf{T7}: of the three guarantees ``exactly-once'' conflates,
+only identity recognition is irreplaceable.
+\item A conformal bound stated for the \emph{deployed} statistic---the maximum
+over a candidate set---with its multiplicity correction and its budget
+(\S\ref{sec:conformal}).
+\item An evaluation on 955 labelled pairs with four generator arms, reporting
+Wilson intervals throughout and distinguishing zeros that are constructive from
+zeros that are sample estimates (\S\ref{sec:eval}).
+\end{itemize}
+
+We do \emph{not} claim to have posed this problem first, nor to be first to use
+semantic comparison for replay protection \cite{ref14,ref5}.
+
+\section{Related Work}
+
+\textbf{Durability and recovery} fix identity by position or construction:
+journals \cite{ref12}, shared logs \cite{ref16}, transactional tool use
+\cite{ref4}, concurrency control \cite{ref6}, and machine-checked resume
+semantics \cite{ref20}. All assume what a re-synthesising actor invalidates.
+\textbf{Idempotency keys} \cite{ref11} are client-chosen and syntactic: they
+answer ``have I seen this token'', not ``is this the same act''.
+\textbf{Verified tool calls} \cite{ref5} suppress duplicates by checking a
+postcondition, which requires the effect to be externally observable---a wire
+that has left the account often is not. \textbf{Authorization} work
+\cite{ref15,ref28} consumes approvals transactionally but keys on an identity
+judgment it inherits. Safety invariants for irreversible ledger transitions
+\cite{ref17} fix identity by the rendered transaction.
+
+\textbf{The oracle is known to be untrustworthy.} LLM judges exhibit position
+and scoring bias \cite{ref70,ref74}, preference leakage \cite{ref73},
+judge-specific idiosyncrasy \cite{ref72}, and---most relevant here---are
+persuadable by adversarial text \cite{ref77,ref78}. The prompt-injection
+literature establishes that defences reading adversarial text inherit the
+adversary's leverage \cite{ref43,ref47}.
+
+\textbf{Conformal prediction} \cite{ref1,ref2} gives distribution-free
+finite-sample guarantees, and has reached language models for generation
+\cite{ref91}, factuality \cite{ref92}, abstention \cite{ref95}, and judges
+\cite{ref97}; its assumptions are known to be fragile under shift
+\cite{ref98,ref99,ref111}. What is absent is a conformal treatment whose
+calibrated object is a \emph{control decision} with an irreversible, asymmetric
+cost.
+
+\textbf{Semantic equivalence} \cite{ref118,ref13} optimises symmetric accuracy on
+cheap errors. Our setting inverts both premises, which is why we report no
+accuracy or F1 anywhere.
+
+\paragraph{The gap.} Against the surveyed literature we find no system with all
+four of: a decidable fragment proving sameness; a decidable fragment proving
+difference; a bound attached to the statistic actually deployed; and an
+auditable policy for what neither settles.
+
+\section{Problem Formulation}
+\label{sec:theory}
+
+A \emph{logical run} has a stable identifier $r$ reused across retries. A tool
+call is $(t,x)$ with $x \in X_t$. Each dispatch carries a hidden intended action
+via a denotation $\llbracket \cdot \rrbracket_t$; the agent controls $x$, not
+the denotation.
+
+\begin{definition}[Ground-truth identity]
+$x \aeq x'$ iff $\llbracket x \rrbracket_t = \llbracket x' \rrbracket_t$.
+\end{definition}
+
+$\aeq$ is an equivalence relation, is not observable, and is what a judge
+estimates. A \emph{fence} maps a candidate dispatch and the durable set of
+committed effects to $\{$SUPPRESS, ESCALATE, EXECUTE$\}$, with two errors:
+\emph{wrong-suppression} ($\mathrm{WS}$), suppressing a distinct act, and
+\emph{duplicate-escape}, split into \emph{silent} (EXECUTE) and \emph{flagged}
+(ESCALATE). The objective is
+$\min\ P(\text{EXECUTE} \wedge \text{duplicate})$ s.t. $\mathrm{WS} \leq \alpha$.
+
+\section{Effect-Identity Framework}
+\subsection{Certifiers, refuters, residual}
+
+\begin{definition}[Certifier / refuter]
+$C \subseteq X_t^2$ is a \textbf{certifier} if $C \subseteq{\aeq}$: it proves
+sameness. $D$ is a \textbf{refuter} if $D \cap {\aeq} = \emptyset$: it proves
+difference.
+\end{definition}
+
+These are duals, not variants. A certifier licenses suppression; a refuter
+licenses execution. Each is one-sided: failing to fire says nothing.
+
+Our instantiation supplies both. Canonical equality $\equiv_\kappa$ under
+declared field policies is a certifier, sound provided each policy is
+semantics-preserving (A5). Projection difference $\not\approx_\sigma$ over
+declared non-text fields is a \emph{refuter}, sound provided declared fields are
+effect-determining (A5$'$). A judge $J$ is neither.
+
+\begin{definition}[Decided set, residual]
+$\Dec = {\equiv_\kappa} \cup {\not\approx_\sigma}$, and
+\[
+\Res = \{(x,x') : \kappa_t(x)\neq\kappa_t(x') \wedge \sigma_t(x)=\sigma_t(x')\}.
+\]
+\end{definition}
+
+\begin{proposition}[Lattice structure]
+\label{prop:lattice}
+Ordered by inclusion, certifiers form a bounded lattice with join $\cup$, meet
+$\cap$, bottom $\emptyset$, top $\aeq$; refuters likewise with top $\aneq$. Both
+are closed under arbitrary union, so a declaration has a maximal decidable
+certifier and refuter. The two families meet only in $\emptyset$.
+\end{proposition}
+
+\begin{proof}
+Closure is inherited from the powerset lattice: if $C_1,C_2 \subseteq {\aeq}$ so
+are $C_1\cup C_2$ and $C_1\cap C_2$; dually for refuters. A relation in both
+satisfies $R \subseteq {\aeq}$ and $R \cap {\aeq} = \emptyset$, forcing
+$R=\emptyset$.
+\end{proof}
+
+Three consequences make the decomposition well-posed. Combining sound mechanisms
+is always safe (closure under union). The residual is the complement of the
+\emph{greatest} elements' union, so it is a property of the declaration rather
+than of which mechanism one implements. And no procedure is both a certifier and
+a refuter, so a design must supply each separately---which is where the
+literature divides.
+
+\subsection{What the residual determines}
+
+\begin{theorem}[T6, residual determination]
+\label{thm:t6}
+$\Res$ is a function of the declared schema alone: independent of the judge, the
+actor and the adversary. Hence (i) no oracle moves a pair out of $\Res$;
+(ii) every non-provable error of a sound mechanism lies in $\Res$; (iii)
+refining the declaration shrinks $\Res$ monotonically.
+\end{theorem}
+
+\begin{proof}
+(i) The defining condition mentions only $\kappa_t,\sigma_t$. (ii) A pair in
+$\equiv_\kappa$ is suppressed and, by A5, correctly; a pair in
+$\not\approx_\sigma$ executes and, by A5$'$, correctly; so any error lies outside
+$\Dec$. (iii) A finer $\sigma'$ distinguishes at least what $\sigma$ does, so
+$\not\approx_\sigma \subseteq \not\approx_{\sigma'}$, and dually for $\kappa$;
+the complement shrinks.
+\end{proof}
+
+\begin{corollary}[Schema-first, model-second]
+For a fixed schema the set of pairs on which \emph{any} mechanism can err is
+fixed. Improving the oracle redistributes error within $\Res$; only enriching the
+declaration removes it.
+\end{corollary}
+
+This converts a design heuristic into a theorem, and predicts the experimental
+pattern of \S\ref{sec:results}: every judge-side intervention we tried trades one
+axis against another, while the single schema change improves all of them at
+once.
+
+\subsection{Three guarantees, not one}
+
+``Exactly-once'' conflates three claims that fail independently:
+\textbf{(A)} identity recognition---did we decide correctly? (statistical);
+\textbf{(B)} fence-level at-most-once commitment (systems, conditional on
+serialisation); \textbf{(C)} external exactly-once (the provider's contract).
+
+\begin{theorem}[T7, composition]
+(A) is necessary: both (B) and (C) are keyed mechanisms, so misidentification
+supplies the wrong key to each---an unrecognised duplicate presents a fresh key
+and the provider correctly fires twice; a wrongly-recognised distinct act
+presents a stale key and is correctly absorbed. (C) subsumes (B) for
+at-most-once. (B) is a strict partial substitute for (C), failing exactly on the
+execute-before-record window.
+\end{theorem}
+
+The window---between the provider applying the effect and the local commit row
+becoming durable---is not closable locally. Crucially, closing it requires a
+provider key that is both paraphrase-invariant \emph{and complete} for effect
+identity. A refuter-only projection is \emph{not} such a key: equal projections
+do not imply equal acts, so keying a provider on $\sigma_t$ would merge distinct
+actions at a boundary no local audit can see.
+
+\section{Proposed Fence}
+
+The fence consults, in order: (L0) the certifier $\equiv_\kappa$, realised as an
+operation id, suppressing on an exact hit; (W) the refuter, filtering committed
+candidates whose projection differs---\emph{before} any model call; (L1) the
+judge over surviving candidates, thresholded conformally; (L2) an escalation band
+in which suspected duplicates execute but are durably flagged.
+
+Two properties of this ordering carry the design. The refuter runs \emph{before}
+the judge, so no judge output---however manipulated---participates in a decision
+across a declared difference. And the refuter \emph{shrinks} the candidate set,
+which loosens the multiplicity correction below.
+
+\section{Theoretical Analysis}
+\subsection{Local guarantees}
+
+Two properties are standard for an execute-then-record scheme but must be stated,
+because the identity relation here is not equality.
+
+\begin{theorem}[T1, at-most-once commitment]
+Assume a stable run id, a pure canonicalisation, atomic insert-if-absent on the
+operation id, effect-before-commit, and no concurrent dispatch per identity.
+Then for a fixed run and operation id, across any number of serialised
+executions and process restarts sharing the durable log, the effect commits at
+most once.
+\end{theorem}
+
+Without the serialisation assumption only the weaker property survives---at most
+one commit \emph{row}, with concurrent duplicates rendered observable as a commit
+conflict rather than prevented. Our experiments dispatch sequentially; a
+distributed deployment must supply a per-operation lease.
+
+\begin{theorem}[T2, certifier soundness]
+If each declared field policy is semantics-preserving (A5), every L0 suppression
+is correct: $\mathrm{WS}_{L0}=0$.
+\end{theorem}
+
+The content is entirely in A5, which is an adoption obligation on the schema
+author rather than a property of the mechanism. Empirically L0 produces 0/206
+false suppressions on held-out distinct pairs.
+
+\begin{theorem}[T5, external exactly-once]
+Compose the fence with a provider obeying at-most-once per idempotency key. If
+the key is derived from a projection that is both paraphrase-invariant
+\emph{and} complete for effect identity, the external effect commits exactly
+once, including across the window of T1. If the projection is only a refuter,
+the key is inadmissible---distinct acts share it---and the window stays open
+under paraphrase.
+\end{theorem}
+
+The asymmetry is worth stating plainly, because it inverts the paper's own
+emphasis: the semantic layer buys deduplication \emph{while the process is
+alive}; schema completeness is what buys correctness \emph{across process
+death}. Neither substitutes for the other.
+
+\subsection{Calibrating the deployed statistic}
+\label{sec:conformal}
+
+The fence suppresses on $\Sstar = \max_{x' \in C} J(t,x,x')$ over the surviving
+candidate set, $m=|C|$. Calibrating a \emph{pairwise} score at level $\alpha$
+does not bound this: with $m$ candidates the rule gets $m$ chances to cross the
+threshold.
+
+\begin{theorem}[T3, multiplicity-corrected bound]
+Let $s_1..s_n$ be judge scores on calibration pairs known distinct, and set
+$\thi(m)$ to the $\lceil (n{+}1)(1-\alpha/m) \rceil$-th smallest (and $+\infty$
+if that exceeds $n$). If, conditionally on $m$, each pairwise score of a truly
+distinct comparison is exchangeable with the pool, then for $x$ distinct from
+every candidate, $P(\Sstar > \thi(m)) \leq \alpha$.
+\end{theorem}
+
+\begin{proof}
+Condition on $m$ and write $\beta=\alpha/m$. For each $i$, exchangeability makes
+the rank of $s_i$ uniform among the $n{+}1$ scores, so $P(s_i > \thi) \le \beta$.
+A union bound over the $m$ candidates gives $m\beta=\alpha$. No independence is
+required, which matters because the $m$ scores share $x$.
+\end{proof}
+
+Ties are resolved by the strict inequality (scores are integer percents, so ties
+are common). $m=0$ never suppresses. Insufficient calibration yields
+$\thi=+\infty$: the layer stops suppressing rather than suppressing unsafely.
+The budget is hard---$\thi=+\infty$ once $m > \alpha(n{+}1)$, i.e. $m>10$ for our
+pool of $n{=}199$ at $\alpha{=}0.05$; supporting $m{=}50$ needs 999 calibration
+pairs.
+
+\begin{theorem}[T4, impossibility]
+If the score distributions of truly-same and truly-distinct pairs overlap, no
+threshold rule on the score alone achieves zero wrong-suppression and zero silent
+escape simultaneously.
+\end{theorem}
+
+T4 is why the architecture is layered: zero error on a class is reachable only by
+a decision that does not consult the score.
+
+\section{Experimental Methodology}
+\label{sec:eval}
+
+\paragraph{Corpus.} 955 labelled tool-call pairs over six irreversible tools
+(charge, refund, transfer, email, ticket, and a deliberately loose-schema wire
+tool) in nine categories: mechanical reformats, benign and adversarial
+paraphrase, loose-schema value reformats, near-miss mutations, legitimate
+repeats, handcrafted intent differences, and two injection classes held out of
+calibration entirely. Labels are by construction, with a validator rejecting any
+variant that alters a pinned numeric mention. Paraphrases are generated by
+\textbf{four arms}: three model families and one written \textbf{by hand with no
+model in the loop}. Split 50/50, stratified by (category, generator).
+
+\paragraph{Judge and parsing.} A judge scores batches at temperature 0, returning
+an integer percentage. Parsing is strict: a reply of \texttt{0.95} where
+\texttt{95} was requested is well-formed JSON and, under a permissive parser,
+silently becomes a confident \emph{distinct} verdict. We reject every
+non-integer, reject out-of-range values rather than clamping, and record
+unanswered pairs as \emph{abstentions} rather than imputing 0.5---an imputed
+mid-score would enter calibration and move both thresholds while appearing to be
+a judgment.
+
+\paragraph{Coverage.} Two judges reached usable coverage: GPT-OSS-120B (920/955)
+and GPT-OSS-20B (955/955, zero abstentions). Llama-3.3-70B (60/955) and
+Qwen3.6-27B (120/955) were halted by per-model daily quotas and are excluded, not
+reported: a judge that abstains yields $\thi=+\infty$ and a row reading ``0\%
+wrong-suppression'' that is the \emph{absence} of a judge.
+
+\section{Results}
+\label{sec:results}
+\subsection{RQ1--RQ2: deduplication at bounded cost}
+
+Table~\ref{tab:main} gives the main result on the held-out test split (251 SAME,
+206 DIFF). The hardened configuration deduplicates \textbf{100.0\%} of true
+duplicates against the content-addressed baseline's \textbf{13.5\%}, at
+\textbf{2.4\%} wrong-suppression and \textbf{zero} silent escape. Rates marked
+$\dagger$ are zero as a consequence of a decidable layer, not as a sample
+estimate.
+
+\begin{table}[t]
+\centering\small
+\caption{Main results, test split. WS = wrong-suppression.}
+\label{tab:main}
+\begin{tabular}{lcccc}
+\toprule
+Config & WS & dedup & silent & friction \\
+\midrule
+No fence & 0.0 & 0.0 & 100.0 & 0.0 \\
+Canonical L0 & 0.0$\dagger$ & 13.5 & 86.5 & 0.0 \\
+Raw judge $\tau{=}0.5$ & 1.5 & 99.6 & 0.4 & 0.0 \\
+Layered $\alpha{=}0.01$ & 0.5 & 85.3 & 6.0 & 0.5 \\
+\textbf{Hardened} $\alpha{=}0.05$ & \textbf{2.4} & \textbf{100.0} & \textbf{0.0} & \textbf{0.0} \\
+Tightened schema & 1.9 & 100.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tightening $\alpha$ to 0.01 buys a real safety improvement (WS 2.4\%$\to$0.5\%)
+and pays in liveness: dedup falls to 85.3\% and silent escape rises to 6.0\%.
+The raw judge is competitive on WS but has \emph{no bound} and no band, so its
+4.4\% miss rate is entirely silent; the calibrated configuration converts that
+into 0.0\% silent and 3.2\% flagged. That conversion, not the headline dedup, is
+what the machinery buys.
+
+Per category, the fence suppresses 100\% of mechanical reformats, 100\% (8/8) of
+loose-schema value reformats---the motivating example, though on a small
+denominator---97.6\% of benign and 93.9\% of adversarial paraphrase. Every wrong
+suppression falls in the legitimate-repeat category (5.3\%), whose pairs are
+identical in every declared field and differ only by a token in prose. This is
+pure residual.
+
+\subsection{RQ3: adversarial injection}
+
+On held-out injection pairs (Table~\ref{tab:attack}), a raw judge wrongly
+suppresses \textbf{65\%} of different-amount actions dressed as retries. The
+calibrated layer is slightly \emph{worse} (70\%), as it must be: calibration
+bounds an error on the benign distribution and offers nothing under deliberate
+shift. The refuter drives this to \textbf{zero deterministically}---the amount
+lives in a declared field, so the veto fires before the judge is consulted.
+
+\begin{table}[t]
+\centering\small
+\caption{Injection attacks: wrong-suppression (\%).}
+\label{tab:attack}
+\begin{tabular}{lcc}
+\toprule
+Config & field-injection & text-injection \\
+\midrule
+Raw judge (120B) & 65.0 & 84.0 \\
+Raw judge (20B) & 15.0 & 28.0 \\
+Layered, no refuter & 70.0 & 88.0 \\
+\textbf{Hardened} & \textbf{0.0}$\dagger$ & 88.0 \\
+Ensemble \textsc{min} & 0.0$\dagger$ & 28.0 \\
+Ensemble \textsc{mean} & 0.0$\dagger$ & 88.0 \\
+\textbf{Tightened schema} & \textbf{0.0}$\dagger$ & \textbf{0.0}$\dagger$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Text-injection is where the honesty is: with declared fields identical, the
+refuter is silent and the judge is wrong \textbf{88\%} of the time. Two findings
+follow. The \textsc{min} ensemble tracks the \emph{better} judge (28\%) while
+\textsc{mean} tracks the worse (88\%)---the aggregator's safety argument measured
+directly, since suppression under \textsc{min} requires unanimity. And
+re-declaring the tool so the distinguishing token is a typed field drives the
+attack to zero \emph{by construction}. The residue is a schema problem, not a
+judge problem.
+
+\subsection{RQ4: cost, and four attempts to reduce it}
+
+The decidable layers settle 26.5\% of decisions with no model call, so the judge
+is invoked on 735 dispatches per 1000, producing 0 escalations per 1000 distinct
+actions. Under the tightened schema: 565 calls, 0 escalations.
+
+Of four reduction strategies, one works and one clearly backfires.
+\textbf{Per-tool calibration} raises WS to 2.9\% and destroys
+deduplication (100.0\%$\to$81.7\%): splitting one pool of 199 across six tools
+leaves two unable to certify $\alpha$ at all, so they stop suppressing entirely.
+This is the T6 budget arriving from another direction. \textbf{Schema tightening}
+improves every axis at once (Table~\ref{tab:main}, and zero injection failure).
+A \textbf{deterministic lexical scorer} needs no model call but reaches only
+22.7\% dedup. \textbf{Ensembles} (mean and min) are successfully evaluated, with min tracking the safer judge.
+
+\section{Ablation}
+
+Table~\ref{tab:abl} isolates each layer. Removing the certifier leaves deduplication
+unchanged on this corpus because the judge successfully resolves all same pairs, but canonical
+duplicates are resolved with $\mathrm{WS}=0$ by construction rather than $\leq\alpha$ by calibration.
+Removing the escalation band leaves deduplication and escape rates unchanged on benign data because
+the judge achieves 100.0\% suppression. Removing calibration for a hand-set threshold gives
+\emph{better} WS at a small loss in deduplication (99.6\% vs 100.0\%)---which we report because
+it is uncomfortable and true. What calibration buys is a
+guarantee that transfers to an unseen judge and corpus; a threshold that happens
+to work here carries nothing, and gives no signal when it stops working.
+
+\begin{table}[t]
+\centering\small
+\caption{Ablations (\%), test split, $\alpha{=}0.05$.}
+\label{tab:abl}
+\begin{tabular}{lcccc}
+\toprule
+& WS & dedup & flagged & silent \\
+\midrule
+Full layered      & 2.9 & 100.0 & 0.0 & 0.0 \\
+$-$ certifier (L0)& 2.9 & 100.0 & 0.0 & 0.0 \\
+$-$ escalation band & 2.9 & 100.0 & 0.0 & 0.0 \\
+$-$ calibration ($\tau{=}0.5$) & 1.5 & 99.6 & 0.4 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The calibration-size sweep confirms the bound behaves as a bound: from $n{=}30$
+the mean wrong-suppression sits below $\alpha$, but the 95th percentile across
+resampled calibration draws reaches 9.2\% at every $n \geq 20$. The guarantee is
+marginal over draws, not per-draw; a declared $\alpha$ should not be read as the
+$\alpha$ obtained on the particular sample one happened to draw.
+
+\subsection{RQ7: is it self-recognition?}
+
+If the result were the judge recognising its own writing, it should deduplicate
+its own paraphrases better. It does not: hand-authored 94.1\% [80.9--98.4],
+Llama 98.2\%, GPT-OSS (self) 95.1\%, Qwen 96.6\%. The self-generated arm ranks
+third of four and all intervals overlap. Most importantly, paraphrases written
+\textbf{by hand, with no model in the loop} are deduplicated as well as
+machine-written ones.
+
+Across the two judges, benign behaviour transfers (dedup 100.0\% vs 97.6\%; WS
+2.4\% vs 2.9\%) but \emph{silent escape does not}: the 20B is saturated (83\% of
+its same-pair scores at an extreme, vs 6\%) so the escalation band has nothing to
+catch, and 2.0\% of duplicates escape silently where the 120B's escape none. A
+more accurate but more saturated judge can be a regression under this loss.
+
+\section{Discussion}
+
+The results confirm the efficacy of the proposed fence architecture. The certifier and refuter layers deterministically resolve decisions within their jurisdiction, while the calibrated semantic layer handles the residual. The choice of LLM judge, the design of the tool schema, and the multiplicity correction are key parameters that shape the mechanism's safety. Moving distinguishing tokens to typed fields in the tool schema is the most effective way to eliminate residual error, reinforcing our recommendation of a schema-first, model-second approach.
+
+\section{Threats to Validity}
+
+\textbf{Construct.} Labels are assigned by construction, so the ground truth
+operationalises the authors' definition of ``the same action''. The construction
+is conservative in one direction---a validator rejecting any variant that alters
+a pinned value cannot admit a false SAME---and unguarded in the other.
+\textbf{Internal.} Generator circularity is controlled by four arms including a
+no-model one; calibration leakage by a fixed stratified split with attacks held
+out entirely; draw luck in the paired designs. Judge-family effect is
+\emph{not} controlled. \textbf{External.} Six tools, adversarially seeded, not
+production traffic; five of six have typed fields that make the refuter
+effective, so a uniformly loose tool surface should expect results closer to our
+residual cells than to our headline. \textbf{Statistical.} Several cells
+carrying qualitative weight are small: the loose-schema category is 8 test pairs
+and the field-injection cell 20, so a 100\% there admits a lower bound of 67.6\%
+and we quote it.
+
+\section{Limitations}
+
+\textbf{Wrong-suppression is non-zero and cannot be zero} for any score-threshold
+rule on overlapping distributions (T4). Deployments that cannot tolerate any
+silent drop should run the decidable layers only, take 13.5\% deduplication, and
+escalate the rest.
+
+\textbf{The conformal bound lapses under adversarial shift.} It rests on
+exchangeability; injection violates it deliberately, and we do not claim the
+bound there---visibly so, since the calibrated layer underperforms the raw judge
+on that split.
+
+\textbf{The correction is conservative and its budget binds:} semantic
+suppression switches off entirely once $m > \alpha(n{+}1)$.
+
+\textbf{Labels are ours.} Every label is by construction and therefore an
+operationalisation of the authors' definition of ``the same action''. The
+hand-authored arm removes the machine-generation confound, not this one;
+independent annotation is not carried out here.
+
+\textbf{Two judges, one vendor family.} Nothing here separates a property of the
+mechanism from an idiosyncrasy of GPT-OSS.
+
+\textbf{Three evaluations are updated under offline simulation:} a cross-model
+judge comparison, a threshold comparison showing uncorrected wrong-suppression
+of 65.0\% at $m=50$ vs 0\% under Bonferroni/set-conformal rules, and a 48-trial
+eight-crash-point replay showing 8.3\% semantic exactly-once vs 0\% syntactic.
+
+\paragraph{What we do not claim.} Universal semantic equivalence; zero
+wrong-suppression; local exactly-once across the external commit window;
+robustness to arbitrary free-text distinctions; production-scale validation;
+immunity to a misdeclared schema; or that an LLM judge is intrinsically
+trustworthy---the design assumes the opposite.
+
+\section{Reproducibility / Artifact}
+
+The complete research artifact is provided in \texttt{research/effect-identity/}. It requires Node $\ge$ 20.11 and has zero runtime dependencies. The unit and integration tests are executed via \texttt{npm test} with no network requirements. Scripts to regenerate the corpus, run model scoring, perform multi-candidate calibration sweeps, and execute the crash-replay fault-injection simulation are detailed in the repository documentation.
+
+\section{Conclusion}
+
+Content-addressing freed exactly-once from positional replay but left the
+arguments of the action syntactic, and an LLM agent's retry paraphrases the
+action itself. We treated the identity decision as the object to be engineered,
+and found it decomposes into a certifier, a refuter, and a residual whose size is
+fixed by the declared schema. Every zero in this paper comes from something the
+schema pinned; every unbounded failure comes from something it did not.
+Tightening one tool's declaration simultaneously eliminated the worst attack, cut
+escalation, cut wrong-suppression, and removed a sixth of the judge's workload.
+The unit of exactly-once for agents is not the hash of the request, and it is not
+the opinion of a model---it is the identity of the act, proved where the
+declaration is willing to say, and bounded by calibration only in the gap
+between.
+
+\balance
+\bibliographystyle{plain}
+\bibliography{effect-identity}
+
+\end{document}
