@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-08-18T15:38:07.717Z",
+  "generatedAt": "2026-08-25T05:11:23.543Z",
   "corpus": "v1",
   "judge": "openai_gpt_oss_120b",
   "alpha": 0.05,
-  "nPairs": 955,
-  "nCal": 453,
-  "nTest": 457,
+  "nPairs": 1066,
+  "nCal": 508,
+  "nTest": 513,
   "nAttack": 45,
   "abstentions": 0,
   "seedProvenanceSharing": {
-    "value": 0.8643326039387309,
-    "successes": 395,
-    "n": 457,
+    "value": 0.8284600389863548,
+    "successes": 425,
+    "n": 513,
     "basis": "measured",
     "ci95": {
-      "lo": 0.8298840309204334,
-      "hi": 0.892707206534973
+      "lo": 0.7934268397434595,
+      "hi": 0.8586106356729896
     }
   },
   "checks": [
@@ -32,7 +32,7 @@
     {
       "name": "seed-level provenance sharing measured (not a pass/fail)",
       "passed": true,
-      "detail": "395/457 test pairs share a seed act with some calibration pair (86.4%)"
+      "detail": "425/513 test pairs share a seed act with some calibration pair (82.8%)"
     },
     {
       "name": "all scores are null or within [0,1]",
@@ -47,7 +47,7 @@
     {
       "name": "abstentions are excluded from the calibration pool",
       "passed": true,
-      "detail": "0 abstained residual DIFF calibration pairs were dropped; pool n = 117"
+      "detail": "0 abstained residual DIFF calibration pairs were dropped; pool n = 142"
     },
     {
       "name": "an abstention can never cause suppression",
@@ -92,7 +92,7 @@
     {
       "name": "the jurisdiction-matched pool is not larger than the mismatched one",
       "passed": true,
-      "detail": "matched n=117, mismatched n=205"
+      "detail": "matched n=142, mismatched n=230"
     }
   ],
   "monteCarlo": [
@@ -144,82 +144,82 @@
         "n": 20,
         "reps": 300,
         "pInfinite": 0,
-        "mean": 0.030756302521008347,
-        "median": 0.01680672268907563,
-        "p95": 0.13445378151260504,
-        "max": 0.13445378151260504,
-        "shareExceedingAlpha": 0.15666666666666668,
+        "mean": 0.027916666666666656,
+        "median": 0.013888888888888888,
+        "p95": 0.13194444444444445,
+        "max": 0.13194444444444445,
+        "shareExceedingAlpha": 0.09666666666666666,
         "certifiableM": 1
       },
       {
         "n": 30,
         "reps": 300,
         "pInfinite": 0,
-        "mean": 0.018347338935574203,
-        "median": 0.008403361344537815,
-        "p95": 0.07563025210084033,
-        "max": 0.13445378151260504,
-        "shareExceedingAlpha": 0.07,
+        "mean": 0.017569444444444443,
+        "median": 0.013888888888888888,
+        "p95": 0.04861111111111111,
+        "max": 0.13194444444444445,
+        "shareExceedingAlpha": 0.03666666666666667,
         "certifiableM": 1
       },
       {
         "n": 50,
         "reps": 300,
         "pInfinite": 0,
-        "mean": 0.02002801120448174,
-        "median": 0.01680672268907563,
-        "p95": 0.04201680672268908,
-        "max": 0.13445378151260504,
-        "shareExceedingAlpha": 0.016666666666666666,
+        "mean": 0.02083333333333327,
+        "median": 0.013888888888888888,
+        "p95": 0.04861111111111111,
+        "max": 0.0763888888888889,
+        "shareExceedingAlpha": 0.013333333333333334,
         "certifiableM": 2
       },
       {
         "n": 100,
         "reps": 300,
         "pInfinite": 0,
-        "mean": 0.02507002801120441,
-        "median": 0.025210084033613446,
-        "p95": 0.04201680672268908,
-        "max": 0.07563025210084033,
-        "shareExceedingAlpha": 0.03,
+        "mean": 0.028726851851851816,
+        "median": 0.027777777777777776,
+        "p95": 0.04861111111111111,
+        "max": 0.13194444444444445,
+        "shareExceedingAlpha": 0.02,
         "certifiableM": 5
       },
       {
         "n": 205,
         "unavailable": true,
-        "poolAvailable": 117
+        "poolAvailable": 142
       }
     ],
-    "nCalResidualDiff": 117,
-    "nCalResidualSame": 214,
-    "nTestResidualDiff": 119
+    "nCalResidualDiff": 142,
+    "nCalResidualSame": 244,
+    "nTestResidualDiff": 144
   },
   "jurisdiction": {
     "mismatchedPool": {
-      "n": 205,
+      "n": 230,
       "tHi": 0.2,
       "wsOverResidual": {
-        "value": 0.04201680672268908,
-        "successes": 5,
-        "n": 119,
+        "value": 0.04861111111111111,
+        "successes": 7,
+        "n": 144,
         "basis": "measured",
         "ci95": {
-          "lo": 0.018078474459665823,
-          "hi": 0.09459894693841323
+          "lo": 0.023743988255155446,
+          "hi": 0.09693568416564162
         }
       }
     },
     "matchedPool": {
-      "n": 117,
+      "n": 142,
       "tHi": 0.8,
       "wsOverResidual": {
-        "value": 0.01680672268907563,
-        "successes": 2,
-        "n": 119,
+        "value": 0.027777777777777776,
+        "successes": 4,
+        "n": 144,
         "basis": "measured",
         "ci95": {
-          "lo": 0.004621175448157974,
-          "hi": 0.059212801256237346
+          "lo": 0.01085411795640967,
+          "hi": 0.06924153934534726
         }
       }
     }
