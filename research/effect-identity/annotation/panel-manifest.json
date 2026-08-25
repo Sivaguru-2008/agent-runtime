@@ -1,6 +1,6 @@
 {
   "channel": "M (model panel)",
-  "ranAt": "2026-08-23T18:29:48.475Z",
+  "ranAt": "2026-08-25T04:40:10.658Z",
   "barredFromPanel": "openai/gpt-oss-120b",
   "barredBecause": "supplies the scores used by the headline re-derivation; using it as an annotator would be circular",
   "oneItemPerCall": true,
@@ -37,9 +37,9 @@
   ],
   "results": [
     {
-      "name": "compound",
-      "answered": 4,
-      "nonResponse": 0
+      "name": "adjudicator-safeguard20b",
+      "answered": 144,
+      "nonResponse": 10
     }
   ],
   "note": "Channel M is a model panel. It is not a human study and is not reported as one."

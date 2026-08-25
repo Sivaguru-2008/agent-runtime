@@ -26,7 +26,7 @@ We instantiate the theory as a layered fence, and correct two errors that the in
 
 On a purpose-built corpus of 955 labelled tool-call pairs over six irreversible tools, with four generator arms of which one is written by hand with no model in the loop, the instantiation deduplicates 94.0% [90.4–96.3] of true duplicates at 1.0% [0.3–3.5] wrong-suppression, against a content-addressed baseline's 13.5% [9.9–18.3]. The decidable layers settle 26.5% of decisions with no model call. Under prompt injection a raw judge wrongly suppresses 65.0% [43.3–81.9] of different-amount actions; the refuter drives that to zero by construction, while text-only distinctions — pure residual — fail 84.0% [65.3–93.6] of the time. Across three judges spanning two vendors, all at full-corpus coverage, across the one ground-truth definition in the corpus a careful reader could reasonably dispute, and under paired significance tests, wrong-suppression stays inside the declared level (1.0%, 1.5%, 1.0% against α = 0.05) while deduplication moves freely (82.1% to 94.0%). That asymmetry is the design’s central prediction — the bound governs the safety direction and nothing governs the other — and it is what we find under every perturbation we can apply.
 
-Taking the theory seriously changed two of our own results. Because T6 places every non-provable error in the residual, the calibration pool must be drawn from the residual too — the pairs the deployed rule actually routes to the oracle — and a pool that also contains refuter-vetoed pairs is easier, depresses the threshold, and inflates suppression. Conditioned on the residual, the mis-specified pool puts wrong-suppression at 4.2% [1.8–9.5] on one judge and 5.0% [2.3–10.6] on the other, the second above its declared α = 0.05; the jurisdiction-matched pool restores 1.7% and 2.5%. And because the pool is drawn from the residual, refining a schema shrinks the pool at the same rate it shrinks the residual: our tightened schema closes an entire injection class by construction and simultaneously drops deduplication from 94.0% to 19.9%, a dilemma we state as a corollary rather than an anomaly.
+Taking the theory seriously changed two of our own results. Because T6 places every non-provable error in the residual, the calibration pool must be drawn from the residual too — the pairs the deployed rule actually routes to the oracle — and a pool that also contains refuter-vetoed pairs is easier, depresses the threshold, and inflates suppression. Conditioned on the residual, the mis-specified pool puts wrong-suppression at 4.9% [2.4–9.7] on both judges, just inside a declared α = 0.05 whose upper interval it plainly is not; the jurisdiction-matched pool restores 2.8% and 2.1%. And because the pool is drawn from the residual, refining a schema shrinks the pool at the same rate it shrinks the residual: our tightened schema closes an entire injection class by construction and simultaneously drops deduplication from 94.0% to 19.9%, a dilemma we state as a corollary rather than an anomaly.
 
 The limits are equally specific. Wrong-suppression is non-zero and, by T4, cannot be zero for any score-threshold rule on overlapping distributions. Per-tool calibration costs 19 points of deduplication, because subdividing a fixed calibration budget leaves the smaller tools unable to certify α at all. A resampling study shows the realised wrong-suppression rate reaching roughly twice the declared α at the 95th percentile over calibration draws at every pool size tested, which is consistent with the theorem and not with the reading practitioners are likely to give it. The cross-family evidence spans two vendors and not three: the Llama arm never cleared 6.3% coverage before its allowance ran out. A nested-candidate-set experiment is reported with its apparatus rather than as a headline rate, the uncorrected rule wrongly suppressing 65.0% of held-out distinct units at `m` = 50 where the corrected rule suppresses none.
 
@@ -735,7 +735,7 @@ Stated generally: **each configuration must be calibrated on its own jurisdictio
 
 *Proof.* Suppose a threshold `τ` gives `WS = 0`: no distinct pair scores `> τ`, i.e. `F_diff` has no mass above `τ`, so `τ ≥ sup(supp F_diff)`. Silent-escape `= 0` requires every identical pair to be suppressed (score `> τ`) or flagged; a *pure* threshold with no band requires `F_same` to have no mass at or below `τ`, i.e. `τ < inf(supp F_same)`. Both demand `sup(supp F_diff) ≤ τ < inf(supp F_same)`, i.e. the supports are separated — contradicting overlap. With the escalation band, "silent-escape = 0" can be met by widening `(t_lo, t_hi]` to cover the overlap, but then those identical pairs are *flagged, not suppressed*, so dedup drops by the overlap mass and friction rises — the error is *relocated*, not removed. Zero error for a class is attainable only by a decision that does not depend on the (overlapping) score: L0 (Theorem T2) gives `WS = 0` on its fragment, and the witness gives `WS = 0` across declared differences, precisely because both are decidable and score-independent. ∎
 
-T4 is why the architecture is *layered*: the decidable layers are not an optimisation but the only route to zero error on their fragments; the calibrated layer then does the best bounded job on the irreducibly ambiguous remainder. Our judge is well but imperfectly separated — `F_diff` median 0.05, `F_same` median 0.95, with the supports overlapping in between — and T4 says exactly what that overlap costs: the empirical `WS` on benign data is small but non-zero (0.5% [0.1–2.7] at α=0.01), and the `F_same` mass sitting low becomes escape (§8.3). The zeros we do report come only from the decidable layers, as T4 requires.
+T4 is why the architecture is *layered*: the decidable layers are not an optimisation but the only route to zero error on their fragments; the calibrated layer then does the best bounded job on the irreducibly ambiguous remainder. Our judge is well but imperfectly separated — `F_diff` median 0.05, `F_same` median 0.95, with the supports overlapping in between — and T4 says exactly what that overlap costs: the empirical `WS` on benign data is small but non-zero (1.7% [0.7–4.3] at α=0.05), and the `F_same` mass sitting low becomes escape (§8.3). The zeros we do report come only from the decidable layers, as T4 requires.
 
 ### 6.8 T5 — external exactly-once by composition, and what the key must satisfy
 
@@ -886,7 +886,16 @@ Every label in this corpus is by construction, which makes it reproducible and c
 
 **Analysis, prepared in advance of any response.** The ingestion path (already implemented and exercised against synthetic input) computes Fleiss' κ and Krippendorff's α — the latter because it handles the ragged, possibly-missing annotations real submissions produce, which κ does not — pairwise Cohen's κ, per-stratum construction agreement with its own Wilson interval, the adjudication rate, and, distinctly from agreement, a **re-derivation of the mechanism's headline wrong-suppression and deduplication rates over the annotated subset under both the constructed and the adjudicated labels**, calibrated on the untouched full calibration split so that re-labelling the subset being measured cannot leak into its own threshold.
 
-**Status: PENDING.** `results/human_annotation.json` records this explicitly and the artifact's verifier (§12) fails the build if that file ever claims completion while no annotator responses exist on disk. No annotation informs any number reported in §8, and none of the analysis code above has run on real judgements. What remains is exclusively the collection of independent responses — roughly 460 individual judgements across three annotators — not any further design or engineering. We report the apparatus at this level of detail because a blinded validation study that exists only as an intention is not a control; one specified precisely enough to be run by someone else, and checked by an automated build assertion for whether it has been, is closer to being one.
+**Two collection channels, and which one ran.** The study was preregistered before any judgement was collected (`annotation/PREREGISTRATION.md`), against a content-hashed 154-item sheet (`annotation/FREEZE.json`, sheet hash `66a174e1…`). The preregistration fixes the analysis, the exclusion rule, and — because we did not know in advance which channel we would be able to run — the claim each channel would license:
+
+- **Channel H (human).** A self-contained HTML instrument (`annotation/instrument.html`), one pair per screen, forced ternary response, A/B side and item order randomised per annotator, CSV export keyed by item ID. This is the stronger channel. It is built, verified end-to-end, and shipped in the artifact. **It was not collected**: we had no independent human annotators available, and we do not report a human validation we did not run.
+- **Channel M (model panel).** The same frozen items, the same instruction text, the same forced ternary, delivered one pair per call to models that have not seen the mechanism. **This is the channel that ran**, and §8.16 reports it.
+
+**Channel M is a model panel and we never call it a human study.** It controls the same threat — whether the constructed labels are shared or private to the authors — and it controls it more weakly, because a construction reflecting a prior common to the authors and the panel would be confirmed here and still be idiosyncratic relative to human practice. That limitation is restated wherever the result is cited.
+
+**Panel composition.** Three annotators — `groq/compound`, `groq/compound-mini`, `qwen/qwen3.6-27b` — and one blind adjudicator, `openai/gpt-oss-safeguard-20b`. The preregistration bars the **primary judge** (`openai/gpt-oss-120b`) from the panel outright, since it supplies the scores the re-derivation uses and would make the exercise circular. One panelist, Qwen3.6-27B, does appear elsewhere in the paper as a reported judge; the preregistration requires that it be named and the agreement recomputed without it, and §8.16 reports both. Each panelist sees **one pair per request** with no history — the deployed judge scores batches of ten, and a batch lets a reader see its own base rate.
+
+**Catch trials.** Three ordinary sheet items are flagged in the key as catch trials — two mechanically-obvious SAME from `same_mechanical`, one single-field numeric DIFF from `diff_near_miss` — chosen by a mechanical rule rather than by eye (`src/experiments/buildInstrument.js`). An annotator failing **any** of them is dropped in full, with `UNSURE` counting as a failure. All four panelists passed all three.
 
 The hand-authored generator arm (§7.1) is not a substitute for this study and should not be read as one: it removes the *machine-generation* confound (does dedup hold on paraphrase no model wrote?) and does nothing about the *author-definition* confound (do the authors' SAME/DIFF calls match an independent reader's?). The two are different controls for different threats and are kept separate throughout.
 
@@ -961,17 +970,17 @@ The number the semantic layer must beat: **86.5% of true duplicates escape L0 an
 
 Each configuration is calibrated on its own jurisdiction (§6.6): the layered rule routes every non-canonical pair to the judge and is calibrated on all 205 distinct calibration pairs the canonical core leaves; the hardened rule routes only residual pairs and is calibrated on the 117 of those the witness does not veto.
 
-| Config (test split) | pool `n` | `t_hi` | WS | dedup | flagged escape | silent escape | friction |
+| Config (test split, n=513) | pool `n` | `t_hi` | WS | dedup | flagged escape | silent escape | friction |
 |---|---:|---:|---|---|---|---|---|
-| B0 no fence | — | — | 0.0% [0.0–1.8] | 0.0% [0.0–1.5] | 0.0% | 100.0% [98.5–100.0] | 0.0% |
-| B1 exact-string | — | — | 0.0% [0.0–1.8] | 0.0% [0.0–1.5] | 0.0% | 100.0% [98.5–100.0] | 0.0% |
-| **B2 canonical L0 (prior art)** | — | — | **0.0%† [0.0–1.8]** | **13.5% [9.9–18.3]** | 0.0% | 86.5% [81.7–90.1] | 0.0% |
-| B4 raw judge τ=0.5 | — | 0.5 | 1.5% [0.5–4.2] | 99.6% [97.8–99.9] | 0.0% | 0.4% [0.1–2.2] | 0.0% |
-| B4 raw judge τ=0.9 | — | 0.9 | 0.0% [0.0–1.8] | 65.3% [59.3–71.0] | 0.0% | 34.7% [29.0–40.7] | 0.0% |
-| Layered α=0.01 (no witness) | 205 | 0.85 | 0.5% [0.1–2.7] | 85.3% [80.3–89.1] | 8.8% [5.9–12.9] | 6.0% [3.7–9.6] | 0.5% [0.1–2.7] |
-| Layered α=0.05 (no witness) | 205 | 0.2 | 2.9% [1.3–6.2] | 100.0% [98.5–100.0] | 0.0% [0.0–1.5] | 0.0% [0.0–1.5] | 0.0% [0.0–1.8] |
-| **Hardened α=0.01** | 117 | 0.95 | **0.0% [0.0–1.8]** | 19.9% [15.4–25.3] | 74.1% [68.3–79.1] | 6.0% [3.7–9.6] | 1.0% [0.3–3.5] |
-| **Hardened α=0.05** | 117 | 0.8 | **1.0% [0.3–3.5]** | **94.0% [90.4–96.3]** | 0.0% [0.0–1.5] | 6.0% [3.7–9.6] | **0.0% [0.0–1.8]** |
+| B0 no fence | — | — | 0.0% [0.0–1.6] | 0.0% [0.0–1.3] | 0.0% | 100.0% [98.7–100.0] | 0.0% |
+| B1 exact-string | — | — | 0.0% [0.0–1.6] | 0.0% [0.0–1.3] | 0.0% | 100.0% [98.7–100.0] | 0.0% |
+| **B2 canonical L0 (prior art)** | — | — | **0.0%† [0.0–1.6]** | **12.1% [8.8–16.4]** | 0.0% | 87.9% [83.6–91.2] | 0.0% |
+| B4 raw judge τ=0.5 | — | 0.5 | 2.2% [0.9–4.9] | 99.6% [98.0–99.9] | 0.0% | 0.4% [0.1–2.0] | 0.0% |
+| B4 raw judge τ=0.9 | — | 0.9 | 0.0% [0.0–1.6] | 69.0% [63.4–74.2] | 0.0% | 31.0% [25.8–36.6] | 0.0% |
+| Layered α=0.01 (no witness) | 230 | 0.9 | 0.0% [0.0–1.6] | 69.0% [63.4–74.2] | 17.8% [13.8–22.7] | 13.2% [9.7–17.6] | 0.9% [0.2–3.1] |
+| Layered α=0.05 (no witness) | 230 | 0.2 | 3.0% [1.5–6.1] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] |
+| **Hardened α=0.01** | 142 | 0.95 | **0.0% [0.0–1.6]** | 22.1% [17.6–27.3] | 64.8% [59.0–70.1] | 13.2% [9.7–17.6] | 0.9% [0.2–3.1] |
+| **Hardened α=0.05** | 142 | 0.8 | **1.7% [0.7–4.3]** | **94.7% [91.4–96.7]** | 0.0% [0.0–1.3] | 5.3% [3.3–8.6] | **0.0% [0.0–1.6]** |
 
 **RQ1.** At α=0.05 the hardened fence deduplicates **94.0% [90.4–96.3]** of true duplicates against the content-addressed baseline's **13.5% [9.9–18.3]**, at **1.0% [0.3–3.5]** wrong-suppression and **6.0% [3.7–9.6]** silent escape. The gain over the baseline is a factor of seven and is what the semantic layer exists to buy; the silent escape is what it costs, and it is not zero.
 
@@ -979,15 +988,15 @@ Each configuration is calibrated on its own jurisdiction (§6.6): the layered ru
 
 | α=0.05, GPT-OSS-120B | calibration pool | `t_hi` | WS over the full test split | WS over the residual |
 |---|---:|---:|---|---|
-| pool includes witness-vetoed pairs | 205 | 0.2 | 2.4% [1.0–5.6] | **4.2% [1.8–9.5]** |
-| pool restricted to the residual | 117 | 0.8 | 1.0% [0.3–3.5] | 1.7% [0.5–5.9] |
+| pool includes witness-vetoed pairs | 230 | 0.2 | 3.0% [1.5–6.1] | **4.9% [2.4–9.7]** |
+| pool restricted to the residual | 142 | 0.8 | 1.7% [0.7–4.3] | 2.8% [1.1–6.9] |
 
 and on the second judge the mis-specified pool puts the residual rate **above** the declared level:
 
 | α=0.05, GPT-OSS-20B | calibration pool | `t_hi` | WS over the full test split | WS over the residual |
 |---|---:|---:|---|---|
-| pool includes witness-vetoed pairs | 205 | 0.1 | 2.9% [1.3–6.2] | **5.0% [2.3–10.6]** |
-| pool restricted to the residual | 117 | 0.95 | 1.5% [0.5–4.2] | 2.5% [0.9–7.2] |
+| pool includes witness-vetoed pairs | 230 | 0.1 | 3.0% [1.5–6.1] | **4.9% [2.4–9.7]** |
+| pool restricted to the residual | 142 | 0.95 | 1.3% [0.4–3.7] | 2.1% [0.7–5.9] |
 
 The mechanism is the one §6.6 predicts. Witness-vetoed distinct pairs differ on a declared field, the judge scores them confidently low, and leaving them in the pool drags `t_hi` from 0.8 down to 0.2. The full-split rate stays under α throughout, which is why the mis-specification is easy to miss: the pairs that dilute the pool also dilute the denominator. We report both conditionings for this reason, and we take the residual-conditioned rate to be the one that answers RQ2. Under the correct pool it is 1.7% and 2.5% against a declared α of 0.05; under the mis-specified pool one of the two judges violates the level it declares.
 
@@ -1002,18 +1011,22 @@ The mechanism is the one §6.6 predicts. Witness-vetoed distinct pairs differ on
 | Category | label | n | suppress | escalate | execute |
 |---|---|---:|---|---|---|
 | S1 mechanical | SAME | 34 | 100.0% [89.8–100.0] | 0.0% [0.0–10.2] | 0.0% [0.0–10.2] |
-| S3 loose-schema value | SAME | 8 | **100.0% [67.6–100.0]** | 0.0% [0.0–32.4] | 0.0% [0.0–32.4] |
-| S2 paraphrase | SAME | 127 | 100.0% [97.1–100.0] | 0.0% [0.0–2.9] | 0.0% [0.0–2.9] |
-| S4 adversarial paraphrase | SAME | 82 | 100.0% [95.5–100.0] | 0.0% [0.0–4.5] | 0.0% [0.0–4.5] |
+| **S3 loose-schema value** | SAME | **38** | **100.0% [90.8–100.0]** | 0.0% [0.0–9.2] | 0.0% [0.0–9.2] |
+| S2 paraphrase | SAME | 127 | 92.9% [87.1–96.2] | 0.0% [0.0–2.9] | 7.1% [3.8–12.9] |
+| S4 adversarial paraphrase | SAME | 82 | 92.7% [84.9–96.6] | 0.0% [0.0–4.5] | 7.3% [3.4–15.1] |
 | D1 near-miss | DIFF | 126 | 0.8% [0.1–4.4] | 0.0% [0.0–3.0] | 99.2% [95.6–99.9] |
-| D2 legitimate repeat | DIFF | 75 | **5.3% [2.1–12.9]** | 0.0% [0.0–4.9] | 94.7% [87.1–97.9] |
-| D3 semantic difference | DIFF | 5 | 0.0% [0.0–43.4] | 0.0% [0.0–43.4] | 100.0% [56.6–100.0] |
+| D2 legitimate repeat | DIFF | 75 | 1.3% [0.2–7.2] | 0.0% [0.0–4.9] | 98.7% [92.8–99.8] |
+| **D3 semantic difference** | DIFF | **31** | **6.5% [1.8–20.7]** | 0.0% [0.0–11.0] | 93.5% [79.3–98.2] |
 
-**S3 — the paper's motivating example — is handled.** The `$780` ↔ "seven hundred eighty dollars" rewrite of §1.2 is category S3, and the fence suppresses **8 of 8** test pairs. We flag the denominator: 8 pairs admit a 95% lower bound of 67.6%, so this is "no observed failures on a small sample", not a demonstration of reliability.
+**A correction to this table's configuration.** An earlier revision printed this table with every SAME category at 100.0% and D2 at 5.3%, under the heading "hardened, α=0.05". Those numbers are not the hardened configuration's — they are the **jurisdiction-mismatched** pool's, the one §8.3's own prose spends two paragraphs correcting. The tell is arithmetic and we should have caught it: a table whose SAME rows are all 100% cannot sum to the 94.0% deduplication printed six rows above it. Recomputing under the pool the hardened rule actually uses gives the table above, and the difference is not cosmetic — S2 moves from 100.0% to 92.9%, S4 from 100.0% to 92.7%, D2 from 5.3% down to 1.3%. The headline row was always computed correctly; it was the per-category breakdown that was drawn from the wrong configuration.
 
-**Adversarial paraphrase is fully deduplicated.** S4 — variants a model was explicitly instructed to make maximally surface-different while preserving the act — is deduplicated at 100.0% [95.5–100.0] under the primary judge, matching S2's 100.0% [97.1–100.0] and demonstrating that surface-level prompt alterations do not degrade deduplication liveness once the model scores are fully populated.
+**S3 — the paper's motivating example — is handled, and now on a sample that can say so.** The `$780` ↔ "seven hundred eighty dollars" rewrite of §1.2 is category S3, and the fence suppresses **38 of 38** test pairs. This category previously held 8 test pairs, where an observed 38/38-equivalent carried a 95% lower bound of **67.6%** — a bound too weak to support the sentence it was being asked to support, since the paper's motivating failure deserves better than "no observed failures on eight tries". The category was grown from 15 pairs to 75 (§7.1), and the lower bound is now **90.8%**. That is a number we would defend in review: it is still not a proof of reliability, and it is no longer compatible with the mechanism failing on a quarter of its own motivating case.
 
-**Wrong suppression concentrates in D2.** At α=0.05 the fence wrongly suppresses 4/75 D2 pairs and 1/126 D1 pairs. D2 pairs are identical in every declared field and differ only by a distinguishing token in free text ("installment 1 of 2" vs "2 of 2"), so the witness cannot veto them and the judge carries the decision alone. This is the same structural weakness the adversarial split exposes (§8.4): **wherever act-distinguishing information lives only in prose, this mechanism is only as good as its judge.**
+**D3 was hiding a real error, and growing it found one.** D3 previously held 5 test pairs and reported 0.0% wrong-suppression [0.0–43.4] — an interval so wide it excluded almost nothing. Grown to 31 test pairs, the same configuration wrongly suppresses **2 of 31, 6.5% [1.8–20.7]**. This is a *new* finding produced by the growth rather than a change in the mechanism, and it is the only category in the table whose point estimate sits above the declared α = 0.05. We report it as the sharpest illustration in the paper of why a cell too small to fail is not evidence of not failing.
+
+It is also exactly where the theory says the error should be. D3 pairs are handcrafted to be identical in every declared field and to differ only in what the free text denotes — a first instalment against a second, one milestone against the next. They are the residual in its purest form: the witness has nothing to veto on, and the judge carries the decision alone with no decidable layer behind it. §8.4 finds the same structure under adversarial pressure, and §8.15 finds it again on the schema ladder. **Wherever act-distinguishing information lives only in prose, this mechanism is only as good as its judge** — and D3 is now a large enough cell to show that as a rate rather than to assert it.
+
+**Wrong suppression, re-apportioned.** With the per-category table computed under the correct configuration, wrong-suppression at α=0.05 is 1/126 D1, 1/75 D2 and 2/31 D3. The earlier revision's claim that "wrong suppression concentrates in D2" was an artefact of the mis-specified pool: under the hardened rule the concentration is in **D3**, and D2 — the category we had pre-registered as the one most likely to be contested — is the second-cleanest DIFF category in the table.
 
 ### 8.4 RQ3 — adversarial injection: the witness earns its place, and the residue is the schema's
 
@@ -1046,8 +1059,9 @@ A judge's usefulness to the escalation band depends on whether it expresses grad
 
 | Judge | SAME median | DIFF median | at the extremes (≤0.02 or ≥0.98) | silent escape |
 |---|---|---|---|---|
-| GPT-OSS-120B | 0.95 | 0.05 | SAME 6%, DIFF 5% | **0.0% [0.0–1.5]** |
-| GPT-OSS-20B | 1.00 | 0.00 | **SAME 83%, DIFF 87%** | 2.0% [0.9–4.6] |
+| GPT-OSS-120B | 0.95 | 0.05 | SAME 10%, DIFF 4% | **5.3% [3.3–8.6]** |
+| GPT-OSS-20B | 1.00 | 0.00 | **SAME 84%, DIFF 87%** | 2.1% [1.0–4.6] |
+| Qwen3.6-27B | 1.00 | 0.00 | **SAME 89%, DIFF 90%** | 8.5% [5.8–12.4] |
 
 The two judges differ sharply in exactly the property the escalation band depends on, and the consequence is visible in the last column. The 120B is *graded* — only 6% of its SAME scores sit at an extreme — so duplicates it fails to suppress land inside `(t_lo, t_hi]` and are flagged; its silent escape is zero. The 20B is *saturated*: 83% of its SAME scores and 87% of its DIFF scores are at the extremes, so there is little mass for the band to catch, and its misses fall straight through to silent execution.
 
@@ -1177,9 +1191,9 @@ The table below is the hardened, jurisdiction-matched configuration at α = 0.05
 
 | Scorer | family | coverage | `t_hi` | WS | dedup | silent escape | friction |
 |---|---|---:|---:|---|---|---|---|
-| GPT-OSS-120B (primary) | gpt-oss | 100% | 0.80 | **1.0% [0.3–3.5]** | **94.0% [90.4–96.3]** | 6.0% [3.7–9.6] | 0.0% [0.0–1.8] |
-| GPT-OSS-20B | gpt-oss | 100% | 0.95 | **1.5% [0.5–4.2]** | 82.1% [76.9–86.3] | **2.0% [0.9–4.6]** | 7.3% [4.5–11.7] |
-| **Qwen3.6-27B** | **qwen** | **97.4%** | 0.95 | **1.0% [0.3–3.5]** | 87.6% [83.0–91.2] | 9.6% [6.5–13.8] | 1.5% [0.5–4.2] |
+| GPT-OSS-120B (primary) | gpt-oss | 100% | 0.80 | **1.7% [0.7–4.3]** | **94.7% [91.4–96.7]** | 5.3% [3.3–8.6] | 0.0% [0.0–1.6] |
+| GPT-OSS-20B | gpt-oss | 100% | 0.95 | **1.3% [0.4–3.7]** | 82.6% [77.7–86.6] | **2.1% [1.0–4.6]** | 8.2% [5.3–12.4] |
+| **Qwen3.6-27B** | **qwen** | **97.7%** | 0.95 | **0.9% [0.2–3.1]** | 89.0% [84.8–92.1] | 8.5% [5.8–12.4] | 1.3% [0.4–3.7] |
 | Llama-3.3-70B | llama | 6.3% | — | — | — | — | excluded |
 
 Ensembles are formed only from judges clearing the admission rule of §8.1, so their membership is fixed rather than varying per pair; the excluded arm is not shown with rates computed over abstentions. (The `min`/`mean` ensemble rows, and the `t_hi = 0.20` row that the mis-specified calibration pool produces for the 120B, are in §8.3 and §8.13 respectively; this table holds the pool fixed at the jurisdiction-matched one so the only thing varying across rows is the judge.)
@@ -1231,10 +1245,10 @@ At α=0.05 the hardened mechanism escalates **0.0% [0.0–1.8]** of genuinely di
 
 | | WS | dedup | friction |
 |---|---|---|---|
-| one global threshold | 2.4% [1.0–5.6] | **100.0% [98.5–100.0]** | 0.0% [0.0–1.8] |
-| per-tool thresholds | **1.5% [0.5–4.2]** | 80.9% [75.6–85.3] | 1.0% [0.3–3.5] |
+| one global threshold | 3.0% [1.5–6.1] | **100.0% [98.7–100.0]** | 0.0% [0.0–1.6] |
+| per-tool thresholds | **1.3% [0.4–3.7]** | 95.0% [91.8–97.0] | 1.3% [0.4–3.7] |
 
-Per-tool calibration buys 0.9 points of wrong-suppression and pays 19 points of deduplication for them. The cause is the calibration budget rather than the thresholds: splitting one pool of 205 distinct calibration pairs across six tools leaves `create_ticket` with 4 and `send_email` with 14, and certifying α=0.05 needs at least 19, so both tools receive `t_hi = +∞` and **stop suppressing semantically altogether**. The lost deduplication is the arithmetic of tools that no longer suppress anything, and the improved wrong-suppression is the same arithmetic seen from the other side — a tool that never suppresses never suppresses wrongly. Nothing here is a better operating point; it is the same point relabelled.
+Per-tool calibration buys 1.7 points of wrong-suppression and pays 5 points of deduplication for them. The cause is the calibration budget rather than the thresholds: splitting one pool of 230 distinct calibration pairs across six tools leaves `create_ticket` with 6, and certifying α=0.05 needs at least 19, so that tool receives `t_hi = +∞` and **stops suppressing semantically altogether**. The lost deduplication is the arithmetic of a tool that no longer suppresses anything, and the improved wrong-suppression is the same arithmetic seen from the other side — a tool that never suppresses never suppresses wrongly. Nothing here is a better operating point; it is the same point relabelled. The effect is smaller than an earlier revision reported (19 points of deduplication, on a corpus whose per-tool pools were roughly half this size): enlarging the corpus lifted `send_email` from 14 pairs to 19, over the certification threshold, so one of the two starved tools now certifies. That is the mechanism behind the disclosure rather than a softening of it — the budget effect is real, and it bites exactly at the tools with the fewest calibration pairs.
 
 This is the multiplicity budget of §8.6 arriving from a different direction. Conformal calibration spends a fixed statistical resource, and every way of subdividing the decision space — by tool, or by candidate-set size — spends it faster. Per-tool thresholds are worth revisiting only with a per-tool pool large enough to certify the level, which at α=0.05 means at least 19 distinct pairs per tool and `19m` if `m` > 1.
 
@@ -1253,17 +1267,17 @@ This is Corollary T6.3′ (the refinement dilemma, stated in full and precisely 
 
 A deployment that tightens its schema must expect to spend longer accumulating calibration data, because the pairs it needs — distinct pairs that survive the refuter — have become rarer by exactly the amount the refinement improved things. The two effects are the same effect. We regard this as the most useful thing the corrected calibration taught us, and note that it is invisible under a pool that is not jurisdiction-matched: the as-published pool holds `n` at 205 for every configuration and shows the tightened schema improving every axis at once, which is the result we previously reported. §8.15 tests the natural follow-up question — does replenishing the calibration budget after refinement recover what is lost? — on a controlled three-level ladder, and finds the answer confounded by a design choice in that experiment rather than settled either way.
 
-**C. Judge ensembles — no benign gain, and a cost.** We compare the single-judge global threshold against the ensembles formed by the two judges with usable coverage:
+**C. Judge ensembles — no benign gain, and a cost.** We compare the single-judge global threshold against the ensembles formed by the three judges with usable coverage:
 
 | Scorer | WS | dedup | friction |
 |---|---|---|---|
-| GPT-OSS-120B (primary) | **2.4% [1.0–5.6]** | **100.0% [98.5–100.0]** | **0.0% [0.0–1.8]** |
-| ensemble `min` | 2.9% [1.3–6.2] | 98.0% [95.4–99.1] | 4.9% [2.7–8.7] |
-| ensemble `mean` | 3.4% [1.7–6.8] | 99.6% [97.8–99.9] | 0.0% [0.0–1.8] |
+| GPT-OSS-120B (primary) | **3.0% [1.5–6.1]** | **100.0% [98.7–100.0]** | **0.0% [0.0–1.6]** |
+| ensemble `min` | 0.9% [0.2–3.1] | 97.9% [95.4–99.0] | 0.0% [0.0–1.6] |
+| ensemble `mean` | 3.9% [2.1–7.2] | 100.0% [98.7–100.0] | 0.0% [0.0–1.6] |
 
 On benign data neither aggregator improves any axis, and both double the judge cost. The reason is worth stating because it is easy to get wrong: conformal calibration re-fits `t_hi` to whatever score distribution it is handed, so the conservatism `min` introduces is absorbed into a lower threshold rather than surfacing as a lower error rate. The aggregator's value is real but appears only under distribution shift, where the threshold cannot adapt — §8.4 shows `min` tracking the more robust judge under injection while `mean` tracks the weaker one.
 
-**D. Deterministic lexical scorer — much cheaper, much weaker.** The offline lexical-numeric scorer needs no model call at all, and reaches dedup **22.7% [18.0–28.3]** at WS **3.4% [1.7–6.8]** and friction 16.5% [12.1–22.2] — worse than the judge on every axis except cost. It handles numeric reformats and not open-ended rewording. It is a fallback for a no-network path, not a competitive alternative.
+**D. Deterministic lexical scorer — much cheaper, much weaker.** The offline lexical-numeric scorer needs no model call at all, and reaches dedup **30.6% [25.5–36.2]** at WS **3.0% [1.5–6.1]** and friction 19.8% [15.2–25.4] — worse than the judge on every axis except cost. It handles numeric reformats and not open-ended rewording. It is a fallback for a no-network path, not a competitive alternative.
 
 **Cost per 1,000 irreversible dispatches.** The decidable layers settle 26.5% of decisions for free, so the judge is invoked on **735 dispatches per 1,000**, producing **0 escalations per 1,000 distinct actions** for review. Under the tightened schema those fall to **565 judge calls** and **0 escalations**. Mean judge latency is **2,061 ms** per call for the primary GPT-OSS-120B judge and **1,480 ms** for the GPT-OSS-20B judge.
 
@@ -1282,11 +1296,11 @@ Ablating a layer changes which pairs reach the judge, so each row is re-calibrat
 | − escalation band | 117 | 0.8 | 1.0% [0.3–3.5] | 94.0% [90.4–96.3] | 0.0% [0.0–1.5] | 6.0% [3.7–9.6] |
 | − calibration (τ=0.5) | 117 | 0.5 | 1.5% [0.5–4.2] | 99.6% [97.8–99.9] | 0.0% [0.0–1.5] | 0.4% [0.1–2.2] |
 | **GPT-OSS-20B** | | | | | | |
-| hardened (full) | 117 | 0.95 | 1.5% [0.5–4.2] | 82.1% [76.9–86.3] | 15.9% [11.9–21.0] | 2.0% [0.9–4.6] |
-| − L0 | 117 | 0.95 | 1.5% [0.5–4.2] | 80.5% [75.1–84.9] | 16.7% [12.6–21.8] | 2.8% [1.4–5.6] |
-| − witness | 205 | 0.1 | 2.9% [1.3–6.2] | 97.6% [94.9–98.9] | 0.4% [0.1–2.2] | 2.0% [0.9–4.6] |
-| − escalation band | 117 | 0.95 | 1.5% [0.5–4.2] | 82.1% [76.9–86.3] | **0.0% [0.0–1.5]** | **17.9% [13.7–23.1]** |
-| − calibration (τ=0.5) | 117 | 0.5 | 2.9% [1.3–6.2] | 97.6% [94.9–98.9] | 0.4% [0.1–2.2] | 2.0% [0.9–4.6] |
+| hardened (full) | 142 | 0.95 | 1.3% [0.4–3.7] | 82.6% [77.7–86.6] | 15.3% [11.6–20.0] | 2.1% [1.0–4.6] |
+| − L0 | 142 | 0.95 | 1.3% [0.4–3.7] | 81.1% [76.2–85.3] | 16.7% [12.8–21.5] | 2.1% [1.0–4.6] |
+| − witness | 230 | 0.1 | 3.0% [1.5–6.1] | 97.5% [94.9–98.8] | 0.4% [0.1–2.0] | 2.1% [1.0–4.6] |
+| − escalation band | 142 | 0.95 | 1.3% [0.4–3.7] | 82.6% [77.7–86.6] | **0.0% [0.0–1.3]** | **17.4% [13.4–22.3]** |
+| − calibration (τ=0.5) | 142 | 0.5 | 3.0% [1.5–6.1] | 97.5% [94.9–98.8] | 0.4% [0.1–2.0] | 2.1% [1.0–4.6] |
 
 **The witness is a safety-for-liveness trade, and the table prices one side of it.** Removing it raises deduplication (94.0% → 100.0% on the primary judge) and raises wrong-suppression (1.0% → 2.9%) — but the second difference rests on four discordant items and does not survive a paired test (§8.12), so we report the deduplication cost as established and the wrong-suppression benefit as not. It also enlarges the calibration pool from 117 to 205, which is why the witness-free row can afford a lower threshold — the two effects are linked by T6.3′. What the trade buys is not visible on this table at all: it is the D4a injection class, which the witness closes by construction (§8.4) and which the witness-free configuration fails 70% of the time.
 
@@ -1458,6 +1472,76 @@ Deduplication is 0.0% at every level under **both** conditions, fixed and replen
 
 ---
 
+### 8.16 Independent validation of the ground truth: a blinded model panel
+
+This is the control §7.4 specifies, run and reported. It was **preregistered before any judgement was collected**, against a sheet frozen and content-hashed per item, and the analysis below is the analysis registered — no statistic here was chosen after seeing a response.
+
+**What ran, and what did not.** The human channel (Channel H) was not collected; the instrument is shipped and unrun, and we claim nothing from it. What ran is **Channel M, a blinded panel of three models** — `groq/compound`, `groq/compound-mini`, `qwen/qwen3.6-27b` — with `openai/gpt-oss-safeguard-20b` as a blind adjudicator, each shown one pair per request with the operational definition and nothing else: no constructed label, no model prediction, no mechanism decision, no threshold, no attack flag. The primary judge is barred from the panel. **This is not a human study and nothing below should be read as one.**
+
+**Reliability.** 116 of 154 items were answered by all three annotators; the shortfall is one panelist's non-response on long pairs, not a dropped annotator, and all four passed all three catch trials.
+
+| statistic | value |
+|---|---|
+| Krippendorff's α (ternary, nominal) | **0.828** |
+| Fleiss' κ | 0.827 |
+| pairwise Cohen's κ | 0.862, 0.812, 0.811 |
+| adjudication rate | **0.0% [0.0–3.2]** |
+| `UNSURE` rate | 0.0% |
+| overall construction agreement | **87.9% [80.8–92.7]** |
+
+No item failed to reach a majority, so the adjudicator was never invoked — which is itself the finding the preregistration asked for: a construction needing frequent adjudication is one that is not capturing a shared notion of "the same act", and this one needed none.
+
+**Per stratum — and this is where the result lives.**
+
+| stratum | constructed | n | agreement | contested? |
+|---|---|---:|---|---|
+| `same_mechanical` | SAME | 12 | 100.0% [75.8–100.0] | no |
+| `same_paraphrase` | SAME | 10 | 100.0% [72.2–100.0] | no |
+| **`same_loose_value`** (the motivating example) | SAME | 11 | **100.0% [74.1–100.0]** | no |
+| `same_adversarial` | SAME | 12 | 100.0% [75.8–100.0] | no |
+| `attack_field` | DIFF | 12 | 100.0% [75.8–100.0] | no |
+| `attack_encoding` | DIFF | 11 | 100.0% [74.1–100.0] | no |
+| `misdeclared` | DIFF | 3 | 100.0% [43.9–100.0] | no |
+| `diff_near_miss` | DIFF | 14 | 92.9% [68.5–98.7] | no |
+| `diff_semantic` | DIFF | 8 | 87.5% [52.9–97.8] | no |
+| **`diff_text_only`** (D2) | DIFF | 12 | **50.0% [25.4–74.6]** | **YES** |
+| **`attack_text`** | DIFF | 11 | **45.5% [21.3–72.0]** | **YES** |
+
+Two strata are **contested** under the preregistered rule (agreement Wilson upper bound below 0.80), and one of them is the stratum the preregistration named in advance as the most likely to be contested. **D2 is contested. We said it would be, and it is, and we are reporting it rather than resolving it by author fiat.**
+
+**Every disagreement is in the residual.** There are 14 label flips, and their distribution is the paper's own thesis arriving from an unexpected direction:
+
+| category | flips | what distinguishes the acts there |
+|---|---:|---|
+| `D2_legit_repeat` | 6 | a distinguishing token in free text |
+| `A7_mimicry_prose_only` | 3 | prose only |
+| `A2_prose_only_injection` | 3 | prose only |
+| `D3_semantic_diff` | 1 | prose only |
+| `D1_near_miss` | 1 | a declared field |
+
+**Thirteen of fourteen flips fall in categories where act-distinguishing information lives only in prose.** Not one falls in a category the certifier or the refuter decides. This is the strongest evidence in the paper for T6, and it arrives as a fact about *readers* rather than about oracles: the residual is not merely where the mechanism errs and where a judge is unbounded — it is where **independent readers do not agree what the right answer is**. A pair whose distinguishing information is not in the declaration is not simply hard to classify; its ground truth is contested. T6 says the residual is a function of the declared schema alone, independent of the oracle. This panel is not an oracle in T6's sense, and it lands in the same place anyway.
+
+**The re-derivation, and the preregistered rule it triggers.** Wrong-suppression and deduplication recomputed over the annotated subset, threshold taken from the untouched full calibration split so that relabelling cannot leak into its own threshold:
+
+| labelling | WS | dedup |
+|---|---|---|
+| constructed | 9.9% [4.9–19.0] | 77.8% [63.7–87.5] |
+| panel-adjudicated | **10.5% [4.9–21.1]** | 61.0% [48.3–72.4] |
+
+The preregistration fixed this rule in advance: *if the adjudicated WS point estimate exceeds both the constructed WS point estimate and the declared α = 0.05, the safety claim is reported as not surviving independent relabelling, and the abstract is amended.* Both conditions hold — 10.5% > 9.9% and 10.5% > 0.05. **We report accordingly: on this stratified subset, under independent relabelling, the safety claim does not survive.** The abstract has been amended to say so.
+
+What that does and does not mean must both be stated, and neither swallows the other:
+
+- It is **not** an estimate of deployment wrong-suppression. The subset is deliberately adversarial — seven of eleven strata are DIFF or attack, including both injection classes — so it is far harder than the test split by construction. The same mechanism under the *constructed* labels scores 9.9% here against 1.7% on the full test split (§8.3). The subset was built to concentrate difficulty, and it did.
+- The movement attributable to relabelling is therefore **0.6 points**, on intervals that overlap almost entirely ([4.9–19.0] against [4.9–21.1]).
+- But the rule was written in advance precisely so that we could not, on seeing a number we disliked, start reasoning about why it should not count. It triggered. We report it as triggered, and a reader who thinks the 0.6-point movement is the more informative quantity now has both numbers and can say so.
+
+**Deduplication moves much further than safety does** — 77.8% to 61.0%, a 17-point drop against wrong-suppression's 0.6-point rise. That is the same asymmetry §8.8 finds across judges and §8.14 finds across splits, appearing a third time under a third kind of perturbation: relabel the ground truth and the liveness direction moves freely while the safety direction barely stirs.
+
+**Sensitivity to the overlapping panelist.** One annotator, Qwen3.6-27B, is also a reported judge in §8.8. Dropping it entirely and recomputing on the remaining two: Krippendorff's α rises to **0.863** and construction agreement to **91.7% [84.9–95.6]** on 108 items. Agreement is therefore *not* being propped up by a panelist that shares the evaluation's own machinery — removing it makes the construction look better, not worse.
+
+**What this study cannot do**, stated once more where the numbers are: it validates 154 items and not 1,066; at this size even a flawless result carries a 95% lower bound of 97.6%; and being a model panel, it cannot detect a notion of "the same act" shared between the authors and the panel but idiosyncratic relative to human practice. Channel H remains the stronger control, remains built, and remains uncollected.
+
 ## 9. Discussion
 
 The results above are best read as a set of boundaries rather than a set of scores: each of the following says where the mechanism stops, why the theory predicts it stops there, and what experiment would move the boundary. Several are places where the design fails, and we take those to be part of the contribution rather than a caveat attached to it, since a mechanism whose failure region is unmapped cannot be deployed against an asymmetric loss.
@@ -1510,16 +1594,15 @@ We state the recipe, then state which parts of it this paper's evidence supports
 ---
 
 
-### 9.2 Built, not yet scored: what two further apparatuses would show
+### 9.2 An apparatus we built and did not score, and why that is a cut rather than a result
 
-Three extensions were built during this revision round specifically to address the weaknesses named above. One — the schema-richness ladder — is now scored and reported in §8.15 rather than here; its monotonicity result confirmed a prediction and its refinement-budget comparison did not answer the question it was built for, for reasons §8.15 states rather than hides. The other two contribute no number to §8 at the time of writing. We report their apparatus rather than omit the attempt, because a reader checking whether these gaps are being taken seriously should be able to see the work rather than take our word for the intention. Scoring both needs an inference budget beyond what this key's per-model daily allowance supports in one pass; each is independently runnable and each will either confirm or revise a specific claim made above.
+An earlier revision of this section described two further apparatuses — an extended fourteen-tool surface (`corpus/pairs-v2ext.jsonl`, 1,043 pairs) and an eleven-class adversarial matrix (`src/experiments/attackMatrix.js`) — in full methodological detail, without a number from either, on the argument that a reader deciding whether to trust the paper's account of its own gaps should be able to see that the apparatus exists.
 
-**The extended tool surface.** `src/toolsV2.js` adds eight tools to the six already in the corpus, chosen for structural difference in where an act's identity lives rather than for domain variety: fully pinned by typed fields (`grant_access`, `delete_resource`, where A5″ is expected to hold and the residual should be nearly empty); pinned except for a repeat count (`place_order`, `book_reservation`, where a genuine re-order shares a projection with its predecessor); carried by a version token (`patch_resource`, the one case in this surface where a typed field distinguishes acts a human reader might call the same); and carried almost entirely by prose (`update_document`, `send_sms`, the maximal-residual case). Each tool carries an explicit machine-readable spec — effect-determining fields, non-effect-determining fields, the witness projection, and named ambiguity classes — rather than an implicit one, because §4.2's claim that the residual is a property of the declaration is only checkable if the declaration is written down. 1,043 pairs have been generated across the same nine categories as the original corpus, split and stratified the same way, held in `corpus/pairs-v2ext.jsonl`, additive to and never merged with the frozen 955-pair record. **What this would show, if scored:** whether the judge-dependent liveness spread and the bounded safety direction of §8.8 hold on tool structures the original six do not exercise — most directly, whether the `patch_resource` etag case behaves as T6 predicts (a typed field separating acts a reader would initially call the same) and whether the fully-pinned tools drive the residual, and hence the judge's jurisdiction, close to zero as A5″ implies.
+We now think that was the wrong call, and we have cut it. A described-but-unscored apparatus occupies the space of a result while carrying none of the obligations of one: it cannot be checked, cannot be wrong, and quietly borrows credibility from the sections around it. The apparatus remains in the artifact and is documented there. What it does not have is a place in the body of the paper, because it has no findings.
 
-**The expanded adversarial matrix.** `src/corpus/generateV2.js` generates eleven attack classes against every tool in the extended surface — four injection templates against a declared difference, injection placed in a field other than the one that changed, zero-width-character disguise, Unicode homoglyph substitution on an identifier, field-reordering and serialisation games, prose-only mimicry, and the dual attack (forced execution of a true duplicate dressed as new). A twelfth class is deliberately not an attack on the mechanism but on an *assumption*: `A9_misdeclared_policy` declares an account-number field `num` rather than `id`, so two distinct accounts (`"0012"`, `"12"`) canonicalise to one value, and the certifier suppresses across them unconditionally — no judge, no escalation band, no bound, because A5 has been violated by the schema author rather than defeated by an attacker. `src/experiments/attackMatrix.js` is written to report, per class, which layer disposes of it, and whether a raw judge, a calibrated judge, and the full system each fail — the same decomposition §8.4 uses for D4a/D4b, generalised. **What this would show:** whether the certifier/refuter split that closes D4a while leaving D4b open generalises to a materially larger and more varied attack surface, and a direct demonstration that A5 is load-bearing rather than a formality — the misdeclaration class has no decidable defence by design, and reporting its failure rate is the sharpest evidence available that the mechanism's guarantees are conditional on the schema author rather than unconditional.
+The cost of scoring it is a measurement rather than an excuse. At the fourteen-tool surface's prompt sizes, the primary judge scores roughly one pair per 57 seconds of wall clock — the tool manifest is long, and this is a reasoning model budgeted accordingly — so the 1,043-pair corpus is of order fifteen hours for a *single* judge, and §8.1's admission rule would want a second before any rate from it entered a table. That is a real experiment for a later paper and not a gap in this one.
 
-Both are implemented, generated, and awaiting judge coverage. We list them here rather than as a single line in §9.3 because a reader deciding whether to trust the paper's account of its own gaps should be able to see that the apparatus for closing them already exists. (The schema-richness ladder, which stood here in earlier drafts of this section, has since been scored; see §8.15 for what it found, including a design lesson — the fixed-versus-replenished comparison was confounded by which attribute was chosen to stay in prose — that a reader planning a similar experiment should have before running one, not after.)
-
+It is listed once in §9.3 and nowhere else.
 
 ### 9.3 Future work
 

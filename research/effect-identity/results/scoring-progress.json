@@ -1,12 +1,12 @@
 {
   "model": "qwen/qwen3.6-27b",
-  "attempted": 955,
-  "answered": 930,
-  "total": 955,
-  "pct": 97.4,
-  "abstentions": 35,
+  "attempted": 1066,
+  "answered": 1041,
+  "total": 1066,
+  "pct": 97.7,
+  "abstentions": 0,
   "batchesWithViolations": 0,
   "probabilityScaleBatches": 0,
-  "elapsedSec": 4303,
-  "updatedAt": "2026-08-23T18:26:18.188Z"
+  "elapsedSec": 264,
+  "updatedAt": "2026-08-25T04:21:29.440Z"
 }

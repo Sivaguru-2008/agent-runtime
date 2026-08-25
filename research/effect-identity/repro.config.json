@@ -13,25 +13,45 @@
   ],
   "artifactVersion": "2.0.0",
   "generatedFor": "Effect Identity for Non-Deterministic Agents",
-  "runtime": { "node": ">=20.11.0", "dependencies": "none" },
-
+  "runtime": {
+    "node": ">=20.11.0",
+    "dependencies": "none"
+  },
   "corpora": {
     "v1": {
       "file": "corpus/pairs.jsonl",
       "scores": "corpus/scores.jsonl",
-      "nPairs": 955,
+      "nPairs": 1066,
       "rngSeed": 20260712,
       "generatedAt": "2026-08-15T10:07:37.040Z",
       "toolTable": "src/tools.js",
-      "status": "FROZEN",
+      "status": "FROZEN + ADDITIVE GROWTH",
       "frozenBecause": [
         "It is the record the previously reported results rest on.",
         "Two of its four generator arms (llama-3.3-70b-versatile, and the",
         "llama-3.1-8b-instant used by the multi-candidate experiment) are no longer",
         "reachable on this key, so regenerating would silently produce a different",
-        "corpus under the same name."
+        "corpus under the same name.",
+        "Growth is APPENDED under its own seed and manifest; the original 955 remain byte-identical."
       ],
-      "splits": { "cal": 453, "test": 457, "attack": 45, "method": "50/50 stratified by (category, generator), fixed seed; attack categories held out of calibration entirely" }
+      "splits": {
+        "cal": 508,
+        "test": 513,
+        "attack": 45,
+        "method": "50/50 stratified by (category, generator), fixed seed; attack categories held out of calibration entirely"
+      },
+      "growth": {
+        "manifest": "corpus/growth-manifest.json",
+        "seed": 20260824,
+        "reason": "Task 4 - S3 (the motivating example) and D3 carried named qualitative claims at n=8 and n=5 test pairs",
+        "newPairs": 111,
+        "existingPairsModified": 0,
+        "categories": {
+          "S3_loose_value": "15 -> 75",
+          "D3_semantic_diff": "10 -> 61"
+        },
+        "note": "Additive only. Every original id, pair content, split and score is unchanged, which is why the frozen annotation sheet still verifies against the grown corpus."
+      }
     },
     "v2ext": {
       "file": "corpus/pairs-v2ext.jsonl",
@@ -46,11 +66,14 @@
       "file": "corpus/ladder.jsonl",
       "scores": "corpus/scores-ladder.jsonl",
       "definition": "src/corpus/schemaLevels.js",
-      "levels": ["L1_loose", "L2_moderate", "L3_strict"],
+      "levels": [
+        "L1_loose",
+        "L2_moderate",
+        "L3_strict"
+      ],
       "note": "One act family declared three ways. Every pair exists at every level, so level comparisons are paired item-by-item."
     }
   },
-
   "judges": {
     "reachedOn": "2026-08-18",
     "endpoint": "https://api.groq.com/openai/v1/chat/completions",
@@ -62,12 +85,30 @@
     "scoreField": "p_same_pct",
     "scoreContract": "integer 0-100 only; 0.95 is REJECTED rather than rescaled; out-of-range values are rejected rather than clamped; a pair that never receives an admissible value is recorded as null (abstention) and never imputed",
     "models": {
-      "openai/gpt-oss-120b": { "family": "gpt-oss", "role": "primary" },
-      "openai/gpt-oss-20b": { "family": "gpt-oss", "role": "reported" },
-      "qwen/qwen3.6-27b": { "family": "qwen", "role": "cross-family" },
-      "allam-2-7b": { "family": "allam", "role": "cross-family candidate" },
-      "llama-3.3-70b-versatile": { "family": "llama", "role": "v1 only — endpoint no longer available on this key" },
-      "llama-3.1-8b-instant": { "family": "llama", "role": "v1 multi-candidate experiment only — endpoint no longer available on this key" }
+      "openai/gpt-oss-120b": {
+        "family": "gpt-oss",
+        "role": "primary"
+      },
+      "openai/gpt-oss-20b": {
+        "family": "gpt-oss",
+        "role": "reported"
+      },
+      "qwen/qwen3.6-27b": {
+        "family": "qwen",
+        "role": "cross-family"
+      },
+      "allam-2-7b": {
+        "family": "allam",
+        "role": "cross-family candidate"
+      },
+      "llama-3.3-70b-versatile": {
+        "family": "llama",
+        "role": "v1 only — endpoint no longer available on this key"
+      },
+      "llama-3.1-8b-instant": {
+        "family": "llama",
+        "role": "v1 multi-candidate experiment only — endpoint no longer available on this key"
+      }
     },
     "admission": {
       "module": "src/judgeAdmission.js",
@@ -77,10 +118,12 @@
       "rationale": "Coverage alone is insufficient. A judge that answers every pair with the same number has 100% coverage, produces a threshold equal to that constant, suppresses nothing under the strict inequality, and therefore reports 0% wrong-suppression and 0% deduplication — the same fake-perfect row an abstaining judge produces. Both routes are closed."
     }
   },
-
   "calibration": {
     "module": "src/conformal.js",
-    "alphaReported": [0.01, 0.05],
+    "alphaReported": [
+      0.01,
+      0.05
+    ],
     "alphaPrimary": 0.05,
     "gamma": 0.05,
     "thresholdConstruction": "t_hi(m) = ceil((n+1)(1 - alpha/m))-th smallest calibration score; +Infinity when that index exceeds n",
@@ -89,7 +132,6 @@
     "poolRule": "MUST be drawn from the configuration's own jurisdiction — the pairs its layers actually route to the judge. Enforced in src/evaluate.js:jurisdictionFilter.",
     "abstentions": "dropped from the pool; excluded from the max; can never suppress"
   },
-
   "canonicalisation": {
     "module": "src/canonicalize.js",
     "policies": {
@@ -104,17 +146,19 @@
       "tightened": "the above plus the numeric magnitudes each free-text field mentions"
     }
   },
-
   "statistics": {
     "module": "src/stats.js",
     "intervalMethod": "Wilson score, 95%",
     "intervalRationale": "Wald collapses to zero width at p=0 and p=1, which is exactly where the headline rates sit",
     "pairedTest": "exact two-sided McNemar over discordant items",
     "multipleComparisons": "Holm-Bonferroni, applied WITHIN a family (liveness and safety corrected separately)",
-    "reliability": ["Fleiss kappa", "Cohen kappa pairwise", "Krippendorff alpha (nominal)"],
+    "reliability": [
+      "Fleiss kappa",
+      "Cohen kappa pairwise",
+      "Krippendorff alpha (nominal)"
+    ],
     "zeroReporting": "rates that are zero by construction are marked and distinguished from zeros that are sample estimates"
   },
-
   "experiments": {
     "corpusV1": "node src/corpus/generate.js",
     "corpusV2": "node src/corpus/generateV2.js --generator openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.6-27b",
@@ -131,16 +175,26 @@
     "annotationIngest": "node src/experiments/annotation.js --ingest",
     "verify": "node src/experiments/verify.js"
   },
-
   "crashReplay": {
     "trialsPerArm": 48,
-    "arms": ["duplicate", "distinct"],
-    "crashPoints": [
-      "before_fence", "after_L0", "after_witness", "after_judge",
-      "before_external_effect", "during_external_commit_window",
-      "after_external_effect_before_local_commit", "after_local_commit"
+    "arms": [
+      "duplicate",
+      "distinct"
     ],
-    "commitWindowPoints": ["during_external_commit_window", "after_external_effect_before_local_commit"],
+    "crashPoints": [
+      "before_fence",
+      "after_L0",
+      "after_witness",
+      "after_judge",
+      "before_external_effect",
+      "during_external_commit_window",
+      "after_external_effect_before_local_commit",
+      "after_local_commit"
+    ],
+    "commitWindowPoints": [
+      "during_external_commit_window",
+      "after_external_effect_before_local_commit"
+    ],
     "rngSeed": 20260818,
     "paraphrasePoolGenerator": "llama-3.3-70b-versatile",
     "crossFamilyRequired": true,
@@ -148,7 +202,6 @@
     "thresholdSource": "results/residual_calibration.json -> <judge>_a0.05_residualOnly (the jurisdiction-matched hardened configuration)",
     "providerIdempotency": "ABSENT BY DESIGN — the mock provider presents no idempotency key, so the commit window stays open and measurable rather than being closed by an assumption"
   },
-
   "humanAnnotation": {
     "status": "PENDING",
     "harness": "src/experiments/annotation.js",
@@ -156,12 +209,16 @@
     "perStratumTarget": 15,
     "plannedAnnotators": 3,
     "adjudication": "majority of 3; non-majority items go to a fourth independent adjudicator",
-    "reliability": ["Fleiss kappa", "Krippendorff alpha", "per-stratum agreement", "adjudication rate"],
+    "reliability": [
+      "Fleiss kappa",
+      "Krippendorff alpha",
+      "per-stratum agreement",
+      "adjudication rate"
+    ],
     "blinding": "annotators see the two calls only; no labels, predictions, thresholds, attack flags; presentation order and A/B assignment randomised",
     "whatRemains": "collect responses-<name>.csv from at least 3 independent annotators, plus responses-adjudicator-<name>.csv for non-majority items",
     "mayNotBeCited": "No number from this study may appear in the manuscript until results/human_annotation.json reports status COMPLETE."
   },
-
   "assertions": {
     "enforcedBy": "src/experiments/verify.js",
     "list": [

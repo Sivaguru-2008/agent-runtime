@@ -26,6 +26,10 @@ const RESULT_FILES = [
   "residual_calibration.json", "cross_family.json", "sensitivity.json",
   "crash_replay_v2.json", "baseline_matrix_v1.json", "attack_matrix_v1.json",
   "conformal_audit_v1.json", "schema_ladder.json",
+  // §8.16's annotation result and §8.14's seed-split robustness check. Both
+  // produce rates quoted in the manuscript, so both must be checkable; without
+  // them the checker would silently pass every number in those sections.
+  "human_annotation.json", "seed_split.json",
 ];
 
 /** Walk any JSON and collect every {value, ci95:{lo,hi}} rate record. */
