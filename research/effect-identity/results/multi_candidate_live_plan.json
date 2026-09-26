@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-09-26T15:14:41.734Z",
+  "config": {
+    "$comment": [
+      "AIJ revision Phase 3. PREPARED, NOT RUN. Units are built from corpus v1: one per residual TEST pair; dispatch = pair.b, candidate 1 = pair.a (true match for SAME units, labelled distinct act for DIFF units); candidates 2..mMax drawn without replacement by a seeded Fisher-Yates shuffle from corpus inputs of the same tool that share the dispatch projection, are outside its SAME-class, and are known distinct (different seed act, or linked by a DIFF label). Thresholds from the deployed configuration jurisdiction-matched pool; uncorrected t(alpha) vs Bonferroni t(alpha/m)."
+    ],
+    "status": "PREPARED — scoring not executed",
+    "seed": 20260926,
+    "mValues": [
+      1,
+      2,
+      5,
+      10
+    ],
+    "judge": "openai/gpt-oss-120b",
+    "judgeKey": "openai_gpt_oss_120b",
+    "batchSize": 10,
+    "temperature": 0,
+    "alpha": 0.05,
+    "gamma": 0.05,
+    "unitsFile": "corpus/multi-candidate-live-units.json",
+    "scoresFile": "corpus/multi-candidate-live-scores.json",
+    "output": "results/multi_candidate_live.json",
+    "commands": {
+      "build": "node src/experiments/multiCandidateLive.js",
+      "score": "node src/experiments/multiCandidateLive.js --score",
+      "evaluate": "node src/experiments/multiCandidateLive.js --evaluate"
+    }
+  },
+  "estimate": {
+    "comparisons": 1592,
+    "batchSize": 10,
+    "calls": 160,
+    "tokensPerComparison": 183.7117117117117,
+    "tokens": 292469,
+    "meanCallLatencyMs": 2148,
+    "serialWallClockMinutes": 5.7,
+    "source": "results/aij_analyses.json A8_cost (the primary judge's final scoring session, batches of ten)"
+  },
+  "eligibility": {
+    "1": {
+      "diff": 144,
+      "same": 247
+    },
+    "2": {
+      "diff": 49,
+      "same": 241
+    },
+    "5": {
+      "diff": 37,
+      "same": 69
+    },
+    "10": {
+      "diff": 37,
+      "same": 69
+    }
+  }
+}

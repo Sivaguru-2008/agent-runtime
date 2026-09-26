@@ -183,6 +183,7 @@
     "crossFamily": "node src/experiments/crossFamily.js",
     "aijAnalyses": "node src/experiments/aijAnalyses.js",
     "classConditional": "node src/experiments/classConditional.js",
+    "multiCandidateLive": "node src/experiments/multiCandidateLive.js --score && node src/experiments/multiCandidateLive.js --evaluate",
     "report": "node src/experiments/report.js > results/REPORT.md",
     "verify": "node src/experiments/verify.js",
     "checkPaper": "node src/experiments/checkPaper.js",
@@ -291,5 +292,32 @@
     "bootstrapReplicates": 10000,
     "seed": 20260926,
     "output": "results/class_conditional.json"
+  },
+  "multiCandidateLive": {
+    "$comment": [
+      "AIJ revision Phase 3. PREPARED, NOT RUN. Units are built from corpus v1: one per residual TEST pair; dispatch = pair.b, candidate 1 = pair.a (true match for SAME units, labelled distinct act for DIFF units); candidates 2..mMax drawn without replacement by a seeded Fisher-Yates shuffle from corpus inputs of the same tool that share the dispatch projection, are outside its SAME-class, and are known distinct (different seed act, or linked by a DIFF label). Thresholds from the deployed configuration jurisdiction-matched pool; uncorrected t(alpha) vs Bonferroni t(alpha/m)."
+    ],
+    "status": "PREPARED — scoring not executed",
+    "seed": 20260926,
+    "mValues": [
+      1,
+      2,
+      5,
+      10
+    ],
+    "judge": "openai/gpt-oss-120b",
+    "judgeKey": "openai_gpt_oss_120b",
+    "batchSize": 10,
+    "temperature": 0,
+    "alpha": 0.05,
+    "gamma": 0.05,
+    "unitsFile": "corpus/multi-candidate-live-units.json",
+    "scoresFile": "corpus/multi-candidate-live-scores.json",
+    "output": "results/multi_candidate_live.json",
+    "commands": {
+      "build": "node src/experiments/multiCandidateLive.js",
+      "score": "node src/experiments/multiCandidateLive.js --score",
+      "evaluate": "node src/experiments/multiCandidateLive.js --evaluate"
+    }
   }
 }
