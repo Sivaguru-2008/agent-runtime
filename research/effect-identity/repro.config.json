@@ -184,6 +184,7 @@
     "aijAnalyses": "node src/experiments/aijAnalyses.js",
     "classConditional": "node src/experiments/classConditional.js",
     "multiCandidateLive": "node src/experiments/multiCandidateLive.js --score && node src/experiments/multiCandidateLive.js --evaluate",
+    "channelHTargeted": "node src/experiments/channelHTargeted.js --analyze",
     "report": "node src/experiments/report.js > results/REPORT.md",
     "verify": "node src/experiments/verify.js",
     "checkPaper": "node src/experiments/checkPaper.js",
@@ -318,6 +319,31 @@
       "build": "node src/experiments/multiCandidateLive.js",
       "score": "node src/experiments/multiCandidateLive.js --score",
       "evaluate": "node src/experiments/multiCandidateLive.js --evaluate"
+    }
+  },
+  "channelHTargeted": {
+    "status": "PREPARED — not collected",
+    "scope": "targeted follow-up on the two strata contested by the model panel; NOT the preregistered 154-item study",
+    "strata": [
+      "diff_text_only",
+      "attack_text"
+    ],
+    "nTargetItems": 30,
+    "catchTrials": [
+      "IT013",
+      "IT022",
+      "IT108"
+    ],
+    "annotators": 3,
+    "adjudicators": 1,
+    "packet": "annotation/channel-h-targeted/",
+    "materialsSource": "annotation/preregistered-collection/ (INSTRUCTIONS.md hash-checked against FREEZE.json; instrument.html with its item list reduced to the packet)",
+    "contestedRule": "Wilson 95% upper bound of agreement < 0.80; with 15 items per stratum, contested at <= 8 agreeing",
+    "output": "results/channel_h_targeted.json",
+    "commands": {
+      "build": "node src/experiments/channelHTargeted.js --build",
+      "analyze": "node src/experiments/channelHTargeted.js --analyze",
+      "selfTest": "node src/experiments/channelHTargeted.js --self-test"
     }
   }
 }

@@ -225,6 +225,27 @@ for (const [corpusName, spec] of Object.entries(cfg.corpora)) {
   }
 }
 
+// ── the targeted Channel H follow-up must not be reported as the full study ───
+// annotation/channel-h-targeted/ covers two strata (30 items + 3 catch trials).
+// If it is ever run and quoted, the AIJ sources must call it a targeted
+// follow-up, and must still say the preregistered study was not collected.
+{
+  const p = resolve(base, "results", "channel_h_targeted.json");
+  if (existsSync(p)) {
+    const ch = JSON.parse(readFileSync(p, "utf8"));
+    if (ch.status === "COMPLETE") {
+      const aij = resolve(base, "..", "..", "docs", "research", "aij");
+      const secDir = resolve(aij, "sections");
+      const text = existsSync(secDir) ? readdirSync(secDir).filter((f) => f.endsWith(".tex")).map((f) => readFileSync(resolve(secDir, f), "utf8")).join("\n") : "";
+      assert(/targeted (Channel H )?follow-up/i.test(text), "the targeted Channel H result is described as a targeted follow-up");
+      assert(!/preregistered (human|Channel H) study (was|is) (run|completed|collected)/i.test(text), "the preregistered Channel H study is not described as collected");
+      notes.push(`INFO targeted Channel H follow-up COMPLETE with ${ch.annotators.length} annotators`);
+    } else {
+      notes.push(`INFO targeted Channel H follow-up is ${ch.status} — no number from it may appear in the manuscript`);
+    }
+  }
+}
+
 
 // ── report ────────────────────────────────────────────────────────────────────
 for (const n of notes) console.log(n);
