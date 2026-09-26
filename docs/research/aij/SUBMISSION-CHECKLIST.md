@@ -156,3 +156,26 @@ them **[AUTHOR]**.
 **Superseded:** `docs/research/AIJ_SUBMISSION_CHECKLIST.md` (2026-09-14) is
 replaced by this file. It described theorems the paper does not contain and
 stated a fence-safety claim the paper explicitly disavows.
+
+---
+
+## AIJ Guide for Authors check — 2026-09-26 (revision)
+
+Read from the live guide (sciencedirect.com/journal/artificial-intelligence/publish/guide-for-authors).
+
+| Guide requirement | Manuscript now | Status |
+|---|---|---|
+| Review model: single anonymised | author named on title page | complies |
+| Abstract <= 250 words, stands alone, no references | 226 words, no citations | complies |
+| 1-10 keywords, avoid multi-word "and/of" | 7 keywords | complies |
+| Highlights: 3-5 bullets, <= 85 characters incl. spaces, separate file with "highlights" in the name | 5 bullets, 74-83 chars, `highlights.txt` | complies (upload `highlights.txt` separately) |
+| Title page: full postal address of affiliation incl. country | city/state/country only | **[AUTHOR] add postal address** |
+| Research data: Option C — deposit data in a repository AND cite/link the dataset in the article | GitHub URL + "Zenodo DOI upon publication" | **[AUTHOR] deposit on Zenodo before submission and add the dataset DOI as a reference** |
+| Declarations tool (competing interests) must be completed in the submission system | text in manuscript | **[AUTHOR] also complete the online tool** |
+| Declaration of generative AI use | present, updated for this revision | complies |
+| Numbered references in order of citation | elsarticle-num | complies |
+| Denote powers of e by exp | appendix now uses \exp | fixed in this revision |
+| Length: no limit, but > ~40 pages "often significantly delayed" | 85 review-format pages (12pt double-spaced preprint); main text 12,122 words | note: long by the guide's standard |
+| Supplementary material: caption per file, submitted with the manuscript | one PDF (18 pp.) | give it a descriptive caption on upload |
+
+The `submission/` folder (latex-source, zip, PDFs) predates this revision and is **stale**; rebuild it from the current sources before uploading.
