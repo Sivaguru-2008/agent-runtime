@@ -42,6 +42,8 @@ const RESULT_FILES = [
   // analyses added in the AIJ revision.
   "human_annotation.published-20260825.json", "aij_analyses.json",
   "authz_v1.json",
+  // AIJ revision, Phase 2: class-conditional validity (§8.10, Table S27).
+  "class_conditional.json",
 ];
 const normaliseTex = (s) => s
   .replace(/\$\^?\{?\\dagger\}?\$/g, "†").replace(/\\dagger/g, "†")

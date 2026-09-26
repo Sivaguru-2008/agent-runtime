@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Residual wrong suppression when the distinct residual test mix (144 pairs) is reweighted toward the hand-specified semantic-difference category (D3); the remaining weight is split between D1 and D2 in their observed ratio. The first column is the observed mix. Intervals are stratified percentile bootstraps; a row with no suppression in any stratum has no interval.}\label{tab:s27c}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Judge & rule & D3 20.8\% (obs.) & D3 13\% & D3 25\% & D3 50\% \\
+\midrule
+GPT-OSS-120B & marginal & 2.8\%~[0.7--5.6] & 2.4\%~[0.4--5.1] & 3.0\%~[0.7--6.1] & 4.2\%~[0.4--9.3] \\
+GPT-OSS-120B & class-valid & 0.0\% & 0.0\% & 0.0\% & 0.0\% \\
+GPT-OSS-20B & marginal & 2.1\%~[0.0--4.9] & 2.3\%~[0.0--5.3] & 2.0\%~[0.0--4.6] & 1.3\%~[0.0--3.1] \\
+GPT-OSS-20B & class-valid & 0.0\% & 0.0\% & 0.0\% & 0.0\% \\
+Qwen3.6-27B & marginal & 1.4\%~[0.0--3.5] & 1.5\%~[0.0--3.8] & 1.3\%~[0.0--3.3] & 0.9\%~[0.0--2.2] \\
+Qwen3.6-27B & class-valid & 0.0\% & 0.0\% & 0.0\% & 0.0\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

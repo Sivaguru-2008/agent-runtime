@@ -95,6 +95,19 @@ Let a configuration have pool size $n$ and level $\alpha$.
 
 At $\alpha=0.05$ and $m=1$, the declared pool of the primary judge ($n=142$) places $\thi$ at the 7th largest score, the tightened pool of Section~\ref{sec:res-refinement} ($n=49$) at the 2nd largest, and any pool with $n\le18$ at $+\infty$. Proposition~\ref{prop:dilemma} does \emph{not} say that the refined threshold is numerically higher: an order statistic of a different multiset can be lower. Whether it is higher depends on which pairs refinement removes, and that is a property of the judge, not of the schema. If the judge scores the pairs that a refined refuter removes (distinct pairs whose newly typed fields differ) lower than the pairs that remain, the refined pool's upper tail is heavier and the rank shift compounds. Section~\ref{sec:res-refinement} measures both components.
 
+Theorem~\ref{thm:bound} is marginal over the distinct pairs of the jurisdiction, and that population is a mixture of kinds of difference. Asking for the bound to hold within each kind is a second refinement---of the calibration population rather than of the schema---and it pays the same price.
+
+\begin{corollary}[Class-conditional budget]\label{cor:mondrian}
+Partition the jurisdiction into classes $c=1,\dots,K$ by a function of the request, let the pool contain $n_c$ scores of class $c$ ($\sum_c n_c=n$), and let $t_c(m)$ be Eq.~\eqref{eq:thi} computed on the class-$c$ pool alone.
+\begin{enumerate}[(a),leftmargin=*,itemsep=1pt]
+\item If A6 holds within each class, then $P(S^\ast>t_c(m)\mid\text{class } c)\le\alpha$ for every $c$.
+\item $t_c(m)$ is finite iff $m\le\alpha(n_c+1)$. Every class is certifiable at $m$ iff $\min_c n_c\ge\lceil m/\alpha\rceil-1$, which requires $n\ge K(\lceil m/\alpha\rceil-1)$; and $\min_c\lfloor\alpha(n_c+1)\rfloor\le\lfloor\alpha(n/K+1)\rfloor$.
+\item If the class is not observable when the fence decides, thresholding at $\max_c t_c(m)$ satisfies (a) for every class simultaneously; it is finite only if every class is certifiable at $m$.
+\end{enumerate}
+\end{corollary}
+
+Each class pool is a sub-multiset of the pool, so by Proposition~\ref{prop:dilemma}(c) its threshold sits at an equal or higher rank from the top: partitioning the jurisdiction into $K$ classes gives each class the budget of Proposition~\ref{prop:dilemma}(a) at its own $n_c$. A marginal guarantee is therefore not a per-class guarantee for free; buying the latter costs the calibration budget, and when the classes are defined by the label (as the kinds of difference in our corpus are) it costs the deduplication of the most conservative class. Section~\ref{sec:res-class} measures this.
+
 \subsection{The bound cannot be improved}\label{sec:tight}
 
 Theorem~\ref{thm:bound} rests on a union bound, and union bounds are often loose. The natural question is whether a sharper rule exists under the same assumption: a per-candidate level above $\alpha/m$, a constant below $\alpha$, or semantic suppression beyond the budget of Proposition~\ref{prop:dilemma}. For every rule that does not depend on the scale of the judge's scores, the answer is no. We first make that class precise. The restriction is not a convenience: the judge's percentages are uncalibrated, and a rule that reads meaning into their absolute values inherits that miscalibration.

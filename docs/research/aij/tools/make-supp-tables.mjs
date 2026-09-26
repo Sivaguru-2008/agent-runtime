@@ -280,7 +280,7 @@ write("s2-generators.tex", table(
   const p3 = (x) => (x === null || x === undefined ? "---" : `${(100 * x).toFixed(3)}\\%`);
   const sci = (x) => (Math.abs(x) < 1e-12 ? "$0$" : `$${x.toExponential(1).replace(/e([+-]?)(\d+)/, (_, s, d) => `\\times10^{${s === "-" ? "-" : ""}${d}}`)}$`);
   write("s21-tightness.tex", table(
-    `Worst case over $\\mathcal{Q}_{n,m}$ (Theorem~2) against the Bonferroni bound $m\\rho/(n+1)$, at $\\alpha=${tg.alpha}$. The value in parentheses is the worst case of the threshold one rank lower. The simulation column is the attaining law simulated directly (${tg.repsPerSimulation.toLocaleString("en-US")} draws per row); the gap column is exact and negative entries below $10^{-12}$ are rounding.`,
+    `Worst case over $\\mathcal{Q}_{n,m}$ (Theorem~\\ref{M-thm:tight}) against the Bonferroni bound $m\\rho/(n+1)$, at $\\alpha=${tg.alpha}$. The value in parentheses is the worst case of the threshold one rank lower. The simulation column is the attaining law simulated directly (${tg.repsPerSimulation.toLocaleString("en-US")} draws per row); the gap column is exact and negative entries below $10^{-12}$ are rounding.`,
     "tab:s21", "lrrrrrrr",
     "Configuration & $n$ & $m$ & $k^\\ast$ & bound & worst case & gap & simulated \\\\ & & & & & & & (next rank)",
     tg.configs.filter((c) => c.k !== null).map((c) =>
@@ -312,6 +312,44 @@ write("s2-generators.tex", table(
     "tab:s22b", "l" + "l".repeat(az.admitted.length),
     `Category & ${az.admitted.map((j) => esc(JN[j])).join(" & ")}`,
     Object.entries(cats).map(([c, name]) => `${c} ${name} & ${az.admitted.map((j) => iv(az.configs[j]["0.05"].hardened.perCategory[c])).join(" & ")}`)));
+}
+
+// S27: class-conditional validity (AIJ revision, Phase 2).
+{
+  const cc = J("class_conditional.json");
+  const rows = [];
+  for (const j of cc.judges) {
+    const r = cc.judgesResult[j];
+    rows.push(`${esc(JN[j])} & all distinct (marginal) & ${r.marginal.poolN} & ${r.marginal.certifiableM} & ${thr(r.marginal.tHi)} & ${iv(r.marginal.wrongSuppression)} & ---`);
+    for (const c of cc.diffCategories) {
+      const x = r.perCategory[c];
+      rows.push(` & ${CATEGORY_NAME[c]} & ${x.poolN} & ${x.certifiableM} & ${thr(x.mondrianTHi)} & ${iv(x.marginal.wrongSuppression)} & ${iv(x.mondrian.wrongSuppression)}`);
+    }
+    rows.push(` & class-valid rule ($\\max_c t_c$) & --- & --- & ${thr(r.classValid.tHi)} & --- & ${iv(r.classValid.wrongSuppression)}`);
+  }
+  write("s27-classcond.tex", table(
+    `Class-conditional validity at $\\alpha=${cc.alpha}$. For each judge, the first row is the deployed (marginal) rule; each category row gives that category's residual calibration pool, its certifiable $m$, its Mondrian threshold $t_c$, and its wrong suppression on the test split under the marginal threshold and under $t_c$. The category is defined by the label, so $t_c$ is an oracle; the deployable rule valid for every category is $\\max_c t_c$ (last row).`,
+    "tab:s27", "llrrlll",
+    "Judge & population & pool $n$ & cert.\\ $m$ & threshold & WS, marginal $\\thi$ & WS, Mondrian / class-valid",
+    rows));
+  const dedupRows = cc.judges.map((j) => { const r = cc.judgesResult[j];
+    return `${esc(JN[j])} & ${iv(r.classValid.marginalDedup)} & ${iv(r.classValid.dedup)} & ${esc(CATEGORY_NAME[r.classValid.bindingCategory])} & ${iv(r.toolMondrian.wrongSuppression)} & ${iv(r.toolMondrian.dedup)} & ${r.toolMondrian.toolsBelowBudget.length}`; });
+  write("s27-classcond-dedup.tex", table(
+    "The price of per-class validity. Deduplication under the marginal rule, under the class-valid rule $\\max_c t_c$ (with the category that sets it), and under Mondrian calibration by tool, an observable partition; the last column counts tools whose residual pool is below the 19 pairs needed at $m=1$.",
+    "tab:s27b", "llllllr",
+    "Judge & dedup, marginal & dedup, class-valid & binding category & WS, by tool & dedup, by tool & tools off",
+    dedupRows));
+  const rw = [];
+  for (const j of cc.judges) for (const k of ["marginal", "classValid"]) {
+    const r = cc.judgesResult[j].reweighting[k];
+    rw.push(`${esc(JN[j])} & ${k === "marginal" ? "marginal" : "class-valid"} & ${r.map((w) => (w.residualWrongSuppression.degenerate ? pc(w.residualWrongSuppression.value) : iv(w.residualWrongSuppression))).join(" & ")}`);
+  }
+  const r0 = cc.judgesResult[cc.judges[0]].reweighting.marginal;
+  write("s27-reweight.tex", table(
+    `Residual wrong suppression when the distinct residual test mix (${cc.judgesResult[cc.judges[0]].reweighting.nResidualDiffTest} pairs) is reweighted toward the hand-specified semantic-difference category (D3); the remaining weight is split between D1 and D2 in their observed ratio. The first column is the observed mix. Intervals are stratified percentile bootstraps; a row with no suppression in any stratum has no interval.`,
+    "tab:s27c", "ll" + "l".repeat(r0.length),
+    `Judge & rule & ${r0.map((w) => `D3 ${(100 * w.d3Share).toFixed(w.natural ? 1 : 0)}\\%${w.natural ? " (obs.)" : ""}`).join(" & ")}`,
+    rw));
 }
 
 console.log("supplement tables written to", out);

@@ -182,6 +182,7 @@
     "weakJudge": "node src/experiments/weakJudge.js",
     "crossFamily": "node src/experiments/crossFamily.js",
     "aijAnalyses": "node src/experiments/aijAnalyses.js",
+    "classConditional": "node src/experiments/classConditional.js",
     "report": "node src/experiments/report.js > results/REPORT.md",
     "verify": "node src/experiments/verify.js",
     "checkPaper": "node src/experiments/checkPaper.js",
@@ -272,5 +273,23 @@
       "labels are exactly SAME or DIFF",
       "the human-annotation result file does not claim COMPLETE while no responses exist"
     ]
+  },
+  "classConditional": {
+    "$comment": "AIJ revision Phase 2. Offline; persisted scores only. Mondrian over DIFF categories is an oracle analysis (category is label-defined); the deployable class-valid rule is the maximum per-category threshold. Reweighting shifts the RESIDUAL distinct test mix toward D3, remaining weight split D1:D2 in observed ratio.",
+    "alpha": 0.05,
+    "classes": [
+      "D1_near_miss",
+      "D2_legit_repeat",
+      "D3_semantic_diff"
+    ],
+    "observablePartition": "tool",
+    "d3Shares": [
+      0.13,
+      0.25,
+      0.5
+    ],
+    "bootstrapReplicates": 10000,
+    "seed": 20260926,
+    "output": "results/class_conditional.json"
   }
 }

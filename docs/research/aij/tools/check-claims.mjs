@@ -67,6 +67,20 @@ const CLAIMS = [
   ["tightened rank from top", `${aa.A5_refinement[G].tightened.rankFromTop}nd largest`, ["sections/theory.tex"]],
   ["tokens per comparison (rounded)", `about ${Math.round(aa.A8_cost.judges[G].tokensPerComparison)} tokens`, ["sections/limitations.tex"]],
   ["Qwen coverage", pct1(cf.missingness.overall.covered / cf.missingness.overall.n), ["sections/method.tex"]],
+  // §8.3 class-conditional validity (results/class_conditional.json).
+  ...(() => {
+    const cc = J("class_conditional.json"), r = cc.judgesResult[G];
+    const pools = cc.diffCategories.map((c) => r.perCategory[c].poolN);
+    const d3 = r.perCategory.D3_semantic_diff;
+    return [
+      ["class pools primary", `${pools.slice(0, -1).join(", ")} and ${pools.at(-1)} scores`, ["sections/results.tex"]],
+      ["class: D3 Mondrian threshold", `largest score, ${Number(d3.mondrianTHi).toFixed(2)}`, ["sections/results.tex"]],
+      ["class: observed D3 residual share", `observed D3 share (${pct1(r.reweighting.naturalD3Share)})`, ["sections/results.tex"]],
+      ["class: tools below budget", `${["zero", "one", "two", "three", "four", "five", "six"][r.toolMondrian.toolsBelowBudget.length]} of six tools below`, ["sections/results.tex"]],
+      ["class: marginal certifiable m", `certifiable $m\\le${r.marginal.certifiableM}$`, ["sections/results.tex"]],
+      ["class: only D2 beyond m=1", cc.diffCategories.filter((c) => r.perCategory[c].certifiableM > 1).join() === "D2_legit_repeat" ? "but only D2 beyond it" : "CLASS BUDGET CLAIM FALSE", ["sections/results.tex"]],
+    ];
+  })(),
   // Theorem 2 / Corollary 1: exact worst cases quoted in theory.tex.
   ...(() => {
     const tg = J("tightness.json");
@@ -141,6 +155,25 @@ for (const f of allFiles) {
     return "";
   });
   for (const [re, why] of STALE) if (re.test(text)) failures.push(`stale string in ${f}: ${why}`);
+}
+
+// The main text cites supplement sections by number ("Section~S21"), because
+// the two documents compile separately. Each cited number must be a section of
+// supplement.tex whose title carries the expected topic, so that inserting a
+// supplement section cannot silently re-point a citation.
+{
+  const SUPP_TOPIC = {
+    2: /corpus construction/i, 3: /parser defect/i, 4: /judge coverage/i, 8: /score distributions/i,
+    16: /model panel/i, 20: /artifact contents/i, 21: /tightness/i, 22: /authorisation/i, 23: /class-conditional/i,
+  };
+  const titles = [...readFileSync(resolve(aij, "supplement.tex"), "utf8").matchAll(/^\\section\{(.*)\}/gm)].map((m) => m[1]);
+  for (const f of allFiles.filter((x) => x.startsWith("sections/") || x === "manuscript.tex")) {
+    for (const m of read(f).matchAll(/Sections? S(\d+)/g)) {
+      const n = +m[1];
+      if (!SUPP_TOPIC[n]) failures.push(`${f} cites supplement Section S${n}, which has no expected topic in check-claims.mjs`);
+      else if (!SUPP_TOPIC[n].test(titles[n - 1] ?? "")) failures.push(`${f} cites Section S${n}, but supplement section ${n} is "${titles[n - 1]}"`);
+    }
+  }
 }
 
 // Every sentence using "exactly-once" must qualify it.
