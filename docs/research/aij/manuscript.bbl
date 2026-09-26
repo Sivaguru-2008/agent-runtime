@@ -66,11 +66,13 @@ L.~Zheng, W.-L. Chiang, Y.~Sheng, S.~Zhuang, Z.~Wu, Y.~Zhuang, Z.~Lin, Z.~Li,
   2023, arXiv:2306.05685.
 
 \bibitem{wang2023fair}
-P.~Wang, L.~Li, L.~Chen, Z.~Cai, D.~Zhu, B.~Lin, Y.~Cao, Q.~Liu, T.~Liu,
-  Z.~Sui, {Large Language Models are not Fair Evaluators}, preprint,
-  arXiv:2305.17926 (2023).
-\newblock \href {https://doi.org/10.48550/arXiv.2305.17926}
-  {\path{doi:10.48550/arXiv.2305.17926}}.
+P.~Wang, L.~Li, L.~Chen, Z.~Cai, D.~Zhu, B.~Lin, Y.~Cao, L.~Kong, Q.~Liu,
+  T.~Liu, Z.~Sui, {Large Language Models are not Fair Evaluators}, in:
+  Proceedings of the 62nd Annual Meeting of the Association for Computational
+  Linguistics (Volume 1: Long Papers), Association for Computational
+  Linguistics, Bangkok, Thailand, 2024, pp. 9440--9450.
+\newblock \href {https://doi.org/10.18653/v1/2024.acl-long.511}
+  {\path{doi:10.18653/v1/2024.acl-long.511}}.
 
 \bibitem{ye2024justice}
 J.~Ye, Y.~Wang, Y.~Huang, D.~Chen, Q.~Zhang, N.~Moniz, T.~Gao, W.~Geyer,
@@ -251,16 +253,16 @@ A.~N. Angelopoulos, S.~Bates, {Conformal Prediction: A Gentle Introduction},
 
 \bibitem{quach2023clm}
 V.~Quach, A.~Fisch, T.~Schuster, A.~Yala, J.~H. Sohn, T.~S. Jaakkola,
-  R.~Barzilay, {Conformal Language Modeling}, preprint, arXiv:2306.10193
-  (2023).
-\newblock \href {https://doi.org/10.48550/arXiv.2306.10193}
-  {\path{doi:10.48550/arXiv.2306.10193}}.
+  R.~Barzilay, {Conformal Language Modeling}, in: International Conference on
+  Learning Representations (ICLR), 2024, arXiv:2306.10193.
 
 \bibitem{mohri2024factuality}
-C.~Mohri, T.~Hashimoto, {Language Models with Conformal Factuality Guarantees},
-  preprint, arXiv:2402.10978 (2024).
-\newblock \href {https://doi.org/10.48550/arXiv.2402.10978}
-  {\path{doi:10.48550/arXiv.2402.10978}}.
+C.~Mohri, T.~Hashimoto,
+  \href{https://proceedings.mlr.press/v235/mohri24a.html}{{Language Models with
+  Conformal Factuality Guarantees}}, in: Proceedings of the 41st International
+  Conference on Machine Learning (ICML), Vol. 235 of Proceedings of Machine
+  Learning Research, PMLR, 2024, pp. 36029--36047.
+\newline\urlprefix\url{https://proceedings.mlr.press/v235/mohri24a.html}
 
 \bibitem{ren2023knowno}
 A.~Z. Ren, A.~Dixit, A.~Bodrova, S.~Singh, S.~Tu, N.~Brown, P.~Xu, L.~Takayama,

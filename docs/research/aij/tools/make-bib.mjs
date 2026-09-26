@@ -28,10 +28,10 @@ const ARXIV = {
   balakrishnan2026logact: "2604.07988", yin2026invariants: "2608.00783", mozafari2026transaction: "2608.05412",
   resume2026contract: "2608.03836", zuvic2026confused: "2606.28679", turan2026oversight: "2606.08919",
   beurerkellner2025patterns: "2506.08837", ye2024justice: "2410.02736", chen2024humans: "2402.10669",
-  li2025leakage: "2502.01534", hwang2025persuasion: "2508.07805", quach2023clm: "2306.10193",
-  mohri2024factuality: "2402.10978", sheng2025judgeconformal: "2509.18658", ulmer2024nonexchangeable: "2402.00707",
+  li2025leakage: "2502.01534", hwang2025persuasion: "2508.07805",
+  sheng2025judgeconformal: "2509.18658", ulmer2024nonexchangeable: "2402.00707",
   lin2025domainshift: "2510.05566", tursunbadalov2026minority: "2607.06605", yao2024taubench: "2406.12045",
-  angelopoulos2021ltt: "2110.01052", wang2023fair: "2305.17926",
+  angelopoulos2021ltt: "2110.01052",
 };
 // Published versions whose arXiv id is also recorded (venue added by hand from the proceedings).
 const ARXIV_PUBLISHED = {
@@ -43,6 +43,8 @@ const ARXIV_PUBLISHED = {
   debenedetti2024agentdojo: { id: "2406.13352", type: "inproceedings", booktitle: "Advances in Neural Information Processing Systems 37 (NeurIPS), Datasets and Benchmarks Track", year: 2024 },
   ruan2024toolemu: { id: "2309.15817", type: "inproceedings", booktitle: "International Conference on Learning Representations (ICLR)", year: 2024 },
   angelopoulos2024crc: { id: "2208.02814", type: "inproceedings", booktitle: "International Conference on Learning Representations (ICLR)", year: 2024 },
+  // Published version confirmed on OpenReview (ICLR 2024 poster, forum pzUhfQ74c5), 2026-09-26.
+  quach2023clm: { id: "2306.10193", type: "inproceedings", booktitle: "International Conference on Learning Representations (ICLR)", year: 2024 },
   gill2025meancache: { id: "2403.02694", type: "inproceedings", booktitle: "Proceedings of the IEEE International Parallel and Distributed Processing Symposium (IPDPS)", year: 2025, doi: "10.1109/IPDPS64566.2025.00117" },
 };
 
@@ -163,6 +165,20 @@ const FIXED = String.raw`
   author = {Gray, Jim and Reuter, Andreas},
   title = {{Transaction Processing: Concepts and Techniques}},
   publisher = {Morgan Kaufmann}, year = {1993}, isbn = {9781558601901}
+}
+@inproceedings{mohri2024factuality,
+  author = {Mohri, Christopher and Hashimoto, Tatsunori},
+  title = {{Language Models with Conformal Factuality Guarantees}},
+  booktitle = {Proceedings of the 41st International Conference on Machine Learning (ICML)}, series = {Proceedings of Machine Learning Research},
+  volume = {235}, pages = {36029--36047}, publisher = {PMLR}, year = {2024},
+  url = {https://proceedings.mlr.press/v235/mohri24a.html}
+}
+@inproceedings{wang2023fair,
+  author = {Wang, Peiyi and Li, Lei and Chen, Liang and Cai, Zefan and Zhu, Dawei and Lin, Binghuai and Cao, Yunbo and Kong, Lingpeng and Liu, Qi and Liu, Tianyu and Sui, Zhifang},
+  title = {{Large Language Models are not Fair Evaluators}},
+  booktitle = {Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages = {9440--9450}, address = {Bangkok, Thailand}, publisher = {Association for Computational Linguistics}, year = {2024},
+  doi = {10.18653/v1/2024.acl-long.511}
 }
 @misc{stripe2026idempotency,
   author = {{Stripe}},

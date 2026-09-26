@@ -31,6 +31,12 @@ const esc = (s) => String(s)
   .replace(/([_%#&])/g, "\\$1")
   .replace(/</g, "$<$").replace(/>/g, "$>$");
 const JN = { openai_gpt_oss_120b: "GPT-OSS-120B", openai_gpt_oss_20b: "GPT-OSS-20B", qwen_qwen3_6_27b: "Qwen3.6-27B", llama_3_3_70b_versatile: "Llama-3.3-70B", allam_2_7b: "Allam-2-7B" };
+// Corpus categories under the names the main text uses (Table 5 of the manuscript).
+const CATEGORY_NAME = {
+  S1_mechanical: "S1 mechanical reformat", S2_paraphrase: "S2 paraphrase", S3_loose_value: "S3 loose-schema value",
+  S4_adversarial: "S4 adversarial paraphrase", D1_near_miss: "D1 near-miss mutation", D2_legit_repeat: "D2 legitimate repeats",
+  D3_semantic_diff: "D3 semantic difference", D4a_field_injection: "D4a typed-field injection", D4b_text_injection: "D4b prose-only injection",
+};
 const write = (name, body) => { writeFileSync(resolve(out, name), body + "\n"); console.log("wrote", name); };
 const table = (caption, label, spec, header, rows, size = "\\footnotesize") => `\\begin{table}[htbp]
 \\centering${size}\\setlength{\\tabcolsep}{3.5pt}
@@ -68,7 +74,7 @@ write("s6-percategory.tex", table(
   "tab:s6", "llrlll",
   "Judge & Category & $n$ & suppress & escalate & execute",
   JUD.flatMap((j) => Object.entries(aa.A10_perCategory[j]).map(([c, v]) =>
-    `${esc(JN[j])} & ${esc(c)} & ${v.n} & ${iv(v.suppress)} & ${iv(v.escalate)} & ${iv(v.execute)}`))));
+    `${esc(JN[j])} & ${CATEGORY_NAME[c] ?? esc(c)} & ${v.n} & ${iv(v.suppress)} & ${iv(v.escalate)} & ${iv(v.execute)}`))));
 
 // S7: baseline and ablation matrix + paired tests.
 write("s7-matrix.tex", table(
@@ -152,13 +158,28 @@ write("s12-weak.tex", table(
   "$\\sigma$ & AUC & safe region & safe fraction & conformal $\\thi$ & conformal dedup",
   wj.map((r) => `${num(r.sigma, 2)} & ${num(r.auc, 3)} & ${r.safeWidth > 0 ? `width ${num(r.safeWidth, 2)}` : "empty"} & ${pc(r.safeFraction, 0)} & ${num(r.conformalTau, 2)} & ${pc(r.conformalDedup)}`)));
 
-// S13: schema ladder.
-write("s13-ladder.tex", table(
-  "Schema-richness ladder: one act family declared with zero, four and six typed attributes. The residual and the judge's jurisdiction shrink together; every level's natural pool is below the 19 pairs needed to certify $\\alpha=0.05$ at $m=1$.",
-  "tab:s13", "lrllrr",
-  "Level & typed attributes & refuter coverage & residual & pool $n$ & certifiable $m$",
-  Object.entries(sl.fixed).map(([lvl, v]) =>
-    `${esc(lvl)} & ${v.typedAttributes.length} & ${iv(v.coverage.refuter)} & ${iv(v.coverage.residual)} & ${v.calibration.nCalDiff} & ${v.certifiableM}`)));
+// S13: schema ladder. The caption is derived from the data: which levels'
+// pools reach the m = 1 requirement, and where the certifiable ones put t_hi.
+{
+  const lv = Object.entries(sl.fixed);
+  const req = lv[0][1].requiredForM1;
+  const cert = lv.filter(([, v]) => v.certifiableM >= 1);
+  const uncert = lv.filter(([, v]) => v.certifiableM < 1);
+  const ceil = cert.filter(([, v]) => v.calibration.tHi !== null && v.calibration.tHi >= 1);
+  const names = (xs) => xs.map(([l, v]) => `${esc(l)} ($n=${v.calibration.nCalDiff}$)`).join(" and ");
+  const certText = cert.length
+    ? ` ${names(cert)} ${cert.length > 1 ? "reach" : "reaches"} the ${req} pairs needed to certify $\\alpha=0.05$ at $m=1$` +
+      (ceil.length === cert.length ? `, but ${cert.length > 1 ? "their thresholds fall" : "its threshold falls"} at a score of 1.00, which the strict inequality never exceeds` : "") + ";"
+    : "";
+  const uncertText = uncert.length ? ` ${names(uncert)} ${uncert.length > 1 ? "are" : "is"} below it, so $\\thi=+\\infty$.` : "";
+  const off = lv.every(([, v]) => v.test.dedup.value === 0) ? " The calibrated layer therefore suppresses nothing at any level." : "";
+  write("s13-ladder.tex", table(
+    `Schema-richness ladder: one act family declared with zero, four and six typed attributes. The residual and the judge's jurisdiction shrink together.${certText}${uncertText}${off}`,
+    "tab:s13", "lrllrrrr",
+    "Level & typed attributes & refuter coverage & residual & pool $n$ & certifiable $m$ & $\\thi$ & dedup",
+    lv.map(([lvl, v]) =>
+      `${esc(lvl)} & ${v.typedAttributes.length} & ${iv(v.coverage.refuter)} & ${iv(v.coverage.residual)} & ${v.calibration.nCalDiff} & ${v.certifiableM} & ${thr(v.calibration.tHi)} & ${pc(v.test.dedup.value)}`)));
+}
 
 // S14: refinement decomposition.
 write("s14-refinement.tex", table(
@@ -176,13 +197,24 @@ write("s15-crash.tex", table(
   ["duplicate", "distinct"].flatMap((arm) => Object.entries(cr.byArm[arm].byCrashPoint).map(([cp, v]) =>
     `${arm} & ${esc(cp)} & ${v.syntactic.correctFinalState.successes}/${v.syntactic.nTrials} & ${v.semantic.correctFinalState.successes}/${v.semantic.nTrials} & ${v.semantic.crashPointReached.successes}/${v.semantic.nTrials} & ${v.semantic.windowFlagged?.successes ?? 0}/${v.semantic.nTrials}`))));
 
-// S16: model panel per stratum + re-derivations.
+// S16: model panel per stratum + re-derivations. Strata are printed under the
+// names the main text uses (with corpus codes); the artifact's internal keys
+// (annotation.js STRATA) are data identifiers and are not renamed, because the
+// frozen sheet hashes them.
+const STRATUM_NAME = {
+  same_mechanical: "mechanical reformat (S1)", same_paraphrase: "paraphrase (S2)",
+  same_loose_value: "loose-schema value rewrite (S3)", same_adversarial: "adversarial paraphrase (S4)",
+  diff_near_miss: "near-miss field mutation (D1)", diff_text_only: "legitimate repeats (D2)",
+  diff_semantic: "hand-specified semantic difference (D3)", attack_field: "typed-field injection (D4a)",
+  attack_text: "prose-only injection (D4b)", attack_encoding: "encoding-level attack",
+  misdeclared: "mis-declared field policy",
+};
 write("s16-panel.tex", table(
-  `Model panel (Channel M), preregistered collection: agreement with the construction per stratum over ${ha.nFullyAnnotated} fully annotated items. A stratum is contested when the interval's upper bound falls below 0.80.`,
+  `Model panel (Channel M), preregistered collection: agreement with the construction per stratum over ${ha.nFullyAnnotated} fully annotated items. A stratum is contested when the interval's upper bound falls below 0.80. Stratum names follow the main text; the extension-corpus attack categories are pooled with the corpus category of the same kind.`,
   "tab:s16a", "lrll",
   "Stratum & $n$ & agreement with construction & contested",
   Object.entries(ha.perStratum).map(([s, v]) =>
-    `${esc(s)} & ${v.n} & ${iv(v.constructionAgreement)} & ${v.constructionAgreement.ci95 && v.constructionAgreement.ci95.hi < 0.8 ? "yes" : "no"}`)));
+    `${STRATUM_NAME[s] ?? esc(s)} & ${v.n} & ${iv(v.constructionAgreement)} & ${v.constructionAgreement.ci95 && v.constructionAgreement.ci95.hi < 0.8 ? "yes" : "no"}`)));
 {
   const cols = aa.A6_annotation.collections;
   write("s16-rederivation.tex", table(
