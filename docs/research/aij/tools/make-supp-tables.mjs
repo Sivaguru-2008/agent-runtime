@@ -286,10 +286,10 @@ write("s2-generators.tex", table(
     tg.configs.filter((c) => c.k !== null).map((c) =>
       `${esc(c.label)} & ${c.n} & ${c.m} & ${c.k} & ${p3(c.bonferroniBound)} & ${p3(c.attainedSupQ)} & ${sci(c.gap)} & ${p3(c.simulatedCoupling.rate)} (${p3(c.nextLowerThresholdSupQ)})`)));
   write("s21-budget.tex", table(
-    `Beyond the budget ($m>\\alpha(n+1)$): the worst case of the most conservative finite threshold, the pool maximum, at $\\alpha=${tg.alpha}$. Every entry exceeds $\\alpha$, so no finite scale-free threshold is valid. The grid check covers every $n+1\\le10^6$ at $\\alpha=0.05$ and $\\alpha=0.01$ (${tg.budgetGrid.map((g) => `${g.failures} exceptions at $\\alpha=${g.alpha}$`).join(", ")}).`,
-    "tab:s21b", "rrrl",
-    "$n$ & $m$ & $\\alpha(n+1)$ & worst case of the pool maximum",
-    tg.budgetExamples.map((b) => `${b.n} & ${b.m} & ${num(b.alpha * (b.n + 1), 2)} & ${p3(b.supPoolMax)}`)));
+    `Beyond the budget ($m>\\alpha(n+1)$): the worst case of the most conservative finite threshold, the pool maximum, at $\\alpha=${tg.alpha}$. Every entry exceeds $\\alpha$, so no finite scale-free threshold is valid. The grid check covers every $n+1\\le10^6$ at $\\alpha=0.05$ and $\\alpha=0.01$ (${tg.budgetGrid.map((g) => `${g.failures} exceptions at $\\alpha=${g.alpha}$`).join(", ")}). The closed form is an equality (Corollary~\\ref{M-cor:tight}(c)); it was checked against the general rank-$k$ computation at $k=n$ over ${tg.poolMaxEquality.gridPoints.toLocaleString("en-US")} pairs $(n,m)$ with $n\\le${tg.poolMaxEquality.nRange[1]}$ (largest absolute difference ${sci(tg.poolMaxEquality.maxAbsDiff)}), and against a direct simulation of the attaining law (${tg.repsPerSimulation.toLocaleString("en-US")} draws per row, last column).`,
+    "tab:s21b", "rrrll",
+    "$n$ & $m$ & $\\alpha(n+1)$ & worst case of the pool maximum & simulated ($z$)",
+    tg.budgetExamples.map((b, i) => `${b.n} & ${b.m} & ${num(b.alpha * (b.n + 1), 2)} & ${p3(b.supPoolMax)} & ${p3(tg.poolMaxEquality.simulated[i].simulated)} (${num(tg.poolMaxEquality.simulated[i].z, 2)})`)));
 }
 
 // S22: the authorisation instance (second instance of the recipe).

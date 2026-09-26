@@ -103,7 +103,10 @@ const CLAIMS = [
       ["tightness: every gap below 1e-10", gapsBelow ? "below $10^{-10}$" : "GAP CLAIM FALSE", ["sections/theory.tex"]],
       ["tightness: Monte-Carlo agreement", tg.mcOk ? "agrees with the exact values in all eight" : "MC CLAIM FALSE", ["sections/theory.tex"]],
       ["tightness: grid exceptions", grid.every((g) => g.failures === 0 && g.maxNPlus1 >= 1e6) ? "with no exception" : "GRID CLAIM FALSE", ["sections/theory.tex"]],
-      ["tightness: delta 0.05", tg.budgetBand.find((b) => b.alpha === 0.05).delta < 1.1e-10 ? "delta_{0.05}<1.1" : "DELTA CLAIM FALSE", ["sections/theory.tex"]],
+      ["tightness: k=n equality grid", `over ${tg.poolMaxEquality.gridPoints.toLocaleString("en-US")} pairs`, ["sections/theory.tex"]],
+      ["tightness: k=n equality precision", tg.poolMaxEquality.maxAbsDiff < 1e-12 ? "to within $10^{-12}$" : "EQUALITY PRECISION CLAIM FALSE", ["sections/theory.tex"]],
+      ["tightness: k=n simulation", tg.poolMaxEquality.simulationOk && tg.poolMaxEquality.simulated.length === 6 ? "agrees in all six budget configurations" : "EQUALITY SIMULATION CLAIM FALSE", ["sections/theory.tex"]],
+      ["tightness: delta 0.05",tg.budgetBand.find((b) => b.alpha === 0.05).delta < 1.1e-10 ? "delta_{0.05}<1.1" : "DELTA CLAIM FALSE", ["sections/theory.tex"]],
     ];
   })(),
 ];

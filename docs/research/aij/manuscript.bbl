@@ -329,6 +329,56 @@ P.~Buneman, S.~Khanna, W.-C. Tan, {Why and Where: A Characterization of Data
 \newblock \href {https://doi.org/10.1007/3-540-44503-X_20}
   {\path{doi:10.1007/3-540-44503-X_20}}.
 
+\bibitem{frechet1935}
+M.~Fr{\'e}chet, {G{\'e}n{\'e}ralisation du th{\'e}or{\`e}me des
+  probabilit{\'e}s totales}, Fundamenta Mathematicae 25 (1935) 379--387.
+\newblock \href {https://doi.org/10.4064/fm-25-1-379-387}
+  {\path{doi:10.4064/fm-25-1-379-387}}.
+
+\bibitem{ruschendorf1982maxsums}
+L.~R{\"u}schendorf, {Random Variables with Maximum Sums}, Advances in Applied
+  Probability 14~(3) (1982) 623--632.
+\newblock \href {https://doi.org/10.2307/1426677} {\path{doi:10.2307/1426677}}.
+
+\bibitem{galambos1996bonferroni}
+J.~Galambos, I.~Simonelli, {Bonferroni-type Inequalities with Applications},
+  Springer, New York, 1996.
+
+\bibitem{hunter1976union}
+D.~Hunter, {An Upper Bound for the Probability of a Union}, Journal of Applied
+  Probability 13~(3) (1976) 597--603.
+\newblock \href {https://doi.org/10.2307/3212481} {\path{doi:10.2307/3212481}}.
+
+\bibitem{worsley1982bonferroni}
+K.~J. Worsley, {An Improved Bonferroni Inequality and Applications}, Biometrika
+  69~(2) (1982) 297--302.
+\newblock \href {https://doi.org/10.1093/biomet/69.2.297}
+  {\path{doi:10.1093/biomet/69.2.297}}.
+
+\bibitem{vovk2020averaging}
+V.~Vovk, R.~Wang, {Combining $p$-values via Averaging}, Biometrika 107~(4)
+  (2020) 791--808.
+\newblock \href {https://doi.org/10.1093/biomet/asaa027}
+  {\path{doi:10.1093/biomet/asaa027}}.
+
+\bibitem{vovk2022admissible}
+V.~Vovk, B.~Wang, R.~Wang, {Admissible Ways of Merging $p$-values under
+  Arbitrary Dependence}, The Annals of Statistics 50~(1) (2022).
+\newblock \href {https://doi.org/10.1214/21-AOS2109}
+  {\path{doi:10.1214/21-AOS2109}}.
+
+\bibitem{ovchinnikov1997invariant}
+S.~Ovchinnikov, {Invariant Functions on Simple Orders}, Order 14~(4) (1997)
+  365--371.
+\newblock \href {https://doi.org/10.1023/A:1006054508202}
+  {\path{doi:10.1023/A:1006054508202}}.
+
+\bibitem{marichal2002order}
+J.-L. Marichal, {On Order Invariant Synthesizing Functions}, Journal of
+  Mathematical Psychology 46~(6) (2002) 661--676.
+\newblock \href {https://doi.org/10.1006/jmps.2002.1418}
+  {\path{doi:10.1006/jmps.2002.1418}}.
+
 \bibitem{wilson1927}
 E.~B. Wilson, {Probable Inference, the Law of Succession, and Statistical
   Inference}, Journal of the American Statistical Association 22~(158) (1927)

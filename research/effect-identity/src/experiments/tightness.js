@@ -205,6 +205,28 @@ const budgetExamples = [
   { n: 200, m: 11 }, { n: 200, m: 25 }, { n: 200, m: 50 }, { n: 142, m: 8 }, { n: 49, m: 3 }, { n: 18, m: 1 },
 ].map(({ n, m }) => ({ n, m, alpha: ALPHA, budgetExceeded: m > ALPHA * (n + 1), supPoolMax: supPoolMax(n, m) }));
 
+// Corollary 1(c) at k = n is an EQUALITY: the pool maximum's worst case is
+// m/(n+1)·(1 − (1 − 1/m)^{n+1}). Checked two independent ways, neither of
+// which uses that closed form: (i) the general rank-k computation of Theorem 2
+// (binomial tails, supOverQ) at k = n over a grid, and (ii) a direct
+// simulation of the attaining coupling at k = n for each budget example.
+const poolMaxEquality = (() => {
+  let maxAbsDiff = 0, count = 0, arg = null;
+  for (let n = 1; n <= 400; n++) {
+    for (const m of [1, 2, 3, 5, 8, 10, 20, 25, 50, 100]) {
+      const d = Math.abs(supOverQ(n, m, n) - supPoolMax(n, m));
+      count += 1;
+      if (d > maxAbsDiff) { maxAbsDiff = d; arg = { n, m }; }
+    }
+  }
+  const simulated = budgetExamples.map((b, i) => {
+    const s = simulateCoupling(b.n, b.m, b.n, REPS, 90001 + i);
+    return { n: b.n, m: b.m, closedForm: b.supPoolMax, simulated: s.rate, z: (s.rate - b.supPoolMax) / Math.max(s.se, 1e-12) };
+  });
+  return { gridPoints: count, nRange: [1, 400], mValues: [1, 2, 3, 5, 8, 10, 20, 25, 50, 100], maxAbsDiff, argMax: arg,
+    simulated, simulationOk: simulated.every((s) => Math.abs(s.z) < 4) };
+})();
+
 const band = [0.01, 0.05, 0.1].map((a) => {
   const x0 = budgetBandEdge(a);
   return { alpha: a, x0, delta: x0 - a };
@@ -226,6 +248,7 @@ const out = {
   configs,
   uncorrectedUnderCoupling: uncorrected,
   budgetExamples,
+  poolMaxEquality,
   budgetBand: band,
   budgetGrid: grid,
   mcAgreement,
@@ -245,6 +268,7 @@ for (const c of configs) {
 }
 console.log("uncorrected under coupling (n=200):", uncorrected.map((u) => `m=${u.m}: ${pct(u.attainedSupQ)}`).join(", "));
 console.log("budget examples:", budgetExamples.map((b) => `n=${b.n},m=${b.m}: exceeded=${b.budgetExceeded} supPoolMax=${pct(b.supPoolMax)}`).join("; "));
+console.log(`pool-maximum equality (Cor. 1c, k = n): max |general − closed form| = ${poolMaxEquality.maxAbsDiff.toExponential(2)} over ${poolMaxEquality.gridPoints} (n, m); simulation ${poolMaxEquality.simulationOk ? "OK" : "FAILED"} (z = ${poolMaxEquality.simulated.map((s) => s.z.toFixed(2)).join(" ")})`);
 console.log("band:", band.map((b) => `alpha=${b.alpha}: delta=${b.delta.toExponential(3)}`).join("; "));
 console.log("grid:", grid.map((g) => `alpha=${g.alpha}: failures=${g.failures} over n+1<=${g.maxNPlus1}, min margin=${g.minMargin.toExponential(3)} at n=${g.argMin.n},m=${g.argMin.m}`).join("; "));
 console.log("Monte-Carlo agreement:", mcOk ? "OK" : "FAILED", mcAgreement.map((c) => c.z.toFixed(2)).join(" "));
