@@ -1,0 +1,30 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Authorisation instance, every admitted judge and configuration, calibrated on its own jurisdiction. WA is wrong authorisation over the 120 not-covered test pairs, and the res. column conditions on the residual; autonomy is the permit rate over the 100 covered test pairs; B4a and B4b are permit rates over the 40 + 40 held-out attack pairs.}\label{tab:s22}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lllllllll@{}}
+\toprule
+Judge & $\alpha$ & configuration & $\thi$ & WA & WA (res.) & autonomy & B4a & B4b \\
+\midrule
+GPT-OSS-120B & 0.05 & exact scope (no model) & --- & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+GPT-OSS-120B & 0.05 & raw judge, $\tau=0.5$ & --- & 5.0\%~[2.3--10.5] & 7.5\%~[3.5--15.4] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 12.5\%~[5.5--26.1] \\
+GPT-OSS-120B & 0.05 & calibrated, no refuter & 0.30 & 5.0\%~[2.3--10.5] & 7.5\%~[3.5--15.4] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 15.0\%~[7.1--29.1] \\
+GPT-OSS-120B & 0.05 & certifier + refuter + calibrated & 0.40 & 5.0\%~[2.3--10.5] & 7.5\%~[3.5--15.4] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 15.0\%~[7.1--29.1] \\
+GPT-OSS-120B & 0.01 & calibrated, no refuter & 0.99 & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 51.0\%~[41.3--60.6] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+GPT-OSS-120B & 0.01 & certifier + refuter + calibrated & $+\infty$ & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+GPT-OSS-20B & 0.05 & exact scope (no model) & --- & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+GPT-OSS-20B & 0.05 & raw judge, $\tau=0.5$ & --- & 1.7\%~[0.5--5.9] & 2.5\%~[0.7--8.7] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 12.5\%~[5.5--26.1] \\
+GPT-OSS-20B & 0.05 & calibrated, no refuter & 0.10 & 3.3\%~[1.3--8.3] & 5.0\%~[2.0--12.2] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 12.5\%~[5.5--26.1] \\
+GPT-OSS-20B & 0.05 & certifier + refuter + calibrated & 0.20 & 1.7\%~[0.5--5.9] & 2.5\%~[0.7--8.7] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 12.5\%~[5.5--26.1] \\
+GPT-OSS-20B & 0.01 & calibrated, no refuter & 1.00 & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+GPT-OSS-20B & 0.01 & certifier + refuter + calibrated & $+\infty$ & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+Qwen3.6-27B & 0.05 & exact scope (no model) & --- & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+Qwen3.6-27B & 0.05 & raw judge, $\tau=0.5$ & --- & 0.8\%~[0.1--4.6] & 1.3\%~[0.2--6.7] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+Qwen3.6-27B & 0.05 & calibrated, no refuter & 0.10 & 0.8\%~[0.1--4.6] & 1.3\%~[0.2--6.7] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+Qwen3.6-27B & 0.05 & certifier + refuter + calibrated & 0.10 & 0.8\%~[0.1--4.6] & 1.3\%~[0.2--6.7] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+Qwen3.6-27B & 0.01 & calibrated, no refuter & 0.90 & 0.8\%~[0.1--4.6] & 1.3\%~[0.2--6.7] & 100.0\%~[96.3--100.0] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+Qwen3.6-27B & 0.01 & certifier + refuter + calibrated & $+\infty$ & 0.0\%~[0.0--3.1] & 0.0\%~[0.0--4.6] & 20.0\%~[13.3--28.9] & 0.0\%~[0.0--8.8] & 0.0\%~[0.0--8.8] \\
+\bottomrule
+\end{tabular}}
+\end{table}

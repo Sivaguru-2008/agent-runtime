@@ -33,6 +33,11 @@ const OUT_FILE = argAfter("--out", null) ?? PAIRS_FILE.replace(/pairs-?/, "score
 const BATCH = Number(argAfter("--batch", "10"));
 const JUDGES = argAfter("--judges", "openai/gpt-oss-120b").split(",").map((s) => s.trim()).filter(Boolean);
 const FRESH = process.argv.includes("--fresh");
+// --task authz scores (approval, action) pairs with the authorisation judge.
+// It has no identity schema and no lexical stand-in, so both are skipped.
+const TASK = argAfter("--task", "identity");
+if (!["identity", "authz"].includes(TASK)) throw new Error(`unknown --task ${TASK}`);
+const JUDGE_OPTIONS = TASK === "authz" ? (await import("../authz/judge.js")).AUTHZ_JUDGE_OPTIONS : {};
 const RETRY_ABSTENTIONS = process.argv.includes("--retry-abstentions");
 
 /** Every schema any v2 corpus can reference, in one table. */
@@ -88,7 +93,7 @@ async function scoreModel(model, pairs) {
     const vals = await judgeScores(
       client,
       batch.map((p) => ({ tool: p.tool, a: p.a, b: p.b, id: p.id })),
-      { batchSize: BATCH, diagnostics: diag }
+      { batchSize: BATCH, diagnostics: diag, ...JUDGE_OPTIONS }
     );
     const allNull = vals.every((v) => v === null);
     const hadTransport = diag.transportFailures > before;
@@ -134,10 +139,12 @@ async function main() {
   for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
   const shuffled = order.map((i) => pairs[i]);
 
-  const missing = [...new Set(shuffled.map((p) => p.tool))].filter((t) => !SCHEMAS[t]);
-  if (missing.length) throw new Error(`no schema for tools: ${missing.join(", ")}`);
-
-  const lexical = await lexicalScores(shuffled, SCHEMAS);
+  let lexical = shuffled.map(() => null);
+  if (TASK === "identity") {
+    const missing = [...new Set(shuffled.map((p) => p.tool))].filter((t) => !SCHEMAS[t]);
+    if (missing.length) throw new Error(`no schema for tools: ${missing.join(", ")}`);
+    lexical = await lexicalScores(shuffled, SCHEMAS);
+  }
   const byModel = {}, metas = {};
   if (groqAvailable() && !process.argv.includes("--offline")) {
     for (const model of JUDGES) {

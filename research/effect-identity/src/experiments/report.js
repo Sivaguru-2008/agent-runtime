@@ -42,23 +42,34 @@ L(`Candidate-set size in this file: m = ${exp.candidateSetSize}. ${exp.candidate
 L();
 
 // ── Corpus ───────────────────────────────────────────────────────────────────
-if (meta) {
+// Composition is computed from the corpus file itself. It was previously read
+// from corpus/meta.json, which predates the additive growth to 1,066 pairs and
+// printed the 955-pair counts under a 1,066-pair header. meta.json is still the
+// only record of generation-time kept/dropped counts, so it supplies those.
+const corpusPairs = existsSync(resolve(base, "corpus/pairs.jsonl"))
+  ? readFileSync(resolve(base, "corpus/pairs.jsonl"), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)) : [];
+if (corpusPairs.length) {
+  const bySplit = (set, sp) => set.filter((p) => p.split === sp).length;
   L(`## Corpus composition`);
   L();
   L(`| category | label | total | cal | test | attack |`);
   L(`|---|---|---:|---:|---:|---:|`);
-  for (const [cat, c] of Object.entries(meta.counts)) {
-    L(`| ${cat} | ${c.label} | ${c.total} | ${c.cal} | ${c.test} | ${c.attack} |`);
+  for (const cat of [...new Set(corpusPairs.map((p) => p.category))]) {
+    const s = corpusPairs.filter((p) => p.category === cat);
+    L(`| ${cat} | ${s[0].label} | ${s.length} | ${bySplit(s, "cal")} | ${bySplit(s, "test")} | ${bySplit(s, "attack")} |`);
   }
   L();
-  L(`Totals: ${meta.totals.pairs} pairs, ${meta.totals.same} SAME, ${meta.totals.diff} DIFF.`);
+  L(`Totals: ${corpusPairs.length} pairs, ${corpusPairs.filter((p) => p.label === "SAME").length} SAME, ${corpusPairs.filter((p) => p.label === "DIFF").length} DIFF.`);
   L();
   L(`| generator arm | pairs | cal | test | S2 kept/dropped | S4 kept/dropped | transport drops |`);
   L(`|---|---:|---:|---:|---|---|---:|`);
-  for (const [gen, g] of Object.entries(meta.byGenerator)) {
-    const s = meta.generation.perGenerator[gen] ?? {};
-    L(`| ${gen} | ${g.total} | ${g.cal} | ${g.test} | ${s.s2Kept ?? 0}/${s.s2Dropped ?? 0} | ${s.s4Kept ?? 0}/${s.s4Dropped ?? 0} | ${(s.s2TransportDropped ?? 0) + (s.s4TransportDropped ?? 0)} |`);
+  for (const gen of [...new Set(corpusPairs.map((p) => p.generator).filter(Boolean))]) {
+    const s = corpusPairs.filter((p) => p.generator === gen);
+    const g = meta?.generation?.perGenerator?.[gen] ?? {};
+    L(`| ${gen} | ${s.length} | ${bySplit(s, "cal")} | ${bySplit(s, "test")} | ${g.s2Kept ?? 0}/${g.s2Dropped ?? 0} | ${g.s4Kept ?? 0}/${g.s4Dropped ?? 0} | ${(g.s2TransportDropped ?? 0) + (g.s4TransportDropped ?? 0)} |`);
   }
+  L();
+  L(`Non-LLM pairs (mechanical or hand-specified, no generator): ${corpusPairs.filter((p) => !p.generator).length}.`);
   L();
 }
 

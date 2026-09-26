@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Abstention homogeneity for the Qwen judge (25 abstentions among 1066 pairs), by exact permutation test.}\label{tab:s4b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Stratification & levels & $\chi^2$ & permutation $p$ \\
+\midrule
+category & 9 & 11.14 & 0.183 \\
+label & 2 & 0.59 & 0.547 \\
+tool & 6 & 9.37 & 0.091 \\
+split & 3 & 1.93 & 0.363 \\
+generator & 5 & 3.66 & 0.448 \\
+\bottomrule
+\end{tabular}}
+\end{table}

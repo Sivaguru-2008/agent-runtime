@@ -1,7 +1,13 @@
 # Semantic Effect Identity — research artifact
 
-Apparatus for *Semantic Effect Fencing for Paraphrased Replay in Non-Deterministic
-Agents* (`docs/research/Semantic-Effect-Identity-Paper.md`).
+Apparatus for *Effect Identity for LLM Agents: Schema-Determined Limits on
+Duplicate Suppression* (`docs/research/aij/`), and for the earlier long-form
+version (`docs/research/Semantic-Effect-Identity-Paper.md`).
+
+**Start with [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)**: it lists the
+environment, the one-command build, the offline pipeline, the seeds, which
+result in the paper comes from which script, the four gates, and what is *not*
+reproducible and why.
 
 Zero runtime dependencies, Node ≥ 20.11. Everything except judge scoring runs
 offline; every table in the paper regenerates from the persisted scores.
@@ -68,29 +74,53 @@ thresholds; `test/conformal.test.js` includes a simulation asserting that the
 
 **A number in the paper that no longer exists in the results.** Re-running an
 experiment changes its rates; a manuscript does not update itself. `checkPaper.js`
-extracts every `NN.N% [lo–hi]` interval from
-`docs/research/Semantic-Effect-Identity-Paper.md` and exits non-zero unless each
-one matches a rate computed into `results/`. Run it after any re-scoring:
+extracts every `NN.N% [lo–hi]` interval from the manuscript and exits non-zero
+unless each one matches a rate computed into `results/`. Run it after any
+re-scoring:
 
 ```bash
-node src/experiments/checkPaper.js          # verify the manuscript
-node src/experiments/checkPaper.js --list   # dump every computed rate
+node src/experiments/checkPaper.js                    # the long-form Markdown
+node src/experiments/checkPaper.js --manuscript a,b   # any .tex/.md files
+node src/experiments/checkPaper.js --list             # dump every computed rate
 ```
+
+`docs/research/aij/build.mjs` runs it across the AIJ manuscript, its sections,
+the supplement and the generated supplement tables — 401 intervals in 46 files —
+before LaTeX is allowed to run.
 
 It caught three stale cross-generator figures that had survived a re-score, which
 is the class of error it exists for.
 
-## Human annotation
+## Label validation — two channels, never pooled
+
+The corpus labels are constructed by the authors, so a separate study asks
+whether anyone else reproduces them. It has two channels.
+
+**Channel M — a blinded panel of language models. This is what ran.**
 
 ```bash
-node src/experiments/annotation.js --export --per-stratum 20
-# annotators fill annotation/sheet.csv → annotation/responses-<name>.csv
-node src/experiments/annotation.js --ingest
+node src/experiments/annotation.js --ingest \
+  --responses-dir annotation/preregistered-collection --channel M
 ```
 
-With no responses on disk, `--ingest` writes
-`results/human_annotation.json` with `status: "PENDING"`. That file exists so the
-absence of the study is machine-checkable; nothing in it is a result.
+It is **not a human study** and is never reported as one; `verify.js` fails the
+build if a manuscript file says otherwise. Its preregistration is
+`annotation/PREREGISTRATION.md`, and two disclosed defects — unscored extension
+items in the re-derivation, and the published figures not being exactly
+reproducible from any committed file state — are documented in
+`annotation/RESPONSE-PROVENANCE.md` and in supplement §S16.
+
+**Channel H — independent human annotators. NOT COLLECTED.**
+
+No human has annotated any item in this corpus. The complete package for running
+it — eligibility, consent, blinding, randomisation, catch trials, response
+schema, adjudication rule, preregistered analysis and what 154 items can and
+cannot establish — is `annotation/CHANNEL-H-PROTOCOL.md`. The sheet, instrument
+and instructions are frozen and hashed; check them with:
+
+```bash
+node src/experiments/annotationFreeze.js
+```
 
 ## Archived, superseded runs
 

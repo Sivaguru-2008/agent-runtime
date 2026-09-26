@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-09-01T15:22:39.171Z",
+  "alpha": 0.05,
+  "bootstrapN": 500,
+  "judges": {
+    "openai_gpt_oss_120b": {
+      "auc": 0.9947565227170491,
+      "safeRegion": {
+        "lo": 0.2,
+        "hi": 1,
+        "count": 81,
+        "fraction": 0.801980198019802
+      },
+      "conformal": {
+        "tau": 0.8,
+        "ws": 0.027777777777777776,
+        "dedup": 0.9392712550607287
+      },
+      "bestSafeFixed": {
+        "tau": 0.39,
+        "ws": 0.041666666666666664,
+        "dedup": 1
+      },
+      "residual": {
+        "calDiff": 142,
+        "testDiff": 144,
+        "testSame": 247
+      },
+      "bootstrap": {
+        "n": 500,
+        "conformal": {
+          "meanWS": 0.03808697659332376,
+          "p95WS": 0.08275862068965517,
+          "exceedsAlpha": 146,
+          "rate": 0.292
+        },
+        "cvFixed": {
+          "meanWS": 0.04484597907211133,
+          "p95WS": 0.08904109589041095,
+          "exceedsAlpha": 198,
+          "rate": 0.396
+        }
+      }
+    },
+    "openai_gpt_oss_20b": {
+      "auc": 0.9713787674313991,
+      "safeRegion": {
+        "lo": 0.1,
+        "hi": 1,
+        "count": 91,
+        "fraction": 0.900990099009901
+      },
+      "conformal": {
+        "tau": 0.95,
+        "ws": 0.020833333333333332,
+        "dedup": 0.8016194331983806
+      },
+      "bestSafeFixed": {
+        "tau": 0.89,
+        "ws": 0.04861111111111111,
+        "dedup": 0.97165991902834
+      },
+      "residual": {
+        "calDiff": 142,
+        "testDiff": 144,
+        "testSame": 247
+      },
+      "bootstrap": {
+        "n": 500,
+        "conformal": {
+          "meanWS": 0.034228973662581645,
+          "p95WS": 0.07746478873239436,
+          "exceedsAlpha": 119,
+          "rate": 0.238
+        },
+        "cvFixed": {
+          "meanWS": 0.04116912924905656,
+          "p95WS": 0.0967741935483871,
+          "exceedsAlpha": 167,
+          "rate": 0.334
+        }
+      }
+    },
+    "qwen_qwen3_6_27b": {
+      "auc": 0.9906914893617021,
+      "safeRegion": {
+        "lo": 0.05,
+        "hi": 1,
+        "count": 96,
+        "fraction": 0.9504950495049505
+      },
+      "conformal": {
+        "tau": 0.95,
+        "ws": 0.014184397163120567,
+        "dedup": 0.9
+      },
+      "bestSafeFixed": {
+        "tau": 0.94,
+        "ws": 0.0425531914893617,
+        "dedup": 1
+      },
+      "residual": {
+        "calDiff": 139,
+        "testDiff": 141,
+        "testSame": 240
+      },
+      "bootstrap": {
+        "n": 500,
+        "conformal": {
+          "meanWS": 0.026468751944073568,
+          "p95WS": 0.07751937984496124,
+          "exceedsAlpha": 61,
+          "rate": 0.122
+        },
+        "cvFixed": {
+          "meanWS": 0.03167730691189607,
+          "p95WS": 0.08527131782945736,
+          "exceedsAlpha": 94,
+          "rate": 0.188
+        }
+      }
+    }
+  }
+}

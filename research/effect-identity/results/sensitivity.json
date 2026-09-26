@@ -1,158 +1,159 @@
 {
-  "generatedAt": "2026-08-17T13:30:47.950Z",
+  "generatedAt": "2026-09-01T15:22:30.446Z",
   "alpha": 0.05,
   "judge": "openai_gpt_oss_120b",
   "labelSensitivity": {
     "asConstructed": {
       "tHi": 0.8,
-      "nCalDiff": 117,
-      "nSame": 251,
-      "nDiff": 206,
+      "nCalDiff": 142,
+      "nSame": 281,
+      "nDiff": 232,
       "wrongSuppression": {
-        "value": 0.009708737864077669,
-        "successes": 2,
-        "n": 206,
+        "value": 0.017241379310344827,
+        "successes": 4,
+        "n": 232,
         "basis": "measured",
         "ci95": {
-          "lo": 0.0026665364740969914,
-          "hi": 0.034701955266110154
+          "lo": 0.006724744395396217,
+          "hi": 0.04348465848018965
         }
       },
       "dedup": {
-        "value": 0.9402390438247012,
-        "successes": 236,
-        "n": 251,
+        "value": 0.9466192170818505,
+        "successes": 266,
+        "n": 281,
         "basis": "measured",
         "ci95": {
-          "lo": 0.9037527034962298,
-          "hi": 0.9634531311536774
+          "lo": 0.9138049373482748,
+          "hi": 0.967387010759261
         }
       },
       "silentEscape": {
-        "value": 0.05976095617529881,
+        "value": 0.05338078291814947,
         "successes": 15,
-        "n": 251,
+        "n": 281,
         "basis": "measured",
         "ci95": {
-          "lo": 0.03654686884632264,
-          "hi": 0.0962472965037702
+          "lo": 0.0326129892407388,
+          "hi": 0.08619506265172501
         }
       },
       "friction": {
         "value": 0,
         "successes": 0,
-        "n": 206,
+        "n": 232,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.018306481675656787
+          "hi": 0.016288310121142503
         }
       }
     },
     "d2AsSame": {
-      "tHi": 0.7,
-      "nCalDiff": 42,
-      "nSame": 326,
-      "nDiff": 131,
+      "tHi": 0.8,
+      "nCalDiff": 67,
+      "nSame": 356,
+      "nDiff": 157,
       "wrongSuppression": {
-        "value": 0.007633587786259542,
-        "successes": 1,
-        "n": 131,
+        "value": 0.01910828025477707,
+        "successes": 3,
+        "n": 157,
         "basis": "measured",
         "ci95": {
-          "lo": 0.0013487890456915057,
-          "hi": 0.04197215150021155
+          "lo": 0.00651947883433197,
+          "hi": 0.054667847448659365
         }
       },
       "dedup": {
-        "value": 0.7638036809815951,
-        "successes": 249,
-        "n": 326,
+        "value": 0.75,
+        "successes": 267,
+        "n": 356,
         "basis": "measured",
         "ci95": {
-          "lo": 0.7147907640454069,
-          "hi": 0.8066718823270776
+          "lo": 0.7025119068967931,
+          "hi": 0.7921503829442891
         }
       },
       "silentEscape": {
-        "value": 0.15644171779141106,
+        "value": 0.14325842696629212,
         "successes": 51,
-        "n": 326,
+        "n": 356,
         "basis": "measured",
         "ci95": {
-          "lo": 0.1210353692328788,
-          "hi": 0.19985048665411828
+          "lo": 0.11066959316281712,
+          "hi": 0.1834639932437287
         }
       },
       "friction": {
-        "value": 0.06870229007633588,
-        "successes": 9,
-        "n": 131,
+        "value": 0.09554140127388536,
+        "successes": 15,
+        "n": 157,
         "basis": "measured",
         "ci95": {
-          "lo": 0.0365625456507617,
-          "hi": 0.1254162627344092
+          "lo": 0.05875600076095311,
+          "hi": 0.1516465849207681
         }
       }
     },
     "s4AsDiff": {
-      "tHi": 0.96,
-      "nCalDiff": 198,
-      "nSame": 169,
-      "nDiff": 288,
+      "tHi": 0.95,
+      "nCalDiff": 223,
+      "nSame": 199,
+      "nDiff": 314,
       "wrongSuppression": {
-        "value": 0.020833333333333332,
-        "successes": 6,
-        "n": 288,
+        "value": 0.022292993630573247,
+        "successes": 7,
+        "n": 314,
         "basis": "measured",
         "ci95": {
-          "lo": 0.009582242431984241,
-          "hi": 0.044698800723118104
+          "lo": 0.010839789340053512,
+          "hi": 0.04529341268743636
         }
       },
       "dedup": {
-        "value": 0.2485207100591716,
-        "successes": 42,
-        "n": 169,
+        "value": 0.27638190954773867,
+        "successes": 55,
+        "n": 199,
         "basis": "measured",
         "ci95": {
-          "lo": 0.1894415239332854,
-          "hi": 0.3187783176489414
+          "lo": 0.2189282228961298,
+          "hi": 0.3423054592246767
         }
       },
       "silentEscape": {
-        "value": 0.05325443786982249,
-        "successes": 9,
-        "n": 169,
+        "value": 0.12060301507537688,
+        "successes": 24,
+        "n": 199,
         "basis": "measured",
         "ci95": {
-          "lo": 0.028267147079055317,
-          "hi": 0.09809986561407683
+          "lo": 0.08239896697090487,
+          "hi": 0.17317728022282314
         }
       },
       "friction": {
-        "value": 0.25,
-        "successes": 72,
-        "n": 288,
+        "value": 0.20382165605095542,
+        "successes": 64,
+        "n": 314,
         "basis": "measured",
         "ci95": {
-          "lo": 0.20350256640962516,
-          "hi": 0.30307884741042823
+          "lo": 0.16297017558497257,
+          "hi": 0.2518324096720712
         }
       }
     }
   },
   "wrongSuppressionByCategory": {
     "D1_near_miss": 1,
-    "D2_legit_repeat": 1
+    "D2_legit_repeat": 1,
+    "D3_semantic_diff": 2
   },
   "paired": {
     "dedup: hardened vs canonical baseline": {
-      "hardened": 202,
+      "hardened": 232,
       "baselineL0": 0,
-      "b": 202,
+      "b": 232,
       "c": 0,
-      "n": 202,
+      "n": 232,
       "p": 0,
       "holmAdjusted": 0
     },
@@ -163,7 +164,7 @@
       "c": 0,
       "n": 15,
       "p": 0.0001,
-      "holmAdjusted": 0.0005
+      "holmAdjusted": 0.0004
     },
     "wrong-suppression: hardened vs layered": {
       "hardened": 4,
@@ -181,23 +182,23 @@
       "c": 14,
       "n": 14,
       "p": 0.0001,
-      "holmAdjusted": 0.0005
+      "holmAdjusted": 0.0004
     },
     "dedup: 120B vs 20B (hardened)": {
-      "hardened": 42,
+      "hardened": 46,
       "hardened20B": 12,
-      "b": 42,
+      "b": 46,
       "c": 12,
-      "n": 54,
-      "p": 0.0001,
-      "holmAdjusted": 0.0005
+      "n": 58,
+      "p": 0,
+      "holmAdjusted": 0
     },
     "wrong-suppression: 120B vs 20B (hardened)": {
       "hardened": 3,
-      "hardened20B": 2,
+      "hardened20B": 4,
       "b": 3,
-      "c": 2,
-      "n": 5,
+      "c": 4,
+      "n": 7,
       "p": 1,
       "holmAdjusted": 1
     }

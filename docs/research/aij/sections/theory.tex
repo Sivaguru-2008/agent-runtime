@@ -1,0 +1,166 @@
+\section{Theoretical analysis}\label{sec:theory}
+
+The results below are of uneven depth, and we label them accordingly. Theorem~\ref{thm:bound} is the paper's main technical statement: split-conformal calibration is standard, but the object it is applied to---a maximum over a variable-size candidate set, routed through decidable vetoes---is what a fence deploys, and a pairwise bound does not transfer to it. Theorem~\ref{thm:tight} shows that the bound cannot be improved by any rule that ignores the scale of the judge's scores. Proposition~\ref{prop:dilemma} makes the refinement dilemma exact. The remaining propositions are short arguments that the design is correct in the sense it claims and no further; they are stated because nearby designs violate them.
+
+\subsection{Assumptions and their status}\label{sec:assumptions}
+
+Table~\ref{tab:assumptions} lists every assumption, its nature, and how the experiments satisfy or test it. Several are environmental---properties of the storage, the scheduler, the provider or the schema author, not of the algorithm---and a deployment that does not supply them does not obtain the corresponding guarantee.
+
+{\footnotesize
+\begin{longtable}{@{}p{3.1cm}p{2.4cm}p{7.6cm}@{}}
+\caption{Assumptions, their type, and their status in the implementation and experiments. ``Measured'' entries test an assumption on this corpus; they do not establish it in general.}\label{tab:assumptions}\\
+\toprule
+Assumption & Type & Status in this work \\
+\midrule
+\endfirsthead
+\toprule
+Assumption & Type & Status in this work \\
+\midrule
+\endhead
+A1 Stable run identifier across retries and replays & environment & Supplied by the harness (one run identifier across processes). A retry under a new run identifier is out of scope. \\
+A2 Deterministic canonical identity: $\kappa_t$ and $H$ are pure; $H$ is collision-free & implementation & Canonicalisation is a pure function (NFC, sorted keys, JSON serialisation); $H$ is SHA-256; identity invariance is unit-tested. \\
+A3 Atomic insert-if-absent on $\mathit{op}$ & storage & \emph{Partially supplied.} The research log enforces uniqueness for a single writer but is not crash-atomic (no fsync or atomic rename); crashes were injected at protocol points, not inside a write. A deployment needs a database uniqueness constraint. \\
+A4 Effect before commit; commit only on success & implementation & Order of Algorithm~\ref{alg:fence}; exercised by eight injected crash points (Section~\ref{sec:res-crash}). \\
+A5 Every declared field policy is semantics-preserving & schema & Obligation of the tool author. Measured: 0 of 232 distinct test pairs are canonically equal. \\
+A5$'$ A difference in a declared typed field implies a different act (one direction only) & schema & Obligation of the tool author. Measured: 0 of 281 duplicate test pairs are refuted; all 20 typed-field injection pairs are refuted. \\
+A5$''$ Projection completeness: $\sigma_t(x)=\sigma_t(x')\Leftrightarrow x\approx_t x'$ & schema (optional) & Not assumed except in Proposition~\ref{prop:compose}, Case A. False for every tool in the corpus: each has distinct pairs with equal projection. \\
+A6 Conditionally on $m$, each score of a truly distinct residual comparison is exchangeable with the calibration pool & statistical & Approximated by a stratified pair-level random split of one corpus, with attack pairs held out; 82.8\% of test pairs share a seed act with some calibration pair, tested by seed-level resplitting (Section~\ref{sec:res-bound}). Requires a stationary judge and non-informative abstention; cannot be verified at deployment. \\
+A7 No concurrent dispatch per identity & scheduler & Runs dispatch their effects sequentially in all experiments; concurrency is not tested. \\
+A8 The provider applies at most one effect per idempotency key & provider & Not assumed except in Proposition~\ref{prop:compose}; absent by design in the crash experiment. \\
+\bottomrule
+\end{longtable}}
+
+One further premise is structural rather than listed: the candidate set of a request contains every effect committed in the same run for the same tool. Duplicates across runs, or the same act reached through two different tools (a refund through \texttt{post\_refund} or through \texttt{transfer\_funds}), are outside every result below.
+
+\subsection{Soundness of the decidable layers}
+
+\begin{proposition}[Decidable layers]\label{prop:sound}
+Under A2 and A5, every certifier suppression is correct: if the fence suppresses on the canonical branch, the request denotes the same act as the matched committed effect. Under A5$'$, no judge output can cause suppression of a request whose declared typed fields differ from those of every committed effect.
+\end{proposition}
+
+\begin{proof}
+The canonical branch fires only if $H(\kappa_t(x))=H(\kappa_t(x'))$ for a committed $x'$; by A2 this implies $\kappa_t(x)=\kappa_t(x')$ and by A5 $x\approx_t x'$. For the second claim, a committed effect whose projection differs is removed from $C$ before any judge call, so it is never the maximising candidate; if every committed effect differs, $C=\emptyset$ and the fence executes.
+\end{proof}
+
+\subsection{A bound on the deployed statistic}\label{sec:bound}
+
+The fence suppresses on $S^\ast=\max_{c\in C}J(t,x,c)$, not on a single pairwise score. Calibrating a pairwise score at level $\alpha$ and then thresholding the maximum of $m$ scores gives the fence $m$ chances to cross the threshold: $P(s_i>\hat t)\le\alpha$ for each $i$ does not imply $P(\max_i s_i>\hat t)\le\alpha$. The following result is stated for the statistic Algorithm~\ref{alg:fence} actually thresholds.
+
+\begin{theorem}[Multiplicity-corrected wrong-suppression bound]\label{thm:bound}
+Let the pool $\{s_i\}_{i\le n}$ be drawn from the rule's jurisdiction (Definition~\ref{def:jurisdiction}) and let $\thi(m)$ be given by Eq.~\eqref{eq:thi}. Suppose (A6) that, conditionally on $m$, the judge score of any comparison between a request and a candidate that denotes a different act is exchangeable with the pool. Then for every request $x$ that denotes a different act from every member of its candidate set $C$, $|C|=m$,
+\[
+P\big(S^\ast(x,C)>\thi(m)\big)\le\alpha ,
+\]
+for every $m\ge0$, with no assumption on the distribution of scores and no assumption on the dependence among the $m$ comparisons.
+\end{theorem}
+
+\begin{proof}
+Condition on $m$. If $m=0$ or $\thi(m)=+\infty$ the fence cannot suppress and the probability is $0$. Otherwise let $\beta=\alpha/m$ and $k=\lceil(n+1)(1-\beta)\rceil\le n$, so $\thi(m)=s_{(k)}$. Fix a candidate $c_i\in C$. Because $x\not\approx_t c_i$, its score $s'_i$ is a distinct-pair score, so by A6 the $n+1$ values $s_1,\dots,s_n,s'_i$ are exchangeable and, with ties broken uniformly at random, the rank of $s'_i$ among them is uniform on $\{1,\dots,n+1\}$. If $s'_i>s_{(k)}$, then $s'_i$ exceeds at least $k$ pool values and has rank at least $k+1$ under any tie-breaking, so
+\[
+P\big(s'_i>s_{(k)}\big)\le\frac{n+1-k}{n+1}\le 1-(1-\beta)=\beta .
+\]
+This holds for each $i$ separately. The union bound over the $m$ candidates, which requires no independence, gives
+\[
+P\big(S^\ast>\thi(m)\big)=P\big(\exists i\le m: s'_i>\thi(m)\big)\le\sum_{i=1}^m P\big(s'_i>\thi(m)\big)\le m\beta=\alpha .
+\]
+The bound holds conditionally on each value of $m$ and therefore also after averaging over the distribution of $m$. Abstentions only remove candidates from the maximum while $\thi(m)$ is computed with the full $m$, which is conservative.
+\end{proof}
+
+\paragraph{What the guarantee means}
+The event bounded is the wrong-suppression event of the deployed rule: a request that is distinct from all $m$ surviving candidates is suppressed. The probability is taken jointly over the draw of the calibration pool and the test request; the bound is \emph{marginal}. It is distribution-free in the score and finite-sample in $n$, and it tolerates arbitrary dependence among the $m$ comparisons, which share the request $x$ and are strongly dependent.
+
+\paragraph{What it does not mean}
+It is not a statement that the judge errs on fewer than $\alpha$ of pairs, nor that the wrong-suppression rate realised by a particular deployment, with its particular pool, is at most $\alpha$; an unlucky pool can exceed $\alpha$, and Section~\ref{sec:res-bound} measures how often. It says nothing about pairs settled by the certifier or refuter (those are exact under A5 and A5$'$), nothing about the duplicate-escape direction, and nothing under distribution shift. In particular it does not apply to injected requests, which are a deliberate shift and are held out of calibration.
+
+\paragraph{The pool must match the jurisdiction}
+A6 compares the pool with the scores that the deployed rule thresholds, and which pairs those are is decided by the layers in front of the judge. A pool drawn from a wider population than the rule's jurisdiction satisfies A6 only by coincidence; if the extra pairs score lower, the threshold falls and the bound can fail while the rate over a whole test split still looks acceptable.
+
+\paragraph{The escalation floor}
+In the absence of ties, a true duplicate's matched score falls at or below $\tlo$ with probability at most $\gamma$, and because the candidate set of a duplicate contains its match, $S^\ast$ is at least that score; taking a maximum hurts the safety side and helps this side, which is why $\tlo$ needs no correction. With integer-percent scores ties are frequent, the probability of landing at or below $\tlo$ can exceed $\gamma$, and $\tlo$ is capped at $\thi$, so the band can be empty. We therefore treat the band's effect as an empirical quantity (Section~\ref{sec:res-components}) and claim no bound for it.
+
+\subsection{Calibration budget and the refinement dilemma}\label{sec:dilemma}
+
+\begin{proposition}[Calibration budget; refinement dilemma]\label{prop:dilemma}
+Let a configuration have pool size $n$ and level $\alpha$.
+\begin{enumerate}[(a),leftmargin=*,itemsep=1pt]
+\item $\thi(m)$ is finite if and only if $m\le\alpha(n+1)$; equivalently, semantic suppression at candidate-set size $m$ requires $n\ge\lceil m/\alpha\rceil-1$, and the largest certifiable candidate-set size is $m^\ast=\lfloor\alpha(n+1)\rfloor$.
+\item When finite, $\thi(m)$ is the $\rho$-th \emph{largest} pool score with $\rho=\lfloor (n+1)\alpha/m\rfloor$, which is non-decreasing in $n$.
+\item If $(\kappa',\sigma')$ refines $(\kappa,\sigma)$ and both are calibrated on the same calibration split, the refined pool is a sub-multiset of the original pool. Hence $n'\le n$, $m^{\ast\prime}\le m^\ast$ and $\rho'\le\rho$: refinement can only shrink the certifiable budget and move the threshold to an equal or higher rank from the top.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(a) Since $n$ is an integer, $\lceil(n+1)(1-\alpha/m)\rceil\le n$ holds iff $(n+1)(1-\alpha/m)\le n$, i.e.\ iff $m\le\alpha(n+1)$. (b) The $k$-th smallest of $n$ values is the $(n+1-k)$-th largest, and $n+1-\lceil(n+1)(1-\alpha/m)\rceil=\lfloor (n+1)\alpha/m\rfloor$. (c) The pool is the set of distinct calibration pairs in the jurisdiction with a score; the jurisdiction of the proposed configuration is the residual, and by Proposition~\ref{prop:residual}(iii) the refined residual is contained in the original one.
+\end{proof}
+
+At $\alpha=0.05$ and $m=1$, the declared pool of the primary judge ($n=142$) places $\thi$ at the 7th largest score, the tightened pool of Section~\ref{sec:res-refinement} ($n=49$) at the 2nd largest, and any pool with $n\le18$ at $+\infty$. Proposition~\ref{prop:dilemma} does \emph{not} say that the refined threshold is numerically higher: an order statistic of a different multiset can be lower. Whether it is higher depends on which pairs refinement removes, and that is a property of the judge, not of the schema. If the judge scores the pairs that a refined refuter removes (distinct pairs whose newly typed fields differ) lower than the pairs that remain, the refined pool's upper tail is heavier and the rank shift compounds. Section~\ref{sec:res-refinement} measures both components.
+
+\subsection{The bound cannot be improved}\label{sec:tight}
+
+Theorem~\ref{thm:bound} rests on a union bound, and union bounds are often loose. The natural question is whether a sharper rule exists under the same assumption: a per-candidate level above $\alpha/m$, a constant below $\alpha$, or semantic suppression beyond the budget of Proposition~\ref{prop:dilemma}. For every rule that does not depend on the scale of the judge's scores, the answer is no. We first make that class precise. The restriction is not a convenience: the judge's percentages are uncalibrated, and a rule that reads meaning into their absolute values inherits that miscalibration.
+
+\begin{lemma}[Scale-free thresholds]\label{lem:scalefree}
+Let $\tau$ map pools of $n$ distinct scores to $[-\infty,+\infty]$, be symmetric in its arguments, and satisfy $\tau(g(s_1),\dots,g(s_n))=g(\tau(s_1,\dots,s_n))$ for every strictly increasing bijection $g$ of $\mathbb{R}$, extended by $g(\pm\infty)=\pm\infty$. Then $\tau\equiv s_{(k)}$ for one fixed $k\in\{1,\dots,n\}$, or $\tau\equiv+\infty$, or $\tau\equiv-\infty$.
+\end{lemma}
+
+A deterministic rule that thresholds $S^\ast$ at a scale-free function of the pool is therefore ``suppress iff $S^\ast>s_{(k)}$'' for a fixed $k$, or never suppresses, or always does. The fence is such a rule, with $k=k^\ast=\lceil(n+1)(1-\alpha/m)\rceil$ when $k^\ast\le n$ and $\rho=n+1-k^\ast$ as in Proposition~\ref{prop:dilemma}. Let $\mathcal{Q}_{n,m}$ be the class of joint laws of $(s_1,\dots,s_n,s'_1,\dots,s'_m)$ in which, for each $i$, the pool and $s'_i$ are $n+1$ independent draws from one continuous distribution, with arbitrary dependence among $s'_1,\dots,s'_m$. Every law in $\mathcal{Q}_{n,m}$ satisfies A6, so a rule that is valid under A6 must be valid on all of $\mathcal{Q}_{n,m}$.
+
+\begin{theorem}[The union bound is attained]\label{thm:tight}
+For every $k\in\{1,\dots,n\}$,
+\[
+\sup_{\mathcal{Q}_{n,m}} P\Big(\max_{i\le m}s'_i>s_{(k)}\Big)=\mathbb{E}\big[\min\{1,mB\}\big],\qquad B\sim\mathrm{Beta}(n+1-k,\,k),
+\]
+and the supremum is attained. For the fence's threshold,
+\[
+\sup_{\mathcal{Q}_{n,m}}P(\text{wrong suppression})\;=\;\frac{m\rho}{n+1}-\mathbb{E}\big[(mB-1)_+\big]\;\le\;\frac{m\rho}{n+1}\;\le\;\alpha,
+\]
+where $\mathbb{E}[(mB-1)_+]\le(m-1)\exp\!\big(-(1-\alpha)^2n/(2m)\big)$.
+\end{theorem}
+
+The law that attains the supremum is not exotic. Its pool-to-candidate scores are independent and identically distributed, the most favourable reading of A6; the only thing it chooses adversarially is how the $m$ candidate scores of one request move together, and it spreads them so that at most one is high. That is the dependence a fence meets when a request is compared with several committed effects that differ from it, and from one another, in different ways.
+
+\begin{corollary}[What cannot be improved]\label{cor:tight}
+Fix $\alpha\in(0,1)$ and $m\ge1$. Worst cases are over $\mathcal{Q}_{n,m}$.
+\begin{enumerate}[(a),leftmargin=*,itemsep=1pt]
+\item \emph{The constant.} For $m=1$ the worst case is $\rho/(n+1)$, which equals $\alpha$ whenever $(n+1)\alpha$ is an integer; for every $m$ it tends to $\alpha$ as $n\to\infty$. No constant below $\alpha$ bounds wrong suppression for all pool sizes.
+\item \emph{The correction.} For $m=1$, every rank $k<k^\ast$ has worst case $(n+1-k)/(n+1)>\alpha$. For every $m$, a rule with a fixed per-candidate level $\gamma>\alpha/m$ has worst case tending to $\min\{1,m\gamma\}>\alpha$. The Bonferroni level is the largest per-candidate level valid for every pool size without an assumption on the dependence among the $m$ comparisons.
+\item \emph{The budget.} If $m>\alpha(n+1)$, every finite scale-free threshold has worst case at least $\frac{m}{n+1}\big(1-(1-\frac1m)^{n+1}\big)$, and this exceeds $\alpha$ whenever $m/(n+1)-\alpha>\delta_\alpha$, with $\delta_\alpha$ defined in the proof; $\delta_{0.05}<1.1\times10^{-10}$ and $\delta_{0.01}<10^{-17}$. At $\alpha=0.05$ this covers every pool with $n+1<4.8\times10^{8}$. There, switching semantic suppression off beyond the budget is forced rather than conservative: the only valid deterministic scale-free rule is never to suppress.
+\end{enumerate}
+\end{corollary}
+
+Proofs are in \ref{app:proofs}. The gap between the worst case and the bound is not only asymptotically small. For every configuration in this paper it is below $10^{-10}$: the worst case is 4.895\% for the declared pool ($n=142$, $m=1$), 4.000\% for the tightened pool ($n=49$), and 4.975\% at $n=200$ for each of $m=1,2,5,10$, the setting of the simulation in Section~\ref{sec:res-bound}, whose law gave 3.7\% at $m=10$. One rank lower, the worst case already exceeds $\alpha$: 5.594\% at $n=142$ and 6.000\% at $n=49$. Under the attaining law the uncorrected rule suppresses 49.7\% of distinct requests at $m=10$ and 99.9\% at $m=50$, against 38.3\% and 89.0\% in the simulation, which therefore understated the cost of omitting the correction. A direct simulation of the attaining law agrees with the exact values in all eight configurations we computed, and the budget condition of Corollary~\ref{cor:tight}(c) was checked for every $n+1\le10^6$ at $\alpha=0.05$ and $\alpha=0.01$ with no exception (supplementary material, Section~S21).
+
+Two limits apply. The result concerns deterministic rules: beyond the budget, a rule that suppresses on the pool maximum only when a coin of bias $\alpha(n+1)/m$ comes up heads is valid, and we exclude it because a fence that drops an irreversible action by coin toss cannot be audited or replayed. And the worst case uses continuous scores; with the integer-percent scores of real judges, ties lower the realised rate, which is part of the conservatism measured in Section~\ref{sec:res-components}.
+
+\subsection{Why the architecture is layered}
+
+\begin{proposition}[No zero-error threshold on overlapping scores]\label{prop:impossible}
+Let $F_{\mathrm{same}}$ and $F_{\mathrm{diff}}$ be the judge-score distributions of duplicate and distinct pairs. If they overlap---some score has positive probability under both---no rule that thresholds the score alone achieves zero wrong suppression and zero silent escape simultaneously. An escalation band can remove silent escape only by flagging, not suppressing, the duplicates in the overlap.
+\end{proposition}
+
+The proof is in \ref{app:proofs}. Zero error on a class is therefore attainable only by a decision that does not consult the score, which is what the certifier and the refuter are. The overlap is judge- and tool-dependent: on the residual test pairs the primary judge's scores separate perfectly on four of six tools, the GPT-OSS-20B judge's on one, and the Qwen judge's on two (supplementary material, Section~S8).
+
+\subsection{Fence-level at-most-once}\label{sec:amo}
+
+\begin{proposition}[Fence-level at-most-once commitment]\label{prop:amo}
+Under A1--A4 and A7, for a fixed run $r$ and operation identifier $\mathit{op}$, across any number of serialised executions and process restarts sharing the durable log, the effect for $\mathit{op}$ is dispatched and committed at most once by the fence, except that a crash strictly between the external effect and the commit insert leaves a \textsc{pending} intent with no commit row, after which a later execution may dispatch again.
+\end{proposition}
+
+The proof is in \ref{app:proofs}. Two remarks delimit the claim. The exception---the commit window---cannot be closed by any local mechanism, because during it the only record of the effect is at the provider. And without A7 the proposition fails in a specific, instructive way: two concurrent executions can both miss the log, both dispatch, and contend only on the insert; what survives is that at most one commit row exists and the loser records \textsc{commit\_conflict}, so the duplicate is observable but not prevented.
+
+\subsection{External exactly-once only by composition}\label{sec:compose}
+
+\begin{proposition}[Composition with a provider key]\label{prop:compose}
+\emph{Case A.} If a key function $\pi_t$ is paraphrase-invariant ($x\approx_t x'\Rightarrow\pi_t(x)=\pi_t(x')$) and complete for identity ($\pi_t(x)=\pi_t(x')\Rightarrow x\approx_t x'$), and the provider satisfies A8, then presenting $\pi_t(x)$ as the provider's idempotency key yields external exactly-once application for that tool, including across the commit window. A schema satisfying A5$''$ supplies $\pi_t=\sigma_t$.
+\emph{Case B.} If the schema satisfies A5$'$ but not A5$''$, then $\sigma_t$ is not admissible as a provider key (distinct acts sharing a projection would be merged at the provider, a wrong suppression that no local audit can see), and the canonical identifier $\mathit{op}$ is admissible but not paraphrase-invariant; the commit window then remains open for paraphrased retries.
+\end{proposition}
+
+\begin{proposition}[Identity recognition is not substitutable]\label{prop:structure}
+Mis-recognised identity defeats both fence-level commitment and a correct provider key: an unrecognised duplicate presents a fresh key, which a correct provider must apply, and a wrongly recognised distinct act presents a stale key, which a correct provider absorbs. Conversely, a provider key satisfying Case A of Proposition~\ref{prop:compose} makes A7 unnecessary for at-most-once application.
+\end{proposition}
+
+Proofs are in \ref{app:proofs}. Proposition~\ref{prop:structure} pinpoints the contribution of this paper: identity recognition (A) is the one guarantee that neither the log nor the provider can supply, because both are keyed on its output.
+
+\subsection{What is proved and what is measured}
+
+The mathematical guarantees are: exact correctness of the decidable layers under A2, A5 and A5$'$ (Proposition~\ref{prop:sound}); the marginal bound of Theorem~\ref{thm:bound} under A6, with the budget of Proposition~\ref{prop:dilemma}; the unimprovability of the bound, the correction and the budget within scale-free deterministic rules (Theorem~\ref{thm:tight}, Corollary~\ref{cor:tight}); fence-level at-most-once under A1--A4 and A7 (Proposition~\ref{prop:amo}); and external exactly-once only under the composition of Proposition~\ref{prop:compose}. Everything else in this paper is measured: whether A5, A5$'$ and A6 hold on this corpus, how large the residual is, how much deduplication each judge achieves, how the realised wrong-suppression rate varies across pools and splits, how the mechanism behaves under injection (where Theorem~\ref{thm:bound} does not apply), and whether the refinement dilemma's composition component occurs.

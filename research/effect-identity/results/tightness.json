@@ -1,0 +1,344 @@
+{
+  "generatedBy": "src/experiments/tightness.js",
+  "note": "Exact order-statistic computations and a simulation of the attaining coupling. No model calls, no corpus.",
+  "alpha": 0.05,
+  "repsPerSimulation": 200000,
+  "configs": [
+    {
+      "label": "declared pool, primary judge",
+      "n": 142,
+      "m": 1,
+      "alpha": 0.05,
+      "k": 136,
+      "rho": 7,
+      "bonferroniBound": 0.04895104895104895,
+      "attainedSupQ": 0.04895104895104895,
+      "gap": 0,
+      "nextLowerThresholdSupQ": 0.055944055944055944,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.04933,
+        "se": 0.00048423419488920856
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.04889,
+        "se": 0.0004821813346657044
+      }
+    },
+    {
+      "label": "tightened pool, primary judge",
+      "n": 49,
+      "m": 1,
+      "alpha": 0.05,
+      "k": 48,
+      "rho": 2,
+      "bonferroniBound": 0.04,
+      "attainedSupQ": 0.04,
+      "gap": 0,
+      "nextLowerThresholdSupQ": 0.06,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.039695,
+        "se": 0.0004365736305309793
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.0401,
+        "se": 0.00043870257578455135
+      }
+    },
+    {
+      "label": "simulation setting, m=1",
+      "n": 200,
+      "m": 1,
+      "alpha": 0.05,
+      "k": 191,
+      "rho": 10,
+      "bonferroniBound": 0.04975124378109453,
+      "attainedSupQ": 0.04975124378109453,
+      "gap": 0,
+      "nextLowerThresholdSupQ": 0.05472636815920398,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.049735,
+        "se": 0.00048611433724485027
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.049875,
+        "se": 0.00048676218205094773
+      }
+    },
+    {
+      "label": "simulation setting, m=2",
+      "n": 200,
+      "m": 2,
+      "alpha": 0.05,
+      "k": 196,
+      "rho": 5,
+      "bonferroniBound": 0.04975124378109453,
+      "attainedSupQ": 0.04975124378133012,
+      "gap": -2.355893258254582e-13,
+      "nextLowerThresholdSupQ": 0.05970149253754669,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.049385,
+        "se": 0.0004844900503364336
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.04803,
+        "se": 0.0004781376323821416
+      }
+    },
+    {
+      "label": "simulation setting, m=5",
+      "n": 200,
+      "m": 5,
+      "alpha": 0.05,
+      "k": 199,
+      "rho": 2,
+      "bonferroniBound": 0.04975124378109453,
+      "attainedSupQ": 0.04975124378135509,
+      "gap": -2.6056240498562033e-13,
+      "nextLowerThresholdSupQ": 0.07462686567189587,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.0496,
+        "se": 0.0004854886198460269
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.049275,
+        "se": 0.00048397817293241647
+      }
+    },
+    {
+      "label": "simulation setting, m=10",
+      "n": 200,
+      "m": 10,
+      "alpha": 0.05,
+      "k": 200,
+      "rho": 1,
+      "bonferroniBound": 0.04975124378109453,
+      "attainedSupQ": 0.0497512437496198,
+      "gap": 3.147473254250244e-11,
+      "nextLowerThresholdSupQ": 0.09950248679361164,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.049625,
+        "se": 0.00048560456842476266
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.048735,
+        "se": 0.0004814556042617014
+      }
+    },
+    {
+      "label": "guidance: 199 pairs for m=10",
+      "n": 199,
+      "m": 10,
+      "alpha": 0.05,
+      "k": 199,
+      "rho": 1,
+      "bonferroniBound": 0.05,
+      "attainedSupQ": 0.04999999996488096,
+      "gap": 3.5119039620834513e-11,
+      "nextLowerThresholdSupQ": 0.09999999914570168,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.05074,
+        "se": 0.0004907415429734883
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.04741,
+        "se": 0.0004751962326239551
+      }
+    },
+    {
+      "label": "m=50, pool that certifies it",
+      "n": 999,
+      "m": 50,
+      "alpha": 0.05,
+      "k": 999,
+      "rho": 1,
+      "bonferroniBound": 0.05,
+      "attainedSupQ": 0.04999999991520479,
+      "gap": 8.479521251825162e-11,
+      "nextLowerThresholdSupQ": 0.09999999811377919,
+      "simulatedCoupling": {
+        "reps": 200000,
+        "rate": 0.04946,
+        "se": 0.00048483867626252755
+      },
+      "simulatedIndependent": {
+        "reps": 200000,
+        "rate": 0.046935,
+        "se": 0.0004729276148365625
+      }
+    }
+  ],
+  "uncorrectedUnderCoupling": [
+    {
+      "n": 200,
+      "m": 1,
+      "k": 191,
+      "attainedSupQ": 0.04975124378109453
+    },
+    {
+      "n": 200,
+      "m": 2,
+      "k": 191,
+      "attainedSupQ": 0.09950248756241299
+    },
+    {
+      "n": 200,
+      "m": 5,
+      "k": 191,
+      "attainedSupQ": 0.24875621889992106
+    },
+    {
+      "n": 200,
+      "m": 10,
+      "k": 191,
+      "attainedSupQ": 0.49725146031225176
+    },
+    {
+      "n": 200,
+      "m": 25,
+      "k": 191,
+      "attainedSupQ": 0.9481206190328961
+    },
+    {
+      "n": 200,
+      "m": 50,
+      "k": 191,
+      "attainedSupQ": 0.9990619390101254
+    }
+  ],
+  "budgetExamples": [
+    {
+      "n": 200,
+      "m": 11,
+      "alpha": 0.05,
+      "budgetExceeded": true,
+      "supPoolMax": 0.05472636789722472
+    },
+    {
+      "n": 200,
+      "m": 25,
+      "alpha": 0.05,
+      "budgetExceeded": true,
+      "supPoolMax": 0.124344126446734
+    },
+    {
+      "n": 200,
+      "m": 50,
+      "alpha": 0.05,
+      "budgetExceeded": true,
+      "supPoolMax": 0.24446861003144102
+    },
+    {
+      "n": 142,
+      "m": 8,
+      "alpha": 0.05,
+      "budgetExceeded": true,
+      "supPoolMax": 0.055944055659016126
+    },
+    {
+      "n": 49,
+      "m": 3,
+      "alpha": 0.05,
+      "budgetExceeded": true,
+      "supPoolMax": 0.059999999905900284
+    },
+    {
+      "n": 18,
+      "m": 1,
+      "alpha": 0.05,
+      "budgetExceeded": true,
+      "supPoolMax": 0.05263157894736842
+    }
+  ],
+  "budgetBand": [
+    {
+      "alpha": 0.01,
+      "x0": 0.010000000000000002,
+      "delta": 1.734723475976807e-18
+    },
+    {
+      "alpha": 0.05,
+      "x0": 0.0500000001030577,
+      "delta": 1.0305769432283896e-10
+    },
+    {
+      "alpha": 0.1,
+      "x0": 0.10000454226184673,
+      "delta": 0.0000045422618467211295
+    }
+  ],
+  "budgetGrid": [
+    {
+      "alpha": 0.05,
+      "maxNPlus1": 1000000,
+      "failures": 0,
+      "firstFailure": null,
+      "minMargin": 4.9897010759303306e-8,
+      "argMin": {
+        "n": 999998,
+        "m": 50000,
+        "value": 0.05000004989701076
+      }
+    },
+    {
+      "alpha": 0.01,
+      "maxNPlus1": 1000000,
+      "failures": 0,
+      "firstFailure": null,
+      "minMargin": 1.0000010000621451e-8,
+      "argMin": {
+        "n": 999998,
+        "m": 10000,
+        "value": 0.01000001000001
+      }
+    }
+  ],
+  "mcAgreement": [
+    {
+      "label": "declared pool, primary judge",
+      "z": 0.7825780437454442
+    },
+    {
+      "label": "tightened pool, primary judge",
+      "z": -0.6986221307710359
+    },
+    {
+      "label": "simulation setting, m=1",
+      "z": -0.033415556485318486
+    },
+    {
+      "label": "simulation setting, m=2",
+      "z": -0.7559366411669308
+    },
+    {
+      "label": "simulation setting, m=5",
+      "z": -0.31152899403298295
+    },
+    {
+      "label": "simulation setting, m=10",
+      "z": -0.2599723269270572
+    },
+    {
+      "label": "guidance: 199 pairs for m=10",
+      "z": 1.5079221348069463
+    },
+    {
+      "label": "m=50, pool that certifies it",
+      "z": -1.11377235695693
+    }
+  ],
+  "mcOk": true
+}

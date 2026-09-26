@@ -169,6 +169,7 @@ export const JUDGE_MODELS = {
   "llama-3.3-70b-versatile": { family: "llama", reasoningFactor: 1, maxCompletionTokens: 8000 },
   "openai/gpt-oss-120b": { family: "gpt-oss", reasoningFactor: 4, maxCompletionTokens: 5000 },
   "qwen/qwen3.6-27b": { family: "qwen", reasoningFactor: 8, maxCompletionTokens: 6000 },
+  "qwen/qwen3.8-27b": { family: "qwen", reasoningFactor: 8, maxCompletionTokens: 6000 },
   // Smaller siblings, carried for a reason that is about quota rather than
   // science and is disclosed as such in §6.2: tokens-per-day is enforced PER
   // MODEL, so a scoring pass that exhausts the 120B's allowance can still be

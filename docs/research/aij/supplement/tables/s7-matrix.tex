@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Baseline and ablation matrix (primary judge, $\alpha=0.05$). Each row is calibrated on its own jurisdiction.}\label{tab:s7a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrlll@{}}
+\toprule
+Configuration & pool $n$ & $\thi$ & wrong suppression & dedup & silent escape \\
+\midrule
+B0\_no\_fence & 230 & $+\infty$ & 0.0\%~[0.0--1.6] & 0.0\%~[0.0--1.3] & 100.0\%~[98.7--100.0] \\
+B1\_exact\_string & 0 & $+\infty$ & 0.0\%~[0.0--1.6] & 0.0\%~[0.0--1.3] & 100.0\%~[98.7--100.0] \\
+B2\_content\_addressed & 230 & $+\infty$ & 0.0\%~[0.0--1.6] & 12.1\%~[8.8--16.4] & 87.9\%~[83.6--91.2] \\
+B3\_raw\_judge & 230 & 0.50 & 2.2\%~[0.9--4.9] & 99.6\%~[98.0--99.9] & 0.4\%~[0.1--2.0] \\
+B4\_calibrated\_judge & 230 & 0.20 & 3.4\%~[1.8--6.7] & 100.0\%~[98.7--100.0] & 0.0\%~[0.0--1.3] \\
+B5\_certifier\_judge & 230 & 0.20 & 3.4\%~[1.8--6.7] & 100.0\%~[98.7--100.0] & 0.0\%~[0.0--1.3] \\
+B6\_refuter\_judge & 142 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+B7\_decidable\_only & 142 & $+\infty$ & 0.0\%~[0.0--1.6] & 12.1\%~[8.8--16.4] & 87.9\%~[83.6--91.2] \\
+B8\_full & 142 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+B9\_full\_no\_band & 142 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+B10\_full\_no\_calibration & 142 & 0.50 & 2.2\%~[0.9--4.9] & 99.6\%~[98.0--99.9] & 0.4\%~[0.1--2.0] \\
+B11\_naive\_multiplicity\_m1 & 142 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+B12\_corrected\_multiplicity\_m1 & 142 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+B11\_naive\_multiplicity\_m5 & 142 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+B12\_corrected\_multiplicity\_m5 & 142 & 0.95 & 0.0\%~[0.0--1.6] & 22.1\%~[17.6--27.3] & 13.2\%~[9.7--17.6] \\
+\bottomrule
+\end{tabular}}
+\end{table}

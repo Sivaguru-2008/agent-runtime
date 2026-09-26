@@ -187,14 +187,32 @@ for (const [corpusName, spec] of Object.entries(cfg.corpora)) {
         "every ADMITTED annotator passed every catch trial");
 
       // The manuscript must describe the study by the channel that produced it.
-      const paper = resolve(base, "..", "..", "docs", "research", "Semantic-Effect-Identity-Paper.md");
-      if (existsSync(paper)) {
-        const text = readFileSync(paper, "utf8");
+      // Checked for the long-form Markdown and for the AIJ submission sources
+      // (manuscript, every included section, supplement).
+      const docs = resolve(base, "..", "..", "docs", "research");
+      const aij = resolve(docs, "aij");
+      const manuscripts = [["long-form manuscript", [resolve(docs, "Semantic-Effect-Identity-Paper.md")]]];
+      if (existsSync(resolve(aij, "manuscript.tex"))) {
+        const sec = existsSync(resolve(aij, "sections")) ? readdirSync(resolve(aij, "sections")).filter((f) => f.endsWith(".tex")).map((f) => resolve(aij, "sections", f)) : [];
+        // Recursive: supplement/tables/ holds the generated data tables.
+        const walkTex = (dir) => (existsSync(dir)
+          ? readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+            (e.isDirectory() ? walkTex(resolve(dir, e.name)) : e.name.endsWith(".tex") ? [resolve(dir, e.name)] : []))
+          : []);
+        const supp = walkTex(resolve(aij, "supplement"));
+        manuscripts.push(["AIJ manuscript + supplement", [resolve(aij, "manuscript.tex"), resolve(aij, "supplement.tex"), ...sec, ...supp]]);
+      }
+      for (const [label, files] of manuscripts) {
+        const present = files.filter((f) => existsSync(f));
+        if (!present.length) continue;
+        const text = present.map((f) => readFileSync(f, "utf8")).join("\n");
         if (ha.channel === "M") {
           assert(/model panel/i.test(text),
-            "manuscript names the model panel as a model panel (channel M)");
-          assert(!/\bhuman (annotation|labelling) study (is )?(complete|completed|run)\b/i.test(text),
-            "manuscript does not describe the model panel as a completed human study");
+            `${label} names the model panel as a model panel (channel M)`);
+          assert(!/\bhuman (annotation|labelling|validation) study (is )?(complete|completed|run)\b/i.test(text),
+            `${label} does not describe the model panel as a completed human study`);
+          assert(!/\b(human[- ]validated|validated by (independent )?humans?)\b/i.test(text),
+            `${label} does not call the labels human-validated`);
         }
       }
       notes.push(`INFO annotation COMPLETE on channel ${ha.channel} with ${ha.annotators.length} annotators` +

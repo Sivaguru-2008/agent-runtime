@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Seed-level resplitting: 200 splits that partition the 219 seed acts first, so no seed appears on both sides. The shipped pair-level split is shown for comparison.}\label{tab:s11b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Judge & pair-split WS & seed-split mean & median & p95 & share above $\alpha$ \\
+\midrule
+GPT-OSS-120B & 1.7\%~[0.7--4.3] & 2.7\% & 2.8\% & 5.2\% & 10.5\% \\
+GPT-OSS-20B & 1.3\%~[0.4--3.7] & 2.2\% & 1.7\% & 4.2\% & 1.0\% \\
+Qwen3.6-27B & 0.9\%~[0.2--3.1] & 1.8\% & 1.3\% & 5.7\% & 11.0\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

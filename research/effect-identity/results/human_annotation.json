@@ -1,6 +1,7 @@
 {
   "status": "COMPLETE",
-  "generatedAt": "2026-08-25T05:06:45.813Z",
+  "generatedAt": "2026-09-14T12:44:53.995Z",
+  "responsesDirectory": "annotation/preregistered-collection",
   "channel": "M",
   "channelMeaning": {
     "H": "independent human annotators",
@@ -128,15 +129,15 @@
       "compound-mini",
       "compound"
     ],
-    "krippendorffAlpha": 0.8625,
+    "krippendorffAlpha": 0.8637426900584795,
     "constructionAgreement": {
-      "value": 0.9166666666666666,
-      "successes": 99,
-      "n": 108,
+      "value": 0.9174311926605505,
+      "successes": 100,
+      "n": 109,
       "basis": "measured",
       "ci95": {
-        "lo": 0.8491709381195168,
-        "hi": 0.9555395954250189
+        "lo": 0.8504878975927597,
+        "hi": 0.9559532894588865
       }
     },
     "undecidedWithoutThem": 8
@@ -150,22 +151,22 @@
     "adjudicator-adjudicator-safeguard20b"
   ],
   "nItems": 154,
-  "nFullyAnnotated": 116,
-  "fleissKappa": 0.8274950429610047,
-  "krippendorffAlpha": 0.827990746860542,
+  "nFullyAnnotated": 117,
+  "fleissKappa": 0.8288917777055573,
+  "krippendorffAlpha": 0.829379265518362,
   "cohenKappaPairwise": {
-    "compound-mini|compound": 0.8619458494495685,
-    "compound-mini|qwen27b": 0.8116883116883117,
-    "compound|qwen27b": 0.8107947805456702
+    "compound-mini|compound": 0.8631978953522362,
+    "compound-mini|qwen27b": 0.8131261797589661,
+    "compound|qwen27b": 0.812199036918138
   },
   "adjudicationRate": {
     "value": 0,
     "successes": 0,
-    "n": 116,
+    "n": 117,
     "basis": "measured",
     "ci95": {
       "lo": 0,
-      "hi": 0.032054506499638716
+      "hi": 0.03178924566273338
     }
   },
   "adjudicationResolved": {
@@ -177,13 +178,13 @@
   },
   "needAdjudication": [],
   "constructionAgreementOverall": {
-    "value": 0.8793103448275862,
-    "successes": 102,
-    "n": 116,
+    "value": 0.8803418803418803,
+    "successes": 103,
+    "n": 117,
     "basis": "measured",
     "ci95": {
-      "lo": 0.8075734431935786,
-      "hi": 0.9267300346342817
+      "lo": 0.8091336915104884,
+      "hi": 0.9273685062332443
     }
   },
   "labelFlips": [
@@ -346,36 +347,36 @@
       "disagreements": []
     },
     "same_loose_value": {
-      "n": 11,
+      "n": 12,
       "why": "the paper's motivating example",
       "adjudicationRate": {
         "value": 0,
         "successes": 0,
-        "n": 11,
+        "n": 12,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.2588329669680317
+          "hi": 0.24249400665524085
         }
       },
       "constructionAgreement": {
         "value": 1,
-        "successes": 11,
-        "n": 11,
+        "successes": 12,
+        "n": 12,
         "basis": "measured",
         "ci95": {
-          "lo": 0.7411670330319684,
+          "lo": 0.7575059933447592,
           "hi": 1
         }
       },
       "unsureRate": {
         "value": 0,
         "successes": 0,
-        "n": 33,
+        "n": 36,
         "basis": "measured",
         "ci95": {
           "lo": 0,
-          "hi": 0.10426999754245206
+          "hi": 0.09641862859446367
         }
       },
       "krippendorff": 0,
@@ -776,8 +777,10 @@
     "underConstructedLabels": {
       "tHi": 0.8,
       "nCalDiff": 135,
+      "nItems": 117,
+      "nExcludedUnscored": 0,
       "overall": {
-        "nSame": 45,
+        "nSame": 46,
         "nDiff": 71,
         "wrongSuppression": {
           "value": 0.09859154929577464,
@@ -800,38 +803,38 @@
           }
         },
         "dedup": {
-          "value": 0.7777777777777778,
-          "successes": 35,
-          "n": 45,
+          "value": 0.782608695652174,
+          "successes": 36,
+          "n": 46,
           "basis": "measured",
           "ci95": {
-            "lo": 0.6373070782524372,
-            "hi": 0.8745531446737361
+            "lo": 0.6442631262842105,
+            "hi": 0.8773909467543746
           }
         },
         "silentEscape": {
           "value": 0,
           "successes": 0,
-          "n": 45,
+          "n": 46,
           "basis": "measured",
           "ci95": {
             "lo": 0,
-            "hi": 0.07865159873288838
+            "hi": 0.07707356308558039
           }
         },
         "flaggedEscape": {
-          "value": 0.2222222222222222,
+          "value": 0.21739130434782608,
           "successes": 10,
-          "n": 45,
+          "n": 46,
           "basis": "measured",
           "ci95": {
-            "lo": 0.12544685532626396,
-            "hi": 0.36269292174756296
+            "lo": 0.12260905324562552,
+            "hi": 0.35573687371578955
           }
         }
       },
       "residual": {
-        "nSame": 32,
+        "nSame": 33,
         "nDiff": 33,
         "wrongSuppression": {
           "value": 0.12121212121212122,
@@ -854,33 +857,33 @@
           }
         },
         "dedup": {
-          "value": 0.6875,
-          "successes": 22,
-          "n": 32,
+          "value": 0.696969696969697,
+          "successes": 23,
+          "n": 33,
           "basis": "measured",
           "ci95": {
-            "lo": 0.5143332169904459,
-            "hi": 0.8204745836639026
+            "lo": 0.5266186485419944,
+            "hi": 0.8262446857594641
           }
         },
         "silentEscape": {
           "value": 0,
           "successes": 0,
-          "n": 32,
+          "n": 33,
           "basis": "measured",
           "ci95": {
             "lo": 0,
-            "hi": 0.1071791982550706
+            "hi": 0.10426999754245206
           }
         },
         "flaggedEscape": {
-          "value": 0.3125,
+          "value": 0.30303030303030304,
           "successes": 10,
-          "n": 32,
+          "n": 33,
           "basis": "measured",
           "ci95": {
-            "lo": 0.17952541633609737,
-            "hi": 0.48566678300955407
+            "lo": 0.17375531424053603,
+            "hi": 0.47338135145800575
           }
         }
       }
@@ -888,8 +891,10 @@
     "underHumanLabels": {
       "tHi": 0.8,
       "nCalDiff": 135,
+      "nItems": 117,
+      "nExcludedUnscored": 0,
       "overall": {
-        "nSame": 59,
+        "nSame": 60,
         "nDiff": 57,
         "wrongSuppression": {
           "value": 0.10526315789473684,
@@ -912,38 +917,38 @@
           }
         },
         "dedup": {
-          "value": 0.6101694915254238,
-          "successes": 36,
-          "n": 59,
+          "value": 0.6166666666666667,
+          "successes": 37,
+          "n": 60,
           "basis": "measured",
           "ci95": {
-            "lo": 0.4826634180541163,
-            "hi": 0.7242063816603204
+            "lo": 0.49017595824099924,
+            "hi": 0.7291172762591798
           }
         },
         "silentEscape": {
-          "value": 0.03389830508474576,
+          "value": 0.03333333333333333,
           "successes": 2,
-          "n": 59,
+          "n": 60,
           "basis": "measured",
           "ci95": {
-            "lo": 0.009345909091661303,
-            "hi": 0.11543570750110753
+            "lo": 0.00918931925619787,
+            "hi": 0.113637742743086
           }
         },
         "flaggedEscape": {
-          "value": 0.3559322033898305,
+          "value": 0.35,
           "successes": 21,
-          "n": 59,
+          "n": 60,
           "basis": "measured",
           "ci95": {
-            "lo": 0.2460329140381331,
-            "hi": 0.48344504018145007
+            "lo": 0.24167774406017556,
+            "hi": 0.47637381158245135
           }
         }
       },
       "residual": {
-        "nSame": 45,
+        "nSame": 46,
         "nDiff": 20,
         "wrongSuppression": {
           "value": 0.15,
@@ -966,33 +971,263 @@
           }
         },
         "dedup": {
-          "value": 0.5111111111111111,
-          "successes": 23,
-          "n": 45,
+          "value": 0.5217391304347826,
+          "successes": 24,
+          "n": 46,
           "basis": "measured",
           "ci95": {
-            "lo": 0.3700446464458318,
-            "hi": 0.650429762471215
+            "lo": 0.3813741307280403,
+            "hi": 0.6587531056595433
           }
         },
         "silentEscape": {
-          "value": 0.022222222222222223,
+          "value": 0.021739130434782608,
           "successes": 1,
-          "n": 45,
+          "n": 46,
           "basis": "measured",
           "ci95": {
-            "lo": 0.003933598882833428,
-            "hi": 0.1156668176841488
+            "lo": 0.0038478542580502872,
+            "hi": 0.11335294521511355
           }
         },
         "flaggedEscape": {
-          "value": 0.4666666666666667,
+          "value": 0.45652173913043476,
           "successes": 21,
-          "n": 45,
+          "n": 46,
           "basis": "measured",
           "ci95": {
-            "lo": 0.32935132065011297,
-            "hi": 0.6092254525987463
+            "lo": 0.32154733782284584,
+            "hi": 0.5981981894019872
+          }
+        }
+      }
+    },
+    "scoredOnly": {
+      "underConstructedLabels": {
+        "tHi": 0.8,
+        "nCalDiff": 135,
+        "nItems": 51,
+        "nExcludedUnscored": 66,
+        "overall": {
+          "nSame": 29,
+          "nDiff": 22,
+          "wrongSuppression": {
+            "value": 0.18181818181818182,
+            "successes": 4,
+            "n": 22,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.07306884583422052,
+              "hi": 0.38516607437126543
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 22,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.14865487460862087
+            }
+          },
+          "dedup": {
+            "value": 1,
+            "successes": 29,
+            "n": 29,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.8830302015002593,
+              "hi": 1
+            }
+          },
+          "silentEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 29,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.11696979849974075
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 29,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.11696979849974075
+            }
+          }
+        },
+        "residual": {
+          "nSame": 23,
+          "nDiff": 14,
+          "wrongSuppression": {
+            "value": 0.2857142857142857,
+            "successes": 4,
+            "n": 14,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.11721378644576919,
+              "hi": 0.5464908432989318
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 14,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.2153108027376358
+            }
+          },
+          "dedup": {
+            "value": 1,
+            "successes": 23,
+            "n": 23,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.8568833815495731,
+              "hi": 1
+            }
+          },
+          "silentEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 23,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.14311661845042686
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 23,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.14311661845042686
+            }
+          }
+        }
+      },
+      "underHumanLabels": {
+        "tHi": 0.8,
+        "nCalDiff": 135,
+        "nItems": 51,
+        "nExcludedUnscored": 66,
+        "overall": {
+          "nSame": 31,
+          "nDiff": 20,
+          "wrongSuppression": {
+            "value": 0.15,
+            "successes": 3,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.052368745896216595,
+              "hi": 0.36041886474075696
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 20,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.16112515805281938
+            }
+          },
+          "dedup": {
+            "value": 0.967741935483871,
+            "successes": 30,
+            "n": 31,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.838058948352751,
+              "hi": 0.9942827784745831
+            }
+          },
+          "silentEscape": {
+            "value": 0.03225806451612903,
+            "successes": 1,
+            "n": 31,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.005717221525416816,
+              "hi": 0.16194105164724906
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 31,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.11025539546043596
+            }
+          }
+        },
+        "residual": {
+          "nSame": 25,
+          "nDiff": 12,
+          "wrongSuppression": {
+            "value": 0.25,
+            "successes": 3,
+            "n": 12,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.08894166839405476,
+              "hi": 0.5323053349335656
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 12,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.24249400665524085
+            }
+          },
+          "dedup": {
+            "value": 0.96,
+            "successes": 24,
+            "n": 25,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.8045593626380625,
+              "hi": 0.9929037664980127
+            }
+          },
+          "silentEscape": {
+            "value": 0.04,
+            "successes": 1,
+            "n": 25,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.007096233501987265,
+              "hi": 0.19544063736193734
+            }
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 25,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.13319225093904846
+            }
           }
         }
       }

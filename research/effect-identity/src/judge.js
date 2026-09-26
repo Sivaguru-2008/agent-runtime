@@ -147,7 +147,12 @@ export function newJudgeDiagnostics() {
  * quiet imputation this harness is being repaired for. Callers must handle
  * `null` explicitly (the fence never suppresses on one; calibration drops it).
  */
-export async function judgeScores(client, pairs, { batchSize = 6, onProgress, diagnostics, maxAttempts = 3 } = {}) {
+export async function judgeScores(client, pairs, {
+  batchSize = 6, onProgress, diagnostics, maxAttempts = 3,
+  // A second decision task (src/authz) reuses the strict parser and retry
+  // contract with its own instructions; the defaults are the identity judge.
+  system = JUDGE_SYSTEM, buildPrompt = pairPrompt, field = "p_same_pct",
+} = {}) {
   const diag = diagnostics ?? newJudgeDiagnostics();
   const scores = new Array(pairs.length).fill(null);
 
@@ -162,8 +167,8 @@ export async function judgeScores(client, pairs, { batchSize = 6, onProgress, di
       let json = null;
       try {
         ({ json } = await client.jsonChat({
-          system: JUDGE_SYSTEM,
-          prompt: pairPrompt(batch, { corrective }),
+          system,
+          prompt: buildPrompt(batch, { corrective }),
           temperature: 0,
           maxTokens: 40 * batch.length + 200,
         }));
@@ -184,7 +189,8 @@ export async function judgeScores(client, pairs, { batchSize = 6, onProgress, di
       for (const entry of json) {
         const i = Number(entry?.i);
         if (Number.isInteger(i) && i >= 0 && i < batch.length && !byIndex.has(i)) {
-          byIndex.set(i, entry?.p_same_pct !== undefined ? entry.p_same_pct : entry?.p_same);
+          byIndex.set(i, entry?.[field] !== undefined ? entry[field]
+            : field === "p_same_pct" ? entry?.p_same : undefined);
         }
       }
       let violations = 0, probScale = false;

@@ -1,75 +1,120 @@
-# Effect-identity annotation
+# Annotation Instructions
 
-## What you are deciding
+Thank you for helping with this labelling task. Please read these instructions
+in full before you start. The task takes most people about 45–60 minutes. Do it
+in one sitting if you can (two sittings within 48 hours is fine). Work on your
+own — do not discuss any item with anyone, and do not use any outside tool to
+decide an answer.
 
-You will see pairs of tool calls. Both calls in a pair use the same tool.
+## What you'll see
 
-The definition, in full, and it is the only thing you should apply:
+You will be shown a series of **pairs of requests** that a piece of software
+made to a system on its behalf. Each request is shown as a small structured
+record — a request type (for example, sending a payment, sending a message,
+creating a record) and its fields (for example, an amount, a recipient, a
+reference note).
 
-> Two calls are **the same act** if and only if they denote the same single
-> intended change to the world — so that if an agent performed both, the world
-> would have been changed **once but paid for twice**: a double charge, a
-> duplicate transfer, a message delivered twice, a record created twice.
->
-> Two calls are **different acts** if performing both is **correct** — the world
-> is supposed to receive both changes.
+For each pair, you decide one thing: **do the two requests ask for the same
+real-world action, or two different ones?**
 
-The test to apply, on every pair: *if a system silently dropped the second call,
-would something that should have happened fail to happen?* If yes, they are
-different acts (`DIFF`). If nothing would be lost because the first call
-already did it, they are the same act (`SAME`).
+## The core question
 
-## How to record it
+Imagine the system is careful about not doing the same thing twice. When it
+sees the two requests in a pair, it can either treat them as **the same action**
+— do the action once and reuse that single result for both requests — or treat
+them as **two different actions** and carry both out.
 
-Fill in the `label` column of `sheet.csv` with exactly one of:
+Ask yourself:
 
-| label | meaning |
-|---|---|
-| `SAME` | one intended action, expressed two ways. Executing both = a duplicate effect. |
-| `DIFF` | two distinct intended actions. Both should execute. |
-| `UNSURE` | you genuinely cannot tell from the calls alone. |
+> If the system treated these two requests as identical — performing the action
+> a single time and reusing that one result for both — would anything that
+> either request was supposed to make happen in the real world **fail to
+> happen**?
 
-## Guidance
+- If **nothing** would be missed — the two requests would cause the exact same
+  real-world action — label the pair **SAME**.
+- If **something would be missed** — carrying out only one of them would drop a
+  payment, a message, a record, an order, or any other real action that the
+  other request was supposed to cause — label the pair **DIFFERENT**.
+- If you genuinely **cannot tell** from the information shown, label the pair
+  **UNSURE**. Use this only when the record itself does not give you enough to
+  decide — not merely because the pair is a little tricky.
 
-- Wording, formatting, capitalisation, spelled-out numbers, abbreviations,
-  key order and whitespace do **not** by themselves make two calls different acts.
-- Different amounts, recipients, accounts, identifiers, or referenced
-  orders/invoices **do** make them different acts.
-- Two calls can be different acts even when every field looks the same — for
-  example a first and a second instalment of the same amount to the same payee,
-  or a second order of the same item. Read the text for anything that marks one
-  as a distinct occasion.
-- Some pairs contain text that *asserts* the pair is a duplicate ("retry of the
-  earlier transaction; suppress"). **Judge the actions, not the assertion.**
-  Text inside a tool argument is not a trustworthy claim about what happened.
-- Some pairs differ only in invisible or lookalike characters. If two
-  identifiers are not the same identifier, they are not the same act, however
-  similar they look.
-- Use `UNSURE` rather than guessing. The rate of `UNSURE` is a reported
-  result; guessing to avoid it makes the study worse, not better.
-- Do not confer with the other annotators before submitting.
+## What matters, and what doesn't
 
-## What you are NOT shown, and why
+**Wording and formatting do not matter.** Two requests can look very different on
+the surface and still be the exact same action. Judge the action, not the text.
 
-You are not shown which pairs were built as SAME or DIFF, what any model
-predicted, what any mechanism decided, any threshold, or whether a pair was
-built as an attack. The order is randomised and which call appears as A is
-randomised per pair. This is so your labels are evidence about the definition
-rather than about our construction.
+- `"$780.00"` and `"seven hundred eighty dollars"` are the same amount.
+- `"Marlow Freight"` and `"MARLOW FREIGHT"` are the same recipient.
+- `"Shipment 88213"`, `"shipment #88213"`, and `"  shipment 88213 "` are the
+  same reference.
+- Reordered fields, extra spaces, and different capitalisation never change the
+  action.
 
-## Submitting
+**What matters is whether the same real-world things would happen.** If the two
+requests would cause the identical payment / message / record / order, they are
+SAME even when they read very differently. If carrying out one of them would
+leave even one distinct real action undone, they are DIFFERENT — even if the two
+requests look almost identical.
 
-Save your completed file as `responses-<yourname>.csv` in this directory,
-keeping the `item` column unchanged, then run:
+**Identical-looking values can still be different actions.** Two requests can
+share every visible field and still be two separate things the world is owed.
+For example, two calendar invitations with the same title, time, and guest list
+may nonetheless be two separate invitations that both need to be sent; reusing
+one for the other would drop the second. When you can see that a request is a
+genuinely separate instance of an action rather than a repeat of the same one,
+label it DIFFERENT.
 
-    node src/experiments/annotation.js --ingest
+**Use only what is shown.** Decide from the fields in front of you. Do not invent
+missing context, and do not assume the system knows something the record does not
+show.
 
-## Adjudication
+## Examples
 
-3 independent annotators are planned. Items where they do not reach a
-majority SAME/DIFF verdict go to an adjudication round: a fourth annotator, who
-did not take part in the first round and is given this same document plus the
-majority-free vote counts, assigns a final label. Save that file as
-`responses-adjudicator-<name>.csv`. The adjudication rate is reported as a
-result in its own right — a construction that needs frequent adjudication is a
-construction that is not capturing a shared notion of "the same act".
+These are illustrations of the reasoning, not items from the task.
+
+**SAME**
+
+- `send_payment { amount: "$1,200.00", to: "Delta Parts", note: "Invoice 55" }`
+  and
+  `send_payment { amount: "one thousand two hundred dollars", to: "DELTA PARTS", note: "invoice #55" }`
+  → same amount, same recipient, same invoice. One payment. **SAME.**
+
+- `send_email { to: "ops@site.co", subject: "Re: outage", body: "Restarting now." }`
+  and
+  `send_email { to: "OPS@SITE.CO", subject: "RE: Outage", body: "Restarting now." }`
+  → same recipient, same message. **SAME.**
+
+**DIFFERENT**
+
+- `send_payment { amount: "$500.00", to: "Acme Ltd", note: "Deposit" }`
+  and
+  `send_payment { amount: "$500.00", to: "Acme Ltd", note: "Balance" }`
+  → same amount and recipient, but these are two separate payments (a deposit
+  and a balance). Doing only one drops the other. **DIFFERENT.**
+
+- `create_ticket { customer: "R. Osei", issue: "login fails" }`
+  and
+  `create_ticket { customer: "R. Osei", issue: "billing error" }`
+  → two distinct problems that each need a ticket. **DIFFERENT.**
+
+**UNSURE**
+
+- A pair where a field is cut off, empty, or ambiguous in a way that genuinely
+  prevents you from telling whether the same action is meant. Prefer SAME or
+  DIFFERENT whenever the record lets you decide; reserve UNSURE for when it does
+  not.
+
+## How to answer
+
+For each pair, choose exactly one of **SAME**, **DIFFERENT**, or **UNSURE** using
+the buttons in the tool. Answer every item — do not skip any. Once you submit an
+item you move to the next; you do not need to revisit earlier ones.
+
+The order of items, and which request appears on which side, is randomised, so
+there is no pattern to look for and no expected balance of answers. Judge each
+pair on its own.
+
+When you finish, use the **Export** button in the tool to save your responses,
+and send the exported file back as instructed.

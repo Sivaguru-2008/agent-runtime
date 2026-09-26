@@ -473,9 +473,9 @@ for (const scorerKey of SCORERS) {
 }
 
 // ── Cost model: what the mechanism costs per 1000 irreversible actions ───────
-// Escalation is the dominant operating cost of this design, and it is a HUMAN
-// cost; the judge's own cost is small beside it. Reporting both in the same
-// units is the only way to see that.
+// Escalation is a HUMAN cost and judge calls are a machine cost; both are
+// reported in the same units. (At α = 0.05 on the primary judge the band is
+// empty, so escalation contributes nothing and the judge's cost is what remains.)
 {
   const alpha = 0.05;
   const jm = judgeMeta.models?.[PRIMARY];
@@ -483,9 +483,17 @@ for (const scorerKey of SCORERS) {
   const needsJudgeTight = results.ablations.judgeJurisdiction.needsJudgeTightened.value;
   const hardened = results.configs[`hardened_${PRIMARY}_alpha_${alpha}`];
   const tightened = results.configs[`tightened_${PRIMARY}_alpha_${alpha}`];
-  const perPairTokens = jm ? (jm.inputTokens + jm.outputTokens) / Math.max(1, jm.scoredPairs ?? pairs.length) : null;
+  // judge_meta.json records tokens for the FINAL scoring session only, so the
+  // denominator must be the pairs scored in that session (parse.pairsScored),
+  // not every pair ever scored. Dividing by the latter understated the
+  // per-comparison cost roughly ten-fold (corrected 2026-09-14).
+  const sessionPairs = jm ? (jm.parse?.pairsScored ?? jm.scoredPairs ?? pairs.length) : null;
+  const perPairTokens = jm ? (jm.inputTokens + jm.outputTokens) / Math.max(1, sessionPairs) : null;
   const perPairLatency = jm ? jm.meanCallLatencyMs / Math.max(1, jm.batchSize ?? 1) : null;
-  const dispatchLatency = jm ? jm.meanCallLatencyMs : null; // one dispatch = one unbatched call
+  // Mean latency of one BATCHED call (batchSize pairs). A deployed dispatch
+  // makes one call over its m candidates, so this is a proxy, not a measurement
+  // of an unbatched single-pair call.
+  const dispatchLatency = jm ? jm.meanCallLatencyMs : null;
 
   const per1000 = (fracJudged, escalationRate) => ({
     judgeCallsPer1000: Math.round(fracJudged * 1000),

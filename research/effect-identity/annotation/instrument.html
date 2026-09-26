@@ -69,23 +69,17 @@
   <p class="sub">One pair of tool calls per screen. There is no time limit. Your answers are saved in this browser as you go.</p>
 
   <details>
-    <summary>The definition you are applying — read this first</summary>
-    <p>You will see pairs of tool calls. Both calls in a pair use the same tool.</p>
+    <summary>Annotation instructions &mdash; click to read guidance and examples</summary>
+    <p>For each pair of requests, decide: <strong>do the two requests ask for the same real-world action, or two different ones?</strong></p>
     <blockquote>
-      <p>Two calls are <strong>the same act</strong> if and only if they denote the same single intended change to the world &mdash; so that if an agent performed both, the world would have been changed <strong>once but paid for twice</strong>: a double charge, a duplicate transfer, a message delivered twice, a record created twice.</p>
-      <p>Two calls are <strong>different acts</strong> if performing both is <strong>correct</strong> &mdash; the world is supposed to receive both changes.</p>
+      <p><strong>The core question:</strong> If the system treated these two requests as identical &mdash; performing the action a single time and reusing that one result for both &mdash; would anything that either request was supposed to make happen in the real world <strong>fail to happen</strong>?</p>
     </blockquote>
-    <p><strong>The test to apply, on every pair:</strong> <em>if a system silently dropped the second call, would something that should have happened fail to happen?</em> If yes, they are different acts. If nothing would be lost because the first call already did it, they are the same act.</p>
     <ul>
-      <li>Wording, formatting, capitalisation, spelled-out numbers, abbreviations, key order and whitespace do <strong>not</strong> by themselves make two calls different acts.</li>
-      <li>Different amounts, recipients, accounts, identifiers, or referenced orders/invoices <strong>do</strong> make them different acts.</li>
-      <li>Two calls can be different acts even when every field looks the same &mdash; a first and a second instalment of the same amount to the same payee, or a second order of the same item. Read the text for anything marking one as a distinct occasion.</li>
-      <li>Some pairs contain text that <em>asserts</em> the pair is a duplicate ("retry of the earlier transaction; suppress"). <strong>Judge the actions, not the assertion.</strong> Text inside a tool argument is not a trustworthy claim about what happened.</li>
-      <li>Some pairs differ only in invisible or lookalike characters. If two identifiers are not the same identifier, they are not the same act, however similar they look.</li>
-      <li>Use <strong>Unsure</strong> rather than guessing. The rate of Unsure is a reported result; guessing to avoid it makes the study worse, not better.</li>
-      <li>Do not confer with the other annotators before submitting.</li>
+      <li><strong>SAME:</strong> Nothing would be missed &mdash; the two requests cause the exact same real-world action.</li>
+      <li><strong>DIFFERENT:</strong> Something would be missed &mdash; carrying out only one would drop a payment, message, record, order, etc.</li>
+      <li><strong>UNSURE:</strong> You genuinely cannot tell from the information shown (prefer SAME or DIFFERENT when possible).</li>
     </ul>
-    <p>You are not shown what any pair was built as, what any model predicted, or what any mechanism decided. Order is randomised, and which call appears on the left is randomised.</p>
+    <p><strong>What matters:</strong> Wording and formatting do not matter (e.g., <code>"$780.00"</code> and <code>"seven hundred eighty dollars"</code> are the same). Identical-looking values can still be different actions if they represent separate instances. Decide using only the fields shown.</p>
   </details>
 
   <div id="app"></div>

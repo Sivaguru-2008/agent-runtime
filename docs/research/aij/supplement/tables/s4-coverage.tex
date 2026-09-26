@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Judge coverage and the admission rule (coverage $\ge$ 80\%, at least two distinct score values, AUC $\ge$ 0.60). AUC is computed over all scored pairs. Failed clauses are abbreviated: \emph{coverage} (too few pairs scored to calibrate or to measure), \emph{resolution} (fewer than two distinct score values), \emph{signal} (no scored SAME/DIFF overlap, so discrimination is unmeasurable). Exact permutation tests (20,000 permutations) find no association between the Qwen judge's abstentions and any stratification.}\label{tab:s4a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+Judge & scored / 1,066 & coverage & AUC & admitted \\
+\midrule
+Llama-3.3-70B & 60 & 5.6\% & 1.000 & no (coverage) \\
+GPT-OSS-120B & 1066 & 100.0\% & 0.962 & yes \\
+GPT-OSS-20B & 1066 & 100.0\% & 0.962 & yes \\
+Qwen3.6-27B & 1041 & 97.7\% & 0.974 & yes \\
+Allam-2-7B & 0 & 0.0\% & --- & no (coverage, resolution, signal) \\
+\bottomrule
+\end{tabular}}
+\end{table}

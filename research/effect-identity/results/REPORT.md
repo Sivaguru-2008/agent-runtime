@@ -1,7 +1,7 @@
 # Results digest
 
-Generated 2026-08-16T12:28:49.440Z. Primary judge: `openai_gpt_oss_120b`.
-Corpus: 955 pairs (cal 453, test 457, attack 45).
+Generated 2026-09-14T12:55:02.616Z. Primary judge: `openai_gpt_oss_120b`.
+Corpus: 1066 pairs (cal 508, test 513, attack 45).
 Candidate-set size in this file: m = 1. Every corpus pair is one candidate against one dispatch (m = 1), so the multiplicity-corrected threshold coincides with the pairwise one here. The m > 1 behaviour is measured in multiCandidate.js.
 
 ## Corpus composition
@@ -9,16 +9,16 @@ Candidate-set size in this file: m = 1. Every corpus pair is one candidate again
 | category | label | total | cal | test | attack |
 |---|---|---:|---:|---:|---:|
 | S1_mechanical | SAME | 68 | 34 | 34 | 0 |
-| S3_loose_value | SAME | 15 | 7 | 8 | 0 |
+| S3_loose_value | SAME | 75 | 37 | 38 | 0 |
 | D1_near_miss | DIFF | 251 | 125 | 126 | 0 |
 | D2_legit_repeat | DIFF | 150 | 75 | 75 | 0 |
-| D3_semantic_diff | DIFF | 10 | 5 | 5 | 0 |
+| D3_semantic_diff | DIFF | 61 | 30 | 31 | 0 |
 | D4a_field_injection | DIFF | 20 | 0 | 0 | 20 |
 | D4b_text_injection | DIFF | 25 | 0 | 0 | 25 |
 | S2_paraphrase | SAME | 253 | 126 | 127 | 0 |
 | S4_adversarial | SAME | 163 | 81 | 82 | 0 |
 
-Totals: 955 pairs, 499 SAME, 456 DIFF.
+Totals: 1066 pairs, 559 SAME, 507 DIFF.
 
 | generator arm | pairs | cal | test | S2 kept/dropped | S4 kept/dropped | transport drops |
 |---|---:|---:|---:|---|---|---:|
@@ -27,34 +27,46 @@ Totals: 955 pairs, 499 SAME, 456 DIFF.
 | openai/gpt-oss-120b | 121 | 60 | 61 | 59/9 | 62/6 | 0 |
 | qwen/qwen3.6-27b | 118 | 59 | 59 | 66/2 | 52/6 | 0 |
 
+Non-LLM pairs (mechanical or hand-specified, no generator): 650.
+
 ## Judge integrity (the strict parser)
+
+| judge | calls | scored | abstentions | retries | batches w/ violations | probability-scale batches | non-integer | out-of-range | missing |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| openai_gpt_oss_120b | 12 | 1066 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| qwen_qwen3_6_27b | 8 | 1041 | 25 | 1 | 0 | 0 | 0 | 0 | 0 |
+| openai_gpt_oss_20b | 12 | 1066 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Scale-ambiguous accepted values (0 or 1 as a percent) for openai_gpt_oss_120b: 0.
+Scale-ambiguous accepted values (0 or 1 as a percent) for qwen_qwen3_6_27b: 26.
+Scale-ambiguous accepted values (0 or 1 as a percent) for openai_gpt_oss_20b: 48.
 
 Abstention rates (a pair the judge never returned an admissible score for):
 
 | scorer | all | cal | test | attack |
 |---|---|---|---|---|
-| llama_3_3_70b_versatile | 93.7% [92.0–95.1] | 93.4% [90.7–95.3] | 94.1% [91.5–95.9] | 93.3% [82.1–97.7] |
-| openai_gpt_oss_120b | 3.7% [2.6–5.1] | 3.1% [1.8–5.1] | 4.2% [2.7–6.4] | 4.4% [1.2–14.8] |
-| openai_gpt_oss_20b | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.8] | 0.0% [0.0–7.9] |
-| qwen_qwen3_6_27b | 88.5% [86.3–90.4] | 88.7% [85.5–91.3] | 88.0% [84.7–90.6] | 91.1% [79.3–96.5] |
-| ensemble_min | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.8] | 0.0% [0.0–7.9] |
-| ensemble_mean | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.8] | 0.0% [0.0–7.9] |
+| llama_3_3_70b_versatile | 94.4% [92.8–95.6] | 94.1% [91.7–95.8] | 94.7% [92.5–96.4] | 93.3% [82.1–97.7] |
+| openai_gpt_oss_120b | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.7] | 0.0% [0.0–7.9] |
+| openai_gpt_oss_20b | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.7] | 0.0% [0.0–7.9] |
+| qwen_qwen3_6_27b | 2.3% [1.6–3.4] | 1.8% [0.9–3.3] | 2.7% [1.6–4.5] | 4.4% [1.2–14.8] |
+| ensemble_min | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.7] | 0.0% [0.0–7.9] |
+| ensemble_mean | 0.0% [0.0–0.4] | 0.0% [0.0–0.8] | 0.0% [0.0–0.7] | 0.0% [0.0–7.9] |
 
 ## RQ1 — the canonical core (L0)
 
-- SAME caught by L0 (test): **13.5% [9.9–18.3]**
-- DIFF wrongly caught by L0 (test): **0.0%† [0.0–1.8]** — basis `provable-under-A5`
-- escaping L0 and therefore requiring the semantic layer: 86.5% of true duplicates
+- SAME caught by L0 (test): **12.1% [8.8–16.4]**
+- DIFF wrongly caught by L0 (test): **0.0%† [0.0–1.6]** — basis `provable-under-A5`
+- escaping L0 and therefore requiring the semantic layer: 87.9% of true duplicates
 
 Per category (L0 coverage on the test split):
 
 | category | L0 hit rate |
 |---|---|
 | S1_mechanical | 100.0% [89.8–100.0] |
-| S3_loose_value | 0.0% [0.0–32.4] |
+| S3_loose_value | 0.0% [0.0–9.2] |
 | D1_near_miss | 0.0% [0.0–3.0] |
 | D2_legit_repeat | 0.0% [0.0–4.9] |
-| D3_semantic_diff | 0.0% [0.0–43.4] |
+| D3_semantic_diff | 0.0% [0.0–11.0] |
 | S2_paraphrase | 0.0% [0.0–2.9] |
 | S4_adversarial | 0.0% [0.0–4.5] |
 
@@ -62,17 +74,17 @@ Per category (L0 coverage on the test split):
 
 | config | t_hi | t_lo | WS | dedup | flagged escape | silent escape | friction |
 |---|---|---|---|---|---|---|---|
-| B0 no fence | — | — | 0.0% [0.0–1.8] | 0.0% [0.0–1.5] | 0.0% [0.0–1.5] | 100.0% [98.5–100.0] | 0.0% [0.0–1.8] |
-| B1 exact string | — | — | 0.0% [0.0–1.8] | 0.0% [0.0–1.5] | 0.0% [0.0–1.5] | 100.0% [98.5–100.0] | 0.0% [0.0–1.8] |
-| B2 canonical L0 (prior art) | — | — | 0.0%† [0.0–1.8] | 13.5% [9.9–18.3] | 0.0% [0.0–1.5] | 86.5% [81.7–90.1] | 0.0% [0.0–1.8] |
-| B4 raw judge τ=0.5 | — | — | 1.5% [0.5–4.2] | 95.6% [92.3–97.5] | 0.0% [0.0–1.5] | 4.4% [2.5–7.7] | 0.0% [0.0–1.8] |
-| B4 raw judge τ=0.9 | — | — | 0.0% [0.0–1.8] | 62.2% [56.0–67.9] | 0.0% [0.0–1.5] | 37.8% [32.1–44.0] | 0.0% [0.0–1.8] |
-| layered α=0.01 | 0.850 | 0.800 | 0.5% [0.1–2.7] | 82.1% [76.9–86.3] | 12.0% [8.5–16.5] | 6.0% [3.7–9.6] | 4.9% [2.7–8.7] |
-| hardened α=0.01 | 0.850 | 0.800 | 0.5% [0.1–2.7] | 82.1% [76.9–86.3] | 12.0% [8.5–16.5] | 6.0% [3.7–9.6] | 2.9% [1.3–6.2] |
-| tightened α=0.01 | 0.850 | 0.800 | 0.5% [0.1–2.7] | 82.1% [76.9–86.3] | 12.0% [8.5–16.5] | 6.0% [3.7–9.6] | 1.5% [0.5–4.2] |
-| layered α=0.05 | 0.200 | 0.200 | 2.9% [1.3–6.2] | 96.8% [93.8–98.4] | 3.2% [1.6–6.2] | 0.0% [0.0–1.5] | 4.4% [2.3–8.1] |
-| hardened α=0.05 | 0.200 | 0.200 | 2.4% [1.0–5.6] | 96.8% [93.8–98.4] | 3.2% [1.6–6.2] | 0.0% [0.0–1.5] | 2.4% [1.0–5.6] |
-| tightened α=0.05 | 0.200 | 0.200 | 1.9% [0.8–4.9] | 96.8% [93.8–98.4] | 3.2% [1.6–6.2] | 0.0% [0.0–1.5] | 1.5% [0.5–4.2] |
+| B0 no fence | — | — | 0.0% [0.0–1.6] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 100.0% [98.7–100.0] | 0.0% [0.0–1.6] |
+| B1 exact string | — | — | 0.0% [0.0–1.6] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 100.0% [98.7–100.0] | 0.0% [0.0–1.6] |
+| B2 canonical L0 (prior art) | — | — | 0.0%† [0.0–1.6] | 12.1% [8.8–16.4] | 0.0% [0.0–1.3] | 87.9% [83.6–91.2] | 0.0% [0.0–1.6] |
+| B4 raw judge τ=0.5 | — | — | 2.2% [0.9–4.9] | 99.6% [98.0–99.9] | 0.0% [0.0–1.3] | 0.4% [0.1–2.0] | 0.0% [0.0–1.6] |
+| B4 raw judge τ=0.9 | — | — | 0.0% [0.0–1.6] | 69.0% [63.4–74.2] | 0.0% [0.0–1.3] | 31.0% [25.8–36.6] | 0.0% [0.0–1.6] |
+| layered α=0.01 | 0.900 | 0.850 | 0.0% [0.0–1.6] | 69.0% [63.4–74.2] | 17.8% [13.8–22.7] | 13.2% [9.7–17.6] | 0.9% [0.2–3.1] |
+| hardened α=0.01 | 0.900 | 0.850 | 0.0% [0.0–1.6] | 69.0% [63.4–74.2] | 17.8% [13.8–22.7] | 13.2% [9.7–17.6] | 0.9% [0.2–3.1] |
+| tightened α=0.01 | 0.900 | 0.850 | 0.0% [0.0–1.6] | 69.0% [63.4–74.2] | 17.8% [13.8–22.7] | 13.2% [9.7–17.6] | 0.9% [0.2–3.1] |
+| layered α=0.05 | 0.200 | 0.200 | 3.4% [1.8–6.7] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] |
+| hardened α=0.05 | 0.200 | 0.200 | 3.0% [1.5–6.1] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] |
+| tightened α=0.05 | 0.200 | 0.200 | 2.6% [1.2–5.5] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] |
 
 `layered` = L0 + calibrated judge, no witness. `hardened` = + declared-field witness (the proposed system). `tightened` = + witness widened to numbers mentioned in free text.
 
@@ -81,24 +93,24 @@ Per-category decisions, hardened α=0.05:
 | category | label | n | suppress | escalate | execute |
 |---|---|---:|---|---|---|
 | S1_mechanical | SAME | 34 | 100.0% [89.8–100.0] | 0.0% [0.0–10.2] | 0.0% [0.0–10.2] |
-| S3_loose_value | SAME | 8 | 100.0% [67.6–100.0] | 0.0% [0.0–32.4] | 0.0% [0.0–32.4] |
-| D1_near_miss | DIFF | 126 | 0.8% [0.1–4.4] | 0.8% [0.1–4.4] | 98.4% [94.4–99.6] |
-| D2_legit_repeat | DIFF | 75 | 5.3% [2.1–12.9] | 5.3% [2.1–12.9] | 89.3% [80.3–94.5] |
-| D3_semantic_diff | DIFF | 5 | 0.0% [0.0–43.4] | 0.0% [0.0–43.4] | 100.0% [56.6–100.0] |
-| S2_paraphrase | SAME | 127 | 97.6% [93.3–99.2] | 2.4% [0.8–6.7] | 0.0% [0.0–2.9] |
-| S4_adversarial | SAME | 82 | 93.9% [86.5–97.4] | 6.1% [2.6–13.5] | 0.0% [0.0–4.5] |
+| S3_loose_value | SAME | 38 | 100.0% [90.8–100.0] | 0.0% [0.0–9.2] | 0.0% [0.0–9.2] |
+| D1_near_miss | DIFF | 126 | 0.8% [0.1–4.4] | 0.0% [0.0–3.0] | 99.2% [95.6–99.9] |
+| D2_legit_repeat | DIFF | 75 | 5.3% [2.1–12.9] | 0.0% [0.0–4.9] | 94.7% [87.1–97.9] |
+| D3_semantic_diff | DIFF | 31 | 6.5% [1.8–20.7] | 0.0% [0.0–11.0] | 93.5% [79.3–98.2] |
+| S2_paraphrase | SAME | 127 | 100.0% [97.1–100.0] | 0.0% [0.0–2.9] | 0.0% [0.0–2.9] |
+| S4_adversarial | SAME | 82 | 100.0% [95.5–100.0] | 0.0% [0.0–4.5] | 0.0% [0.0–4.5] |
 
 ## RQ7 — judges and ensembles (hardened, α=0.05)
 
 | scorer | t_hi | WS | dedup | silent escape | flagged escape | friction | abstention |
 |---|---|---|---|---|---|---|---|
-| llama_3_3_70b_versatile | +∞ | 0.0% [0.0–1.8] | 13.5% [9.9–18.3] | 0.0% [0.0–1.5] | 86.5% [81.7–90.1] | 54.9% [48.0–61.5] | 94.1% [91.5–95.9] |
-| openai_gpt_oss_120b | 0.200 | 2.4% [1.0–5.6] | 96.8% [93.8–98.4] | 0.0% [0.0–1.5] | 3.2% [1.6–6.2] | 2.4% [1.0–5.6] | 4.2% [2.7–6.4] |
-| openai_gpt_oss_20b | 0.100 | 2.9% [1.3–6.2] | 97.6% [94.9–98.9] | 2.0% [0.9–4.6] | 0.4% [0.1–2.2] | 5.8% [3.4–9.9] | 0.0% [0.0–0.8] |
-| qwen_qwen3_6_27b | 0.950 | 0.0% [0.0–1.8] | 21.1% [16.5–26.6] | 3.2% [1.6–6.2] | 75.7% [70.0–80.6] | 51.9% [45.1–58.7] | 88.0% [84.7–90.6] |
-| ensemble_min | 0.050 | 2.9% [1.3–6.2] | 98.0% [95.4–99.1] | 2.0% [0.9–4.6] | 0.0% [0.0–1.5] | 4.9% [2.7–8.7] | 0.0% [0.0–0.8] |
-| ensemble_mean | 0.400 | 3.4% [1.7–6.8] | 99.6% [97.8–99.9] | 0.4% [0.1–2.2] | 0.0% [0.0–1.5] | 0.0% [0.0–1.8] | 0.0% [0.0–0.8] |
-| lexical | 0.900 | 3.4% [1.7–6.8] | 22.7% [18.0–28.3] | 3.6% [1.9–6.7] | 73.7% [67.9–78.8] | 16.5% [12.1–22.2] | n/a |
+| llama_3_3_70b_versatile | +∞ | 0.0% [0.0–1.6] | 12.1% [8.8–16.4] | 0.0% [0.0–1.3] | 87.9% [83.6–91.2] | 59.5% [53.1–65.6] | 94.7% [92.5–96.4] |
+| openai_gpt_oss_120b | 0.200 | 3.0% [1.5–6.1] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] | 0.0% [0.0–0.7] |
+| openai_gpt_oss_20b | 0.100 | 3.0% [1.5–6.1] | 97.5% [94.9–98.8] | 2.1% [1.0–4.6] | 0.4% [0.1–2.0] | 6.5% [4.0–10.4] | 0.0% [0.0–0.7] |
+| qwen_qwen3_6_27b | 0.950 | 0.9% [0.2–3.1] | 89.0% [84.8–92.1] | 8.5% [5.8–12.4] | 2.5% [1.2–5.1] | 1.3% [0.4–3.7] | 2.7% [1.6–4.5] |
+| ensemble_min | 0.000 | 0.9% [0.2–3.1] | 97.9% [95.4–99.0] | 2.1% [1.0–4.6] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] | 0.0% [0.0–0.7] |
+| ensemble_mean | 0.350 | 3.9% [2.1–7.2] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] | 0.0% [0.0–0.7] |
+| lexical | 0.900 | 3.0% [1.5–6.1] | 30.6% [25.5–36.2] | 3.2% [1.7–6.0] | 66.2% [60.5–71.5] | 19.8% [15.2–25.4] | n/a |
 
 `ensemble_min` suppresses only when EVERY judge scores above threshold — the safety-aligned aggregator under this loss asymmetry.
 
@@ -110,18 +122,18 @@ Per-category decisions, hardened α=0.05:
 | llama_3_3_70b_versatile | llama-3.3-70b-versatile | true | true | 55 | 0.0% [0.0–6.5] |
 | llama_3_3_70b_versatile | openai/gpt-oss-120b | false | true | 61 | 0.0% [0.0–5.9] |
 | llama_3_3_70b_versatile | qwen/qwen3.6-27b | false | true | 59 | 0.0% [0.0–6.1] |
-| openai_gpt_oss_120b | handwritten-authors | false | false | 34 | 94.1% [80.9–98.4] |
-| openai_gpt_oss_120b | llama-3.3-70b-versatile | false | true | 55 | 98.2% [90.4–99.7] |
-| openai_gpt_oss_120b | openai/gpt-oss-120b | true | true | 61 | 95.1% [86.5–98.3] |
-| openai_gpt_oss_120b | qwen/qwen3.6-27b | false | true | 59 | 96.6% [88.5–99.1] |
+| openai_gpt_oss_120b | handwritten-authors | false | false | 34 | 100.0% [89.8–100.0] |
+| openai_gpt_oss_120b | llama-3.3-70b-versatile | false | true | 55 | 100.0% [93.5–100.0] |
+| openai_gpt_oss_120b | openai/gpt-oss-120b | true | true | 61 | 100.0% [94.1–100.0] |
+| openai_gpt_oss_120b | qwen/qwen3.6-27b | false | true | 59 | 100.0% [93.9–100.0] |
 | openai_gpt_oss_20b | handwritten-authors | false | false | 34 | 100.0% [89.8–100.0] |
 | openai_gpt_oss_20b | llama-3.3-70b-versatile | false | true | 55 | 98.2% [90.4–99.7] |
 | openai_gpt_oss_20b | openai/gpt-oss-120b | true | true | 61 | 100.0% [94.1–100.0] |
 | openai_gpt_oss_20b | qwen/qwen3.6-27b | false | true | 59 | 93.2% [83.8–97.3] |
-| qwen_qwen3_6_27b | handwritten-authors | false | false | 34 | 5.9% [1.6–19.1] |
-| qwen_qwen3_6_27b | llama-3.3-70b-versatile | false | true | 55 | 10.9% [5.1–21.8] |
-| qwen_qwen3_6_27b | openai/gpt-oss-120b | false | true | 61 | 6.6% [2.6–15.7] |
-| qwen_qwen3_6_27b | qwen/qwen3.6-27b | true | true | 59 | 8.5% [3.7–18.4] |
+| qwen_qwen3_6_27b | handwritten-authors | false | false | 34 | 82.4% [66.5–91.7] |
+| qwen_qwen3_6_27b | llama-3.3-70b-versatile | false | true | 55 | 85.5% [73.8–92.4] |
+| qwen_qwen3_6_27b | openai/gpt-oss-120b | false | true | 61 | 88.5% [78.2–94.3] |
+| qwen_qwen3_6_27b | qwen/qwen3.6-27b | true | true | 59 | 84.7% [73.5–91.8] |
 | ensemble_min | handwritten-authors | n/a | false | 34 | 100.0% [89.8–100.0] |
 | ensemble_min | llama-3.3-70b-versatile | n/a | true | 55 | 98.2% [90.4–99.7] |
 | ensemble_min | openai/gpt-oss-120b | n/a | true | 61 | 100.0% [94.1–100.0] |
@@ -129,7 +141,7 @@ Per-category decisions, hardened α=0.05:
 | ensemble_mean | handwritten-authors | n/a | false | 34 | 100.0% [89.8–100.0] |
 | ensemble_mean | llama-3.3-70b-versatile | n/a | true | 55 | 100.0% [93.5–100.0] |
 | ensemble_mean | openai/gpt-oss-120b | n/a | true | 61 | 100.0% [94.1–100.0] |
-| ensemble_mean | qwen/qwen3.6-27b | n/a | true | 59 | 98.3% [91.0–99.7] |
+| ensemble_mean | qwen/qwen3.6-27b | n/a | true | 59 | 100.0% [93.9–100.0] |
 
 ## RQ3 — adversarial injection (held-out D4 pairs, all DIFF)
 
@@ -147,17 +159,17 @@ Per-category decisions, hardened α=0.05:
 | layered_openai_gpt_oss_20b | 15.0% [5.2–36.0] | 28.0% [14.3–47.6] |
 | hardened_openai_gpt_oss_20b | 0.0%† [0.0–16.1] | 28.0% [14.3–47.6] |
 | tightened_openai_gpt_oss_20b | 0.0%† [0.0–16.1] | 0.0%† [0.0–13.3] |
-| rawJudge_qwen_qwen3_6_27b | 0.0% [0.0–16.1] | 8.0% [2.2–25.0] |
-| layered_qwen_qwen3_6_27b | 0.0% [0.0–16.1] | 8.0% [2.2–25.0] |
-| hardened_qwen_qwen3_6_27b | 0.0%† [0.0–16.1] | 8.0% [2.2–25.0] |
+| rawJudge_qwen_qwen3_6_27b | 60.0% [38.7–78.1] | 40.0% [23.4–59.3] |
+| layered_qwen_qwen3_6_27b | 35.0% [18.1–56.7] | 24.0% [11.5–43.4] |
+| hardened_qwen_qwen3_6_27b | 0.0%† [0.0–16.1] | 24.0% [11.5–43.4] |
 | tightened_qwen_qwen3_6_27b | 0.0%† [0.0–16.1] | 0.0%† [0.0–13.3] |
-| rawJudge_ensemble_min | 15.0% [5.2–36.0] | 24.0% [11.5–43.4] |
+| rawJudge_ensemble_min | 15.0% [5.2–36.0] | 20.0% [8.9–39.1] |
 | layered_ensemble_min | 15.0% [5.2–36.0] | 28.0% [14.3–47.6] |
 | hardened_ensemble_min | 0.0%† [0.0–16.1] | 28.0% [14.3–47.6] |
 | tightened_ensemble_min | 0.0%† [0.0–16.1] | 0.0%† [0.0–13.3] |
-| rawJudge_ensemble_mean | 15.0% [5.2–36.0] | 32.0% [17.2–51.6] |
-| layered_ensemble_mean | 30.0% [14.5–51.9] | 88.0% [70.0–95.8] |
-| hardened_ensemble_mean | 0.0%† [0.0–16.1] | 88.0% [70.0–95.8] |
+| rawJudge_ensemble_mean | 40.0% [21.9–61.3] | 44.0% [26.7–62.9] |
+| layered_ensemble_mean | 60.0% [38.7–78.1] | 44.0% [26.7–62.9] |
+| hardened_ensemble_mean | 0.0%† [0.0–16.1] | 44.0% [26.7–62.9] |
 | tightened_ensemble_mean | 0.0%† [0.0–16.1] | 0.0%† [0.0–13.3] |
 | rawJudge_lexical | 0.0% [0.0–16.1] | 0.0% [0.0–13.3] |
 | layered_lexical | 0.0% [0.0–16.1] | 0.0% [0.0–13.3] |
@@ -170,50 +182,50 @@ Per-category decisions, hardened α=0.05:
 
 | ablation | WS | dedup | flagged | silent | friction |
 |---|---|---|---|---|---|
-| noL0 | 2.9% [1.3–6.2] | 96.0% [92.8–97.8] | 4.0% [2.2–7.2] | 0.0% [0.0–1.5] | 4.4% [2.3–8.1] |
-| noEscalation | 2.9% [1.3–6.2] | 96.8% [93.8–98.4] | 0.0% [0.0–1.5] | 3.2% [1.6–6.2] | 0.0% [0.0–1.8] |
-| noCalibration | 1.5% [0.5–4.2] | 96.4% [93.3–98.1] | 3.6% [1.9–6.7] | 0.0% [0.0–1.5] | 4.9% [2.7–8.7] |
+| noL0 | 3.4% [1.8–6.7] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] |
+| noEscalation | 3.4% [1.8–6.7] | 100.0% [98.7–100.0] | 0.0% [0.0–1.3] | 0.0% [0.0–1.3] | 0.0% [0.0–1.6] |
+| noCalibration | 2.2% [0.9–4.9] | 99.6% [98.0–99.9] | 0.4% [0.1–2.0] | 0.0% [0.0–1.3] | 0.4% [0.1–2.4] |
 
-Judge jurisdiction: L0 settles 7.4% [5.4–10.2], the declared-field witness 19.0% [15.7–22.9], leaving 73.5% [69.3–77.4] for the judge. With the tightened witness: 36.1% [31.8–40.6] settled, 56.5% [51.9–60.9] judged.
+Judge jurisdiction: L0 settles 6.6% [4.8–9.1], the declared-field witness 17.2% [14.1–20.7], leaving 76.2% [72.3–79.7] for the judge. With the tightened witness: 34.5% [30.5–38.7] settled, 58.9% [54.6–63.0] judged.
 
 ## RQ4 — friction reduction A: per-tool calibration
 
 | scorer / α | per-tool WS | per-tool friction | per-tool dedup | global WS | global friction | global dedup |
 |---|---|---|---|---|---|---|
-| llama_3_3_70b_versatile_alpha_0.01 | 0.0% [0.0–1.8] | 54.9% [48.0–61.5] | 13.5% [9.9–18.3] | 0.0% [0.0–1.8] | 54.9% [48.0–61.5] | 13.5% [9.9–18.3] |
-| llama_3_3_70b_versatile_alpha_0.05 | 0.0% [0.0–1.8] | 54.9% [48.0–61.5] | 13.5% [9.9–18.3] | 0.0% [0.0–1.8] | 54.9% [48.0–61.5] | 13.5% [9.9–18.3] |
-| openai_gpt_oss_120b_alpha_0.01 | 0.0% [0.0–1.8] | 4.4% [2.3–8.1] | 13.5% [9.9–18.3] | 0.5% [0.1–2.7] | 2.9% [1.3–6.2] | 82.1% [76.9–86.3] |
-| openai_gpt_oss_120b_alpha_0.05 | 1.5% [0.5–4.2] | 3.4% [1.7–6.8] | 78.1% [72.6–82.8] | 2.4% [1.0–5.6] | 2.4% [1.0–5.6] | 96.8% [93.8–98.4] |
-| openai_gpt_oss_20b_alpha_0.01 | 0.0% [0.0–1.8] | 6.3% [3.7–10.5] | 13.5% [9.9–18.3] | 0.0% [0.0–1.8] | 8.7% [5.6–13.4] | 13.5% [9.9–18.3] |
-| openai_gpt_oss_20b_alpha_0.05 | 1.9% [0.8–4.9] | 4.4% [2.3–8.1] | 61.4% [55.2–67.2] | 2.9% [1.3–6.2] | 5.8% [3.4–9.9] | 97.6% [94.9–98.9] |
-| qwen_qwen3_6_27b_alpha_0.01 | 0.0% [0.0–1.8] | 52.9% [46.1–59.6] | 13.5% [9.9–18.3] | 0.0% [0.0–1.8] | 51.9% [45.1–58.7] | 13.5% [9.9–18.3] |
-| qwen_qwen3_6_27b_alpha_0.05 | 0.0% [0.0–1.8] | 52.9% [46.1–59.6] | 13.5% [9.9–18.3] | 0.0% [0.0–1.8] | 51.9% [45.1–58.7] | 21.1% [16.5–26.6] |
-| ensemble_min_alpha_0.01 | 0.0% [0.0–1.8] | 5.3% [3.0–9.3] | 13.5% [9.9–18.3] | 0.5% [0.1–2.7] | 7.3% [4.5–11.7] | 84.5% [79.5–88.4] |
-| ensemble_min_alpha_0.05 | 1.9% [0.8–4.9] | 3.9% [2.0–7.5] | 80.5% [75.1–84.9] | 2.9% [1.3–6.2] | 4.9% [2.7–8.7] | 98.0% [95.4–99.1] |
-| ensemble_mean_alpha_0.01 | 0.0% [0.0–1.8] | 3.4% [1.7–6.8] | 13.5% [9.9–18.3] | 0.5% [0.1–2.7] | 2.4% [1.0–5.6] | 94.0% [90.4–96.3] |
-| ensemble_mean_alpha_0.05 | 2.9% [1.3–6.2] | 1.0% [0.3–3.5] | 81.7% [76.4–86.0] | 3.4% [1.7–6.8] | 0.0% [0.0–1.8] | 99.6% [97.8–99.9] |
+| llama_3_3_70b_versatile_alpha_0.01 | 0.0% [0.0–1.6] | 59.5% [53.1–65.6] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 59.5% [53.1–65.6] | 12.1% [8.8–16.4] |
+| llama_3_3_70b_versatile_alpha_0.05 | 0.0% [0.0–1.6] | 59.5% [53.1–65.6] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 59.5% [53.1–65.6] | 12.1% [8.8–16.4] |
+| openai_gpt_oss_120b_alpha_0.01 | 0.0% [0.0–1.6] | 1.7% [0.7–4.3] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 0.9% [0.2–3.1] | 69.0% [63.4–74.2] |
+| openai_gpt_oss_120b_alpha_0.05 | 1.3% [0.4–3.7] | 1.3% [0.4–3.7] | 95.0% [91.8–97.0] | 3.0% [1.5–6.1] | 0.0% [0.0–1.6] | 100.0% [98.7–100.0] |
+| openai_gpt_oss_20b_alpha_0.01 | 0.0% [0.0–1.6] | 6.0% [3.6–9.9] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 9.5% [6.3–13.9] | 12.1% [8.8–16.4] |
+| openai_gpt_oss_20b_alpha_0.05 | 1.7% [0.7–4.3] | 4.3% [2.4–7.8] | 76.5% [71.2–81.1] | 3.0% [1.5–6.1] | 6.5% [4.0–10.4] | 97.5% [94.9–98.8] |
+| qwen_qwen3_6_27b_alpha_0.01 | 0.0% [0.0–1.6] | 2.2% [0.9–4.9] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 2.2% [0.9–4.9] | 12.1% [8.8–16.4] |
+| qwen_qwen3_6_27b_alpha_0.05 | 0.4% [0.1–2.4] | 1.7% [0.7–4.3] | 75.1% [69.7–79.8] | 0.9% [0.2–3.1] | 1.3% [0.4–3.7] | 89.0% [84.8–92.1] |
+| ensemble_min_alpha_0.01 | 0.0% [0.0–1.6] | 0.9% [0.2–3.1] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 0.9% [0.2–3.1] | 97.5% [94.9–98.8] |
+| ensemble_min_alpha_0.05 | 0.9% [0.2–3.1] | 0.0% [0.0–1.6] | 93.6% [90.1–95.9] | 0.9% [0.2–3.1] | 0.0% [0.0–1.6] | 97.9% [95.4–99.0] |
+| ensemble_mean_alpha_0.01 | 0.0% [0.0–1.6] | 0.9% [0.2–3.1] | 12.1% [8.8–16.4] | 0.0% [0.0–1.6] | 0.0% [0.0–1.6] | 97.5% [94.9–98.8] |
+| ensemble_mean_alpha_0.05 | 2.2% [0.9–4.9] | 0.0% [0.0–1.6] | 95.7% [92.7–97.5] | 3.9% [2.1–7.2] | 0.0% [0.0–1.6] | 100.0% [98.7–100.0] |
 
 Per-tool thresholds (openai_gpt_oss_120b_alpha_0.05):
 
 | tool | t_hi | t_lo | n cal DIFF | n cal SAME |
 |---|---|---|---:|---:|
-| charge_card | 0.200 | 0.200 | 68 | 63 |
-| create_ticket | +∞ | 0.800 | 4 | 22 |
-| post_refund | 0.850 | 0.850 | 40 | 37 |
-| send_email | +∞ | 0.700 | 14 | 27 |
-| transfer_funds | 0.150 | 0.100 | 47 | 23 |
-| wire_money | 0.800 | 0.800 | 26 | 35 |
+| charge_card | 0.200 | 0.200 | 76 | 64 |
+| create_ticket | +∞ | 0.800 | 6 | 22 |
+| post_refund | 0.850 | 0.850 | 44 | 37 |
+| send_email | 0.150 | 0.150 | 19 | 28 |
+| transfer_funds | 0.200 | 0.100 | 56 | 27 |
+| wire_money | 0.800 | 0.800 | 29 | 66 |
 
 ## Calibration-size sweep (α=0.05, 300 resamples)
 
 | n | P(t_hi=+∞) | mean WS | median WS | p95 WS | max WS | certifies m ≤ |
 |---:|---:|---:|---:|---:|---:|---:|
 | 10 | 100.0% | 0.00% | 0.00% | 0.00% | 0.00% | 0 |
-| 20 | 0.0% | 3.69% | 1.46% | 9.22% | 20.87% | 1 |
-| 30 | 0.0% | 2.58% | 0.97% | 9.22% | 9.22% | 1 |
-| 50 | 0.0% | 2.64% | 1.46% | 9.22% | 9.22% | 2 |
-| 100 | 0.0% | 3.64% | 2.91% | 9.22% | 9.22% | 5 |
-| 199 | 0.0% | 3.52% | 2.91% | 9.22% | 9.22% | 10 |
+| 20 | 0.0% | 3.18% | 2.16% | 9.48% | 22.84% | 1 |
+| 30 | 0.0% | 2.15% | 0.86% | 9.48% | 9.48% | 1 |
+| 50 | 0.0% | 3.15% | 2.16% | 9.48% | 9.48% | 2 |
+| 100 | 0.0% | 3.56% | 3.45% | 9.48% | 9.48% | 5 |
+| 230 | 0.0% | 3.26% | 3.45% | 5.60% | 9.48% | 11 |
 
 Calibration pairs required to certify level α at candidate-set size m (⌈m/α⌉−1):
 
@@ -231,19 +243,29 @@ Calibration pairs required to certify level α at candidate-set size m (⌈m/α�
 | scorer | SAME median | SAME q25 | SAME saturated | DIFF median | DIFF q90 | DIFF saturated |
 |---|---|---|---|---|---|---|
 | llama_3_3_70b_versatile | 1.000 | 1.000 | 100.0% | 0.000 | 0.000 | 100.0% |
-| openai_gpt_oss_120b | 0.950 | 0.900 | 5.5% | 0.050 | 0.400 | 4.8% |
-| openai_gpt_oss_20b | 1.000 | 1.000 | 82.6% | 0.000 | 0.050 | 87.3% |
-| qwen_qwen3_6_27b | 1.000 | 1.000 | 78.7% | 0.000 | 0.050 | 88.9% |
-| ensemble_min | 0.950 | 0.900 | 11.1% | 0.000 | 0.050 | 85.3% |
-| ensemble_mean | 0.975 | 0.950 | 10.2% | 0.025 | 0.400 | 6.6% |
-| lexical | 0.830 | 0.800 | 0.7% | 0.109 | 0.893 | 43.9% |
+| openai_gpt_oss_120b | 0.950 | 0.900 | 9.8% | 0.050 | 0.300 | 4.1% |
+| openai_gpt_oss_20b | 1.000 | 1.000 | 83.7% | 0.000 | 0.050 | 87.2% |
+| qwen_qwen3_6_27b | 1.000 | 1.000 | 88.9% | 0.000 | 0.950 | 89.5% |
+| ensemble_min | 0.950 | 0.900 | 12.4% | 0.000 | 0.000 | 95.9% |
+| ensemble_mean | 0.977 | 0.967 | 48.7% | 0.017 | 0.350 | 58.6% |
+| lexical | 0.839 | 0.807 | 4.5% | 0.125 | 0.893 | 39.6% |
 
 ## RQ4 — cost per 1000 irreversible actions
 
+Judge `openai_gpt_oss_120b`: 12 calls at batch 10, 20392 tokens total, 183.7 tokens per comparison, 2148 ms mean call latency.
+
 | witness | fraction judged | judge calls / 1000 dispatches | judge tokens / 1000 | added latency per judged dispatch | escalations / 1000 distinct actions |
 |---|---|---:|---:|---:|---:|
-| declaredWitness | 73.5% | 735 | null | null ms | 24 |
-| tightenedWitness | 56.5% | 565 | null | null ms | 15 |
+| declaredWitness | 76.2% | 762 | 140022 | 2148 ms | 0 |
+| tightenedWitness | 58.9% | 589 | 108150 | 2148 ms | 0 |
+
+Token cost per 1000 dispatches at a hypothetical rate (we measured tokens, not prices):
+
+| rate | USD / 1000 dispatches |
+|---|---:|
+| $0.1/Mtok | 0.014 |
+| $0.5/Mtok | 0.07 |
+| $1/Mtok | 0.14 |
 
 ## RQ6 — multiple committed candidates
 
@@ -387,7 +409,20 @@ Semantic suppression scores observed: min 0.95, max 0.98, n=9, against t_hi=0.90
 
 ## Human-verified labels
 
-**PENDING.** annotation sheet exported, but no responses-*.csv present — no human labels exist
-A blinded, stratified sheet of 100 items is exported and waiting: {"same_paraphrase":20,"same_adversarial":20,"diff_near_miss":20,"diff_text_only":20,"attack_injection":20}.
-No human labels exist. Nothing in the paper may be attributed to human annotation.
+Annotators: compound-mini, compound, qwen27b. Fully annotated: 117/154.
+Fleiss κ = 0.829; adjudication rate 0.0% [0.0–3.2]; agreement with construction 88.0% [80.9–92.7].
+
+| stratum | n | agreement with construction | UNSURE rate | adjudication rate |
+|---|---:|---|---|---|
+| same_mechanical | 12 | 100.0% [75.8–100.0] | 0.0% [0.0–9.6] | 0.0% [0.0–24.2] |
+| same_paraphrase | 10 | 100.0% [72.2–100.0] | 0.0% [0.0–11.4] | 0.0% [0.0–27.8] |
+| same_loose_value | 12 | 100.0% [75.8–100.0] | 0.0% [0.0–9.6] | 0.0% [0.0–24.2] |
+| same_adversarial | 12 | 100.0% [75.8–100.0] | 0.0% [0.0–9.6] | 0.0% [0.0–24.2] |
+| diff_near_miss | 14 | 92.9% [68.5–98.7] | 0.0% [0.0–8.4] | 0.0% [0.0–21.5] |
+| diff_text_only | 12 | 50.0% [25.4–74.6] | 0.0% [0.0–9.6] | 0.0% [0.0–24.2] |
+| diff_semantic | 8 | 87.5% [52.9–97.8] | 0.0% [0.0–13.8] | 0.0% [0.0–32.4] |
+| attack_field | 12 | 100.0% [75.8–100.0] | 0.0% [0.0–9.6] | 0.0% [0.0–24.2] |
+| attack_text | 11 | 45.5% [21.3–72.0] | 0.0% [0.0–10.4] | 0.0% [0.0–25.9] |
+| attack_encoding | 11 | 100.0% [74.1–100.0] | 0.0% [0.0–10.4] | 0.0% [0.0–25.9] |
+| misdeclared | 3 | 100.0% [43.9–100.0] | 0.0% [0.0–29.9] | 0.0% [0.0–56.1] |
 

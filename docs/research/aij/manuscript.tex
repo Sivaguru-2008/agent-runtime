@@ -1,0 +1,117 @@
+%% Effect Identity for LLM Agents: Schema-Determined Limits on Duplicate Suppression
+%% Manuscript for Artificial Intelligence (Elsevier), ISSN 0004-3702.
+%%
+%% Build (figure data from results/ -> number checks -> pdflatex/bibtex):
+%%   node docs/research/aij/build.mjs
+%% Every interval of the form NN.N\%~[lo--hi] in this manuscript is checked
+%% against research/effect-identity/results/*.json by the build; see
+%% research/effect-identity/src/experiments/checkPaper.js.
+\documentclass[preprint,review,12pt]{elsarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{stmaryrd}
+\usepackage{amsthm}
+\usepackage{longtable}
+\usepackage{booktabs,array,tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric,backgrounds,patterns}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage[shortlabels]{enumitem}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\usepackage{lineno}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\WS}{\mathrm{WS}}
+\newcommand{\Res}{\mathrm{Res}}
+\newcommand{\Dec}{\mathrm{Dec}}
+\newcommand{\thi}{t_{\mathrm{hi}}}
+\newcommand{\tlo}{t_{\mathrm{lo}}}
+\newcommand{\SUP}{\textsc{suppress}}
+\newcommand{\EXE}{\textsc{execute}}
+\newcommand{\ESC}{\textsc{escalate}}
+\newcommand{\iv}[3]{#1\%~[#2--#3]}
+
+%% Float placement: the double-spaced review layout starves the default float
+%% areas, which pushes every float to the end of the document. These values let
+%% a float occupy most of a page so that it lands near the text that cites it.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.65}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+
+\journal{Artificial Intelligence}
+
+\begin{document}
+
+\begin{frontmatter}
+\title{Effect Identity for LLM Agents:\\ Schema-Determined Limits on Duplicate Suppression}
+
+\author[aff1]{Sivaguru R.~M.\corref{cor1}}
+\ead{sivagurumurugan1@gmail.com}
+\cortext[cor1]{Corresponding author.}
+\affiliation[aff1]{organization={Independent Research, AgentRuntime Project},
+            city={Chennai},
+            state={Tamil Nadu},
+            country={India}}
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+%% Keep in sync with highlights.txt, the copy uploaded as a separate file.
+\begin{highlights}
+\item Effect identity for LLM agents is treated as a decision under asymmetric loss.
+\item Certifier and refuter settle what the schema pins; only the residual is judged.
+\item A conformal bound holds for the max-over-candidates statistic the fence uses.
+\item Refining the schema shrinks the calibration pool: an exact refinement dilemma.
+\item Canonical keys dedupe 12.1\%; the fence 94.7\% at 1.7\% wrong suppression.
+\end{highlights}
+
+\begin{keyword}
+effect identity \sep duplicate suppression \sep LLM agents \sep conformal prediction \sep multiple comparisons \sep prompt injection \sep idempotency
+\end{keyword}
+\end{frontmatter}
+
+\linenumbers
+\sloppy
+
+\input{sections/introduction}
+\input{sections/related}
+\input{sections/problem}
+\input{sections/framework}
+\input{sections/fence}
+\input{sections/theory}
+\input{sections/method}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/limitations}
+\input{sections/conclusion}
+\input{sections/declarations}
+
+\appendix
+\input{sections/appendix-proofs}
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}

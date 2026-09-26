@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Paraphrase generator arms and the validator's rejections at generation time. The hand-written arm has no model in the loop. Mechanical and hand-specified pairs (650) have no generator.}\label{tab:s2}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrrll@{}}
+\toprule
+Generator arm & pairs & cal & test & S2 kept/dropped & S4 kept/dropped \\
+\midrule
+handwritten-authors & 68 & 34 & 34 & 68/0 & 0/0 \\
+llama-3.3-70b-versatile & 109 & 54 & 55 & 60/8 & 49/19 \\
+openai/gpt-oss-120b & 121 & 60 & 61 & 59/9 & 62/6 \\
+qwen/qwen3.6-27b & 118 & 59 & 59 & 66/2 & 52/6 \\
+\bottomrule
+\end{tabular}}
+\end{table}

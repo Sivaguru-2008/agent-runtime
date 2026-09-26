@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Cost accounting, measured over each judge's final scoring session (batches of ten pairs, so the system prompt is amortised over the batch). Judge calls per 1,000 dispatches follow from the judge's jurisdiction (76.2\% declared, 58.9\% refined).}\label{tab:s17}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Judge & session pairs & tokens per comparison & mean latency per call (ms) & tokens per 1,000 (declared) & tokens per 1,000 (refined) \\
+\midrule
+GPT-OSS-120B & 111 & 183.7 & 2148 & 140,022 & 108,150 \\
+Qwen3.6-27B & 61 & 513.2 & 6044 & 391,162 & 302,125 \\
+GPT-OSS-20B & 111 & 199.1 & 1611 & 151,716 & 117,182 \\
+\bottomrule
+\end{tabular}}
+\end{table}

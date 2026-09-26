@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Refinement decomposition. The size-only counterfactual draws 5,000 random subsets of the declared pool at the refined pool's size and recomputes the threshold; ``$P(\le$ observed$)$'' is the share of those draws whose deduplication is at most the observed refined value.}\label{tab:s14}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrrlrr@{}}
+\toprule
+Judge & declared $n$ & refined $n$ & refined rank & refined dedup & size-only mean dedup & $P(\le$ observed$)$ \\
+\midrule
+GPT-OSS-120B & 142 & 49 & 2 & 69.0\%~[63.4--74.2] & 88.4\% & 0.116 \\
+GPT-OSS-20B & 142 & 49 & 2 & 12.1\%~[8.8--16.4] & 55.1\% & 0.439 \\
+Qwen3.6-27B & 139 & 48 & 2 & 12.1\%~[8.8--16.4] & 57.2\% & 0.419 \\
+\bottomrule
+\end{tabular}}
+\end{table}

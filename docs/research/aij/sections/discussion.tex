@@ -1,0 +1,23 @@
+\section{Discussion}\label{sec:discussion}
+
+\subsection{What the evidence supports}
+
+The most robust finding is an asymmetry between the two error directions. Wrong suppression stayed below the declared $\alpha$ across three judges (1.7\%, 1.3\%, 0.9\%), three labellings of the ground truth (1.7\%, 1.9\%, 2.2\%) and the mean over 200 seed-level splits (2.7\%, 2.2\%, 1.8\%), while deduplication moved from 94.7\% to 82.6\% across judges, from 94.7\% to 27.6\% across labellings, and to 69.0\% or 12.1\% under schema refinement. That is what a bound on one direction and no bound on the other ought to look like from outside, and we do not read it as evidence that the mechanism is more accurate than alternatives. Part of this stability is produced by conservatism: on these judges the conformal threshold sits well inside the region of thresholds that happen to be safe (Section~\ref{sec:res-components}), so a hand-tuned threshold can match or beat the calibrated one on this corpus. What the calibrated rule adds is a guarantee that does not depend on having tuned against labelled test data, a correction that remains valid when several effects are committed per tool, and a failure mode---no semantic suppression---that is safe when the calibration data run out.
+
+The second finding is that the schema, not the judge, determines where the mechanism can be trusted. Every benign wrong suppression we observed, and every label disagreement of the model panel but one, fell on a pair whose distinguishing information lives only in free text. That is partly true by construction (Proposition~\ref{prop:residual}), but the operational consequence is not: the only intervention that removed an attack class was a declaration change, and the same change paid for its safety with deduplication, through a calibration pool that is both smaller and harder. Schema refinement is therefore not a free improvement; it strengthens the safety-critical direction on the fragment it decides and pushes cost into the recoverable direction on the fragment it does not.
+
+\subsection{Practical guidance}
+
+The results translate into a short procedure for anyone deploying this mechanism.
+\begin{enumerate}[(1),leftmargin=*,itemsep=1pt]
+\item Declare every act-determining field as a typed field where possible, and treat an effect-determining field left in free text as a known exposure to the judge and to injection.
+\item Calibrate each configuration on its own jurisdiction, and recalibrate whenever a layer, the judge or the schema changes; a threshold inherited across such a change is not covered by Theorem~\ref{thm:bound}.
+\item Size the calibration pool for the candidate budget: at $\alpha=0.05$, at least 19 distinct residual pairs to suppress semantically at all and $m/\alpha-1$ to certify $m$ committed candidates (199 for $m=10$).
+\item Expect the escalation band to matter only when $\tlo<\thi$, and check how many duplicate scores tie with $\thi$ on a coarse score grid, because ties decide whether a missed duplicate is flagged or silent.
+\item Prefer a verified postcondition on world state where one exists~\cite{mansoor2026verified}, and a provider idempotency key derived from a projection that is complete for identity where the schema permits it (Proposition~\ref{prop:compose}, Case A).
+\item Audit a sample of semantic suppressions. The bound is marginal, a particular deployment can exceed it, and a wrong suppression leaves no trace unless suppressions are logged and reviewed.
+\end{enumerate}
+
+\subsection{Beyond duplication}
+
+Effect identity is one instance of a recurring shape in agent safety: a binary decision with sharply asymmetric consequences, no complete decidable procedure, and a stochastic model as the only general-purpose decider. Authorisation (``is this action within what the user approved?'') and content release share the same shape. The recipe---find a decidable certifier and a decidable refuter, name the residual, calibrate the deployed statistic on the residual in the safety-critical direction only, make the undecided band auditable, report the calibration budget---transfers across both evaluated instances (duplicate suppression, Section~\ref{sec:res-main}; action authorisation, Section~\ref{sec:res-authz}), while further domains such as content release remain open for study.

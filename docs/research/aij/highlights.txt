@@ -1,0 +1,5 @@
+Effect identity for LLM agents is treated as a decision under asymmetric loss.
+Certifier and refuter settle what the schema pins; only the residual is judged.
+A conformal bound holds for the max-over-candidates statistic the fence uses.
+Refining the schema shrinks the calibration pool: an exact refinement dilemma.
+Canonical keys dedupe 12.1%; the fence 94.7% at 1.7% wrong suppression.

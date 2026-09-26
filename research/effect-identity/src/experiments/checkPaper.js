@@ -21,6 +21,13 @@ import { fileURLToPath } from "node:url";
 
 const base = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const PAPER = resolve(base, "..", "..", "docs", "research", "Semantic-Effect-Identity-Paper.md");
+// --manuscript a.tex,b.tex checks those files instead of the long-form Markdown.
+// LaTeX is normalised first (\% → %, -- → –, ~ → space, $\dagger$ → †), so an
+// interval typeset as `94.7\%~[91.4--96.7]` is checked exactly like the Markdown.
+const argIdx = process.argv.indexOf("--manuscript");
+const TARGETS = argIdx !== -1 && process.argv[argIdx + 1]
+  ? process.argv[argIdx + 1].split(",").map((p) => resolve(process.cwd(), p))
+  : [PAPER];
 const RESULT_FILES = [
   "experiments.json", "crash_replay.json", "multi_candidate.json",
   "residual_calibration.json", "cross_family.json", "sensitivity.json",
@@ -30,7 +37,15 @@ const RESULT_FILES = [
   // produce rates quoted in the manuscript, so both must be checkable; without
   // them the checker would silently pass every number in those sections.
   "human_annotation.json", "seed_split.json",
+  // The panel analysis as originally published (commit 226a355), preserved
+  // verbatim so the long-form manuscript's quotes of it stay traceable, and the
+  // analyses added in the AIJ revision.
+  "human_annotation.published-20260825.json", "aij_analyses.json",
+  "authz_v1.json",
 ];
+const normaliseTex = (s) => s
+  .replace(/\$\^?\{?\\dagger\}?\$/g, "†").replace(/\\dagger/g, "†")
+  .replace(/\\%/g, "%").replace(/%\}/g, "%").replace(/--/g, "–").replace(/~/g, " ").replace(/\\,/g, "");
 
 /** Walk any JSON and collect every {value, ci95:{lo,hi}} rate record. */
 function collectRates(node, path, sink) {
@@ -69,35 +84,39 @@ if (process.argv.includes("--list")) {
 
 // Index by the triple the paper quotes. Tolerance covers the paper's rounding.
 const near = (a, b) => Math.abs(a - b) <= 0.06;
-const paper = readFileSync(PAPER, "utf8");
 
 // Intervals are written `12.3% [4.5–67.8]`, optionally with a dagger before the
 // bracket, optionally bolded. The dash is an en-dash in the manuscript.
 const QUOTED = /(\d+(?:\.\d+)?)%(?:†)?\s*\[(\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\]/g;
 
 const unmatched = [];
-const seen = new Set();
-let total = 0;
+let total = 0, distinct = 0;
 
-for (const m of paper.matchAll(QUOTED)) {
-  const [full, p, lo, hi] = m;
-  total++;
-  if (seen.has(full)) continue;
-  seen.add(full);
-  const hit = rates.some((r) => near(r.pct, +p) && near(r.lo, +lo) && near(r.hi, +hi));
-  if (!hit) {
-    const line = paper.slice(0, m.index).split("\n").length;
-    unmatched.push({ quoted: full, line });
+for (const target of TARGETS) {
+  const raw = readFileSync(target, "utf8");
+  const paper = target.endsWith(".tex") ? normaliseTex(raw) : raw;
+  const seen = new Set();
+  for (const m of paper.matchAll(QUOTED)) {
+    const [full, p, lo, hi] = m;
+    total++;
+    if (seen.has(full)) continue;
+    seen.add(full);
+    distinct++;
+    const hit = rates.some((r) => near(r.pct, +p) && near(r.lo, +lo) && near(r.hi, +hi));
+    if (!hit) {
+      const line = paper.slice(0, m.index).split("\n").length;
+      unmatched.push({ quoted: full, line, file: target.split(/[\\/]/).pop() });
+    }
   }
 }
 
-console.log(`checked ${total} quoted intervals (${seen.size} distinct) against ${rates.length} computed rates`);
+console.log(`checked ${total} quoted intervals (${distinct} distinct) in ${TARGETS.length} file(s) against ${rates.length} computed rates`);
 if (unmatched.length === 0) {
   console.log("all quoted intervals matched a computed rate");
   process.exit(0);
 }
 
 console.error(`\n${unmatched.length} quoted interval(s) with no matching computed rate:`);
-for (const u of unmatched) console.error(`  line ${u.line}: ${u.quoted}`);
+for (const u of unmatched) console.error(`  ${u.file}:${u.line}: ${u.quoted}`);
 console.error("\nEach is either stale, a typo, or computed by a script whose output is not in results/.");
 process.exit(1);

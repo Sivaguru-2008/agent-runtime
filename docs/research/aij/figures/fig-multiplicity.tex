@@ -1,0 +1,22 @@
+\begin{figure}[!tbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.70\linewidth, height=5.4cm,
+  xmode=log, log basis x=10, xtick={1,2,5,10,25,50}, xticklabels={1,2,5,10,25,50},
+  xlabel={candidate-set size $m$}, ylabel={wrong-suppression probability (\%)},
+  ymin=0, ymax=100, grid=major, grid style={gray!20},
+  legend style={font=\footnotesize, at={(0.02,0.98)}, anchor=north west, draw=none, fill=white, fill opacity=0.85, text opacity=1},
+  tick label style={font=\footnotesize}, label style={font=\footnotesize}]
+\addplot[thick, mark=square*, red!70!black] table[x=m, y=uncorrected] {figures/data/multiplicity.dat};
+\addlegendentry{uncorrected pairwise threshold at level $\alpha$}
+\addplot[thick, mark=*, blue!70!black] table[x=m, y=corrected] {figures/data/multiplicity.dat};
+\addlegendentry{corrected threshold at level $\alpha/m$ (Theorem~\ref{thm:bound})}
+\addplot[dashed, gray, domain=1:50, samples=2] {5};
+\addlegendentry{$\alpha=0.05$}
+\draw[gray!70, densely dotted] (axis cs:10.05,0) -- (axis cs:10.05,100) node[pos=0.55, right, font=\scriptsize, text=gray!60!black, align=left]{budget\\$m=\alpha(n+1)$};
+\end{axis}
+\end{tikzpicture}}
+\caption{Why the correction is needed. Monte-Carlo simulation with exchangeable continuous scores, calibration pool $n=200$, $\alpha=0.05$, 2,000 replications per $m$: the probability that a request distinct from all $m$ candidates is suppressed. The uncorrected rule reaches 89.0\% at $m=50$. The corrected rule stays within Monte-Carlo error of $\alpha$ and switches semantic suppression off once $m$ exceeds the budget $\alpha(n+1)$, which is the intended failure direction.}\label{fig:multiplicity}
+\end{figure}

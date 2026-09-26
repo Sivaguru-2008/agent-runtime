@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Re-derivation of the headline rates over the annotated subset, for each state of the response files. ``As executed'' is the preregistered computation, which includes items with no judge score; ``scored only'' restricts to the items the primary judge scored. Benign excludes the held-out injection pairs.}\label{tab:s16b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llrllll@{}}
+\toprule
+Collection & labels & items & WS (as executed) & dedup (as executed) & WS (scored only) & WS benign (scored only) \\
+\midrule
+preregistered & constructed & 117 & 9.9\%~[4.9--19.0] & 78.3\%~[64.4--87.7] & 18.2\%~[7.3--38.5] & 7.1\%~[1.3--31.5] \\
+preregistered & panel & 117 & 10.5\%~[4.9--21.1] & 61.7\%~[49.0--72.9] & 15.0\%~[5.2--36.0] & 0.0\%~[0.0--24.2] \\
+head0dc8464 & constructed & 118 & 9.7\%~[4.8--18.7] & 78.3\%~[64.4--87.7] & 18.2\%~[7.3--38.5] & 7.1\%~[1.3--31.5] \\
+head0dc8464 & panel & 118 & 10.5\%~[4.9--21.1] & 60.7\%~[48.1--71.9] & 15.0\%~[5.2--36.0] & 0.0\%~[0.0--24.2] \\
+workingTree & constructed & 140 & 10.6\%~[5.7--18.9] & 74.5\%~[61.7--84.2] & 20.0\%~[8.9--39.1] & 6.7\%~[1.2--29.8] \\
+workingTree & panel & 140 & 11.9\%~[6.2--21.8] & 57.5\%~[46.1--68.2] & 17.4\%~[7.0--37.1] & 0.0\%~[0.0--22.8] \\
+\bottomrule
+\end{tabular}}
+\end{table}

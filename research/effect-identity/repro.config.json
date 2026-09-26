@@ -172,8 +172,20 @@
     "conformalAudit": "node src/experiments/conformalAudit.js --corpus v1",
     "crashReplayV2": "node src/experiments/crashReplayV2.js --trials 48 --arms duplicate,distinct --judge openai/gpt-oss-120b",
     "annotationExport": "node src/experiments/annotation.js --export",
-    "annotationIngest": "node src/experiments/annotation.js --ingest",
-    "verify": "node src/experiments/verify.js"
+    "annotationIngest": "node src/experiments/annotation.js --ingest --responses-dir annotation/preregistered-collection --channel M",
+    "annotationFreezeCheck": "node src/experiments/annotationFreeze.js",
+    "multiCandidate": "node src/experiments/multiCandidate.js --K 50 --units-diff 40 --units-same 20 --judge llama-3.1-8b-instant",
+    "nonLlmBaseline": "node src/experiments/nonLlmBaseline.js",
+    "seedSplit": "node src/experiments/seedSplit.js",
+    "sensitivity": "node src/experiments/sensitivity.js",
+    "thresholdSweep": "node src/experiments/thresholdSweep.js",
+    "weakJudge": "node src/experiments/weakJudge.js",
+    "crossFamily": "node src/experiments/crossFamily.js",
+    "aijAnalyses": "node src/experiments/aijAnalyses.js",
+    "report": "node src/experiments/report.js > results/REPORT.md",
+    "verify": "node src/experiments/verify.js",
+    "checkPaper": "node src/experiments/checkPaper.js",
+    "buildPaper": "node ../../docs/research/aij/build.mjs"
   },
   "crashReplay": {
     "trialsPerArm": 48,
@@ -202,22 +214,48 @@
     "thresholdSource": "results/residual_calibration.json -> <judge>_a0.05_residualOnly (the jurisdiction-matched hardened configuration)",
     "providerIdempotency": "ABSENT BY DESIGN — the mock provider presents no idempotency key, so the commit window stays open and measurable rather than being closed by an assumption"
   },
-  "humanAnnotation": {
-    "status": "PENDING",
+  "labelValidation": {
+    "$comment": "Two channels. H is human annotators and was NEVER COLLECTED. M is a panel of language models and ran. They are never pooled and never described interchangeably.",
     "harness": "src/experiments/annotation.js",
+    "preregistration": "annotation/PREREGISTRATION.md (written and committed before any judgement was collected)",
+    "freeze": "annotation/FREEZE.json — 154 items, sheet hash 66a174e1392093c14e911d6130b235b3d4af3b8116c0a81ef27830174a249a9c, export seed 20260818; re-checked by annotationFreezeCheck",
     "strata": 11,
     "perStratumTarget": 15,
-    "plannedAnnotators": 3,
-    "adjudication": "majority of 3; non-majority items go to a fourth independent adjudicator",
+    "annotators": 3,
+    "adjudication": "majority of 3; ties and UNSURE-dominated items go to a fourth independent adjudicator, never to a coin flip",
     "reliability": [
       "Fleiss kappa",
       "Krippendorff alpha",
       "per-stratum agreement",
       "adjudication rate"
     ],
-    "blinding": "annotators see the two calls only; no labels, predictions, thresholds, attack flags; presentation order and A/B assignment randomised",
-    "whatRemains": "collect responses-<name>.csv from at least 3 independent annotators, plus responses-adjudicator-<name>.csv for non-majority items",
-    "mayNotBeCited": "No number from this study may appear in the manuscript until results/human_annotation.json reports status COMPLETE."
+    "blinding": "annotators see the two calls only; no labels, predictions, thresholds, attack flags; presentation order and A/B assignment randomised per annotator by the instrument",
+    "channelM": {
+      "status": "COMPLETE",
+      "whatItIs": "a blinded panel of language models — NOT a human study, and never to be reported as one",
+      "ranAt": "2026-08-25",
+      "panel": "groq/compound, groq/compound-mini, qwen/qwen3.6-27b; adjudicator openai/gpt-oss-safeguard-20b; openai/gpt-oss-120b barred as the judge whose scores the re-derivation uses",
+      "responsesAnalysed": "annotation/preregistered-collection (earliest committed state, 117 fully annotated items)",
+      "result": "results/human_annotation.json",
+      "publishedOriginal": "results/human_annotation.published-20260825.json (116 items; preserved verbatim for comparison)",
+      "disclosedDefects": [
+        "93 of the 154 sheet items come from an extension corpus whose judge scores were never persisted; in the preregistered 'as executed' re-derivation they abstain, escalate, and so enter the wrong-suppression denominator without being able to enter its numerator. 12 of the 14 label flips are such items. Both 'as executed' and 'scored only' forms are reported.",
+        "The published figures are not exactly reproducible from any committed state of the response files: the analysis ran against live files. See annotation/RESPONSE-PROVENANCE.md."
+      ]
+    },
+    "channelH": {
+      "status": "NOT COLLECTED",
+      "protocol": "annotation/CHANNEL-H-PROTOCOL.md",
+      "whatRemains": "recruit 3 independent annotators and 1 adjudicator; collect responses-<name>.csv into a directory of its own; commit it; then run annotation.js --ingest --responses-dir <dir> --channel H",
+      "mustNotBeClaimed": "No manuscript may describe the existing evidence as human validation; verify.js fails the build if one does."
+    }
+  },
+  "cost": {
+    "source": "results/aij_analyses.json -> A8_cost, computed by aijAnalyses.js from the judge session metadata in results/judge_meta-*.json",
+    "denominator": "tokens of a scoring session divided by the pairs scored IN THAT SESSION",
+    "priorDefect": "an earlier cost model divided one session's tokens by every pair ever scored, understating cost by roughly an order of magnitude (5,431 tokens per 1,000 dispatches reported; ~140,000 measured for the primary judge). Corrected 2026-09.",
+    "batching": "judges are called in batches of 10 pairs, so the system prompt is amortised over the batch; per-comparison figures inherit that batching and would be higher at batch size 1",
+    "callsPer1000Dispatches": "follows from the judge's jurisdiction: 762 calls per 1,000 dispatches under the declared schema (76.2% residual), 589 under the refined one (58.9%)"
   },
   "assertions": {
     "enforcedBy": "src/experiments/verify.js",

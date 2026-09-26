@@ -1,0 +1,26 @@
+\section{Proofs}\label{app:proofs}
+
+\begin{proof}[Proof of Proposition~\ref{prop:equivalence}]
+Suppose substituting the recorded response of $x'$ for $x$ drops nothing owed. By the first condition $x$ denotes one act $a=\llbracket x\rrbracket_t$ and $x'$ one act $a'=\llbracket x'\rrbracket_t$. If $a\ne a'$, the recorded response of $x'$ reflects $a'$ by the second condition, and returning it in place of executing $x$ drops $a$, a contradiction; hence $a=a'$. Conversely, if $a=a'$ the substitution returns the response of the act that $x$ denotes and drops nothing. The test therefore coincides with equality of denotations, which is reflexive, symmetric and transitive.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:lattice}]
+If $\mathsf{C}_1,\mathsf{C}_2\subseteq{\approx_t}$ then $\mathsf{C}_1\cup\mathsf{C}_2$ and $\mathsf{C}_1\cap\mathsf{C}_2$ are subsets of $\approx_t$; $\emptyset$ and $\approx_t$ are certifiers and bound the family. The argument for refuters is identical with the complement of $\approx_t$ in place of $\approx_t$. If $\mathsf{C}_1,\dots,\mathsf{C}_k$ are decidable, running their decision procedures and taking the disjunction decides $\bigcup_i\mathsf{C}_i$; decidability need not survive countable unions, so only finite unions are claimed, and only finite unions are used. A relation that is both a certifier and a refuter satisfies $R\subseteq{\approx_t}$ and $R\cap{\approx_t}=\emptyset$, hence $R=\emptyset$.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:impossible}]
+Let a threshold rule suppress iff the score exceeds $\tau$. Zero wrong suppression requires that $F_{\mathrm{diff}}$ place no mass above $\tau$. Zero silent escape without a band requires that $F_{\mathrm{same}}$ place no mass at or below $\tau$. Together these require that every score with positive probability under $F_{\mathrm{diff}}$ be at most $\tau$ and every score with positive probability under $F_{\mathrm{same}}$ exceed $\tau$, contradicting overlap. With a band $(\tlo,\thi]$, silent escape can be removed by widening the band over the overlap, but the duplicates in the overlap are then flagged rather than suppressed, so deduplication falls by the overlap mass; the error is relocated, not removed. A decision that does not consult the score is not subject to this argument.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:amo}]
+Consider the first execution for $\mathit{op}$ to reach the insert. By A3 the insert either creates the commit row or observes an existing one. Any later execution computing $\mathit{op}$---in the same process or a fresh one---computes the same identifier by A1 and A2, finds the committed row, and returns the recorded response on the certifier branch without dispatching. By A7 no second execution is inside the interval between its lookup and its insert while the first is, so the dispatch branch is entered at most once before a commit row exists, and by A4 that branch dispatches the effect once and commits only on success. If the process dies after the dispatch and before the insert, no commit row exists, the intent remains \textsc{pending}, and a later execution finds no row and may dispatch again; this is the stated exception.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:compose}]
+\emph{Case A.} If the fence suppresses, nothing is dispatched. If it executes and the process dies inside the commit window, a later execution re-dispatches the same act, possibly paraphrased. By paraphrase invariance both dispatches carry the same key, so by A8 the provider applies at most one effect; by completeness no distinct act carries that key, so no legitimate act is absorbed. Outside the window, Proposition~\ref{prop:amo} applies. If the schema satisfies A5$''$, $\sigma_t$ is both invariant and complete, so $\pi_t=\sigma_t$ qualifies.
+\emph{Case B.} Without A5$''$ there exist $x\not\approx_t x'$ with $\sigma_t(x)=\sigma_t(x')$; presented to a provider obeying A8 under key $\sigma_t$, the second is absorbed although it is a distinct act, which is a wrong suppression invisible to the local log. The canonical identifier is admissible by Proposition~\ref{prop:sound} but changes under paraphrase, because $\kappa_t$ normalises free text without interpreting it, so a paraphrased retry presents a new key and is applied.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:structure}]
+If $x\approx_t x'$ but the fence computes different identifiers, the log's uniqueness constraint does not fire and a provider keyed on those identifiers receives two keys; under A8 it is obliged to apply both. If $x\not\approx_t x'$ but they receive the same identifier, both the log and the provider absorb the second, and both behave as specified. In either case the failure is attributable to identity recognition alone. Conversely, under Case A of Proposition~\ref{prop:compose} the provider applies at most one effect per act whatever the local fence serialised, so A7 is not needed for at-most-once application.
+\end{proof}

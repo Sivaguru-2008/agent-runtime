@@ -1,0 +1,36 @@
+\begin{figure}[!tbp]
+\centering
+\scalebox{0.80}{%
+\begin{tikzpicture}[
+  font=\footnotesize, node distance=0.30cm,
+  fstep/.style={draw, rounded corners=2pt, align=center, inner sep=3pt, text width=4.3cm, fill=white},
+  ftest/.style={draw, diamond, aspect=2.6, align=center, inner sep=0.5pt, text width=2.6cm, fill=gray!6},
+  fout/.style={draw, rounded corners=2pt, align=center, inner sep=3pt, text width=2.9cm, font=\scriptsize},
+  farr/.style={-{Latex[length=1.8mm]}, thick}]
+  \node[fstep] (in) {request $(t,x)$; committed set $\mathcal{C}_{r,t}$};
+  \node[ftest, below=of in] (q0) {$\kappa_t(x)=\kappa_t(c)$\\ for some $c$?};
+  \node[fstep, below=of q0] (w) {$C\gets\{c:\sigma_t(c)=\sigma_t(x)\}$,\ \ $m\gets|C|$};
+  \node[ftest, below=of w] (q1) {$m=0$?};
+  \node[fstep, below=of q1] (j) {$S^\ast\gets\max_{c\in C}J(t,x,c)$\\ (abstentions excluded)};
+  \node[ftest, below=of j] (q2) {$S^\ast>t_{\mathrm{hi}}(m)$?};
+  \node[ftest, below=of q2] (q3) {$S^\ast>t_{\mathrm{lo}}$?};
+  \node[fout, right=1.2cm of q0, fill=green!8] (s0) {\textsc{suppress}\\ certified; exact under A5};
+  \node[fout, right=1.2cm of q1, fill=blue!6] (e0) {\textsc{execute}\\ refuted or no candidate; exact under A5$'$};
+  \node[fout, right=1.2cm of q2, fill=green!8] (s1) {\textsc{suppress}\\ $P(\text{wrong})\le\alpha$ under A6 (Thm.~\ref{thm:bound})};
+  \node[fout, right=1.2cm of q3, fill=orange!12] (x1) {\textsc{escalate}\\ execute and flag};
+  \node[fout, below=0.5cm of q3, fill=blue!6] (e1) {\textsc{execute}};
+  \draw[farr] (in) -- (q0);
+  \draw[farr] (q0) -- node[above, font=\scriptsize]{yes} (s0);
+  \draw[farr] (q0) -- node[right, font=\scriptsize]{no} (w);
+  \draw[farr] (w) -- (q1);
+  \draw[farr] (q1) -- node[above, font=\scriptsize]{yes} (e0);
+  \draw[farr] (q1) -- node[right, font=\scriptsize]{no} (j);
+  \draw[farr] (j) -- (q2);
+  \draw[farr] (q2) -- node[above, font=\scriptsize]{yes} (s1);
+  \draw[farr] (q2) -- node[right, font=\scriptsize]{no} (q3);
+  \draw[farr] (q3) -- node[above, font=\scriptsize]{yes} (x1);
+  \draw[farr] (q3) -- node[right, font=\scriptsize]{no} (e1);
+  \node[align=left, font=\scriptsize, text width=4.4cm, left=0.5cm of j] {$t_{\mathrm{hi}}(m)=+\infty$ when $m>\alpha(n+1)$: no semantic suppression.\\[2pt] All candidates abstain: \textsc{escalate}.};
+\end{tikzpicture}}
+\caption{Decision flow for one request. The certifier and the refuter settle their pairs without a model call; only the residual reaches the judge, and the judge can cause suppression only through the multiplicity-corrected threshold. Every path that is not certified ends in execution, flagged or not.}\label{fig:flow}
+\end{figure}

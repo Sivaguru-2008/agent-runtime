@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T04:22:33.458Z",
+  "generatedAt": "2026-09-14T12:55:02.616Z",
   "gamma": 0.05,
   "alphas": [
     0.01,
@@ -42608,31 +42608,31 @@
       "inputTokens": 12640,
       "outputTokens": 7752,
       "meanCallLatencyMs": 2148,
-      "tokensPerComparison": 19.129455909943715,
+      "tokensPerComparison": 183.7117117117117,
       "batchedLatencyMsPerComparison": 214.8
     },
     "declaredWitness": {
       "fractionJudged": 0.7621832358674464,
       "judgeCallsPer1000": 762,
-      "judgeTokensPer1000": 14580,
+      "judgeTokensPer1000": 140022,
       "addedLatencyMsPerJudgedDispatch": 2148,
       "escalationsPer1000DistinctActions": 0,
       "usdPer1000AtRate": {
-        "$0.1/Mtok": 0.0015,
-        "$0.5/Mtok": 0.0073,
-        "$1/Mtok": 0.0146
+        "$0.1/Mtok": 0.014,
+        "$0.5/Mtok": 0.07,
+        "$1/Mtok": 0.14
       }
     },
     "tightenedWitness": {
       "fractionJudged": 0.5886939571150097,
       "judgeCallsPer1000": 589,
-      "judgeTokensPer1000": 11261,
+      "judgeTokensPer1000": 108150,
       "addedLatencyMsPerJudgedDispatch": 2148,
       "escalationsPer1000DistinctActions": 0,
       "usdPer1000AtRate": {
-        "$0.1/Mtok": 0.0011,
-        "$0.5/Mtok": 0.0056,
-        "$1/Mtok": 0.0113
+        "$0.1/Mtok": 0.0108,
+        "$0.5/Mtok": 0.0541,
+        "$1/Mtok": 0.1081
       }
     },
     "note": "Escalations are the human cost and are counted per 1000 GENUINELY DISTINCT actions (the population that gets escalated); judge calls are per 1000 dispatches."

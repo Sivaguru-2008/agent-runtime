@@ -1,0 +1,30 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Multiple committed candidates, live judge (llama-3.1-8b-instant), $K=50$ nested candidates, 40 distinct and 20 duplicate units. Wrong suppression is over the 20 held-out distinct units.}\label{tab:s10}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}rlrll@{}}
+\toprule
+$m$ & rule & $\thi$ & wrong suppression & dedup \\
+\midrule
+1 & uncorrected & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+1 & bonferroni & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+1 & setconformal & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+2 & uncorrected & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+2 & bonferroni & 0.91 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+2 & setconformal & 0.91 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+5 & uncorrected & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+5 & bonferroni & 0.91 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+5 & setconformal & 0.91 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+10 & uncorrected & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+10 & bonferroni & 0.91 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+10 & setconformal & 0.91 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+25 & uncorrected & 0.90 & 0.0\%~[0.0--16.1] & 50.0\%~[29.9--70.1] \\
+25 & bonferroni & $+\infty$ & 0.0\%~[0.0--16.1] & 0.0\%~[0.0--16.1] \\
+25 & setconformal & $+\infty$ & 0.0\%~[0.0--16.1] & 0.0\%~[0.0--16.1] \\
+50 & uncorrected & 0.90 & 65.0\%~[43.3--81.9] & 70.0\%~[48.1--85.5] \\
+50 & bonferroni & $+\infty$ & 0.0\%~[0.0--16.1] & 0.0\%~[0.0--16.1] \\
+50 & setconformal & $+\infty$ & 0.0\%~[0.0--16.1] & 0.0\%~[0.0--16.1] \\
+\bottomrule
+\end{tabular}}
+\end{table}

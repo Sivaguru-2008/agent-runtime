@@ -1,0 +1,371 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{yao2023react}
+S.~Yao, J.~Zhao, D.~Yu, N.~Du, I.~Shafran, K.~Narasimhan, Y.~Cao, {ReAct:
+  Synergizing Reasoning and Acting in Language Models}, in: International
+  Conference on Learning Representations (ICLR), 2023, arXiv:2210.03629.
+
+\bibitem{schick2023toolformer}
+T.~Schick, J.~Dwivedi-Yu, R.~Dess{\`\i}, R.~Raileanu, M.~Lomeli,
+  L.~Zettlemoyer, N.~Cancedda, T.~Scialom, {Toolformer: Language Models Can
+  Teach Themselves to Use Tools}, in: Advances in Neural Information Processing
+  Systems 36 (NeurIPS), 2023, arXiv:2302.04761.
+
+\bibitem{yao2024taubench}
+S.~Yao, N.~Shinn, P.~Razavi, K.~Narasimhan, {$\tau$-bench: A Benchmark for
+  Tool-Agent-User Interaction in Real-World Domains}, preprint,
+  arXiv:2406.12045 (2024).
+\newblock \href {https://doi.org/10.48550/arXiv.2406.12045}
+  {\path{doi:10.48550/arXiv.2406.12045}}.
+
+\bibitem{birrell1984rpc}
+A.~D. Birrell, B.~J. Nelson, {Implementing Remote Procedure Calls}, ACM
+  Transactions on Computer Systems 2~(1) (1984) 39--59.
+\newblock \href {https://doi.org/10.1145/2080.357392}
+  {\path{doi:10.1145/2080.357392}}.
+
+\bibitem{kleppmann2017ddia}
+M.~Kleppmann, {Designing Data-Intensive Applications}, O'Reilly Media, 2017.
+
+\bibitem{stripe2026idempotency}
+{Stripe}, {Idempotent Requests}, API documentation,
+  \url{https://docs.stripe.com/api/idempotent_requests}, accessed 14 September
+  2026 (2026).
+
+\bibitem{temporal2026docs}
+{Temporal Technologies}, {Temporal Documentation: Durable Execution},
+  \url{https://docs.temporal.io/}, accessed 14 September 2026 (2026).
+
+\bibitem{restate2026docs}
+{Restate}, {Restate Documentation}, \url{https://docs.restate.dev/}, accessed
+  14 September 2026 (2026).
+
+\bibitem{zheng2026acrfence}
+Y.~Zheng, Y.~Yang, W.~Zhang, A.~Quinn, {ACRFence: Preventing Semantic Rollback
+  Attacks in Agent Checkpoint-Restore}, preprint, arXiv:2603.20625 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2603.20625}
+  {\path{doi:10.48550/arXiv.2603.20625}}.
+
+\bibitem{xu2026caplease}
+J.~Xu, L.~Fan, Z.~Wang, X.~Li, H.~Liu, {Beyond Single-Use Tokens: Durable
+  Authorization State for Replay-Resistant LLM Agent Actions}, preprint,
+  arXiv:2608.01710 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2608.01710}
+  {\path{doi:10.48550/arXiv.2608.01710}}.
+
+\bibitem{zheng2023judge}
+L.~Zheng, W.-L. Chiang, Y.~Sheng, S.~Zhuang, Z.~Wu, Y.~Zhuang, Z.~Lin, Z.~Li,
+  D.~Li, E.~P. Xing, H.~Zhang, J.~E. Gonzalez, I.~Stoica, {Judging
+  LLM-as-a-Judge with MT-Bench and Chatbot Arena}, in: Advances in Neural
+  Information Processing Systems 36 (NeurIPS), Datasets and Benchmarks Track,
+  2023, arXiv:2306.05685.
+
+\bibitem{wang2023fair}
+P.~Wang, L.~Li, L.~Chen, Z.~Cai, D.~Zhu, B.~Lin, Y.~Cao, Q.~Liu, T.~Liu,
+  Z.~Sui, {Large Language Models are not Fair Evaluators}, preprint,
+  arXiv:2305.17926 (2023).
+\newblock \href {https://doi.org/10.48550/arXiv.2305.17926}
+  {\path{doi:10.48550/arXiv.2305.17926}}.
+
+\bibitem{ye2024justice}
+J.~Ye, Y.~Wang, Y.~Huang, D.~Chen, Q.~Zhang, N.~Moniz, T.~Gao, W.~Geyer,
+  C.~Huang, P.-Y. Chen, N.~V. Chawla, X.~Zhang, {Justice or Prejudice?
+  Quantifying Biases in LLM-as-a-Judge}, preprint, arXiv:2410.02736 (2024).
+\newblock \href {https://doi.org/10.48550/arXiv.2410.02736}
+  {\path{doi:10.48550/arXiv.2410.02736}}.
+
+\bibitem{greshake2023injection}
+K.~Greshake, S.~Abdelnabi, S.~Mishra, C.~Endres, T.~Holz, M.~Fritz, {Not What
+  You've Signed Up For: Compromising Real-World LLM-Integrated Applications
+  with Indirect Prompt Injection}, in: Proceedings of the 16th ACM Workshop on
+  Artificial Intelligence and Security (AISec), 2023, pp. 79--90.
+\newblock \href {https://doi.org/10.1145/3605764.3623985}
+  {\path{doi:10.1145/3605764.3623985}}.
+
+\bibitem{hwang2025persuasion}
+Y.~Hwang, D.~Lee, T.~Kang, Y.~Kim, K.~Jung, {Can You Trick the Grader?
+  Adversarial Persuasion of LLM Judges}, preprint, arXiv:2508.07805 (2025).
+\newblock \href {https://doi.org/10.48550/arXiv.2508.07805}
+  {\path{doi:10.48550/arXiv.2508.07805}}.
+
+\bibitem{carbone2017flink}
+P.~Carbone, S.~Ewen, G.~F{\'o}ra, S.~Haridi, S.~Richter, K.~Tzoumas, {State
+  Management in Apache Flink: Consistent Stateful Distributed Stream
+  Processing}, Proceedings of the VLDB Endowment 10~(12) (2017) 1718--1729.
+\newblock \href {https://doi.org/10.14778/3137765.3137777}
+  {\path{doi:10.14778/3137765.3137777}}.
+
+\bibitem{gray1993transaction}
+J.~Gray, A.~Reuter, {Transaction Processing: Concepts and Techniques}, Morgan
+  Kaufmann, 1993.
+
+\bibitem{garcia1987sagas}
+H.~Garcia-Molina, K.~Salem, {Sagas}, in: Proceedings of the 1987 ACM SIGMOD
+  International Conference on Management of Data, 1987, pp. 249--259.
+\newblock \href {https://doi.org/10.1145/38713.38742}
+  {\path{doi:10.1145/38713.38742}}.
+
+\bibitem{resume2026contract}
+S.~Khan, {Resume Means Resume: A Machine-Checked Conformance Contract for
+  Checkpoint, Interrupt, and Resume Semantics in Workflow Persistence Layers},
+  preprint, arXiv:2608.03836 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2608.03836}
+  {\path{doi:10.48550/arXiv.2608.03836}}.
+
+\bibitem{atomix2026}
+B.~Mohammadi, N.~Potamitis, L.~Klein, A.~Arora, L.~Bindschaedler, {Atomix:
+  Timely, Transactional Tool Use for Reliable Agentic Workflows}, preprint,
+  arXiv:2602.14849 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2602.14849}
+  {\path{doi:10.48550/arXiv.2602.14849}}.
+
+\bibitem{lyu2026coagent}
+H.~Lyu, D.~Zhang, M.~Wu, X.~Wei, H.~Chen, {CoAgent: Concurrency Control for
+  Multi-Agent Systems}, preprint, arXiv:2606.15376 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2606.15376}
+  {\path{doi:10.48550/arXiv.2606.15376}}.
+
+\bibitem{balakrishnan2026logact}
+M.~Balakrishnan, A.~Bharambe, D.~Testuggine, D.~Geraghty, D.~Mao, V.~Venkat,
+  I.~Mironov, R.~Baradi, G.~Aiyer, V.~Dudin, {LogAct: Enabling Agentic
+  Reliability via Shared Logs}, preprint, arXiv:2604.07988 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2604.07988}
+  {\path{doi:10.48550/arXiv.2604.07988}}.
+
+\bibitem{mozafari2026transaction}
+B.~Mozafari, {BEGIN AI TRANSACTION: Semantic Isolation for Durable AI
+  Workflows}, preprint, arXiv:2608.05412 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2608.05412}
+  {\path{doi:10.48550/arXiv.2608.05412}}.
+
+\bibitem{mansoor2026verified}
+I.~K. Mansoor, A.~Phadke, P.~Rana, {Verified Tool Calls Improve LLM Agent
+  Reliability Under Non-Atomic Failures}, preprint, arXiv:2608.02645 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2608.02645}
+  {\path{doi:10.48550/arXiv.2608.02645}}.
+
+\bibitem{yin2026invariants}
+Z.~Yin, {Safety Invariants for Agents Orchestrating Irreversible State
+  Transitions: A Four-Dimensional Formalism Evaluated on Public Ledgers},
+  preprint, arXiv:2608.00783 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2608.00783}
+  {\path{doi:10.48550/arXiv.2608.00783}}.
+
+\bibitem{elmagarmid2007duplicate}
+A.~K. Elmagarmid, P.~G. Ipeirotis, V.~S. Verykios, {Duplicate Record Detection:
+  A Survey}, IEEE Transactions on Knowledge and Data Engineering 19~(1) (2007)
+  1--16.
+\newblock \href {https://doi.org/10.1109/TKDE.2007.250581}
+  {\path{doi:10.1109/TKDE.2007.250581}}.
+
+\bibitem{cer2017sts}
+D.~Cer, M.~Diab, E.~Agirre, I.~Lopez-Gazpio, L.~Specia, {SemEval-2017 Task 1:
+  Semantic Textual Similarity Multilingual and Crosslingual Focused
+  Evaluation}, in: Proceedings of the 11th International Workshop on Semantic
+  Evaluation (SemEval-2017), 2017, pp. 1--14.
+\newblock \href {https://doi.org/10.18653/v1/S17-2001}
+  {\path{doi:10.18653/v1/S17-2001}}.
+
+\bibitem{fang2026semhash}
+X.~Fang, K.~Tong, J.~Liu, T.~Ning, Y.~He, {SemHash-LLM: A Multi-Granularity
+  Semantic Hashing Framework for Document Deduplication}, preprint,
+  arXiv:2607.01601 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2607.01601}
+  {\path{doi:10.48550/arXiv.2607.01601}}.
+
+\bibitem{gill2025meancache}
+W.~Gill, M.~Elidrisi, P.~Kalapatapu, A.~Ahmed, A.~Anwar, M.~A. Gulzar,
+  {MeanCache: User-Centric Semantic Caching for LLM Web Services}, in:
+  Proceedings of the IEEE International Parallel and Distributed Processing
+  Symposium (IPDPS), 2025, arXiv:2403.02694.
+\newblock \href {https://doi.org/10.1109/IPDPS64566.2025.00117}
+  {\path{doi:10.1109/IPDPS64566.2025.00117}}.
+
+\bibitem{chen2024humans}
+G.~H. Chen, S.~Chen, Z.~Liu, F.~Jiang, B.~Wang, {Humans or LLMs as the Judge? A
+  Study on Judgement Biases}, preprint, arXiv:2402.10669 (2024).
+\newblock \href {https://doi.org/10.48550/arXiv.2402.10669}
+  {\path{doi:10.48550/arXiv.2402.10669}}.
+
+\bibitem{li2025leakage}
+D.~Li, R.~Sun, Y.~Huang, M.~Zhong, B.~Jiang, J.~Han, X.~Zhang, W.~Wang, H.~Liu,
+  {Preference Leakage: A Contamination Problem in LLM-as-a-judge}, preprint,
+  arXiv:2502.01534 (2025).
+\newblock \href {https://doi.org/10.48550/arXiv.2502.01534}
+  {\path{doi:10.48550/arXiv.2502.01534}}.
+
+\bibitem{yuan2024rjudge}
+T.~Yuan, Z.~He, L.~Dong, Y.~Wang, R.~Zhao, T.~Xia, L.~Xu, B.~Zhou, F.~Li,
+  Z.~Zhang, R.~Wang, G.~Liu, {R-Judge: Benchmarking Safety Risk Awareness for
+  LLM Agents}, in: Findings of the Association for Computational Linguistics:
+  EMNLP 2024, 2024, arXiv:2401.10019.
+
+\bibitem{ruan2024toolemu}
+Y.~Ruan, H.~Dong, A.~Wang, S.~Pitis, Y.~Zhou, J.~Ba, Y.~Dubois, C.~J. Maddison,
+  T.~Hashimoto, {Identifying the Risks of LM Agents with an LM-Emulated
+  Sandbox}, in: International Conference on Learning Representations (ICLR),
+  2024, arXiv:2309.15817.
+
+\bibitem{debenedetti2024agentdojo}
+E.~Debenedetti, J.~Zhang, M.~Balunovi{\'c}, L.~Beurer-Kellner, M.~Fischer,
+  F.~Tram{\`e}r, {AgentDojo: A Dynamic Environment to Evaluate Prompt Injection
+  Attacks and Defenses for LLM Agents}, in: Advances in Neural Information
+  Processing Systems 37 (NeurIPS), Datasets and Benchmarks Track, 2024,
+  arXiv:2406.13352.
+
+\bibitem{zuvic2026confused}
+D.~M. Zuvic, {Capability Gates Are Not Authorization: Confused-Deputy Failures
+  in LLM Agent Frameworks}, preprint, arXiv:2606.28679 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2606.28679}
+  {\path{doi:10.48550/arXiv.2606.28679}}.
+
+\bibitem{beurerkellner2025patterns}
+L.~Beurer-Kellner, B.~Buesser, A.-M. Cre{\c{t}}u, E.~Debenedetti, D.~Dobos,
+  D.~Fabian, M.~Fischer, D.~Froelicher, K.~Grosse, D.~Naeff, E.~Ozoani,
+  A.~Paverd, F.~Tram{\`e}r, V.~Volhejn, {Design Patterns for Securing LLM
+  Agents against Prompt Injections}, preprint, arXiv:2506.08837 (2025).
+\newblock \href {https://doi.org/10.48550/arXiv.2506.08837}
+  {\path{doi:10.48550/arXiv.2506.08837}}.
+
+\bibitem{vovk2005alrw}
+V.~Vovk, A.~Gammerman, G.~Shafer, {Algorithmic Learning in a Random World},
+  Springer, New York, 2005.
+
+\bibitem{lei2018distribution}
+J.~Lei, M.~G'Sell, A.~Rinaldo, R.~J. Tibshirani, L.~Wasserman,
+  {Distribution-Free Predictive Inference for Regression}, Journal of the
+  American Statistical Association 113~(523) (2018) 1094--1111.
+\newblock \href {https://doi.org/10.1080/01621459.2017.1307116}
+  {\path{doi:10.1080/01621459.2017.1307116}}.
+
+\bibitem{angelopoulos2023gentle}
+A.~N. Angelopoulos, S.~Bates, {Conformal Prediction: A Gentle Introduction},
+  Foundations and Trends in Machine Learning 16~(4) (2023) 494--591.
+\newblock \href {https://doi.org/10.1561/2200000101}
+  {\path{doi:10.1561/2200000101}}.
+
+\bibitem{quach2023clm}
+V.~Quach, A.~Fisch, T.~Schuster, A.~Yala, J.~H. Sohn, T.~S. Jaakkola,
+  R.~Barzilay, {Conformal Language Modeling}, preprint, arXiv:2306.10193
+  (2023).
+\newblock \href {https://doi.org/10.48550/arXiv.2306.10193}
+  {\path{doi:10.48550/arXiv.2306.10193}}.
+
+\bibitem{mohri2024factuality}
+C.~Mohri, T.~Hashimoto, {Language Models with Conformal Factuality Guarantees},
+  preprint, arXiv:2402.10978 (2024).
+\newblock \href {https://doi.org/10.48550/arXiv.2402.10978}
+  {\path{doi:10.48550/arXiv.2402.10978}}.
+
+\bibitem{ren2023knowno}
+A.~Z. Ren, A.~Dixit, A.~Bodrova, S.~Singh, S.~Tu, N.~Brown, P.~Xu, L.~Takayama,
+  F.~Xia, J.~Varley, Z.~Xu, D.~Sadigh, A.~Zeng, A.~Majumdar, {Robots That Ask
+  For Help: Uncertainty Alignment for Large Language Model Planners}, in:
+  Proceedings of the 7th Conference on Robot Learning (CoRL), Vol. 229 of PMLR,
+  2023, arXiv:2307.01928.
+
+\bibitem{sheng2025judgeconformal}
+H.~Sheng, X.~Liu, H.~He, J.~Zhao, J.~Kang, {Analyzing Uncertainty of
+  LLM-as-a-Judge: Interval Evaluations with Conformal Prediction}, preprint,
+  arXiv:2509.18658 (2025).
+\newblock \href {https://doi.org/10.48550/arXiv.2509.18658}
+  {\path{doi:10.48550/arXiv.2509.18658}}.
+
+\bibitem{angelopoulos2024crc}
+A.~N. Angelopoulos, S.~Bates, A.~Fisch, L.~Lei, T.~Schuster, {Conformal Risk
+  Control}, in: International Conference on Learning Representations (ICLR),
+  2024, arXiv:2208.02814.
+
+\bibitem{angelopoulos2021ltt}
+A.~N. Angelopoulos, S.~Bates, E.~J. Cand{\`e}s, M.~I. Jordan, L.~Lei, {Learn
+  then Test: Calibrating Predictive Algorithms to Achieve Risk Control},
+  preprint, arXiv:2110.01052 (2021).
+\newblock \href {https://doi.org/10.48550/arXiv.2110.01052}
+  {\path{doi:10.48550/arXiv.2110.01052}}.
+
+\bibitem{bates2023outliers}
+S.~Bates, E.~Cand{\`e}s, L.~Lei, Y.~Romano, M.~Sesia, {Testing for Outliers
+  with Conformal p-values}, The Annals of Statistics 51~(1) (2023).
+\newblock \href {https://doi.org/10.1214/22-AOS2244}
+  {\path{doi:10.1214/22-AOS2244}}.
+
+\bibitem{ulmer2024nonexchangeable}
+D.~Ulmer, C.~Zerva, A.~F.~T. Martins, {Non-Exchangeable Conformal Language
+  Generation with Nearest Neighbors}, preprint, arXiv:2402.00707 (2024).
+\newblock \href {https://doi.org/10.48550/arXiv.2402.00707}
+  {\path{doi:10.48550/arXiv.2402.00707}}.
+
+\bibitem{lin2025domainshift}
+Z.~Lin, Y.~Li, N.~Sarna, Y.~Gao, M.~von Gablenz, {Domain-Shift-Aware Conformal
+  Prediction for Large Language Models}, preprint, arXiv:2510.05566 (2025).
+\newblock \href {https://doi.org/10.48550/arXiv.2510.05566}
+  {\path{doi:10.48550/arXiv.2510.05566}}.
+
+\bibitem{tursunbadalov2026minority}
+M.~Tursunbadalov, M.~Tursunbadalov, {A Quiet Failure in Calibrated Virtual
+  Screening: Marginal Conformal Prediction Under-Covers the Minority Class, and
+  a Class-Conditional Fix Recovers It}, preprint, arXiv:2607.06605 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2607.06605}
+  {\path{doi:10.48550/arXiv.2607.06605}}.
+
+\bibitem{pezoa2016jsonschema}
+F.~Pezoa, J.~L. Reutter, F.~Suarez, M.~Ugarte, D.~Vrgo{\v{c}}, {Foundations of
+  JSON Schema}, in: Proceedings of the 25th International Conference on World
+  Wide Web (WWW), 2016, pp. 263--273.
+\newblock \href {https://doi.org/10.1145/2872427.2883029}
+  {\path{doi:10.1145/2872427.2883029}}.
+
+\bibitem{buneman2001provenance}
+P.~Buneman, S.~Khanna, W.-C. Tan, {Why and Where: A Characterization of Data
+  Provenance}, in: Database Theory -- ICDT 2001, Vol. 1973 of Lecture Notes in
+  Computer Science, Springer, 2001, pp. 316--330.
+\newblock \href {https://doi.org/10.1007/3-540-44503-X_20}
+  {\path{doi:10.1007/3-540-44503-X_20}}.
+
+\bibitem{wilson1927}
+E.~B. Wilson, {Probable Inference, the Law of Succession, and Statistical
+  Inference}, Journal of the American Statistical Association 22~(158) (1927)
+  209--212.
+\newblock \href {https://doi.org/10.1080/01621459.1927.10502953}
+  {\path{doi:10.1080/01621459.1927.10502953}}.
+
+\bibitem{mcnemar1947}
+Q.~McNemar, {Note on the Sampling Error of the Difference Between Correlated
+  Proportions or Percentages}, Psychometrika 12~(2) (1947) 153--157.
+\newblock \href {https://doi.org/10.1007/BF02295996}
+  {\path{doi:10.1007/BF02295996}}.
+
+\bibitem{holm1979}
+S.~Holm, {A Simple Sequentially Rejective Multiple Test Procedure},
+  Scandinavian Journal of Statistics 6~(2) (1979) 65--70.
+
+\bibitem{krippendorff2004}
+K.~Krippendorff, {Reliability in Content Analysis: Some Common Misconceptions
+  and Recommendations}, Human Communication Research 30~(3) (2004) 411--433.
+\newblock \href {https://doi.org/10.1111/j.1468-2958.2004.tb00738.x}
+  {\path{doi:10.1111/j.1468-2958.2004.tb00738.x}}.
+
+\bibitem{fleiss1971}
+J.~L. Fleiss, {Measuring Nominal Scale Agreement Among Many Raters},
+  Psychological Bulletin 76~(5) (1971) 378--382.
+\newblock \href {https://doi.org/10.1037/h0031619}
+  {\path{doi:10.1037/h0031619}}.
+
+\bibitem{cohen1960}
+J.~Cohen, {A Coefficient of Agreement for Nominal Scales}, Educational and
+  Psychological Measurement 20~(1) (1960) 37--46.
+\newblock \href {https://doi.org/10.1177/001316446002000104}
+  {\path{doi:10.1177/001316446002000104}}.
+
+\bibitem{turan2026oversight}
+E.~Turan, {Oversight Has a Capacity: Calibrating Agent Guards to a Subjective,
+  Fatiguing Human}, preprint, arXiv:2606.08919 (2026).
+\newblock \href {https://doi.org/10.48550/arXiv.2606.08919}
+  {\path{doi:10.48550/arXiv.2606.08919}}.
+
+\end{thebibliography}

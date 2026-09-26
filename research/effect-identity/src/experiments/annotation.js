@@ -296,7 +296,7 @@ function fleissKappa(matrix, categories) {
  * directly, and it is reported as a separate evaluation on a small subset —
  * never merged into the constructed corpus, and never used to relabel it.
  */
-function mechanismUnderLabels(annotatedPairs, labelOverride) {
+function mechanismUnderLabels(annotatedPairs, labelOverride, { scoredOnly = false } = {}) {
   const readJsonl = (f) => (existsSync(resolve(base, f))
     ? readFileSync(resolve(base, f), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)) : []);
   const scores = [...readJsonl("corpus/scores.jsonl"), ...readJsonl("corpus/scores-v2ext.jsonl")];
@@ -305,16 +305,38 @@ function mechanismUnderLabels(annotatedPairs, labelOverride) {
   // The threshold must come from the full calibration split, not from the
   // annotated subset: re-calibrating on the items being measured would leak.
   const all = loadCorpus();
-  const subsetIds = new Set(annotatedPairs.map((p) => p.id));
+  // An annotated item the primary judge never scored can reach the judge only
+  // as an abstention, which escalates and can NEVER be suppressed. Counting it
+  // in the wrong-suppression denominator measures the missing score, not the
+  // mechanism. As executed for the published panel, 93 of the 154 sheet items
+  // came from the v2ext extension corpus, whose score file was never persisted,
+  // so every one of them was in that position. `scoredOnly` restricts the
+  // re-derivation to items with a real score (corrected analysis, 2026-09-14);
+  // the unrestricted computation is kept alongside it as the as-executed record.
+  const eligible = scoredOnly ? annotatedPairs.filter((p) => scoreOf({ id: p.id }) !== null) : annotatedPairs;
+  const subsetIds = new Set(eligible.map((p) => p.id));
   const forEval = all.map((p) => (subsetIds.has(p.id)
     ? { ...p, split: "test", label: labelOverride.get(p.id) ?? p.label }
     : { ...p, split: p.split === "test" ? "unused" : p.split }));
   const r = runConfig({ pairs: forEval, schemas, cfg: {}, judge: "openai_gpt_oss_120b", scoreOf, alpha: 0.05 });
-  return { tHi: r.calibration.tHi, nCalDiff: r.calibration.nCalDiff, overall: r.overall, residual: r.residual };
+  return {
+    tHi: r.calibration.tHi, nCalDiff: r.calibration.nCalDiff,
+    nItems: subsetIds.size, nExcludedUnscored: annotatedPairs.length - subsetIds.size,
+    overall: r.overall, residual: r.residual,
+  };
 }
 
 function ingest() {
-  const outPath = resolve(base, "results", "human_annotation.json");
+  // --responses-dir <dir>: where the response files live (default annotation/).
+  //   The published Channel M analysis is reproduced from the preregistered
+  //   snapshot:  --responses-dir annotation/preregistered-collection --channel M
+  // --channel H|M: which channel's files to ingest. Human (H) and model-panel (M)
+  //   responses license different claims and are never pooled.
+  const respDir = resolve(base, argAfter("--responses-dir", "annotation"));
+  const channelFlag = argAfter("--channel", null);
+  if (channelFlag && !["H", "M"].includes(channelFlag)) throw new Error("--channel must be H or M");
+  const outPath = resolve(base, argAfter("--out",
+    channelFlag === "H" ? "results/human_annotation_channelH.json" : "results/human_annotation.json"));
   mkdirSync(resolve(base, "results"), { recursive: true });
 
   if (!existsSync(resolve(annDir, "key.jsonl"))) {
@@ -326,7 +348,26 @@ function ingest() {
   const key = new Map(readFileSync(resolve(annDir, "key.jsonl"), "utf8")
     .split("\n").filter(Boolean).map((l) => { const k = JSON.parse(l); return [k.item, k]; }));
 
-  const allFiles = readdirSync(annDir).filter((f) => /^responses-.+\.csv$/i.test(f));
+  // Which channel a response file belongs to is decided by the panel manifest:
+  // a file whose annotator is listed there is a model panelist (M); any other
+  // file is a human annotator (H).
+  const manifestPath = existsSync(resolve(respDir, "panel-manifest.json"))
+    ? resolve(respDir, "panel-manifest.json") : resolve(annDir, "panel-manifest.json");
+  const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, "utf8")) : null;
+  const panelByName = new Map((manifest?.panel ?? []).map((p) => [p.name, p]));
+  const fileChannel = (f) => {
+    const name = f.replace(/^responses-/i, "").replace(/\.csv$/i, "");
+    return panelByName.has(name) || panelByName.has(name.replace(/^adjudicator-/, "")) ? "M" : "H";
+  };
+  const listed = readdirSync(respDir).filter((f) => /^responses-.+\.csv$/i.test(f));
+  const presentChannels = [...new Set(listed.map(fileChannel))];
+  if (!channelFlag && presentChannels.length > 1) {
+    console.error(`REFUSED — ${respDir} holds both human (H) and model-panel (M) response files. ` +
+      "They license different claims and are never pooled; re-run with --channel H or --channel M.");
+    process.exitCode = 1;
+    return;
+  }
+  const allFiles = channelFlag ? listed.filter((f) => fileChannel(f) === channelFlag) : listed;
   const adjFiles = allFiles.filter((f) => /^responses-adjudicator/i.test(f));
   const files = allFiles.filter((f) => !/^responses-adjudicator/i.test(f));
 
@@ -344,7 +385,7 @@ function ingest() {
   }
 
   const readResponses = (f) => {
-    const rows = parseCsv(readFileSync(resolve(annDir, f), "utf8"));
+    const rows = parseCsv(readFileSync(resolve(respDir, f), "utf8"));
     const header = rows[0].map((h) => h.trim().toLowerCase());
     const iItem = header.indexOf("item"), iLabel = header.indexOf("label");
     if (iItem === -1 || iLabel === -1) throw new Error(`${f}: needs 'item' and 'label' columns`);
@@ -410,9 +451,7 @@ function ingest() {
   // Channel H (human) and Channel M (model panel) license different claims, and
   // the preregistration requires the channel be named in the result rather than
   // inferred by a reader. A response file with no panel entry is a human one.
-  const manifestPath = resolve(annDir, "panel-manifest.json");
-  const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, "utf8")) : null;
-  const panelByName = new Map((manifest?.panel ?? []).map((p) => [p.name, p]));
+  // (manifest and panelByName are loaded above, where files are assigned a channel)
   const provenance = Object.fromEntries([...annotators, ...Object.keys(adjudicators)].map((a) => {
     const bare = a.replace(/^adjudicator-/, "");
     const p = panelByName.get(a) ?? panelByName.get(bare);
@@ -473,8 +512,14 @@ function ingest() {
   let mechanism = null;
   try {
     mechanism = {
+      // As executed for the published panel analysis (see mechanismUnderLabels).
       underConstructedLabels: mechanismUnderLabels(annotatedPairs, constructedMap),
       underHumanLabels: mechanismUnderLabels(annotatedPairs, humanMap),
+      // Corrected: restricted to annotated items the primary judge scored.
+      scoredOnly: {
+        underConstructedLabels: mechanismUnderLabels(annotatedPairs, constructedMap, { scoredOnly: true }),
+        underHumanLabels: mechanismUnderLabels(annotatedPairs, humanMap, { scoredOnly: true }),
+      },
     };
   } catch (e) {
     mechanism = { error: String(e).slice(0, 200) };
@@ -516,6 +561,7 @@ function ingest() {
   const out = {
     status: "COMPLETE",
     generatedAt: new Date().toISOString(),
+    responsesDirectory: respDir.slice(base.length + 1).replace(/\\/g, "/"),
     // Channel H is human; channel M is the blinded model panel and is NEVER
     // reported as a human study. Anything reading this file must branch on it.
     channel,
