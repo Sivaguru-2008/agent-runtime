@@ -1,38 +1,33 @@
 \section{Limitations and broader impact}\label{sec:limitations}
 
+Each caveat of the paper is stated here in full; elsewhere it appears at most as a clause.
+
 \subsection{Limitations}
 
-\paragraph{Human validation}
-Independent human validation of the labels was designed, preregistered and fully instrumented but never collected. The only evidence that the constructed labels are shared by readers other than the author comes from a panel of language models---a weaker control, because a notion of ``the same act'' shared by the author and the models would pass it and could still diverge from human practice. The panel's preregistered re-derivation was itself defective (Section~\ref{sec:res-labels}). The instrument, protocol and analysis are provided so that the human study can be run exactly as preregistered.
+\paragraph{Labels and human validation}
+Every label operationalises our definition of identity. Independent human validation was designed, preregistered and instrumented but not collected. The only evidence that the labels are shared by other readers is a blinded panel of language models, a weaker control: a notion of ``the same act'' shared by the author and the models would pass it and could still diverge from human practice. The panel contested two strata (legitimate repeats and prose-only injection), and its preregistered safety re-derivation triggered, in a computation with two defects that we report rather than correct away (Section~\ref{sec:res-labels}). A targeted human follow-up on the two contested strata is prepared but not run; the preregistered study remains uncollected. The safety conclusion was stable under the relabellings we could construct; the liveness conclusion was not.
 
-\paragraph{Constructed labels and a single corpus}
-Every label is an operationalisation of our definition of identity. The safety conclusion was stable under the relabellings we could construct; the liveness conclusion was not. The corpus is synthetic and purpose-built, covers six tools, and says nothing about fleet-scale traffic, other tool surfaces, or the distribution of paraphrase in production. The empirical rates are properties of this corpus; what transfers are the decomposition, the bound and the dilemma.
-
-\paragraph{Dependence on schema quality}
-The certifier and the refuter are exactly as sound as the declarations they read (A5, A5$'$). A field mis-declared as an identifier that does not determine the act breaks certifier soundness; an act-determining field declared as free text moves its distinction to the judge. Neither is detected automatically.
-
-\paragraph{Free text}
-Where distinctions are carried only by prose, the mechanism is only as good as its judge---and under injection it is worse: prose-only injection succeeded 84.0\% of the time on the primary judge. The refuter's protection does not extend to free text.
-
-\paragraph{Judge dependence and drift}
-Deduplication, silent escape and robustness to injection all depend on the judge; two of the three judges share a model family, and a third vendor was never reached. Model versions behind an endpoint change without notice, violating exchangeability until the pool is recalibrated. Scoring at temperature 0 does not make an API deterministic.
+\paragraph{One constructed corpus}
+The corpus is synthetic and purpose-built, covers six tools, and says nothing about the distribution of paraphrase in production. Rates are properties of this corpus; what transfers are the decomposition, the bound and the dilemma. The authorisation corpus has author-drafted seeds and no independent annotation.
 
 \paragraph{Calibration validity}
-Theorem~\ref{thm:bound} needs exchangeability between the pool and deployed comparisons. Our split is stratified at the pair level of one corpus, and removing seed-level sharing raised mean wrong suppression by a factor of about 1.5--2. The bound is marginal: 10.5\% of seed-level splits exceeded $\alpha$ on the primary judge. It says nothing under distribution shift, including injection.
+Theorem~\ref{thm:bound} needs exchangeability between the pool and the deployed comparisons, which cannot be verified at deployment and is violated deliberately by injection. The bound is marginal in two senses. Over calibration draws: removing seed-level sharing raised mean wrong suppression by a factor of about 1.5--2, and 10.5\% of seed-level splits exceeded $\alpha$ on the primary judge. Over kinds of difference: on the primary judge hand-specified semantic differences are wrongly suppressed at 6.5\%, above $\alpha$, and per-kind validity costs deduplication (Section~\ref{sec:res-class}). A realised rate can exceed $\alpha$ for a particular deployment.
 
-\paragraph{Candidate generation and multiplicity}
-The candidate set is every effect committed in the same run for the same tool. Retries under a new run identifier and the same act reached through a different tool are missed. On the corpus $m=1$; the multiplicity correction is supported by simulation and by one live experiment with a weak, saturated judge, and response attribution at $m\ge2$ (Section~\ref{sec:problem}) is not measured.
+\paragraph{Multiplicity}
+The corpus has $m=1$. The correction is supported by simulation and by one live experiment with a weak, saturated judge. An experiment that builds multi-candidate units from the corpus and scores them with the primary judge, which would also measure response attribution at $m\ge2$ (Section~\ref{sec:problem}), is prepared and released but not run. The candidate set is every effect committed in the same run for the same tool; retries under a new run identifier, and the same act reached through a different tool, are missed.
+
+\paragraph{Free text and injection}
+Where distinctions are carried only by prose, the mechanism is only as good as its judge, and under injection it is worse: prose-only injection succeeded 84.0\% of the time on the primary judge. The refuter's protection does not extend to free text.
+
+\paragraph{Schema and judge dependence}
+The decidable layers are exactly as sound as the declarations they read (A5, A5$'$), and mis-declarations are not detected automatically. Deduplication, silent escape and injection robustness depend on the judge; two of the three judges share a family, and a third vendor was never reached. Models behind an endpoint change without notice, violating exchangeability until the pool is recalibrated.
 
 \paragraph{External semantics, storage and concurrency}
-The mechanism does not provide external exactly-once execution; a crash inside the commit window re-fires under paraphrase unless the provider supplies a key complete for identity, which no tool in the corpus has. The research log is not crash-atomic (A3 is only partially supplied), and concurrent dispatch (A7) was not tested.
+The mechanism does not provide external exactly-once execution; a crash inside the commit window re-fires under paraphrase unless the provider supplies a key complete for identity, which no tool in the corpus has. The research log is not crash-atomic (A3 is partial), and concurrent dispatch (A7) was not tested.
 
-\paragraph{Cost and missed deduplication}
-The judge is consulted on 76.2\% of dispatches, at about 184 tokens per comparison in batches of ten (roughly 140,000 tokens per 1,000 dispatches) and about 2.1\,s per batched call for the primary judge; the reasoning judge costs about 2.8 times as many tokens. Stricter levels buy safety with liveness: at $\alpha=0.01$ the primary judge deduplicates 22.1\% and routes 64.8\% of duplicates to review.
+\paragraph{Cost and the choice of $\alpha$}
+The judge is consulted on 76.2\% of dispatches, at about 184 tokens per comparison in batches of ten. Stricter levels buy safety with liveness: at $\alpha=0.01$ the primary judge deduplicates 22.1\% and routes 64.8\% of duplicates to review.
 
 \subsection{Ethics and broader impact}
 
-The mechanism is meant to reduce harm from irreversible agent actions, and its two failure modes carry different ethical weight. Wrongly suppressing a legitimate action---a refund never issued, a message never sent---is silent, and the person affected may never learn of it; the design bounds this error but does not eliminate it, and the bound is marginal. Executing an unintended duplicate is visible and recoverable by reconciliation, and the design deliberately tolerates more of it. When calibration is insufficient, when the judge abstains, and inside the commit window, the fence defaults to execution rather than semantic suppression, flagging the request where it has grounds for suspicion.
-
-Adversaries can target both directions. A crafted request can make a distinct act look like a duplicate (a malicious semantic collision) so that it is swallowed, or disguise a duplicate so that it fires twice. The refuter removes the first attack whenever the distinction is typed; where it is not, the attack succeeded in a large fraction of our trials---a reason to type act-determining fields rather than to trust a better judge. The injection templates in the corpus are standard in the prompt-injection literature and are released for defensive evaluation.
-
-Human oversight enters through the escalation band and through audit. A band that emits more flagged actions than reviewers can handle is not a safety mechanism~\cite{turan2026oversight}, and a wrong suppression can be recovered only if suppressions are recorded and sampled for review; the fence records every semantic suppression with the matched effect, the score, $m$ and the threshold, and every pending intent and flag. We do not recommend using the mechanism as the only safeguard for financial or safety-critical agent operations. The corpus is synthetic and contains no personal data.
+The mechanism is meant to reduce harm from irreversible agent actions, and its two failure modes carry different ethical weight. Wrongly suppressing a legitimate action---a refund never issued, a message never sent---is silent, and the person affected may never learn of it; the design bounds this error but does not eliminate it. Executing an unintended duplicate is visible and recoverable, and the design deliberately tolerates more of it. Adversaries can target both directions; the refuter removes forced suppression whenever the distinction is typed, which is a reason to type act-determining fields rather than to trust a better judge. The injection templates are standard in the literature and released for defensive evaluation. Human oversight enters through the escalation band and audit; a band that emits more flags than reviewers can handle is not a safety mechanism~\cite{turan2026oversight}, so the fence records every semantic suppression with the matched effect, score, $m$ and threshold. We do not recommend the mechanism as the only safeguard for financial or safety-critical agent operations. The corpora are synthetic and contain no personal data.
