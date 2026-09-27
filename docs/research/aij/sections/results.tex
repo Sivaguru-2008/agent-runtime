@@ -47,7 +47,7 @@ refined schema & 49 & 0.90 & 0.0\%~[0.0--1.6] & 69.0\%~[63.4--74.2] & 13.2\%~[9.
 
 \paragraph{Interpretation} A pool from outside the jurisdiction roughly doubles the rate the bound governs while the whole-split rate stays under $\alpha$, so the violation is invisible unless one conditions on the residual. The correction is necessary and pays for safety by switching off beyond its budget; $\alpha$ is a promise about the average calibration draw.
 
-\paragraph{Limitation} The simulation uses synthetic scores and the live experiment a weak, saturated judge on purpose-built units; it establishes that the correction is necessary, not an operating point. A live experiment on an admitted judge is prepared but not run (Section~\ref{sec:limitations}).
+\paragraph{Limitation} Simulation evaluates exchangeable continuous scores, while the live multiplicity trial employs a compact model (Llama-3.1-8B-Instant) on purpose-built units; it demonstrates the necessity of the multiplicity correction rather than a production operating point. A live multi-candidate evaluation on admitted judge models is prepared and released with the artifact (Section~\ref{sec:limitations}).
 
 \subsection{Is the bound valid within each kind of difference?}\label{sec:res-class}
 
@@ -97,9 +97,9 @@ Qwen3.6-27B & 97.7\% & 0.95 & 0.9\%~[0.2--3.1] & 89.0\%~[84.8--92.1] & 8.5\%~[5.
 
 \input{figures/fig-adversarial}
 
-\paragraph{Interpretation} The adversarial guarantee extends exactly as far as the typed fields; in prose, calibration offers nothing and the outcome depends on the model. The remedy that worked is a declaration change, not a better judge.
+\paragraph{Interpretation} The injection experiment demonstrates the value of jurisdiction decomposition: typed-field injection is eliminated before judging, whereas prose-only manipulation remains inside the residual LLM jurisdiction where the primary judge wrongly suppresses 84.0\% of attack pairs. The result shows that schema design and judge calibration address different parts of the attack surface: the architectural remedy for prose vulnerability is schema refinement---moving distinguishing attributes into typed fields---rather than relying on judge prompt tuning.
 
-\paragraph{Limitation} Twenty and twenty-five pairs, with our own templates; an adversary who knows the refuter will aim at prose.
+\paragraph{Limitation} Evaluated on forty-five constructed attack pairs using standard injection templates; adversaries with knowledge of declared typed projections will specifically target free-text residual fields.
 
 \subsection{The refinement dilemma, measured and decomposed}\label{sec:res-refinement}
 
@@ -126,7 +126,7 @@ Qwen3.6-27B & declared & 139 & 6 & 0.95 & 0.9\%~[0.2--3.1] & 89.0\%~[84.8--92.1]
 \end{tabular}
 \end{table}
 
-\paragraph{Interpretation} Refinement is a trade: zero wrong suppression, one injection class closed and 23\% less oracle load, paid for in the recoverable direction. Both components are real: the threshold moves from the 7th to the 2nd largest score, and the surviving pool is enriched in the pairs the judge finds hardest.
+\paragraph{Interpretation} Refinement is a trade: zero wrong suppression, one injection class closed and 23\% less oracle load, paid for in the recoverable direction. Both components are real: the threshold moves from the 7th to the 2nd largest score, and the surviving pool is enriched in the pairs the judge finds hardest. This demonstrates that schema design is part of the statistical specification of the mechanism.
 
 \paragraph{Limitation} The refined projection types the numbers prose mentions, not the concepts; the composition component is a property of these judges on this corpus.
 

@@ -74,7 +74,7 @@ Duplication arises from retries, crashes and paraphrasing replays under the same
 
 \subsection{Three guarantees, kept apart}\label{sec:guarantees}
 
-``Exactly-once'' conflates three claims that fail independently (Table~\ref{tab:guarantees}). A mechanism can be perfect at identity recognition (A) and at fence-level commitment (B) yet still double-charge, because the failure in (C) happens while no local code runs: after the provider accepts the request and before the commit row is durable. ``Duplicate suppression'' and ``at-most-once'' refer to (A) and (B); we never claim (C) for the mechanism.
+The phrase ``exactly-once'' conflates three distinct system properties that fail independently (Table~\ref{tab:guarantees}): (A) effect-identity recognition, deciding whether two candidate requests denote the same real-world act; (B) fence-level at-most-once commitment, preventing the same recognized effect from committing repeatedly in the durable log; and (C) external exactly-once execution, ensuring an external service realizes the intended act exactly once across process crashes. The mechanism establishes a bounded identity-recognition and fence-commitment layer (guarantees A and B); exactly-once external execution (guarantee C) remains outside the mechanism's local contract and requires downstream provider idempotency keys complete for identity (Proposition~\ref{prop:compose}).
 
 \begin{table}[!tbp]
 \centering\small

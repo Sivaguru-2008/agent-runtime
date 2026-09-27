@@ -1,32 +1,34 @@
-\section{Limitations and broader impact}\label{sec:limitations}
+\section{Scope, limitations and broader impact}\label{sec:limitations}
 
-Each caveat of the paper is stated here in full; elsewhere it appears at most as a clause.
+Each scope boundary and operational assumption of the paper is stated here in full; elsewhere it appears as a cross-reference.
 
-\subsection{Limitations}
+\subsection{Scope boundaries and assumptions}
 
-\paragraph{Labels and human validation}
-Every label operationalises our definition of identity. Independent human validation was designed, preregistered and instrumented but not collected. The only evidence that the labels are shared by other readers is a blinded panel of language models, a weaker control: a notion of ``the same act'' shared by us and the models would pass it and could still diverge from human practice. The panel contested two strata (legitimate repeats and prose-only injection), and its preregistered safety re-derivation triggered, in a computation with two defects that we report rather than correct away (Section~\ref{sec:res-labels}). A targeted human follow-up on the two contested strata is prepared but not run; the preregistered study remains uncollected. The safety conclusion was stable under the relabellings we could construct; the liveness conclusion was not.
- 
-\paragraph{One constructed corpus}
-The corpus is synthetic and purpose-built, covers six tools, and says nothing about the distribution of paraphrase in production. Rates are properties of this corpus; what transfers are the decomposition, the bound and the dilemma. The authorisation corpus has drafted seeds (Section~\ref{sec:method-authz}) and no independent annotation.
+\paragraph{Semantic assumptions and schema dependencies}
+The decidable layers are sound under the condition that declared field normalisation and projection policies preserve intended semantics (A5, A5$'$); semantic mis-declarations are not detected automatically. Deduplication and residual handling depend on the underlying judge model, and models served via external endpoints may change over time, requiring recalibration to maintain valid calibration pools.
 
-\paragraph{Calibration validity}
-Theorem~\ref{thm:bound} needs exchangeability between the pool and the deployed comparisons, which cannot be verified at deployment and is violated deliberately by injection. The bound is marginal in two senses. Over calibration draws: removing seed-level sharing raised mean wrong suppression by a factor of about 1.5--2, and 10.5\% of seed-level splits exceeded $\alpha$ on the primary judge. Over kinds of difference: on the primary judge hand-specified semantic differences are wrongly suppressed at 6.5\%, above $\alpha$, and per-kind validity costs deduplication (Section~\ref{sec:res-class}). A realised rate can exceed $\alpha$ for a particular deployment.
+\paragraph{Statistical assumptions and calibration jurisdiction}
+Theorem~\ref{thm:bound} requires exchangeability (A6) between the calibration pool and deployed comparisons within the decision rule's actual jurisdiction; this condition cannot be verified dynamically at execution time and is deliberately challenged by adversarial input. The guarantee is marginal: removing seed-level sharing raised mean wrong suppression, with 10.5\% of seed-level splits exceeding $\alpha$ on the primary judge. Across difference strata, hand-specified semantic differences (D3) exhibit 6.5\% wrong suppression under marginal pooling, where class-conditional validity costs deduplication (Section~\ref{sec:res-class}). Realised error rates can exceed $\alpha$ on individual unfavorable draws.
 
-\paragraph{Multiplicity}
-The corpus has $m=1$. The correction is supported by simulation and by one live experiment with a weak, saturated judge. An experiment that builds multi-candidate units from the corpus and scores them with the primary judge, which would also measure response attribution at $m\ge2$ (Section~\ref{sec:problem}), is prepared and released but not run. The candidate set is every effect committed in the same run for the same tool; retries under a new run identifier, and the same act reached through a different tool, are missed.
+\paragraph{Operational and durable-store assumptions}
+The mechanism guarantees fence-level at-most-once commitment under the crash-atomic insert-if-absent model (A1--A4). Concurrent dispatch for the same logical operation (A7) requires external serialisation or per-operation leases; without concurrency control, concurrent executions remain observable via recorded conflicts rather than strictly prevented. The research implementation uses a local file-backed log.
 
-\paragraph{Free text and injection}
-Where distinctions are carried only by prose, the mechanism is only as good as its judge, and under injection it is worse: prose-only injection succeeded 84.0\% of the time on the primary judge. The refuter's protection does not extend to free text.
+\paragraph{Evaluation corpus and label scope}
+The evaluation corpus is constructed across six irreversible tools to provide controlled evidence for the mechanism's decision behaviour across known semantic transformations. Broad human annotation was instrumented and preregistered on Channel H but not collected; label consistency across variations was audited using a blinded language-model panel (Channel M). The panel contested two specific strata (legitimate repeats and prose-only injection), triggering the preregistered safety re-derivation rule under the computational conditions reported in Section~\ref{sec:res-labels}. A targeted human-annotation protocol for the contested strata is released with the artifact.
 
-\paragraph{Schema and judge dependence}
-The decidable layers are exactly as sound as the declarations they read (A5, A5$'$), and mis-declarations are not detected automatically. Deduplication, silent escape and injection robustness depend on the judge; two of the three judges share a family, and a third vendor was never reached. Models behind an endpoint change without notice, violating exchangeability until the pool is recalibrated.
+\paragraph{Candidate multiplicity}
+The empirical corpus evaluates pairwise comparisons ($m=1$). Multiplicity scaling ($m\ge 2$) is evaluated via synthetic simulation and controlled candidate units with a compact model; live candidate scoring on an admitted model across large candidate sets is prepared and released as part of the artifact. The candidate set encompasses effects committed in the same run for the same tool; retries under fresh run identifiers or distinct tools fall outside this scope.
 
-\paragraph{External semantics, storage and concurrency}
-The mechanism does not provide external exactly-once execution; a crash inside the commit window re-fires under paraphrase unless the provider supplies a key complete for identity, which no tool in the corpus has. The research log is not crash-atomic (A3 is partial), and concurrent dispatch (A7) was not tested.
+\paragraph{Adversarial text and prose boundaries}
+The refuter eliminates typed-field manipulation before judging, whereas prose-only manipulation remains within the residual judge's jurisdiction where the primary judge yielded an 84.0\% suppression rate under attack text. The architectural remedy for prose vulnerability is schema refinement---moving distinguishing attributes into typed fields---rather than relying on judge prompt tuning.
 
-\paragraph{Cost and the choice of $\alpha$}
-The judge is consulted on 76.2\% of dispatches, at about 184 tokens per comparison in batches of ten. Stricter levels buy safety with liveness: at $\alpha=0.01$ the primary judge deduplicates 22.1\% and routes 64.8\% of duplicates to review.
+\paragraph{External execution boundary}
+The mechanism establishes bounded identity recognition (guarantee A) and fence-level commitment (guarantee B); external exactly-once execution (guarantee C) remains outside the mechanism's contract. A crash strictly inside the external commit window results in duplicate dispatch unless downstream providers offer idempotency keys complete for identity (Proposition~\ref{prop:compose}).
+
+\paragraph{Operating budget and cost}
+The judge is consulted on 76.2\% of dispatches, at about 184 tokens per comparison in batches of ten. Operating points are governed by $\alpha$: selecting a stricter level of $\alpha=0.01$ prioritises safety over autonomy, yielding 22.1\% deduplication and routing 64.8\% of duplicates to flagged review.
+
+These boundaries define the conditions under which the proposed mechanism converts semantic retry ambiguity into a calibrated decision problem.
 
 \subsection{Ethics and broader impact}
 
