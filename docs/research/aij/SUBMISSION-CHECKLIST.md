@@ -57,7 +57,7 @@ tool:
 | Data availability | artifact accompanies the manuscript; regenerates offline; corpus frozen because two generator models are no longer reachable | **[AUTHOR]** add public archive and DOI |
 | Generative AI in manuscript preparation | discloses use of Claude (Anthropic) for drafting, code and number auditing, with the author taking responsibility; separates this from models used as research instruments | **[AUTHOR]** confirm and edit to match the final process |
 | CRediT | single author, full role list | **[AUTHOR]** confirm |
-| Ethics / human participants | **none required**: no human subjects took part. The human annotation channel was designed and instrumented but never collected; the model panel is not a human study. The corpus is synthetic and contains no personal data. | **[AUTHOR]** confirm no institutional determination is needed |
+| Ethics / human participants | **Synthetic non-personal corpus**: the targeted Channel H follow-up evaluates non-personal synthetic tool calls with anonymised pseudonyms; no personal data collected. | **[AUTHOR]** confirm no institutional determination is needed |
 
 ## 4. Originality and concurrent submission — **[AUTHOR] action required**
 
