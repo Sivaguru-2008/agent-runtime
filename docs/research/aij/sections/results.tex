@@ -45,9 +45,9 @@ refined schema & 49 & 0.90 & 0.0\%~[0.0--1.6] & 69.0\%~[63.4--74.2] & 13.2\%~[9.
 
 \input{figures/fig-multiplicity}
 
-\paragraph{Interpretation} A pool from outside the jurisdiction roughly doubles the rate the bound governs while the whole-split rate stays under $\alpha$, so the violation is invisible unless one conditions on the residual. The correction is necessary and pays for safety by switching off beyond its budget; $\alpha$ is a promise about the average calibration draw.
+\paragraph{Interpretation} A pool from outside the jurisdiction roughly doubles the rate the bound governs while the whole-split rate stays under $\alpha$, so the violation is invisible unless one conditions on the residual. The correction is necessary and pays for safety by switching off beyond its budget; the theorem is marginal and depends on jurisdiction-matched exchangeability, so realised rates can vary across calibration draws.
 
-\paragraph{Limitation} Simulation evaluates exchangeable continuous scores, while the live multiplicity trial employs a compact model (Llama-3.1-8B-Instant) on purpose-built units; it demonstrates the necessity of the multiplicity correction rather than a production operating point. A live multi-candidate evaluation on admitted judge models is prepared and released with the artifact (Section~\ref{sec:limitations}).
+\paragraph{Limitation} The theoretical mechanism covers variable candidate multiplicity, while empirical multiplicity scaling is validated through controlled live and simulation experiments; the primary corpus evaluates pairwise identity decisions. Live validation on naturally occurring multi-candidate agent workloads remains valuable future work (Section~\ref{sec:limitations}).
 
 \subsection{Is the bound valid within each kind of difference?}\label{sec:res-class}
 
