@@ -1,5 +1,5 @@
-Effect identity for agents is a decision under asymmetric, irreversible loss.
-A certifier and a refuter settle what the schema pins; only the residual is judged.
-The conformal bound on the deployed maximum needs a jurisdiction-matched pool.
-A calibration pool drawn outside the jurisdiction hides its own violation.
-Refining the schema or per-class validity shrinks the budget: a refinement dilemma.
+Retrying LLM agents paraphrase irreversible calls, so content hashes miss duplicates.
+A schema-fixed certifier and refuter leave only a residual for an LLM judge.
+A conformal rule on the max over m candidates bounds silent wrong suppression by α.
+The bound needs a jurisdiction-matched pool; a wider pool hides its own violation.
+Refining the schema shrinks the calibration budget: an exact refinement dilemma.

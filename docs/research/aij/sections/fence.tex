@@ -15,7 +15,7 @@ The semantic projection $\sigma_t(x)$ is the tuple of canonical values of the de
 
 \subsection{Residual judge}\label{sec:judge}
 
-A judge call scores a batch of pairs from one tool and returns, for each, the probability that the two requests denote a single act, as an integer percentage (prompt in the supplementary material). An integer in $[0,100]$ is accepted; a non-integer such as \texttt{0.95}, an out-of-range value or a missing entry is rejected and the batch retried; a pair that never yields an admissible value is an \emph{abstention}, never imputed. The contract exists because an earlier pass stored 180 scores (23.1\%) on the wrong scale while reporting no failures; every number from it was withdrawn (supplementary material, Section~S3). Abstentions are dropped from calibration, excluded from the maximum, and never cause suppression; if every candidate abstains the fence escalates.
+A judge call scores a batch of pairs from one tool and returns, for each, the probability that the two requests denote a single act, as an integer percentage (prompt in the supplementary material). An integer in $[0,100]$ is accepted; a non-integer such as \texttt{0.95}, an out-of-range value or a missing entry is rejected and the batch retried; a pair that never yields an admissible value is an \emph{abstention}, never imputed. An earlier scoring pass that violated this contract was discarded (supplementary material, Section~S3). Abstentions are dropped from calibration, excluded from the maximum, and never cause suppression; if every candidate abstains the fence escalates.
 
 \subsection{Calibration}\label{sec:calibration}
 
