@@ -4,17 +4,13 @@
 
 A \emph{logical run} carries an identifier $r$ chosen by the application and reused across every retry, crash and replay of that run. Within a run, an agent emits \emph{requests} $c=(t,x)$: a tool $t$ and a structured input $x\in X_t$. A tool is \emph{irreversible} if executing it twice for one intended action is a defect (a charge, a wire, an email, a ticket); only irreversible tools are fenced. Executing a request produces an \emph{effect} and a \emph{response}, and the fence records a \emph{commit row} for each executed request in a durable log. Table~\ref{tab:terms} fixes the vocabulary.
 
-{\small
-\begin{longtable}{@{}p{3.1cm}p{10.4cm}@{}}
-\caption{Terminology. Each term is used only in the sense given here.}\label{tab:terms}\\
+\begin{table}[!tbp]
+\centering\small
+\caption{Terminology. Each term is used only in the sense given here.}\label{tab:terms}
+\begin{tabularx}{\linewidth}{@{}p{3.8cm}X@{}}
 \toprule
 Term & Meaning \\
 \midrule
-\endfirsthead
-\toprule
-Term & Meaning \\
-\midrule
-\endhead
 operation identifier & the content address $\mathit{op}=H(r\,\|\,t\,\|\,H(\kappa_t(x)))$ of a request \\
 committed effect & an executed request whose commit row is in the durable log of run $r$ \\
 effect identity & ground-truth sameness of intended acts, $x\approx_t x'$ (Definition~\ref{def:identity}) \\
@@ -28,7 +24,8 @@ wrong suppression & suppressing a request that is distinct from every committed 
 at-most-once & fence-level commitment of each recognised effect at most once (guarantee B) \\
 exactly-once & external application of each intended act exactly once (guarantee C); never used unqualified \\
 \bottomrule
-\end{longtable}}
+\end{tabularx}
+\end{table}
 
 \subsection{Ground-truth identity}
 

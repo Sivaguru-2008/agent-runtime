@@ -110,7 +110,7 @@ Qwen3.6-27B & 97.7\% & 0.95 & 0.9\%~[0.2--3.1] & 89.0\%~[84.8--92.1] & 8.5\%~[5.
 \paragraph{Result} Refinement closes prose-only injection on every judge and drives benign wrong suppression to 0.0\%~[0.0--1.6], while judge jurisdiction falls from 76.2\%~[72.3--79.7] to 58.9\%~[54.6--63.0] (Table~\ref{tab:refinement}). Deduplication falls from 94.7\%~[91.4--96.7] to 69.0\%~[63.4--74.2] on the primary judge, and from 82.6\%~[77.7--86.6] and 89.0\%~[84.8--92.1] to the canonical-only 12.1\%~[8.8--16.4] on the other two, whose refined thresholds sit at a score of 1.0. No duplicate is falsely vetoed (0 of 281); on the primary judge 72 duplicates stop being suppressed, 50 of them flagged. In the size-only counterfactual mean deduplication is 88.4\%, and the observed 69.0\% lies at its 11.6th percentile; for the two saturated judges a size-only draw reaches the ceiling in 43.9\% and 41.9\% of cases. Removed pairs are easier: 2.2\% of removed and 10.2\% of retained pairs score at or above 0.8 for both GPT-OSS judges. A three-level schema ladder over a separate act family confirms the monotone part: the residual falls from 100.0\%~[96.4--100.0] to 41.2\%~[32.1--50.9] to 19.6\%~[13.1--28.4], and the calibrated layer suppresses nothing at any level (Section~S13).
 
 \begin{table}[!tbp]
-\centering\scriptsize\setlength{\tabcolsep}{3.5pt}
+\centering\scriptsize\setlength{\tabcolsep}{2.2pt}
 \caption{Declared against refined declarations, $\alpha=0.05$. The rank is the position of the threshold from the top of the pool (Proposition~\ref{prop:dilemma}b); $\thi=1.00$ with a strict inequality means no semantic suppression.}\label{tab:refinement}
 \begin{tabular}{@{}llrrrlll@{}}
 \toprule

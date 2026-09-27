@@ -54,17 +54,13 @@ The corpus has 520 (approval, action) pairs over four tools (\texttt{issue\_refu
 
 Table~\ref{tab:claims} maps each claim of the paper to the result that supports it and states what that result does and does not establish. It is the reading guide to Section~\ref{sec:results}.
 
-{\footnotesize
-\begin{longtable}{@{}p{2.9cm}p{2.5cm}p{4.3cm}p{2.3cm}@{}}
-\caption{Claims, evidence and conclusions. ``Proved'' results hold under the listed assumptions; ``measured'' results hold on this corpus.}\label{tab:claims}\\
+\begin{table}[!tbp]
+\centering\scriptsize\linespread{1.0}\selectfont\setlength{\tabcolsep}{3.5pt}
+\caption{Claims, evidence and conclusions. ``Proved'' results hold under the listed assumptions; ``measured'' results hold on this corpus.}\label{tab:claims}
+\begin{tabularx}{\linewidth}{@{}p{2.8cm}p{2.3cm}Xp{2.7cm}@{}}
 \toprule
 Claim & Theorem / experiment & Evidence & Conclusion \\
 \midrule
-\endfirsthead
-\toprule
-Claim & Theorem / experiment & Evidence & Conclusion \\
-\midrule
-\endhead
 Decidable layers never err on the pairs they decide & Prop.~\ref{prop:sound}; §\ref{sec:res-main} & 0/232 distinct test pairs certified; 0/281 duplicates refuted; 20/20 typed-field injections refuted & proved under A2, A5, A5$'$; assumptions hold on this corpus \\
 Semantic layer recovers paraphrased duplicates that canonical keys miss & §\ref{sec:res-main} & dedup 94.7\% vs 12.1\%; McNemar 232/0 discordant & measured; large effect \\
 Wrong suppression is bounded on the deployed statistic & Thm.~\ref{thm:bound}; §\ref{sec:res-bound} & WS 1.7\%; residual-conditioned 2.8\%; mismatched pool 4.9\%; Monte-Carlo 89.0\% uncorrected vs $\le$5.7\% corrected & proved under A6; marginal, not per deployment \\
@@ -78,4 +74,5 @@ External exactly-once is not provided & Props.~\ref{prop:compose}, \ref{prop:str
 Safety conclusion is robust to relabelling; liveness is not & §\ref{sec:res-labels} & WS 1.7/1.9/2.2\% across labellings; dedup 94.7/75.0/27.6\% & measured; labels are constructed \\
 Constructed labels are shared by independent readers & §\ref{sec:res-labels} & Model panel audit (88.0\% [80.9--92.7]); targeted Channel H follow-up (100.0\% [79.6--100.0] on D2 and D4b) & Shared across model families; confirmed on contested strata by targeted human annotators \\
 \bottomrule
-\end{longtable}}
+\end{tabularx}
+\end{table}

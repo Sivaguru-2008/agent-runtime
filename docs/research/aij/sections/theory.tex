@@ -6,17 +6,13 @@ The individual tools used below---split-conformal calibration, the union bound, 
 
 Table~\ref{tab:assumptions} lists every assumption and how the experiments satisfy or test it. Several are environmental, and a deployment that does not supply them does not obtain the corresponding guarantee.
 
-{\footnotesize
-\begin{longtable}{@{}p{3.1cm}p{2.4cm}p{7.6cm}@{}}
-\caption{Assumptions, their type, and their status in the implementation and experiments. ``Measured'' entries test an assumption on this corpus; they do not establish it in general.}\label{tab:assumptions}\\
+\begin{table}[!tbp]
+\centering\footnotesize\linespread{1.0}\selectfont\setlength{\tabcolsep}{4pt}
+\caption{Assumptions, their type, and their status in the implementation and experiments. ``Measured'' entries test an assumption on this corpus; they do not establish it in general.}\label{tab:assumptions}
+\begin{tabularx}{\linewidth}{@{}p{3.0cm}p{2.5cm}X@{}}
 \toprule
 Assumption & Type & Status in this work \\
 \midrule
-\endfirsthead
-\toprule
-Assumption & Type & Status in this work \\
-\midrule
-\endhead
 A1 Stable run identifier across retries and replays & environment & Supplied by the harness; a retry under a new identifier is out of scope. \\
 A2 Deterministic canonical identity: $\kappa_t$ and $H$ are pure; $H$ is collision-free & implementation & Pure canonicalisation; $H$ is SHA-256; unit-tested. \\
 A3 Atomic insert-if-absent on $\mathit{op}$ & storage & \emph{Partial:} unique for a single writer but not crash-atomic; crashes injected at protocol points, not inside a write. \\
@@ -28,7 +24,8 @@ A6 Conditionally on $m$, each score of a truly distinct residual comparison is e
 A7 No concurrent dispatch per identity & scheduler & Sequential dispatch in all experiments; concurrency not tested. \\
 A8 The provider applies at most one effect per idempotency key & provider & Only in Proposition~\ref{prop:compose}; absent by design in the crash experiment. \\
 \bottomrule
-\end{longtable}}
+\end{tabularx}
+\end{table}
 
 Structurally, the candidate set of a request is every effect committed in the same run for the same tool; duplicates across runs or across tools are outside every result below.
 

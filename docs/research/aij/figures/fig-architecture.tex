@@ -3,20 +3,36 @@
 \begin{tikzpicture}[
   font=\footnotesize,
   box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt, fill=white},
-  layer/.style={draw, rounded corners=2pt, align=left, inner sep=4pt, text width=5.6cm, fill=gray!6},
+  layer/.style={draw, rounded corners=2pt, align=left, inner sep=4pt, text width=6.0cm, fill=gray!6},
   arr/.style={-{Latex[length=2mm]}, thick},
   lbl/.style={font=\scriptsize\itshape, align=center}]
-  \node[box, text width=2.0cm] (agent) {LLM agent\\(re-synthesises\\arguments on retry)};
-  \node[layer, right=1.0cm of agent, yshift=1.05cm] (l0) {\textbf{Certifier} $\equiv_\kappa$: canonical equality of declared fields $\Rightarrow$ \textsc{suppress}\hfill\emph{exact (A5)}};
-  \node[layer, below=0.18cm of l0] (wit) {\textbf{Refuter} $\not\equiv_\sigma$: declared typed fields differ $\Rightarrow$ candidate removed\hfill\emph{exact (A5$'$)}};
-  \node[layer, below=0.18cm of wit] (jud) {\textbf{Residual judge} $S^\ast=\max_{c\in C}J(t,x,c)$ vs.\ conformal $t_{\mathrm{hi}}(m)$ at level $\alpha/m$\hfill\emph{bounded (A6)}};
-  \node[draw, dashed, rounded corners=3pt, inner sep=5pt, fit=(l0)(wit)(jud), label={[font=\scriptsize]above:{Fence \quad (A) identity recognition}}] (fence) {};
-  \node[box, below=1.05cm of jud.south west, anchor=north west, text width=5.6cm] (log) {\textbf{Durable log}: commit rows (unique $op$), pending intents, flags\\ \emph{(B) fence-level at-most-once: A3, A7}};
-  \node[box, right=1.0cm of fence, text width=2.1cm] (prov) {External provider\\(payment, e-mail,\\ticketing API)\\ \emph{(C) not provided}};
-  \draw[arr] (agent.east) -- node[above, lbl]{request $(t,x)$} (agent.east -| fence.west);
-  \draw[arr] (fence.east) -- node[above, lbl]{execute} (prov.west);
-  \draw[arr, <->] (fence.south) -- node[right, lbl]{lookup / insert-if-absent} (log.north -| fence.south);
-  \draw[very thick, red!70!black, dashed] (prov.south) |- node[pos=0.72, below, lbl, text=red!60!black]{commit window: effect accepted, row not yet durable} (log.east);
+  % Center column: three fence layers
+  \node[layer] (l0) {\textbf{Certifier $\equiv_\kappa$}: canonical field equality\\[2pt]$\Rightarrow$ \textsc{suppress}\hfill\emph{exact (A5)}};
+  \node[layer, below=0.20cm of l0] (wit) {\textbf{Refuter $\not\equiv_\sigma$}: declared fields differ\\[2pt]$\Rightarrow$ candidate removed\hfill\emph{exact (A5$'$)}};
+  \node[layer, below=0.20cm of wit] (jud) {\textbf{Residual judge}: candidate $c\in C$\\[2pt]$J(t,x,c) \ge \thi(m)$\hfill\emph{bounded (A6)}};
+  \node[draw, dashed, rounded corners=3pt, inner sep=5pt, fit=(l0)(wit)(jud), label={[font=\scriptsize\bfseries]above:{Fence \quad (A) identity recognition}}] (fence) {};
+
+  % Left: LLM agent
+  \node[box, left=1.2cm of fence.west, text width=1.9cm] (agent) {\textbf{LLM agent}\\[2pt]\scriptsize(re-synthesises\\arguments\\on retry)};
+
+  % Right: External provider
+  \node[box, right=1.2cm of fence.east, text width=2.0cm] (prov) {\textbf{External}\\[1pt]\textbf{provider}\\[2pt]\scriptsize(payment, e-mail,\\ticketing API)\\[2pt]\emph{(C) not provided}};
+
+  % Bottom: Durable log
+  \node[box, below=1.15cm of fence.south, text width=6.0cm] (log) {\textbf{Durable log}: commit rows (unique $\mathit{op}$), pending intents\\[2pt]\emph{(B) fence-level at-most-once: A3, A7}};
+
+  % Main flow arrows
+  \draw[arr] (agent.east) -- node[above=2pt, lbl]{request\\$(t,x)$} (fence.west);
+  \draw[arr] (fence.east) -- node[above=2pt, lbl]{execute} (prov.west);
+  \draw[arr, <->] (fence.south) -- node[left=5pt, lbl]{lookup /\\insert-if-absent} (log.north);
+
+  % Commit window: from prov.south, down to below log, then horizontal to below log.south, then up
+  \coordinate (bot) at ([yshift=-18pt]log.south);
+  \coordinate (corner) at (prov.south |- bot);
+  \draw[very thick, red!70!black, dashed, -{Latex[length=2mm]}]
+    (prov.south) -- (corner)
+    -- node[below=2pt, font=\scriptsize\itshape, text=red!70!black, align=center]{commit window: effect accepted,\\row not yet durable} (bot)
+    -- (log.south);
 \end{tikzpicture}
 \caption{System view. The fence sits between the agent and an irreversible provider. Identity recognition (A) is decided by two exact layers and a calibrated residual judge; fence-level at-most-once commitment (B) is enforced at the durable log under its storage and scheduling assumptions; external exactly-once (C) is not provided, because a crash inside the commit window (dashed) leaves no local record of an accepted effect (Proposition~\ref{prop:amo}).}\label{fig:architecture}
 \end{figure}
