@@ -175,7 +175,7 @@ Read from the live guide (sciencedirect.com/journal/artificial-intelligence/publ
 | Declaration of generative AI use | present, updated for this revision | complies |
 | Numbered references in order of citation | elsarticle-num | complies |
 | Denote powers of e by exp | appendix now uses \exp | fixed in this revision |
-| Length: no limit, but > ~40 pages "often significantly delayed" | 85 review-format pages (12pt double-spaced preprint); main text 12,122 words | note: long by the guide's standard |
+| Length: no limit, but > ~40 pages "often significantly delayed" | 86 review-format pages (12pt double-spaced preprint); main text 12,122 words | note: long by the guide's standard |
 | Supplementary material: caption per file, submitted with the manuscript | one PDF (18 pp.) | give it a descriptive caption on upload |
 
-The `submission/` folder (latex-source, zip, PDFs) predates this revision and is **stale**; rebuild it from the current sources before uploading.
+The `submission/` folder (latex-source, zip, PDFs) is **rebuilt and verified** (2026-09-27); standalone `latex-source/manuscript.pdf` compiles cleanly with 0 undefined references and 0 overfull boxes > 20pt, and `latex-source.zip` is ready for Elsevier Editorial Manager upload.
