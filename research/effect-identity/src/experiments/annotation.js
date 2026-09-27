@@ -557,6 +557,21 @@ function ingest() {
     }
   }
 
+  // ── sensitivity: drop Compound panelists (family: llama-based / Groq compound) ──
+  const compoundNames = annotators.filter((a) => a.startsWith("compound"));
+  let sensitivityCompound = null;
+  if (compoundNames.length > 0) {
+    const kept = annotators.filter((a) => !compoundNames.includes(a));
+    const subItems = items.filter((it) => kept.every((a) => byAnnotator[a].has(it)));
+    const agreeing = subItems.filter((it) => byAnnotator[kept[0]].get(it) === key.get(it).constructedLabel);
+    sensitivityCompound = {
+      excluded: compoundNames,
+      why: "these panelists are built on the primary judge's model family (GPT-OSS-120B / Llama)",
+      remainingAnnotators: kept,
+      constructionAgreement: rate(agreeing.length, subItems.length),
+    };
+  }
+
   const flips = items.filter((it) => finalLabel.has(it) && finalLabel.get(it) !== key.get(it).constructedLabel);
   const out = {
     status: "COMPLETE",
@@ -573,6 +588,7 @@ function ingest() {
     freeze: { ok: freeze.ok, sheetHash: freeze.sheetHash, frozenAt: freeze.frozenAt },
     catchTrials: { declared: catchTrials, audit: catchAudit, droppedAnnotators: dropped },
     sensitivityExcludingReportedJudges: sensitivity,
+    sensitivityExcludingCompound: sensitivityCompound,
     annotators, adjudicators: Object.keys(adjudicators),
     nItems: key.size, nFullyAnnotated: items.length,
     fleissKappa: fleissKappa(matrix, CATS),

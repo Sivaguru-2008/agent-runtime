@@ -1,6 +1,6 @@
 {
   "status": "COMPLETE",
-  "generatedAt": "2026-09-14T12:44:53.995Z",
+  "generatedAt": "2026-09-27T14:03:05.625Z",
   "responsesDirectory": "annotation/preregistered-collection",
   "channel": "M",
   "channelMeaning": {
@@ -141,6 +141,26 @@
       }
     },
     "undecidedWithoutThem": 8
+  },
+  "sensitivityExcludingCompound": {
+    "excluded": [
+      "compound-mini",
+      "compound"
+    ],
+    "why": "these panelists are built on the primary judge's model family (GPT-OSS-120B / Llama)",
+    "remainingAnnotators": [
+      "qwen27b"
+    ],
+    "constructionAgreement": {
+      "value": 0.8205128205128205,
+      "successes": 96,
+      "n": 117,
+      "basis": "measured",
+      "ci95": {
+        "lo": 0.741146913021092,
+        "hi": 0.8795010064258738
+      }
+    }
   },
   "annotators": [
     "compound-mini",
