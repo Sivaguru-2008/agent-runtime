@@ -1,0 +1,124 @@
+{
+  "status": "COMPLETE",
+  "generatedAt": "2026-09-27T07:24:01.738Z",
+  "channel": "H",
+  "scope": "TARGETED follow-up on the two strata contested by the model panel; not the preregistered 154-item study",
+  "annotators": [
+    "human-alpha",
+    "human-beta",
+    "human-gamma"
+  ],
+  "adjudicators": [],
+  "droppedOnCatchTrials": [],
+  "nFullyAnnotated": 33,
+  "adjudicationRate": {
+    "value": 0,
+    "successes": 0,
+    "n": 33,
+    "basis": "measured",
+    "ci95": {
+      "lo": 0,
+      "hi": 0.10426999754245206
+    }
+  },
+  "fleissKappa": 0.7306122448979594,
+  "krippendorffAlpha": 0.7333333333333334,
+  "perStratum": {
+    "diff_text_only": {
+      "name": "legitimate repeats (D2)",
+      "nItems": 15,
+      "constructionAgreement": {
+        "value": 1,
+        "successes": 15,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7961166989641515,
+          "hi": 1
+        }
+      },
+      "contested": false,
+      "unsureRate": {
+        "value": 0.022222222222222223,
+        "successes": 1,
+        "n": 45,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.003933598882833428,
+          "hi": 0.1156668176841488
+        }
+      },
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.20388330103584862
+        }
+      },
+      "krippendorff": -0.011494252873563315,
+      "disagreements": [],
+      "channelMOnSameStratum": {
+        "value": 0.5,
+        "successes": 6,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.2537815976337061,
+          "hi": 0.7462184023662939
+        }
+      }
+    },
+    "attack_text": {
+      "name": "prose-only injection (D4b and extension analogues)",
+      "nItems": 15,
+      "constructionAgreement": {
+        "value": 1,
+        "successes": 15,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7961166989641515,
+          "hi": 1
+        }
+      },
+      "contested": false,
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 45,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.07865159873288838
+        }
+      },
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.20388330103584862
+        }
+      },
+      "krippendorff": null,
+      "disagreements": [],
+      "channelMOnSameStratum": {
+        "value": 0.45454545454545453,
+        "successes": 5,
+        "n": 11,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.21271271622459764,
+          "hi": 0.719908462590678
+        }
+      }
+    }
+  },
+  "rule": "contested iff Wilson 95% upper bound of agreement < 0.80 (PREREGISTRATION.md §6)",
+  "ingestFile": "results/channel_h_targeted.ingest.json"
+}

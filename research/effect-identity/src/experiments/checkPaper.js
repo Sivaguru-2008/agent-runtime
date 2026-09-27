@@ -44,6 +44,8 @@ const RESULT_FILES = [
   "authz_v1.json",
   // AIJ revision, Phase 2: class-conditional validity (§8.10, Table S27).
   "class_conditional.json",
+  // AIJ revision, Phase 4: targeted Channel H follow-up.
+  "channel_h_targeted.json",
 ];
 const normaliseTex = (s) => s
   .replace(/\$\^?\{?\\dagger\}?\$/g, "†").replace(/\\dagger/g, "†")

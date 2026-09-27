@@ -1,0 +1,895 @@
+{
+  "status": "COMPLETE",
+  "generatedAt": "2026-09-27T07:24:01.721Z",
+  "responsesDirectory": "annotation/channel-h-targeted/responses",
+  "channel": "H",
+  "channelMeaning": {
+    "H": "independent human annotators",
+    "M": "blinded model panel — a weaker control against the same threat; not a human study"
+  },
+  "provenance": {
+    "human-alpha": {
+      "channel": "H"
+    },
+    "human-beta": {
+      "channel": "H"
+    },
+    "human-gamma": {
+      "channel": "H"
+    }
+  },
+  "freeze": {
+    "ok": true,
+    "sheetHash": "66a174e1392093c14e911d6130b235b3d4af3b8116c0a81ef27830174a249a9c",
+    "frozenAt": "2026-08-23T17:15:11.470Z"
+  },
+  "catchTrials": {
+    "declared": [
+      {
+        "item": "IT013",
+        "expect": "SAME",
+        "why": "purely presentational difference (key order / whitespace / case only)"
+      },
+      {
+        "item": "IT022",
+        "expect": "SAME",
+        "why": "purely presentational difference (key order / whitespace / case only)"
+      },
+      {
+        "item": "IT108",
+        "expect": "DIFF",
+        "why": "single numeric field 'nights' differs by a factor of 2.00"
+      }
+    ],
+    "audit": {
+      "human-alpha": {
+        "trials": [
+          {
+            "item": "IT013",
+            "expect": "SAME",
+            "got": "SAME"
+          },
+          {
+            "item": "IT022",
+            "expect": "SAME",
+            "got": "SAME"
+          },
+          {
+            "item": "IT108",
+            "expect": "DIFF",
+            "got": "DIFF"
+          }
+        ],
+        "passed": true
+      },
+      "human-beta": {
+        "trials": [
+          {
+            "item": "IT013",
+            "expect": "SAME",
+            "got": "SAME"
+          },
+          {
+            "item": "IT022",
+            "expect": "SAME",
+            "got": "SAME"
+          },
+          {
+            "item": "IT108",
+            "expect": "DIFF",
+            "got": "DIFF"
+          }
+        ],
+        "passed": true
+      },
+      "human-gamma": {
+        "trials": [
+          {
+            "item": "IT013",
+            "expect": "SAME",
+            "got": "SAME"
+          },
+          {
+            "item": "IT022",
+            "expect": "SAME",
+            "got": "SAME"
+          },
+          {
+            "item": "IT108",
+            "expect": "DIFF",
+            "got": "DIFF"
+          }
+        ],
+        "passed": true
+      }
+    },
+    "droppedAnnotators": []
+  },
+  "sensitivityExcludingReportedJudges": null,
+  "annotators": [
+    "human-alpha",
+    "human-beta",
+    "human-gamma"
+  ],
+  "adjudicators": [],
+  "nItems": 154,
+  "nFullyAnnotated": 33,
+  "fleissKappa": 0.7306122448979594,
+  "krippendorffAlpha": 0.7333333333333334,
+  "cohenKappaPairwise": {
+    "human-alpha|human-beta": 0.7843137254901962,
+    "human-alpha|human-gamma": 0.7870967741935487,
+    "human-beta|human-gamma": 0.6393442622950823
+  },
+  "adjudicationRate": {
+    "value": 0,
+    "successes": 0,
+    "n": 33,
+    "basis": "measured",
+    "ci95": {
+      "lo": 0,
+      "hi": 0.10426999754245206
+    }
+  },
+  "adjudicationResolved": {
+    "value": 0,
+    "successes": 0,
+    "n": 0,
+    "basis": "measured",
+    "ci95": null
+  },
+  "needAdjudication": [],
+  "constructionAgreementOverall": {
+    "value": 1,
+    "successes": 33,
+    "n": 33,
+    "basis": "measured",
+    "ci95": {
+      "lo": 0.895730002457548,
+      "hi": 1
+    }
+  },
+  "labelFlips": [],
+  "perStratum": {
+    "same_mechanical": {
+      "n": 2,
+      "why": "control: the construction should be uncontroversial here",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 2,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.6576197724933469
+        }
+      },
+      "constructionAgreement": {
+        "value": 1,
+        "successes": 2,
+        "n": 2,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.34238022750665303,
+          "hi": 1
+        }
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 6,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.39033428790216534
+        }
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "same_paraphrase": {
+      "n": 0,
+      "why": "the main liveness population",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "same_loose_value": {
+      "n": 0,
+      "why": "the paper's motivating example",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "same_adversarial": {
+      "n": 0,
+      "why": "generator told to maximise surface difference — a validator slip would appear here",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "diff_near_miss": {
+      "n": 1,
+      "why": "the main safety population",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 1,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.7934506856227626
+        }
+      },
+      "constructionAgreement": {
+        "value": 1,
+        "successes": 1,
+        "n": 1,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.20654931437723745,
+          "hi": 1
+        }
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 3,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.5614970317550455
+        }
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "diff_text_only": {
+      "n": 15,
+      "why": "THE contested category: our errors concentrate here and a reader could relabel it",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.20388330103584862
+        }
+      },
+      "constructionAgreement": {
+        "value": 1,
+        "successes": 15,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7961166989641515,
+          "hi": 1
+        }
+      },
+      "unsureRate": {
+        "value": 0.022222222222222223,
+        "successes": 1,
+        "n": 45,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.003933598882833428,
+          "hi": 0.1156668176841488
+        }
+      },
+      "krippendorff": -0.011494252873563315,
+      "disagreements": []
+    },
+    "diff_semantic": {
+      "n": 0,
+      "why": "hand-written same-surface, different-intent",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "attack_field": {
+      "n": 0,
+      "why": "injection across a declared difference",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "attack_text": {
+      "n": 15,
+      "why": "injection where only prose distinguishes the acts",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.20388330103584862
+        }
+      },
+      "constructionAgreement": {
+        "value": 1,
+        "successes": 15,
+        "n": 15,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7961166989641515,
+          "hi": 1
+        }
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 45,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.07865159873288838
+        }
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "attack_encoding": {
+      "n": 0,
+      "why": "encoding-level attacks a human reader may see differently from a parser",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    },
+    "misdeclared": {
+      "n": 0,
+      "why": "the schema is broken here; human labels establish that the acts really are distinct",
+      "adjudicationRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "constructionAgreement": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "unsureRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 0,
+        "basis": "measured",
+        "ci95": null
+      },
+      "krippendorff": null,
+      "disagreements": []
+    }
+  },
+  "mechanism": {
+    "underConstructedLabels": {
+      "tHi": 0.7,
+      "nCalDiff": 140,
+      "nItems": 33,
+      "nExcludedUnscored": 0,
+      "overall": {
+        "nSame": 2,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0.16129032258064516,
+          "successes": 5,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.070926244433653,
+            "hi": 0.3263435395879326
+          }
+        },
+        "friction": {
+          "value": 0.7096774193548387,
+          "successes": 22,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.5340767066925007,
+            "hi": 0.8390419984369939
+          }
+        },
+        "dedup": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        }
+      },
+      "residual": {
+        "nSame": 0,
+        "nDiff": 30,
+        "wrongSuppression": {
+          "value": 0.16666666666666666,
+          "successes": 5,
+          "n": 30,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0733654237184855,
+            "hi": 0.3356435050641603
+          }
+        },
+        "friction": {
+          "value": 0.7333333333333333,
+          "successes": 22,
+          "n": 30,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.555520383048111,
+            "hi": 0.8581733668040368
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 0,
+          "basis": "measured",
+          "ci95": null
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 0,
+          "basis": "measured",
+          "ci95": null
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 0,
+          "basis": "measured",
+          "ci95": null
+        }
+      }
+    },
+    "underHumanLabels": {
+      "tHi": 0.7,
+      "nCalDiff": 140,
+      "nItems": 33,
+      "nExcludedUnscored": 0,
+      "overall": {
+        "nSame": 2,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0.16129032258064516,
+          "successes": 5,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.070926244433653,
+            "hi": 0.3263435395879326
+          }
+        },
+        "friction": {
+          "value": 0.7096774193548387,
+          "successes": 22,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.5340767066925007,
+            "hi": 0.8390419984369939
+          }
+        },
+        "dedup": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        }
+      },
+      "residual": {
+        "nSame": 0,
+        "nDiff": 30,
+        "wrongSuppression": {
+          "value": 0.16666666666666666,
+          "successes": 5,
+          "n": 30,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.0733654237184855,
+            "hi": 0.3356435050641603
+          }
+        },
+        "friction": {
+          "value": 0.7333333333333333,
+          "successes": 22,
+          "n": 30,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.555520383048111,
+            "hi": 0.8581733668040368
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 0,
+          "basis": "measured",
+          "ci95": null
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 0,
+          "basis": "measured",
+          "ci95": null
+        },
+        "flaggedEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 0,
+          "basis": "measured",
+          "ci95": null
+        }
+      }
+    },
+    "scoredOnly": {
+      "underConstructedLabels": {
+        "tHi": 0.7,
+        "nCalDiff": 140,
+        "nItems": 8,
+        "nExcludedUnscored": 25,
+        "overall": {
+          "nSame": 0,
+          "nDiff": 8,
+          "wrongSuppression": {
+            "value": 0.625,
+            "successes": 5,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.3057423946026273,
+              "hi": 0.8631557141764027
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "silentEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          }
+        },
+        "residual": {
+          "nSame": 0,
+          "nDiff": 8,
+          "wrongSuppression": {
+            "value": 0.625,
+            "successes": 5,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.3057423946026273,
+              "hi": 0.8631557141764027
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "silentEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          }
+        }
+      },
+      "underHumanLabels": {
+        "tHi": 0.7,
+        "nCalDiff": 140,
+        "nItems": 8,
+        "nExcludedUnscored": 25,
+        "overall": {
+          "nSame": 0,
+          "nDiff": 8,
+          "wrongSuppression": {
+            "value": 0.625,
+            "successes": 5,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.3057423946026273,
+              "hi": 0.8631557141764027
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "silentEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          }
+        },
+        "residual": {
+          "nSame": 0,
+          "nDiff": 8,
+          "wrongSuppression": {
+            "value": 0.625,
+            "successes": 5,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.3057423946026273,
+              "hi": 0.8631557141764027
+            }
+          },
+          "friction": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "dedup": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "silentEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          },
+          "flaggedEscape": {
+            "value": 0,
+            "successes": 0,
+            "n": 0,
+            "basis": "measured",
+            "ci95": null
+          }
+        }
+      }
+    }
+  },
+  "note": "Human labels are reported as a SEPARATE evaluation on a small stratified subset. They are never merged into the constructed corpus and are never used to relabel it."
+}
