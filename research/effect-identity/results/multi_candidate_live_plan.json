@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T17:42:13.211Z",
+  "generatedAt": "2026-09-29T15:38:04.140Z",
   "config": {
     "$comment": [
       "AIJ revision Phase 3. PREPARED, NOT RUN. Units are built from corpus v1: one per residual TEST pair; dispatch = pair.b, candidate 1 = pair.a (true match for SAME units, labelled distinct act for DIFF units); candidates 2..mMax drawn without replacement by a seeded Fisher-Yates shuffle from corpus inputs of the same tool that share the dispatch projection, are outside its SAME-class, and are known distinct (different seed act, or linked by a DIFF label). Thresholds from the deployed configuration jurisdiction-matched pool; uncorrected t(alpha) vs Bonferroni t(alpha/m)."

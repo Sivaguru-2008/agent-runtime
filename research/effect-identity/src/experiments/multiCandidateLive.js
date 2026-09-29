@@ -179,7 +179,12 @@ async function score(units) {
   const { judgeScores, newJudgeDiagnostics } = await import("../judge.js");
   const cached = existsSync(SCORES_PATH) ? JSON.parse(readFileSync(SCORES_PATH, "utf8")) : { scores: {}, meta: {} };
   const scores = cached.scores;
-  const todo = comparisons(units).filter((c) => scores[c.id] === undefined);
+  // --retry-abstentions re-asks pairs stored as null. A null can be a genuine
+  // abstention or the residue of a rate-limit outage that exhausted the
+  // retries; re-asking is the only way to tell, and a pair that is still null
+  // after it stays an abstention (never imputed).
+  const retry = process.argv.includes("--retry-abstentions");
+  const todo = comparisons(units).filter((c) => scores[c.id] === undefined || (retry && scores[c.id] === null));
   process.stdout.write(`${todo.length} comparisons to score with ${JUDGE} (${Object.keys(scores).length} cached)\n`);
   const client = new GroqClient({ model: JUDGE });
   const diag = newJudgeDiagnostics();
@@ -237,6 +242,22 @@ function evaluate(units) {
   // Drift: fresh score of the corpus partner against the persisted one.
   const drift = units.map((u) => [sc(u, u.candidates[0]), corpusScore(u.sourcePair)]).filter(([a, b]) => a !== null && b !== null);
   out.drift = { n: drift.length, identical: rate(drift.filter(([a, b]) => a === b).length, drift.length), meanAbsDiff: drift.reduce((s, [a, b]) => s + Math.abs(a - b), 0) / Math.max(1, drift.length) };
+  // Where the drift matters: distinct partners on either side of the deployed
+  // m = 1 threshold, re-scored in a different batch context.
+  {
+    const tHi1 = suppressionThreshold(pool, ALPHA);
+    const dd = units.filter((u) => u.label === "DIFF")
+      .map((u) => [sc(u, u.candidates[0]), corpusScore(u.sourcePair)]).filter(([a, b]) => a !== null && b !== null);
+    out.drift.largeChange = rate(drift.filter(([a, b]) => Math.abs(a - b) >= 0.2).length, drift.length);
+    out.drift.meanSignedDiff = drift.reduce((s, [a, b]) => s + (a - b), 0) / Math.max(1, drift.length);
+    out.drift.distinctAtM1 = {
+      tHi: tHi1, n: dd.length,
+      suppressedPersisted: rate(dd.filter(([, b]) => b > tHi1).length, dd.length),
+      suppressedFresh: rate(dd.filter(([a]) => a > tHi1).length, dd.length),
+      crossedUp: dd.filter(([a, b]) => b <= tHi1 && a > tHi1).length,
+      crossedDown: dd.filter(([a, b]) => b > tHi1 && a <= tHi1).length,
+    };
+  }
 
   for (const m of M_VALUES) {
     const eligible = units.filter((u) => u.mAvailable >= m);
@@ -294,7 +315,7 @@ if (process.argv.includes("--score")) {
   console.log("scored; now run with --evaluate");
 } else if (process.argv.includes("--evaluate")) {
   const r = evaluate(units);
-  const f = (x) => (x ? `${(100 * x.value).toFixed(1)}% [${(100 * x.ci95.lo).toFixed(1)}–${(100 * x.ci95.hi).toFixed(1)}] (${x.successes}/${x.n})` : "—");
+  const f = (x) => (x && x.ci95 ? `${(100 * x.value).toFixed(1)}% [${(100 * x.ci95.lo).toFixed(1)}–${(100 * x.ci95.hi).toFixed(1)}] (${x.successes}/${x.n})` : x ? `n/a (${x.successes}/${x.n})` : "—");
   console.log(`pool n=${r.calibration.poolN}, certifiable m ≤ ${r.calibration.certifiableM}; drift identical ${f(r.drift.identical)}`);
   for (const row of r.byM) for (const [k, v] of Object.entries(row.rules)) {
     console.log(`m=${row.m} ${k.padEnd(11)} t=${row.thresholds[k]}  WS ${f(v.wrongSuppression)}  dedup ${f(v.dedup)}  attrib ${f(v.attributionErrorTiesAsErrors)}`);
