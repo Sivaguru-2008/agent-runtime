@@ -46,6 +46,8 @@ const RESULT_FILES = [
   "class_conditional.json",
   // AIJ revision, Phase 4: targeted Channel H follow-up.
   "channel_h_targeted.json",
+  // Branch aij-revision-mclive: the multi-candidate experiment on an admitted judge.
+  "multi_candidate_live.json",
 ];
 const normaliseTex = (s) => s
   .replace(/\$\^?\{?\\dagger\}?\$/g, "†").replace(/\\dagger/g, "†")

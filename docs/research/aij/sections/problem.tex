@@ -63,7 +63,7 @@ We report wrong suppression $\WS=P(\SUP\mid\text{distinct})$, deduplication $P(\
 \end{equation}
 because wrong suppression is undetectable when it happens, a silent escape is not, and a flagged escape is recoverable by reconciliation. Accuracy and F1 weight the two errors symmetrically and are not reported.
 
-When a duplicate is suppressed the fence returns the response of the matched candidate. If $m\ge2$ and a distinct candidate outscores the true match, no owed act is dropped but the returned response belongs to a different act. This \emph{response-attribution error} is not a wrong suppression; it cannot occur when $m\le1$, the regime of our corpus, and it is not measured here.
+When a duplicate is suppressed the fence returns the response of the matched candidate. If $m\ge2$ and a distinct candidate outscores the true match, no owed act is dropped but the returned response belongs to a different act. This \emph{response-attribution error} is not a wrong suppression; it cannot occur when $m\le1$, the regime of our corpus, and we measure it on multi-candidate units in Section~\ref{sec:res-bound}.
 
 \subsection{Threat model}\label{sec:threat}
 

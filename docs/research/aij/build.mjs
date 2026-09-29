@@ -43,6 +43,9 @@ const texFiles = () => ["manuscript.tex", "supplement.tex",
 console.log("── 1. figure data from results/");
 run("node", [resolve(here, "tools", "make-figure-data.mjs")]);
 run("node", [resolve(here, "tools", "make-supp-tables.mjs")], { quiet: true });
+// Branch aij-revision-mclive: the multi-candidate experiment's result slots.
+// Fails (and so fails the build) until results/multi_candidate_live.json exists.
+run("node", [resolve(here, "tools", "make-mclive-slots.mjs")]);
 
 console.log("── 2. quoted intervals (checkPaper.js)");
 run("node", [resolve(artifact, "src", "experiments", "checkPaper.js"), "--manuscript", texFiles().map((f) => resolve(here, f)).join(",")]);

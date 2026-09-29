@@ -172,7 +172,7 @@ for (const f of allFiles) {
 {
   const SUPP_TOPIC = {
     2: /corpus construction/i, 3: /parser defect/i, 4: /judge coverage/i, 8: /score distributions/i,
-    11: /resampling/i, 13: /schema-richness ladder/i, 15: /crash/i, 17: /cost/i,
+    10: /multiple committed candidates/i, 11: /resampling/i, 13: /schema-richness ladder/i, 15: /crash/i, 17: /cost/i,
     16: /model panel/i, 20: /artifact contents/i, 21: /tightness/i, 22: /authorisation/i, 23: /class-conditional/i,
   };
   const titles = [...readFileSync(resolve(aij, "supplement.tex"), "utf8").matchAll(/^\\section\{(.*)\}/gm)].map((m) => m[1]);
