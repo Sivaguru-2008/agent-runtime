@@ -139,6 +139,7 @@ const STALE = [
   [/one tool'?s (declaration|schema)/, "tightened configuration refines every tool's free-text fields, not one tool"],
   [/\bhuman[- ]validated\b/i, "labels are not human-validated"],
   [/202\s*\/\s*0/, "stale McNemar count 202/0 (now 232/0)"],
+  [/human-(alpha|beta|gamma)|0\.731|targeted (Channel.?H|human) (annotation )?follow-up (was executed|agreed)/i, "withdrawn Channel H responses (annotation/channel-h-targeted/WITHDRAWN.md)"],
   [/fourteen further tools/, "extension corpus covers nine further tools (fourteen is toolsV2.js's total, six of which are this paper's)"],
 ];
 // Recursive: supplement/tables/ holds generated tables, which are checked too.
