@@ -185,6 +185,7 @@
     "classConditional": "node src/experiments/classConditional.js",
     "multiCandidateLive": "node src/experiments/multiCandidateLive.js --score && node src/experiments/multiCandidateLive.js --evaluate",
     "channelHTargeted": "node src/experiments/channelHTargeted.js --analyze",
+    "scoringStability": "node src/experiments/scoringStability.js --score && node src/experiments/scoringStability.js --evaluate",
     "report": "node src/experiments/report.js > results/REPORT.md",
     "verify": "node src/experiments/verify.js",
     "checkPaper": "node src/experiments/checkPaper.js",
@@ -344,6 +345,22 @@
       "build": "node src/experiments/channelHTargeted.js --build",
       "analyze": "node src/experiments/channelHTargeted.js --analyze",
       "selfTest": "node src/experiments/channelHTargeted.js --self-test"
+    }
+  },
+  "scoringStability": {
+    "$comment": "TMLR revision. Every residual pair of corpus v1 (cal+test) re-scored once by the primary judge in batches of ten from one seeded shuffle, so pool and test share a scoring context; compared with the persisted scoring (and the multi-candidate run as a third scoring of the test pairs).",
+    "seed": 20260930,
+    "judge": "openai/gpt-oss-120b",
+    "judgeKey": "openai_gpt_oss_120b",
+    "batchSize": 10,
+    "temperature": 0,
+    "alpha": 0.05,
+    "gamma": 0.05,
+    "scoresFile": "corpus/scores-stability-r1.json",
+    "output": "results/scoring_stability.json",
+    "commands": {
+      "score": "node src/experiments/scoringStability.js --score",
+      "evaluate": "node src/experiments/scoringStability.js --evaluate"
     }
   }
 }

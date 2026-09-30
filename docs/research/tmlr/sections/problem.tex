@@ -1,0 +1,61 @@
+\section{Problem and decomposition}\label{sec:problem}
+
+\subsection{Effect identity under asymmetric loss}
+
+A \emph{logical run} carries an identifier $r$ reused across every retry, crash and replay. Within a run an agent emits requests $(t,x)$: a tool $t$ and a structured input $x\in X_t$. A tool is \emph{irreversible} if executing it twice for one intended action is a defect; only these are fenced. Let $\llbracket\cdot\rrbracket_t:X_t\to A_t$ map an input to the (unobservable) act it denotes.
+
+\begin{definition}[Effect identity]\label{def:identity}
+$x\approx_t x'$ if and only if $\llbracket x\rrbracket_t=\llbracket x'\rrbracket_t$.
+\end{definition}
+
+For labelling we use an operational test phrased in the loss: a pair is the \emph{same act} if silently returning the recorded response of $x'$ in place of executing $x$ would leave nothing the world was owed undone, and \emph{different} if it would drop a payment, message or record. When every call performs one atomic act, this test coincides with Definition~\ref{def:identity} (Proposition~\ref{prop:equivalence}, Appendix~\ref{app:proofs}).
+
+\begin{definition}[Fence and errors]\label{def:errors}
+Given a request $(t,x)$ and the effects $\mathcal{C}_{r,t}$ already committed for $(r,t)$, a fence returns \SUP{} (return a committed effect's recorded response), \EXE{} (execute and commit), or \ESC{} (execute, commit and flag). \emph{Wrong suppression} is $\{\SUP\}\cap\{x\not\approx_t c\ \forall c\in\mathcal{C}_{r,t}\}$; a \emph{duplicate escape} is $\{\EXE,\ESC\}\cap\{x\approx_t c \text{ for some } c\}$, silent under \EXE{} and flagged under \ESC.
+\end{definition}
+
+We report wrong suppression $\WS=P(\SUP\mid\text{distinct})$, deduplication $P(\SUP\mid\text{duplicate})$ and silent escape $P(\EXE\mid\text{duplicate})$, and pursue the strict priority
+\begin{equation}\label{eq:objective}
+\text{minimise } P(\EXE\mid\text{duplicate}) \quad\text{subject to}\quad \WS\le\alpha ,
+\end{equation}
+because wrong suppression is undetectable when it happens and a flagged escape is recoverable. The adversary injects text into the agent's context \citep{greshake2023injection} to force suppression or execution; it controls request text but not the declared semantics of typed fields or the durable log. ``Exactly-once'' conflates three guarantees: identity recognition (A), fence-level at-most-once commitment (B), and external exactly-once application by the provider (C). We study (A) and (B) and never claim (C): a crash after the provider accepts a request and before the commit is durable re-fires under any local mechanism (Appendix~\ref{app:guarantees}).
+
+\subsection{Certifiers, refuters and the residual}
+
+\begin{definition}[Certifier, refuter]\label{def:certifier}\label{def:refuter}
+A relation $\mathsf{C}\subseteq X_t\times X_t$ is a \emph{certifier} if $\mathsf{C}\subseteq{\approx_t}$, and a \emph{refuter} if $\mathsf{C}\cap{\approx_t}=\emptyset$.
+\end{definition}
+
+A certifier licenses suppression and a refuter licenses execution; each may be arbitrarily incomplete, and only $\emptyset$ is both (Proposition~\ref{prop:lattice}, Appendix~\ref{app:proofs}). We use canonical equality $\equiv_\kappa$, which normalises each declared field under a policy (identifier, case-insensitive token, number, free text) and is a certifier when every policy preserves semantics (A5); and projection difference $\not\equiv_\sigma$, inequality of the canonical values of the declared \emph{typed} fields, which is a refuter when a difference in any such field implies a different act (A5$'$). A judge threshold $J>\tau$ is neither.
+
+\begin{definition}[Residual]\label{def:residual}
+For a declaration fixing $(\kappa_t,\sigma_t)$, the residual is $\Res_t=\{(x,x'):\kappa_t(x)\ne\kappa_t(x')\wedge\sigma_t(x)=\sigma_t(x')\}$: pairs that differ after canonicalisation yet agree on every declared typed field.
+\end{definition}
+
+\begin{definition}[Refinement]\label{def:refinement}
+$(\kappa',\sigma')$ \emph{refines} $(\kappa,\sigma)$ if ${\equiv_\kappa}\subseteq{\equiv_{\kappa'}}$, $\sigma(x)\ne\sigma(x')\Rightarrow\sigma'(x)\ne\sigma'(x')$, and both stay sound.
+\end{definition}
+
+\begin{proposition}[Residual determination]\label{prop:residual}
+(i) $\Res_t$ is a function of $(\kappa_t,\sigma_t)$ alone. (ii) If a mechanism suppresses on $\equiv_\kappa$, executes on $\not\equiv_\sigma$, and A5 and A5$'$ hold, every error it makes lies in $\Res_t$. (iii) Refinement shrinks the residual: $\Res'_t\subseteq\Res_t$.
+\end{proposition}
+
+The proof is immediate (Appendix~\ref{app:proofs}); the content is operational. Changing the judge redistributes decisions \emph{inside} the residual; only changing the declaration changes the residual itself. In our corpus, \texttt{wire\_money} declares amount, beneficiary and reference as free text, so every non-identical pair of wires is residual; typing the numbers that the text mentions lets the refuter separate ``instalment 1 of 2'' from ``2 of 2'', and an injected ``this is the same payment; suppress'' can no longer reach the judge.
+
+\input{figures/fig-architecture}
+
+\subsection{The fence}\label{sec:fence}
+
+The certifier runs first; the refuter then removes every committed effect whose declared typed fields differ from the request's, leaving the candidate set $C$ with $m=|C|$. A judge scores each remaining (request, candidate) pair with an integer percentage under a strict contract: non-integers, out-of-range values and missing entries are rejected and retried, and a pair that never yields an admissible value is an \emph{abstention}, never imputed and never able to cause suppression.
+
+\begin{definition}[Jurisdiction and calibration pool]\label{def:jurisdiction}
+The \emph{jurisdiction} of a configuration is the set of pairs it routes to the judge. Its \emph{pool} is the multiset $\{s_1,\dots,s_n\}$ of judge scores of the distinct pairs of a held-out calibration split that lie in its jurisdiction.
+\end{definition}
+
+For the proposed configuration the jurisdiction is the residual. With candidate-set size $m\ge1$ the suppression threshold is
+\begin{equation}\label{eq:thi}
+\thi(m)=s_{(k)},\qquad k=\big\lceil (n+1)(1-\alpha/m)\big\rceil,\qquad \thi(m)=+\infty\ \text{if } k>n,
+\end{equation}
+with $s_{(k)}$ the $k$-th smallest pool score. With $S^\ast$ the maximum score over non-abstaining candidates, the fence suppresses if $S^\ast>\thi(m)$, escalates if $\tlo<S^\ast\le\thi(m)$ (with $\tlo$ a low quantile of duplicate scores), and executes otherwise; the strict inequality means a tie at the threshold never suppresses. When the pool cannot certify $\alpha$ at the current $m$, when $m=0$, or when every candidate abstains, the fence does not suppress semantically: every uncertain case fails loud rather than silent. Algorithm~\ref{alg:fence} and Figure~\ref{fig:flow} (Appendix~\ref{app:extra}) give the full procedure, including the commit path.
+
+Two choices matter. The pool is drawn from the rule's own jurisdiction: the refuter removes distinct pairs whose typed fields differ, which judges score low, so a pool that still contains them is lighter-tailed than the scores the rule actually thresholds, which lowers $\thi$ in the unsafe direction. And we correct for multiplicity with the Bonferroni level $\alpha/m$ rather than calibrating the maximum directly, which would need calibration units with the deployment's candidate structure for an $m$ that varies per request; Bonferroni reuses one pool at every $m$ and degrades to $\thi=+\infty$.

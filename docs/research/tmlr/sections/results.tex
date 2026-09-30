@@ -1,0 +1,92 @@
+\section{Results}\label{sec:results}
+
+Unless stated otherwise the judge is GPT-OSS-120B and $\alpha=0.05$; benign rates are on the test split and attack rates on the 45 held-out pairs.
+
+\subsection{Recovering paraphrased duplicates}\label{sec:res-main}
+
+The decidable layers settle 122 of 513 test decisions without a model call---the certifier 34 (6.6\%~[4.8--9.1]) and the refuter 88 (17.2\%~[14.1--20.7])---leaving 76.2\%~[72.3--79.7] for the judge. Canonical keys deduplicate 12.1\%~[8.8--16.4] with no wrong suppression; the proposed configuration deduplicates 94.7\%~[91.4--96.7] at 1.7\%~[0.7--4.3] wrong suppression, with 5.3\%~[3.3--8.6] of duplicates escaping silently (232 discordant items to 0, $p<10^{-60}$; Table~\ref{tab:main}, Figure~\ref{fig:main}). All four wrong suppressions are residual pairs. A hand-set threshold ($\tau=0.5$) deduplicates more (99.6\%~[98.0--99.9]) and differs in wrong suppression by one discordant item; what calibration adds is a threshold chosen without test labels, a correction valid at $m>1$, and a safe fallback when calibration data run out. The level $\alpha$ moves the operating point more than any other choice: at $\alpha=0.01$ deduplication is 22.1\% and 64.8\% of duplicates go to review.
+
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{4pt}
+\caption{Main comparison on the test split. Pool $n$ is each configuration's own calibration pool.}\label{tab:main}
+\begin{tabular}{@{}lrrlll@{}}
+\toprule
+Configuration & $n$ & $\thi$ & wrong suppression & dedup & silent escape \\
+\midrule
+B1 exact string & --- & --- & 0.0\%~[0.0--1.6] & 0.0\%~[0.0--1.3] & 100.0\%~[98.7--100.0] \\
+B2 canonical key & --- & --- & 0.0\%$\dagger$~[0.0--1.6] & 12.1\%~[8.8--16.4] & 87.9\%~[83.6--91.2] \\
+raw judge $\tau=0.5$ & --- & 0.50 & 2.2\%~[0.9--4.9] & 99.6\%~[98.0--99.9] & 0.4\%~[0.1--2.0] \\
+layered (no refuter) & 230 & 0.20 & 3.4\%~[1.8--6.7] & 100.0\%~[98.7--100.0] & 0.0\%~[0.0--1.3] \\
+\textbf{proposed}, $\alpha=0.05$ & 142 & 0.80 & \textbf{1.7\%~[0.7--4.3]} & \textbf{94.7\%~[91.4--96.7]} & 5.3\%~[3.3--8.6] \\
+\textbf{proposed}, $\alpha=0.01$ & 142 & 0.95 & 0.0\%~[0.0--1.6] & 22.1\%~[17.6--27.3] & 13.2\%~[9.7--17.6] \\
+refined schema & 49 & 0.90 & 0.0\%~[0.0--1.6] & 69.0\%~[63.4--74.2] & 13.2\%~[9.7--17.6] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{figures/fig-main}
+
+\subsection{Jurisdiction matching and multiplicity}\label{sec:res-bound}
+
+\paragraph{A mismatched pool hides its own violation}
+With the jurisdiction-matched pool ($n=142$, $\thi=0.80$), wrong suppression over the residual---the population the bound governs---is 2.8\%~[1.1--6.9]. With the wider non-canonical pool ($n=230$, $\thi=0.20$) it is 4.9\%~[2.4--9.7], while the rate over the whole test split stays at 3.0\%~[1.5--6.1], below $\alpha$; the second judge behaves the same way (2.1\%~[0.7--5.9] against 4.9\%~[2.4--9.7]). The violation is invisible unless one conditions on the residual.
+
+\paragraph{The correction is necessary}
+In a simulation with exchangeable scores ($n=200$), an uncorrected threshold on the maximum reaches 5.0\%, 11.2\%, 22.9\%, 38.3\%, 70.3\% and 89.0\% at $m=1,2,5,10,25,50$; the corrected rule gives 5.0\%, 5.7\%, 4.5\%, 3.7\%, 0.0\% and 0.0\%, the zeros being the budget switching semantic suppression off (Figure~\ref{fig:multiplicity}). With a saturated live judge on 60 purpose-built units, the uncorrected rule wrongly suppresses 65.0\%~[43.3--81.9] of distinct units at $m=50$ and the corrected rule 0.0\%~[0.0--16.1].
+
+\paragraph{On corpus-derived candidate sets the correction only costs}
+We built one multi-candidate unit per residual test pair from the corpus: the pair's partner (the true match, or a labelled distinct act) plus up to nine further committed acts that share the request's projection and are known distinct from it and from each other (Appendix~\ref{app:extra}), all scored afresh by the primary judge. Wrong suppression of distinct units is \mclWSUncTwo{} under both rules at $m=2$ ($n=\mclNDiffTwo$) and \mclWSUncFive{} under both at $m=5$ and $10$ ($n=\mclNDiffFive$): the added acts come from other seed requests and score low, so the failure the correction guards against does not arise, and the correction only costs deduplication (\mclDedupUncFive{} against \mclDedupBonFive{} at $m=5$; none at $m=10$, beyond the budget of the 142-pair pool). The returned response belongs to a different act for \mclAttrCountUncTwo{} suppressed duplicates at $m=2$ and \mclAttrCountUncFive{} at $m=5$. These units reach $m\ge5$ only on the two tools whose schemas leave many committed acts undistinguished; they contain no hard multi-candidate cases, so they measure the correction's cost, not its benefit.
+
+\paragraph{Variation across calibration draws}
+The bound is an average over pools. Seed-level resplitting, which removes shared provenance between calibration and test, raises mean wrong suppression on every judge---1.7\% to 2.7\%, 1.3\% to 2.2\%, 0.9\% to 1.8\%---with 10.5\%, 1.0\% and 11.0\% of splits above $\alpha$ (Appendix~\ref{app:extra}).
+
+\input{figures/fig-multiplicity}
+
+\subsection{Scoring-context stability}\label{sec:res-stability}
+
+Re-scoring the corpus partners inside the multi-candidate batches changed most scores: only \mclDriftIdenticalCount{} were reproduced exactly at temperature 0, and although few moved by 0.2 or more (\mclDriftLarge), \mclCrossedUp{} distinct pairs crossed the 0.80 threshold upward and \mclCrossedDown{} downward, so the same 144 distinct residual pairs gave \mclMOneFresh{} wrong suppression against \mclMOnePersisted{}. The judge's output depends on batch context, which A6 does not allow for when the pool and the deployed comparisons are scored differently.
+
+To separate the two causes we re-scored all \stabNResidual{} residual pairs---calibration and test together---in one fresh, shuffled batching, so that pool and test share a scoring context, and compared four conditions (Table~\ref{tab:stability}). The fresh scoring reproduced \stabFPIdenticalCount{} persisted scores exactly (\stabFPLarge{} moved by 0.2 or more; mean change \stabFPSigned).
+
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{4pt}
+\caption{Residual wrong suppression and deduplication when the calibration pool and the test comparisons are scored in the same or in different scoring contexts (primary judge, $\alpha=0.05$).}\label{tab:stability}
+\begin{tabular}{@{}llrrll@{}}
+\toprule
+Pool scored in & Test scored in & pool $n$ & $\thi$ & wrong suppression & dedup \\
+\midrule
+original run & original run & \stabMPPool & \stabMPThr & \stabMPWS & \stabMPDedup \\
+fresh run & fresh run & \stabMFPool & \stabMFThr & \stabMFWS & \stabMFDedup \\
+original run & fresh run & \stabMMPool & \stabMMThr & \stabMMWS & \stabMMDedup \\
+fresh run & original run & \stabMRPool & \stabMRThr & \stabMRWS & \stabMRDedup \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{sections/stability-interpretation}
+
+\subsection{Validity within each kind of difference}\label{sec:res-class}
+
+The distinct pairs in the jurisdiction mix three kinds of difference we chose: near-miss mutations (D1), legitimate repeats (D2) and hand-specified semantic differences (D3). Under the deployed threshold (pool 142, certifiable $m\le7$) the primary judge wrongly suppresses 0.8\%~[0.1--4.4] of D1, 1.3\%~[0.2--7.2] of D2 and 6.5\%~[1.8--20.7] of D3; on the other two judges the excess sits on legitimate repeats instead (4.0\%~[1.4--11.1] and 2.7\%~[0.7--9.2]). The per-category pools hold 37, 75 and 30 scores: each is certifiable at $m=1$, but only D2 beyond it. D3's own (Mondrian) threshold is its pool's largest score, 0.90, and removes both D3 errors (0.0\%~[0.0--11.0]). Because the category is defined by the label, the fence cannot use per-category thresholds directly; the rule valid for every category, $\max_ct_c$ (Corollary~\ref{cor:mondrian}), removes every benign wrong suppression (0.0\%~[0.0--1.6]) but lowers deduplication from 94.7\% to 69.0\%~[63.4--74.2] on the primary judge and to the canonical-only 12.1\%~[8.8--16.4] on the other two. Calibrating per tool, an observable partition, gives 0.4\%~[0.1--2.4] wrong suppression and 67.6\%~[61.9--72.8] deduplication, with two of six tools below the 19-pair budget. Reweighting the residual mix moves the primary judge's rate from 2.8\%~[0.7--5.6] at the observed D3 share (20.8\%) to 4.2\%~[0.4--9.3] at 50\% (Appendix~\ref{app:s23}). No per-category rate is significantly above $\alpha$, but the theorem gives no reason to expect any to be below it: a marginal guarantee is an average over a mix, and per-kind validity costs budget exactly as Corollary~\ref{cor:mondrian} predicts.
+
+\subsection{Transfer across judges}\label{sec:res-judges}
+
+Wrong suppression is 1.7\%~[0.7--4.3], 1.3\%~[0.4--3.7] and 0.9\%~[0.2--3.1] for the three judges, all below $\alpha$, against deduplication of 94.7\%~[91.4--96.7], 82.6\%~[77.7--86.6] and 89.0\%~[84.8--92.1]. Their wrong suppressions (four, three and two pairs) have no pair in common, as Proposition~\ref{prop:residual} predicts: a different oracle redistributes error within the residual rather than removing it. The primary judge deduplicates its own family's paraphrases no better than the hand-written ones (91.8\%~[82.2--96.4] against 91.2\%~[77.0--97.0]).
+
+\subsection{Prompt injection: typed fields against prose}\label{sec:res-attack}
+
+Every attack pair is a distinct act, and injection is a deliberate distribution shift, so Theorem~\ref{thm:bound} does not apply. The raw primary judge wrongly suppresses 65.0\%~[43.3--81.9] of D4a (typed field differs, text asserts a duplicate); the refuter drives D4a to 0.0\%$\dagger$~[0.0--16.1] on every judge by construction. On D4b (typed fields identical, distinguished only in prose) the refuter is silent and the outcome is the judge's: 84.0\%~[65.3--93.6] for the primary judge, 28.0\%~[14.3--47.6] and 24.0\%~[11.5--43.4] for the others (Figure~\ref{fig:adversarial}). Under the refined declaration every judge's D4b rate is 0.0\%$\dagger$~[0.0--13.3]. The adversarial guarantee extends exactly as far as the typed fields; the remedy that worked was a declaration change, not a better judge.
+
+\input{figures/fig-adversarial}
+
+\subsection{The refinement dilemma}\label{sec:res-refinement}
+
+Refinement closes prose-only injection and drives benign wrong suppression to 0.0\%~[0.0--1.6], while judge jurisdiction falls from 76.2\%~[72.3--79.7] to 58.9\%~[54.6--63.0]. Its cost falls on deduplication: 94.7\% to 69.0\% on the primary judge, and from 82.6\% and 89.0\% to 12.1\%~[8.8--16.4] on the other two, whose refined thresholds reach a score of 1.0. No duplicate is falsely vetoed. Both parts of the dilemma are visible: the pool shrinks from 142 to 49, moving the threshold from the 7th to the 2nd largest score, and the pairs removed are easier than those kept (2.2\% against 10.2\% score at or above 0.8), so the observed deduplication sits at the 11.6th percentile of a size-only counterfactual whose mean is 88.4\%. A three-level schema ladder confirms the monotone part: the residual falls from 100.0\%~[96.4--100.0] to 41.2\%~[32.1--50.9] to 19.6\%~[13.1--28.4] as typed attributes are added (Appendix~\ref{app:extra}).
+
+\subsection{Dependence on the labels}\label{sec:res-labels}
+
+Relabelling legitimate repeats as duplicates, or adversarial paraphrases as distinct (assuming our own validator failed), gives wrong suppression of 1.9\%~[0.7--5.5] and 2.2\%~[1.1--4.5], still below $\alpha$, but deduplication of 75.0\%~[70.3--79.2] and 27.6\%~[21.9--34.2]: the safety conclusion does not depend on our definition of identity, the liveness conclusion does. The model panel agrees with the construction on 88.0\%~[80.9--92.7] of 117 items and contests two strata under the preregistered rule: legitimate repeats (50.0\%~[25.4--74.6]) and prose-only injection (45.5\%~[21.3--72.0])---the pairs whose distinguishing information lives only in prose. Its preregistered safety re-derivation \emph{triggered} (9.9\%~[4.9--19.0] under constructed labels, 10.5\%~[4.9--21.1] under panel labels), in a computation with two disclosed defects (Appendix~\ref{app:s16}); we report it as triggered.
+
+\subsection{Further results}\label{sec:res-other}\label{sec:res-crash}\label{sec:res-authz}\label{sec:method-authz}\label{sec:res-components}
+
+In a crash-and-replay experiment across real process death, the semantic fence reached the correct final state in 97.9\%~[89.1--99.6] of duplicate-arm trials against 0.0\%~[0.0--7.4] for content-addressed fencing, dropped no legitimate act, and re-fired inside the commit window as Appendix~\ref{app:guarantees} predicts. Applied to a second decision---whether an agent's action lies within a user's standing approval---the same recipe raises autonomy from 20.0\%~[13.3--28.9] to 100.0\%~[96.3--100.0] at 5.0\%~[2.3--10.5] wrong authorisation and closes typed-constraint injection (Appendix~\ref{app:s22}). Ablations, per-tool separation, cost (about 184 tokens per comparison in batches of ten) and non-LLM baselines are in Appendix~\ref{app:extra}.

@@ -7,7 +7,7 @@
 \resizebox{\linewidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[mainpanel, xmin=0, xmax=8, xlabel={wrong suppression (\%)}, title={safety-critical direction},
-  yticklabels={tightened (120B), hardened (Qwen), hardened (20B), hardened (120B), layered (no refuter), raw judge $\tau{=}0.5$, canonical key (B2)}]
+  yticklabels={refined (120B), proposed (Qwen), proposed (20B), proposed (120B), layered (no refuter), raw judge $\tau{=}0.5$, canonical key (B2)}]
 \addplot[only marks, mark=*, black, error bars/.cd, x dir=both, x explicit]
   table[x=ws, y=y, x error minus=wsm, x error plus=wsp] {figures/data/main.dat};
 \draw[dashed, red!70!black] (axis cs:5,0.4) -- (axis cs:5,7.6) node[pos=0.97, left, font=\scriptsize, text=red!60!black]{$\alpha$};
@@ -19,5 +19,5 @@
   table[x=dedup, y=y, x error minus=dm, x error plus=dp] {figures/data/main.dat};
 \end{axis}
 \end{tikzpicture}}
-\caption{Main comparison on the 513-pair test split, $\alpha=0.05$, with 95\% Wilson intervals. Canonical keys never wrongly suppress but deduplicate only the mechanical fragment. The proposed (hardened) configuration keeps wrong suppression below $\alpha$ for all three judges while deduplication varies with the judge. The layered configuration is calibrated on its own, wider jurisdiction. The tightened configuration trades deduplication for zero benign wrong suppression and closes prose-only injection (Figure~\ref{fig:adversarial}).}\label{fig:main}
+\caption{Main comparison on the 513-pair test split, $\alpha=0.05$, with 95\% Wilson intervals. Canonical keys never wrongly suppress but deduplicate only the mechanical fragment. The proposed configuration keeps wrong suppression below $\alpha$ for all three judges while deduplication varies with the judge. The layered configuration is calibrated on its own, wider jurisdiction. The refined configuration trades deduplication for zero benign wrong suppression and closes prose-only injection (Figure~\ref{fig:adversarial}).}\label{fig:main}
 \end{figure}

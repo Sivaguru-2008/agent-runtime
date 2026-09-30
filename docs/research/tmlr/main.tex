@@ -1,0 +1,79 @@
+%% TMLR submission (anonymous). Build: node docs/research/tmlr/build.mjs
+%% Every interval of the form NN.N\%~[lo--hi] in this document is checked against
+%% research/effect-identity/results/*.json by the build before LaTeX runs.
+\documentclass[10pt]{article}
+\usepackage{tmlr}
+%% Camera-ready: \usepackage[accepted]{tmlr}, then set \month, \year, \openreview.
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{stmaryrd}
+\usepackage{longtable}
+\usepackage{booktabs,array,tabularx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric,backgrounds,patterns}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage[shortlabels]{enumitem}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\input{generated/draftmark}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\WS}{\mathrm{WS}}
+\newcommand{\Res}{\mathrm{Res}}
+\newcommand{\Dec}{\mathrm{Dec}}
+\newcommand{\thi}{t_{\mathrm{hi}}}
+\newcommand{\tlo}{t_{\mathrm{lo}}}
+\newcommand{\SUP}{\textsc{suppress}}
+\newcommand{\EXE}{\textsc{execute}}
+\newcommand{\ESC}{\textsc{escalate}}
+%% Result slots generated from results/multi_candidate_live.json.
+\input{generated/mclive}
+%% Result slots generated from results/scoring_stability.json.
+\input{generated/stability}
+
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.7}
+
+\title{Effect Identity for LLM Agents:\\ Schema-Determined Limits on Duplicate Suppression}
+\author{Anonymous authors}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/related}
+\input{sections/problem}
+\input{sections/theory}
+\input{sections/method}
+\input{sections/results}
+\input{sections/discussion}
+
+\phantomsection\label{sec:refs-start}
+\bibliography{references}
+\bibliographystyle{tmlr}
+
+\appendix
+\input{sections/appendix}
+\input{generated/appendix-supplement}
+
+\end{document}

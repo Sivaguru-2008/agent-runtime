@@ -18,7 +18,12 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const aij = resolve(here, "..");
+// CLAIMS_ROOT=<dir> CLAIMS_MODE=tmlr checks the TMLR build instead: one
+// document (main text + appendices), so a headline number may sit in any of its
+// files, and no "Section S<N>" reference may survive the move from a separate
+// supplement.
+const TMLR = process.env.CLAIMS_MODE === "tmlr";
+const aij = process.env.CLAIMS_ROOT ? resolve(process.env.CLAIMS_ROOT) : resolve(here, "..");
 const R = resolve(aij, "..", "..", "..", "research", "effect-identity");
 const J = (f) => JSON.parse(readFileSync(resolve(R, "results", f), "utf8"));
 const norm = (s) => s.replace(/\\%/g, "%").replace(/~/g, " ").replace(/--/g, "–").replace(/\\,/g, "").replace(/\{,\}/g, ",");
@@ -118,7 +123,15 @@ if (process.argv.includes("--list")) {
 
 const read = (f) => (existsSync(resolve(aij, f)) ? norm(readFileSync(resolve(aij, f), "utf8")) : null);
 const failures = [];
+const walkAny = (rel) => (existsSync(resolve(aij, rel))
+  ? readdirSync(resolve(aij, rel), { withFileTypes: true }).flatMap((e) =>
+    (e.isDirectory() ? walkAny(`${rel}/${e.name}`) : e.name.endsWith(".tex") ? [`${rel}/${e.name}`] : []))
+  : []);
+const tmlrFiles = TMLR ? ["main.tex", ...walkAny("sections"), ...walkAny("tables"), ...walkAny("figures"), ...walkAny("generated")]
+  .filter((f) => existsSync(resolve(aij, f))) : [];
+const tmlrText = TMLR ? tmlrFiles.map(read).join("\n") : "";
 for (const [label, want, files] of CLAIMS) {
+  if (TMLR) { if (!tmlrText.includes(want)) failures.push(`${label}: expected "${want}" somewhere in the TMLR document`); continue; }
   for (const f of files) {
     const text = read(f);
     if (text === null) { failures.push(`${label}: file ${f} missing`); continue; }
@@ -147,7 +160,7 @@ const walkTex = (rel) => (existsSync(resolve(aij, rel))
   ? readdirSync(resolve(aij, rel), { withFileTypes: true }).flatMap((e) =>
     (e.isDirectory() ? walkTex(`${rel}/${e.name}`) : e.name.endsWith(".tex") ? [`${rel}/${e.name}`] : []))
   : []);
-const allFiles = ["manuscript.tex", "supplement.tex",
+const allFiles = TMLR ? tmlrFiles : ["manuscript.tex", "supplement.tex",
   ...walkTex("sections"), ...walkTex("supplement"), ...walkTex("figures")]
   .filter((f) => f.endsWith(".tex") && existsSync(resolve(aij, f)));
 // The errata section names the superseded numbers on purpose ("was X, now Y"),
@@ -170,7 +183,9 @@ for (const f of allFiles) {
 // the two documents compile separately. Each cited number must be a section of
 // supplement.tex whose title carries the expected topic, so that inserting a
 // supplement section cannot silently re-point a citation.
-{
+if (TMLR) {
+  for (const f of allFiles) for (const m of read(f).matchAll(/Sections? S(\d+)|Tables? S\d+/g)) failures.push(`${f}: leftover supplement reference "${m[0]}" (TMLR has one document)`);
+} else {
   const SUPP_TOPIC = {
     2: /corpus construction/i, 3: /parser defect/i, 4: /judge coverage/i, 8: /score distributions/i,
     10: /multiple committed candidates/i, 11: /resampling/i, 13: /schema-richness ladder/i, 15: /crash/i, 17: /cost/i,

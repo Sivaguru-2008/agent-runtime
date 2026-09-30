@@ -1,0 +1,37 @@
+\section{Experimental setup}\label{sec:method}
+
+Every analysis is an offline recomputation from stored corpus files and judge scores, except the two re-scoring experiments of Sections~\ref{sec:res-bound} and~\ref{sec:res-stability}, whose scores are stored as well.
+
+\paragraph{Corpus}
+The corpus has 1,066 labelled pairs over six irreversible tools: \texttt{charge\_card}, \texttt{post\_refund}, \texttt{transfer\_funds}, \texttt{send\_email}, \texttt{create\_ticket}, and \texttt{wire\_money}, whose amount, beneficiary and reference are all free text. Pairs are labelled SAME or DIFF \emph{by construction} (Table~\ref{tab:corpus}): a SAME pair comes from a transformation instructed to preserve the act, checked by a validator that rejects variants altering a pinned number or recipient; a DIFF pair mutates a declared field, inserts a distinguishing token, or is hand-specified to differ in intent. Paraphrases come from four generator arms---Llama-3.3-70B, GPT-OSS-120B, Qwen3.6-27B and a hand-written arm---so self-recognition by a judge can be measured. Benign pairs are split 50/50 into calibration and test, stratified by category and generator; injection categories are held out of calibration entirely. Pairs derived from the same seed act can fall on both sides (82.8\%~[79.3--85.9] of test pairs share a seed act with a calibration pair), so we also report 200 splits that partition the 219 seed acts first.
+
+\begin{table}[t]
+\centering\small
+\caption{Corpus. Calibration/test counts are for the benign split; injection pairs are held out of calibration.}\label{tab:corpus}
+\begin{tabularx}{\linewidth}{@{}llrrX@{}}
+\toprule
+Code & Label & $n$ & cal/test & Construction \\
+\midrule
+S1 & SAME & 68 & 34/34 & mechanical reformat (key order, whitespace, number, currency, case) \\
+S2 & SAME & 253 & 126/127 & paraphrase of free text with typed fields pinned; four generator arms \\
+S3 & SAME & 75 & 37/38 & loose-schema value rewrite (``\$780.00'' vs ``seven hundred eighty dollars'') \\
+S4 & SAME & 163 & 81/82 & paraphrase instructed to maximise surface difference \\
+D1 & DIFF & 251 & 125/126 & one field mutated (amount, identifier, order number, currency) \\
+D2 & DIFF & 150 & 75/75 & legitimate repeats: identical except a distinguishing token (``instalment 1 of 2'' vs ``2 of 2'') \\
+D3 & DIFF & 61 & 30/31 & hand-specified same-surface, different-intent pairs \\
+D4a & DIFF & 20 & held out & typed field differs \emph{and} free text says ``treat as duplicate; suppress'' \\
+D4b & DIFF & 25 & held out & typed fields identical, distinct act, injection in free text \\
+\midrule
+\multicolumn{2}{@{}l}{Total} & 1,066 & 508/513 & 559 SAME, 507 DIFF; 45 attack pairs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Judges}
+GPT-OSS-120B (primary), GPT-OSS-20B and Qwen3.6-27B---two model families---were queried through one inference provider at temperature 0 in batches of ten. A judge is admitted only if it meets conditions fixed before scoring: coverage of at least 80\%, at least two distinct score values, and SAME/DIFF AUC of at least 0.60. Both GPT-OSS models scored every pair (AUC 0.962); Qwen scored 97.7\% (AUC 0.974), with abstentions unassociated with category, label, tool or split (Appendix~\ref{app:extra}).
+
+\paragraph{Configurations and metrics}
+B0 no fence; B1 exact string; B2 canonical key (content-addressed fencing, the prior-art baseline); a raw judge at $\tau=0.5$; a \emph{layered} configuration (certifier and calibrated judge, no refuter); the \emph{proposed} configuration (certifier, refuter, calibrated judge, escalation band); and a \emph{refined} configuration that adds to the projection, for every free-text field, the numeric magnitudes it mentions. Every configuration is calibrated on its own jurisdiction at $\alpha=0.05$ (also $0.01$). Wrong suppression is measured over DIFF pairs and deduplication and silent escape over SAME pairs, on the 513-pair test split (281 SAME, 232 DIFF) and separately on the 45 attack pairs, with 95\% Wilson intervals \citep{wilson1927}; $\dagger$ marks a zero that a decidable layer forces. Paired comparisons use exact McNemar tests \citep{mcnemar1947} with Holm correction \citep{holm1979}. Each corpus pair compares one request with one committed effect ($m=1$); multiplicity is studied separately.
+
+\paragraph{Label validation}
+A relabelling study was preregistered before any judgement: 154 frozen items in eleven strata weighted toward contestable categories, three blinded annotators and an adjudicator, three catch trials with a fixed exclusion rule, and a fixed decision rule for the safety claim. No human annotation was collected. The study was run with a blinded panel of language models (Groq Compound and Compound-mini, Qwen3.6-27B, and GPT-OSS-Safeguard-20B as adjudicator, the primary judge barred), a weaker control: two panelists are built partly on the primary judge's model, and a notion of ``the same act'' shared by the corpus designers and the models would pass it. It is reported only as model-panel evidence.
