@@ -47,7 +47,7 @@ refined schema & 49 & 0.90 & 0.0\%~[0.0--1.6] & 69.0\%~[63.4--74.2] & 13.2\%~[9.
 
 \paragraph{Interpretation} A pool from outside the jurisdiction roughly doubles the rate the bound governs while the whole-split rate stays under $\alpha$, so the violation is invisible unless one conditions on the residual. The correction is necessary and pays for safety by switching off beyond its budget; the theorem is marginal and depends on jurisdiction-matched exchangeability, so realised rates can vary across calibration draws.
 
-\paragraph{Limitation} The simulation uses synthetic scores and the saturated-judge experiment purpose-built units. The admitted-judge units are built from the corpus, reach $m\ge5$ only on two tools, and contain no hard multi-candidate cases, so they measure the correction's cost, not its benefit. The re-scoring result means the judge's scores depend on batch context, which A6 does not allow for: the calibration pool and the deployed comparisons must be scored under the same batching, and a pool scored in a different context can understate the realised rate (Section~\ref{sec:limitations}).
+\paragraph{Limitation} The simulation uses synthetic scores and the saturated-judge experiment purpose-built units. The admitted-judge units are built from the corpus, reach $m\ge5$ only on two tools, and contain no hard multi-candidate cases, so they measure the correction's cost, not its benefit. The re-scoring result means the judge is noisy at temperature 0, so the realised rate of a single scoring run varies; the headline run may be at the favourable end (Section~\ref{sec:limitations}).
 
 \subsection{Is the bound valid within each kind of difference?}\label{sec:res-class}
 

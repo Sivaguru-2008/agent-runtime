@@ -44,6 +44,8 @@ const RESULT_FILES = [
   "authz_v1.json",
   // AIJ revision, Phase 2: class-conditional validity (§8.10, Table S27).
   "class_conditional.json",
+  // TMLR revision: scoring-context stability.
+  "scoring_stability.json",
   // Branch aij-revision-mclive: the multi-candidate experiment on an admitted judge.
   "multi_candidate_live.json",
 ];

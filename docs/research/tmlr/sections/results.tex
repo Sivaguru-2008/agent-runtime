@@ -44,9 +44,9 @@ The bound is an average over pools. Seed-level resplitting, which removes shared
 
 \subsection{Scoring-context stability}\label{sec:res-stability}
 
-Re-scoring the corpus partners inside the multi-candidate batches changed most scores: only \mclDriftIdenticalCount{} were reproduced exactly at temperature 0, and although few moved by 0.2 or more (\mclDriftLarge), \mclCrossedUp{} distinct pairs crossed the 0.80 threshold upward and \mclCrossedDown{} downward, so the same 144 distinct residual pairs gave \mclMOneFresh{} wrong suppression against \mclMOnePersisted{}. The judge's output depends on batch context, which A6 does not allow for when the pool and the deployed comparisons are scored differently.
+Re-scoring the corpus partners inside the multi-candidate batches changed most scores: only \mclDriftIdenticalCount{} were reproduced exactly at temperature 0, and although few moved by 0.2 or more (\mclDriftLarge), \mclCrossedUp{} distinct pairs crossed the 0.80 threshold upward and \mclCrossedDown{} downward, so the same 144 distinct residual pairs gave \mclMOneFresh{} wrong suppression against \mclMOnePersisted{}. Two explanations are possible: the pool and the test pairs were scored in different contexts, which would violate A6, or the judge's scores are simply noisy.
 
-To separate the two causes we re-scored all \stabNResidual{} residual pairs---calibration and test together---in one fresh, shuffled batching, so that pool and test share a scoring context, and compared four conditions (Table~\ref{tab:stability}). The fresh scoring reproduced \stabFPIdenticalCount{} persisted scores exactly (\stabFPLarge{} moved by 0.2 or more; mean change \stabFPSigned).
+To separate them we re-scored all \stabNResidual{} residual pairs---calibration and test together---in one fresh, shuffled batching, so that pool and test share a scoring context, and compared the combinations of pool and test scoring runs, including the multi-candidate run as a third scoring of the test pairs (Table~\ref{tab:stability}). The fresh scoring reproduced \stabFPIdenticalCount{} persisted scores exactly (\stabFPLarge{} moved by 0.2 or more; mean change \stabFPSigned).
 
 \begin{table}[t]
 \centering\small\setlength{\tabcolsep}{4pt}
@@ -59,6 +59,7 @@ original run & original run & \stabMPPool & \stabMPThr & \stabMPWS & \stabMPDedu
 fresh run & fresh run & \stabMFPool & \stabMFThr & \stabMFWS & \stabMFDedup \\
 original run & fresh run & \stabMMPool & \stabMMThr & \stabMMWS & \stabMMDedup \\
 fresh run & original run & \stabMRPool & \stabMRThr & \stabMRWS & \stabMRDedup \\
+original run & multi-candidate run & \stabMTPool & \stabMTThr & \stabMTWS & \stabMTDedup \\
 \bottomrule
 \end{tabular}
 \end{table}
