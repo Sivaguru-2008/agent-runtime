@@ -47,7 +47,11 @@ import { prepareBlind } from "../labelling/prepare.js";
 export const GENERATOR = "gemini-3.8-flash";
 const TEMPERATURE = 1.0;
 const MAX_OUTPUT_TOKENS = 16384;
-const CONCURRENCY = 4;
+const CONCURRENCY = 2;
+// Free tier: 5 requests per minute per model (quotaId
+// GenerateRequestsPerMinutePerProjectPerModel-FreeTier), so request starts are
+// spaced 13 s apart in the client, retries included.
+const MIN_INTERVAL_MS = 13_000;
 const SELECTION_SEED = 20261003;
 const LABELLING_SEED = 20261004;
 const SEEDS_PER_CALL = 8;
@@ -190,13 +194,17 @@ const stats = { calls: 0, retries: 0, failures: [] };
 /** One generation call, cached verbatim under raw/<key>.json. */
 async function callOnce(key, prompt, validate, offline) {
   const path = resolve(RAW, `${key}.json`);
+  // Earlier failed attempts are carried forward, so the raw record keeps every
+  // attempt ever made for this key.
+  let prior = [];
   if (existsSync(path)) {
     const saved = JSON.parse(readFileSync(path, "utf8"));
     if (saved.ok) return saved.parsed;
+    prior = saved.attempts ?? [];
   }
   if (offline) return null;
-  client ??= new GeminiClient({ model: GENERATOR });
-  const attempts = [];
+  client ??= new GeminiClient({ model: GENERATOR, minIntervalMs: MIN_INTERVAL_MS });
+  const attempts = [...prior];
   for (let attempt = 1; attempt <= 3; attempt++) {
     stats.calls += 1;
     if (attempt > 1) stats.retries += 1;
@@ -206,8 +214,16 @@ async function callOnce(key, prompt, validate, offline) {
       parsed = JSON.parse(out.text);
       const problem = validate(parsed);
       if (problem) { error = `invalid shape: ${problem}`; parsed = null; }
-    } catch (e) { error = String(e.message ?? e); }
-    attempts.push({ attempt, at: new Date().toISOString(), error, modelVersion: out?.modelVersion ?? null, raw: out?.raw ?? null });
+    } catch (e) {
+      error = String(e.message ?? e);
+      // A daily quota does not clear within this run: record it and stop.
+      if (error.includes("daily quota")) {
+        attempts.push({ attempt: attempts.length + 1, at: new Date().toISOString(), error });
+        writeFileSync(path, JSON.stringify({ ok: false, key, model: GENERATOR, prompt, attempts }, null, 2));
+        throw new Error(`stopping: ${error.slice(0, 300)}`);
+      }
+    }
+    attempts.push({ attempt: attempts.length + 1, at: new Date().toISOString(), error, modelVersion: out?.modelVersion ?? null, raw: out?.raw ?? null });
     if (parsed) {
       writeFileSync(path, JSON.stringify({ ok: true, key, model: GENERATOR, temperature: TEMPERATURE, promptSha256: sha(SYSTEM + "\n" + prompt), prompt, attempts, parsed }, null, 2));
       return parsed;
