@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-02  
 **Commit Status:** Preregistered prior to generation, validation, or scoring of expansion pairs  
-**Author:** Anonymous (TMLR double-blind submission)  
+**Author:** The Author (TMLR double-blind submission)  
 **Objective:** Expand the calibration and test evaluation corpora for prose-native tools (`send_email` and `create_ticket`) to evaluate whether they can achieve self-contained, tool-conditional certification under the conformal framework without cross-tool pooling.
 
 ---
@@ -31,23 +31,32 @@ For each tool (`send_email`, `create_ticket`):
 - **Held-Out Duplicate (`SAME`) Pairs:** Target $\ge 60$ pairs per tool to measure deduplication ($\mathrm{Dedup}$). Without held-out duplicate test pairs, usefulness (deduplication) cannot be measured.
 
 ### 2.3 Hand-Written Benchmark Arm
-- At least 10 pairs per tool authored manually by human developers to verify that synthetic generation artifacts or generator idiosyncrasies do not confound the result.
+- At least 10 pairs per tool authored manually by the author to verify that synthetic generation artifacts or generator idiosyncrasies do not confound the result.
 
 ---
 
-## 3. Schemas Tested: Realistic Typing vs. Loose Declarations
+## 3. Realistic Schema Declarations and Exact Projections
 
 To test the thesis rigorously, we evaluate prose-native actions under realistic, well-declared schemas:
-1. **`send_email` (Realistic Schema):**
-   - Declared typed fields: `to` (policy `CI`), `subject` (policy `TEXT` / canonicalised), `thread_id` (policy `ID`).
-   - Act-determining prose: `body` (policy `TEXT`).
-   - Residual pairs share identical `to`, `subject`, and `thread_id`, surviving the refuter into the residual.
-2. **`create_ticket` (Realistic Schema):**
-   - Declared typed fields: `project` (policy `ID`), `component` (policy `CI`), `priority` (policy `CI`).
-   - Act-determining prose: `title` (policy `TEXT`), `description` (policy `TEXT`).
-   - Residual pairs share identical `project`, `component`, and `priority`, surviving the refuter into the residual.
 
-This directly verifies the thesis: even when schema declarations are rigorous and realistic, the residual survives because the core act lives in prose.
+1. **`send_email` (Realistic Schema):**
+   - Declared fields:
+     - `to`: policy `CI` (case-insensitive email token, in $\sigma$).
+     - `thread_id`: policy `ID` (opaque thread identifier, in $\sigma$).
+     - `subject`: policy `TEXT` (canonicalized under whitespace collapse, but **not** in $\sigma$ — free text).
+     - `body`: policy `TEXT` (act-determining free text, **not** in $\sigma$).
+   - **Typed Projection $\sigma$:** $\sigma(\text{input}) = (\text{canonical}(\texttt{to}), \text{canonical}(\texttt{thread\_id}))$.
+   - **Mechanical Refuter Rule:** Every residual pair $(a, b)$ must satisfy $\sigma(a) = \sigma(b)$ exactly (same recipient and same thread ID), verified mechanically by `canonicalize.js` before freezing. Pairs with differing `to` or `thread_id` are refuted at L0 and never enter the residual.
+
+2. **`create_ticket` (Realistic Schema):**
+   - Declared fields:
+     - `project`: policy `ID` (opaque project key, in $\sigma$).
+     - `component`: policy `CI` (subsystem identifier, in $\sigma$).
+     - `priority`: policy `CI` (priority tier, in $\sigma$).
+     - `title`: policy `TEXT` (free text summary, **not** in $\sigma$).
+     - `description`: policy `TEXT` (act-determining issue body, **not** in $\sigma$).
+   - **Typed Projection $\sigma$:** $\sigma(\text{input}) = (\text{canonical}(\texttt{project}), \text{canonical}(\texttt{component}), \text{canonical}(\texttt{priority}))$.
+   - **Mechanical Refuter Rule:** Every residual pair $(a, b)$ must satisfy $\sigma(a) = \sigma(b)$ exactly (same project, component, and priority), verified mechanically by `canonicalize.js` before freezing. Pairs with differing typed values are refuted at L0 and never enter the residual.
 
 ---
 
@@ -56,17 +65,17 @@ This directly verifies the thesis: even when schema declarations are rigorous an
 To ensure evaluation is challenging and prevents trivial near-zero scores, distinct (`DIFF`) pairs are sampled in pre-specified proportions across two difficulty strata:
 
 1. **Easy Stratum (30% of DIFF pairs):**
-   - Differing high-level topic or intent (e.g., alert on service downtime vs. routine billing invoice update; payment gateway timeout vs. CSS rendering glitch).
+   - Differing high-level topic or intent within the same recipient/thread or project/component (e.g., initial invoice notification vs. security policy update sharing a thread; authentication crash vs. frontend styling bug in the same component).
 2. **Hard Stratum (70% of DIFF pairs — Prose-Native Analogue of D2 Legitimate Repeats):**
-   - Shared recipient/component, highly overlapping subject/title, related context, but fundamentally distinct real-world acts where suppressing the second call drops a necessary action.
-   - *Email examples:*
-     - Weekly status report for Week 41 vs. Week 42 (subtle metrics changes).
-     - Initial urgent incident notification vs. follow-up escalation with specific remediation steps.
-     - Two distinct payment receipt confirmations for consecutive invoices sent to the same client.
-   - *Ticket examples:*
-     - Two separate bugs in the same auth component with different reproduction steps or stack traces.
-     - Customer reporting duplicate billing issue vs. same customer reporting refund dispute.
-     - Server memory leak in worker process vs. worker process crash due to network timeout.
+   - Identical typed-field projections ($\sigma$), highly overlapping context or subject, but fundamentally distinct real-world acts where suppressing the second call drops a necessary action.
+   - *Email examples sharing the exact same `to` and `thread_id`:*
+     - Two distinct status updates in the same ongoing incident thread (e.g., update 1: root cause identified; update 2: rollback deployed).
+     - A gentle reminder vs. an entirely new action item requested in the same email thread.
+     - Two distinct bug fix confirmations for consecutive patches discussed in the same client communication thread.
+   - *Ticket examples sharing the exact same `project`, `component`, and `priority`:*
+     - Two separate bugs in the same auth component with different reproduction steps or error logs (e.g., OAuth token expiry race condition vs. SAML assertion malformed XML).
+     - Customer reporting duplicate billing issue vs. same customer reporting subscription cancellation in the same billing component.
+     - Worker process out-of-memory crash vs. worker process deadlock on database connection pool.
 
 Wrong suppression and deduplication will be reported both overall and disaggregated per stratum.
 
@@ -75,15 +84,16 @@ Wrong suppression and deduplication will be reported both overall and disaggrega
 ## 5. Model Independence and Validation Protocol
 
 To avoid self-recognition bias and prevent shared representations of "same act":
-1. **Generator Model:**
-   - Candidate pairs are generated by `claude-3-5-sonnet` (Anthropic) or `deepseek-v3` / `llama-3.3-70b-versatile` (Meta).
-2. **Validator Model:**
-   - An independent validator model from an entirely distinct family: `qwen-2.5-72b-instruct` or `gemini-1.5-pro`.
-   - **Neither the generator nor the validator is one of the three admitted judges** (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.6-27b`).
-3. **Validation and Exclusion Rule:**
+1. **Model Commitments:**
+   - **Generator:** `meta-llama/llama-3.3-70b-versatile` (or `gpt-4o-mini` if Groq Llama is unavailable).
+   - **Validator:** `allam-2-7b` (independent Arabic/English multilingual foundation model from SDAIA/IBM, verified reachable and distinct from the judge families).
+   - **Admitted Judges:** `openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`.
+   - **Neither the generator nor the validator belongs to the admitted judge families** (neither is GPT-OSS nor Qwen), preventing self-recognition bias and shared model priors.
+2. **Validation and Exclusion Rule:**
    - The validator model evaluates each pair under the operational definition: *"Would silently returning the recorded response of request A in place of executing request B leave an intended action undone?"*
    - The author conducts a blinded manual inspection of all pairs.
-   - **Exclusion Rule:** If the validator model and the author disagree on the label of a pair, that pair is discarded from the corpus. The total number of discarded pairs and the discordance rate will be explicitly reported.
+   - **Exclusion Rule:** If the validator model and the author disagree on the label of a pair, that pair is discarded from the corpus.
+   - **Reporting Agreement:** We will report the full confusion matrix, Cohen's $\kappa$, raw percent agreement between validator and author, and the total discard count.
 
 ---
 
@@ -91,17 +101,19 @@ To avoid self-recognition bias and prevent shared representations of "same act":
 
 1. **Seed-Level Partitioning:**
    - Base scenarios, customer accounts, and incident entities are partitioned strictly into `cal` or `test` prior to generation. No seed or counterparty is shared across splits.
-2. **Hash Freezing:**
+2. **Stopping Rule:**
+   - No regeneration, replacement, rescoring, or re-validation is permitted after any judge score is seen. The dataset is final upon freezing.
+3. **Hash Freezing:**
    - The resulting dataset (`corpus/prose_native_exp2.jsonl`) will be frozen with its SHA-256 digest committed to Git *before* running any judge scoring.
 
 ---
 
-## 7. Analysis Plan
+## 7. Analysis Plan and Statistical Power
 
 1. **Admitted Judges:**
    - Primary: `openai/gpt-oss-120b`
    - Secondary: `openai/gpt-oss-20b`
-   - Cross-family: `qwen/qwen3.6-27b`
+   - Cross-family: `qwen/qwen3.8-27b`
 2. **Scoring Protocol:**
    - Identical system prompt, pair formatting, temperature ($T=0$), and strict integer-percentage response parsing as established in `src/experiments/`.
 3. **Significance Levels:**
@@ -112,6 +124,8 @@ To avoid self-recognition bias and prevent shared representations of "same act":
    - Tool-conditional residual wrong suppression ($\WS$) and deduplication ($\mathrm{Dedup}$).
    - Disaggregated metrics for Easy vs. Hard strata.
    - Comparison: Deployed pooled calibration vs. standalone tool-conditional calibration.
-5. **Commitment to Empirical Outcomes:**
+5. **Statistical Power Limitation:**
+   - With $N=60$ distinct test pairs, observing 0 wrong suppressions yields a 95% Wilson confidence interval upper bound of $[0.0\%, 6.0\%]$. A zero error rate therefore cannot distinguish $\WS = 0.02$ from $\WS = 0.05$, but suffices to detect substantial violations ($\WS > 0.06$). This power limitation is preregistered in advance.
+6. **Commitment to Empirical Outcomes:**
    - If standalone prose-native tools achieve high deduplication with bounded wrong suppression ($\le \alpha$), this confirms that conformal calibration succeeds on prose-native tasks when the budget is satisfied.
    - If the hard stratum induces high false suppression, or if conservative thresholds ($\thi=1.00$) suppress deduplication, this result will be reported fully as evidence for the central thesis: schema typing, not stochastic judging, determines achievable guarantees.
