@@ -129,3 +129,99 @@ To avoid self-recognition bias and prevent shared representations of "same act":
 6. **Commitment to Empirical Outcomes:**
    - If standalone prose-native tools achieve high deduplication with bounded wrong suppression ($\le \alpha$), this confirms that conformal calibration succeeds on prose-native tasks when the budget is satisfied.
    - If the hard stratum induces high false suppression, or if conservative thresholds ($\thi=1.00$) suppress deduplication, this result will be reported fully as evidence for the central thesis: schema typing, not stochastic judging, determines achievable guarantees.
+
+---
+
+## Amendment 2 (2026-10-02, pre-data)
+
+**Status:** Made before any Experiment 2 pair has been generated, validated, or
+scored (`corpus/prose_native_exp2.jsonl` does not exist at the time of this
+commit). Where this amendment conflicts with the sections above, it supersedes
+them. Nothing else changes.
+
+### A2.1 Larger held-out distinct test set (supersedes §2.2 DIFF target and §7.5)
+
+- **Test DIFF pairs:** at least **140 per tool** (was 60), in the §4 proportions:
+  at least 98 hard and at least 42 easy.
+- Calibration DIFF (≥ 60 per tool), calibration SAME (≥ 30), and test SAME
+  (≥ 60) are unchanged.
+- **Reason:** at n = 60, zero wrong suppressions bounds WS only at 6.0%
+  (95% Wilson), which does not exclude a violation of α = 0.05. The revised
+  power statement:
+
+  | test DIFF n | 0 errors | 1 error | 2 errors | 3 errors |
+  |---|---|---|---|---|
+  | 60 (original) | 6.0% | 8.9% | 11.4% | 13.7% |
+  | 140 (amended) | 2.7% | 3.9% | 5.1% | 6.1% |
+
+  At n = 140, up to one error per tool shows WS below α = 0.05. Two or more
+  errors cannot separate WS from α, and that is reported as such.
+- The same per-stratum Wilson intervals are reported for the hard stratum alone
+  (n ≥ 98: 0 errors → 3.8%).
+
+### A2.2 Judge identifier correction (supersedes §5.1 and §7.1)
+
+The cross-family judge is `qwen/qwen3.6-27b` (result key `qwen_qwen3_6_27b`),
+the model used for every existing result. "`qwen/qwen3.8-27b`" above was a
+typing error. No model has been called for Experiment 2.
+
+### A2.3 Wording correction (§3)
+
+Pairs whose typed projections differ are settled by the **refuter** (the
+distinctness witness σ), not "at L0". L0 is the certifier (canonical equality).
+The mechanical rule itself is unchanged.
+
+### A2.4 Hard-stratum integrity (adds to §4 and §6)
+
+- Hardness is defined by the generation specification in §4 plus the mechanical
+  σ-equality check alone. Pairs are never moved between strata, softened, or
+  regenerated because of how easy or hard they look to the author or the
+  validator. The author's blinded inspection (§5.2) rules on the label only.
+- After scoring, the distribution of every admitted judge's scores on hard-
+  stratum DIFF pairs is reported (median, 90th percentile, share above the
+  calibrated threshold), so a reader can see whether the stratum was hard in
+  effect. If the median hard-DIFF score is below 0.10 for every judge, the
+  paper says that the stratum did not test the judge, rather than presenting a
+  pass as evidence.
+
+### A2.5 Human validation of labels (adds to §5)
+
+- **Sample.** After generation and after the §5.2 validator–author exclusion,
+  and before any judge scores a pair, a stratified random sample is drawn per
+  tool from the validated pool by a seeded generator:
+
+  | stratum | per tool | both tools |
+  |---|---|---|
+  | hard DIFF | 24 | 48 |
+  | easy DIFF | 6 | 12 |
+  | SAME | 10 | 20 |
+  | **total** | **40** | **80** |
+
+  Seed: **20261002**. Within each stratum, pairs are drawn uniformly without
+  replacement from the calibration and test splits together. The drawn ids and
+  the seed are committed before the annotation session.
+- **Annotators.** Two human annotators who are not the author and had no part in
+  generation label the sample independently. They see the two inputs and the
+  §5.2 operational question and nothing else: no label, stratum, split, or model
+  output.
+- **Combined with Experiment 1.** The same two annotators label the
+  Experiment 1 sheet (`human_validation_package/`, frozen under its own
+  preregistration) and this sample in **one session**. Each experiment is a
+  separate block with its own instructions. Items are randomly ordered within
+  each block, and no item appears in both. The Experiment 4 sample
+  (`PREREG_EXP4.md`) is a third block of the same session if its units are
+  frozen by then. Otherwise the same two annotators label it in a second
+  session.
+- **Exclusion rule (in addition to §5.2).** A sampled pair on which both
+  annotators agree with each other and disagree with the validator–author label
+  is discarded before freezing. Every such discard is reported.
+- **Scope of the human check.** Pairs outside the sample carry only the
+  validator–author label. The author is the only human who has judged them. The
+  sample's agreement rate with the validator–author label, overall and per
+  stratum with Wilson intervals, is reported as **the estimate of label quality
+  for the whole corpus**. It is not presented as a check of every pair.
+- **Reported.** Human–human Cohen's κ and raw agreement; each annotator's
+  agreement with the validator–author label, overall and per stratum; and the
+  discard count.
+- **Ordering.** Freezing waits until both annotators have completed the sample.
+  No pair is scored before human labels exist on the sample.
