@@ -137,3 +137,43 @@ level 0.05.
 
 - `results/multi_candidate_hard.json`, regenerated offline from the frozen
   units and persisted scores.
+
+---
+
+## Amendment 1 (2026-10-03, pre-data)
+
+**Status:** Made before any Experiment 4 unit is generated, labelled, or scored.
+It applies the model substitutions of `PREREG_EXP2.md` Amendment 3 for the same
+reasons (endpoint retirement; evidence in
+`results/exp2_endpoint_checks_20261002.txt`). Where it conflicts with §3 or §5,
+it supersedes them.
+
+- **Generator** (supersedes §3): `gemini-3.8-flash`, temperature 1.0, default
+  thinking, with no fallback, as in Experiment 2 §A3.1 (the verbatim `version`
+  field, "3.0", is recorded there). It replaces `llama-3.3-70b-versatile`
+  (HTTP 404 `model_not_found`, 2026-10-02).
+- **Secondary judge** (supersedes §5): `qwen/qwen3.8-27b`, which replaces
+  `qwen/qwen3.6-27b` (HTTP 404, 2026-10-02). It is used only if it passes the
+  main-corpus admission check of Experiment 2 §A3.3. It is never pooled with,
+  or reported as, Qwen3.6-27B.
+- **Blind author check** (supersedes §3 "author inspects every unit"). The
+  author checks each unit with the Experiment 2 §A3.2 labelling tool, or its
+  unit form. It shows only the dispatch x and the candidate tool calls, with
+  candidate order reshuffled per unit, and units in an order fixed by a seeded
+  shuffle (seed 20261006). The constructed label, family stratum, seed act,
+  and generation prompt are hidden, and the tool enforces this in the same way
+  (separate key file, append-only labels, no revision). The author answers the
+  §3 question for each unit. Units whose answer differs from the constructed
+  label are discarded and reported. No model validator is used. The human
+  sample in §3 then audits the remaining units.
+- **Primary thresholds from the same scoring run** (supersedes §5
+  "Thresholds"). For each judge, the calibration pool is the main corpus's
+  jurisdiction-matched residual calibration pairs (DIFF for t_hi, SAME for the
+  escalation floor) **re-scored in the same run as the Experiment 4 units**:
+  one scorer invocation per judge, with the same prompt, model, and parameters,
+  and pool and unit comparisons interleaved in one seeded random order (seed
+  20261007). The uncorrected t(α) and the Bonferroni t(α/m) are both computed
+  from this pool. Its size is reported, and m is tested only up to the budget
+  it certifies (at n = 142, m ≤ 7). Thresholds from the persisted main-corpus
+  scores are reported as secondary, with the scoring-context caveat of
+  Experiment 2 §A3.4.

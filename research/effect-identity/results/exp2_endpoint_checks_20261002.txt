@@ -1,0 +1,48 @@
+Experiment 2/4 endpoint checks, 2026-10-02 (cited by PREREG_EXP2.md Amendment 3
+and PREREG_EXP4.md Amendment 1). No corpus material was sent in any call.
+
+== Groq /models listing (HTTP 200), model ids:
+allam-2-7b, canopylabs/orpheus-arabic-saudi, canopylabs/orpheus-v1-english,
+meta-llama/llama-prompt-guard-2-22m, meta-llama/llama-prompt-guard-2-86m,
+openai/gpt-oss-120b, openai/gpt-oss-20b, openai/gpt-oss-safeguard-20b,
+qwen/qwen3.8-27b, whisper-large-v3, whisper-large-v3-turbo
+
+== Groq live calls (prompt: "Reply with the single word: ok", temperature 0)
+=== llama-3.3-70b-versatile — HTTP 404 — 2026-10-02T18:16:07.894Z
+{"error":{"message":"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.","type":"invalid_request_error","code":"model_not_found"}}
+
+=== qwen/qwen3.6-27b — HTTP 404 — 2026-10-02T18:16:08.181Z
+{"error":{"message":"The model `qwen/qwen3.6-27b` does not exist or you do not have access to it.","type":"invalid_request_error","code":"model_not_found"}}
+
+=== qwen/qwen3.8-27b — HTTP 200 — 2026-10-02T18:16:08.412Z
+{"id":"chatcmpl-a9a294ff-2d6b-4f1d-961b-3d2e7d609046","object":"chat.completion","created":1790964969,"model":"qwen/qwen3.8-27b","choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.051457157,"prompt_tokens":19,"prompt_time":0.001217532,"completion_tokens":2,"completion_time":0.004031293,"total_tokens":21,"total_time":0.005248825},"usage_breakdown":null,"system_fingerprint":"fp_a1293f40b5","x_groq":{"id":"req_01m3yx9bz0ewjrhvdmhm8f67rt","seed":841962986},"service_tier":"on_demand"}
+
+== Gemini models listing (v1beta /models, generateContent-capable text models, abridged)
+Stable, non-alias: gemini-2.5-flash (001), gemini-2.5-pro (2.5, June 2025),
+gemini-2.5-flash-lite (001), gemini-3.1-flash-lite (3.1-flash-lite-05-2026),
+gemini-3.5-flash (3.5-flash-05-2026), gemini-3.5-flash-lite (3.5-flash-lite-07-2026),
+gemini-3.6-flash (3.6-flash-07-2026), gemini-3.7-flash (3.7-flash-08-2026),
+gemini-3.8-flash (3.0)
+Preview: gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools,
+gemini-3.1-flash-lite-preview, gemini-omni-flash-preview
+Aliases: gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest
+Also listed (media/agent/specialised, not considered): image, TTS, Lyria, transcribe,
+robotics, computer-use, Antigravity, Deep Research, Gemma, Omni models.
+
+== Gemini smoke test: node src/experiments/geminiSmoke.js (3 calls)
+=== call 1: GET models/gemini-3.8-flash — HTTP 200 — 2026-10-02T18:16:33.174Z
+{"name":"models/gemini-3.8-flash","version":"3.0","displayName":"Gemini 3.8 Flash","description":"Gemini 3.8 Flash","inputTokenLimit":1048576,"outputTokenLimit":65536,"supportedGenerationMethods":["generateContent","countTokens","createCachedContent","batchGenerateContent"],"temperature":1,"topP":0.95,"topK":64,"maxTemperature":2,"thinking":true}
+
+=== call 2: generateContent — HTTP 200 — 2026-10-02T18:16:46.871Z
+prompt: "Reply with the single word: ok"
+candidates[0].content.parts[0].text = "ok"; finishReason STOP
+usageMetadata: promptTokenCount 8, candidatesTokenCount 1, thoughtsTokenCount 90, totalTokenCount 99
+modelVersion "gemini-3.8-flash"; responseId "AvW_aufRM_SiqfkP1uq70AQ"
+(thoughtSignature omitted here; printed in full in the session output)
+
+=== call 3: generateContent — HTTP 200 — 2026-10-02T18:17:33.431Z
+system: "You output JSON only."  prompt: 'Return exactly this JSON object: {"status":"ok","n":3}'
+candidates[0].content.parts[0].text = "{\"status\":\"ok\",\"n\":3}"; finishReason STOP
+usageMetadata: promptTokenCount 21, candidatesTokenCount 9, thoughtsTokenCount 123, totalTokenCount 153
+modelVersion "gemini-3.8-flash"; responseId "G_W_asybGcyrg8UPt_jRkQU"
+(thoughtSignature omitted here; printed in full in the session output)
