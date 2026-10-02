@@ -25,10 +25,10 @@ export class GeminiClient {
   }
 
   /** One generateContent call. Returns the parsed text, the raw body, and the HTTP status. */
-  async generate({ system, prompt, temperature = 0, maxOutputTokens = 2048 }) {
+  async generate({ system, prompt, temperature = 0, maxOutputTokens = 2048, responseMimeType }) {
     const body = {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { temperature, maxOutputTokens },
+      generationConfig: { temperature, maxOutputTokens, ...(responseMimeType ? { responseMimeType } : {}) },
     };
     if (system) body.systemInstruction = { parts: [{ text: system }] };
     const maxAttempts = 5;
