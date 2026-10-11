@@ -43,11 +43,11 @@ import { GroqClient, extractJson } from "../groq.js";
 import { POLICY, canonicalize, canonicalString, semanticProjection } from "../canonicalize.js";
 import { prepareBlind } from "../labelling/prepare.js";
 
-export const GENERATOR = "qwen/qwen3.8-27b";
+export const GENERATOR = "openai/gpt-oss-120b";
 const TEMPERATURE = 0.7;
-const MAX_OUTPUT_TOKENS = 900;
-const CONCURRENCY = 1;
-const MIN_INTERVAL_MS = 18_000;
+const MAX_OUTPUT_TOKENS = 3000;
+const CONCURRENCY = 2;
+const MIN_INTERVAL_MS = 2000;
 const SELECTION_SEED = 20261003;
 const LABELLING_SEED = 20261004;
 const SEEDS_PER_CALL = 8;
