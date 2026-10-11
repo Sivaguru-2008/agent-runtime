@@ -355,3 +355,17 @@ below) and three Gemini smoke-test calls. Where this amendment conflicts with
   moves residual wrong suppression between 4, 6, and 8 of 144. Exchangeability
   across runs is therefore not assumed, and the secondary result is not used
   for any guarantee.
+
+---
+
+## Amendment 4 (2026-10-11, Pre-Scoring): Generator Transition to `qwen/qwen3.8-27b`
+
+### A4.1 Generator Model: `qwen/qwen3.8-27b` (supersedes §A3.1)
+
+- **Reason (daily quota exhaustion).** Generating the required candidate pool (approx. 180 calls total across seeds and variant expansions) exceeded the Gemini free-tier project allowance (capped at 20 requests/day for `gemini-3.8-flash`, returning HTTP 429 with ~14-hour retry delays).
+- **Model.** Exact model ID string: **`qwen/qwen3.8-27b`** via Groq API.
+- **Independence & Self-Recognition Check.**
+  - The primary judge (`openai/gpt-oss-120b`) and secondary judge (`openai/gpt-oss-20b`) are developed by OpenAI (GPT-OSS architecture), which is an entirely independent model family from Alibaba Tongyi Qwen. There is **zero shared model family or self-recognition bias** on the primary or secondary judges.
+  - For the cross-family judge (`qwen/qwen3.8-27b`), because generator and judge share the model family, self-recognition effects are explicitly evaluated as a preregistered secondary analysis (comparing Qwen-judged deduplication and wrong suppression against GPT-OSS).
+- **Prompts & Validation.** Prompts, schemas, mechanical refuter checks ($\sigma$), canonical equivalence filters, and blind labelling procedures remain verbatim as frozen in Amendment 3. All generated pairs are validated mechanically and blind-labelled before any judge scoring.
+
