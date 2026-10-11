@@ -45,9 +45,9 @@ import { prepareBlind } from "../labelling/prepare.js";
 
 export const GENERATOR = "qwen/qwen3.8-27b";
 const TEMPERATURE = 0.7;
-const MAX_OUTPUT_TOKENS = 2500;
+const MAX_OUTPUT_TOKENS = 1500;
 const CONCURRENCY = 1;
-const MIN_INTERVAL_MS = 1200;
+const MIN_INTERVAL_MS = 18_000;
 const SELECTION_SEED = 20261003;
 const LABELLING_SEED = 20261004;
 const SEEDS_PER_CALL = 8;
@@ -205,6 +205,7 @@ async function callOnce(key, prompt, validate, offline) {
     stats.calls += 1;
     if (attempt > 1) stats.retries += 1;
     let out, parsed = null, error = null;
+    await new Promise((r) => setTimeout(r, MIN_INTERVAL_MS));
     try {
       out = await client.jsonChat({
         system: SYSTEM,
