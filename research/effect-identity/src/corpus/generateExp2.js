@@ -45,9 +45,9 @@ import { prepareBlind } from "../labelling/prepare.js";
 
 export const GENERATOR = "qwen/qwen3.8-27b";
 const TEMPERATURE = 0.7;
-const MAX_OUTPUT_TOKENS = 8192;
-const CONCURRENCY = 3;
-const MIN_INTERVAL_MS = 500;
+const MAX_OUTPUT_TOKENS = 2500;
+const CONCURRENCY = 1;
+const MIN_INTERVAL_MS = 1200;
 const SELECTION_SEED = 20261003;
 const LABELLING_SEED = 20261004;
 const SEEDS_PER_CALL = 8;
