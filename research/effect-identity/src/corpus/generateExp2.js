@@ -45,7 +45,7 @@ import { prepareBlind } from "../labelling/prepare.js";
 
 export const GENERATOR = "qwen/qwen3.8-27b";
 const TEMPERATURE = 0.7;
-const MAX_OUTPUT_TOKENS = 1500;
+const MAX_OUTPUT_TOKENS = 900;
 const CONCURRENCY = 1;
 const MIN_INTERVAL_MS = 18_000;
 const SELECTION_SEED = 20261003;
@@ -213,6 +213,7 @@ async function callOnce(key, prompt, validate, offline) {
         temperature: TEMPERATURE,
         maxTokens: MAX_OUTPUT_TOKENS,
         model: GENERATOR,
+        rawBudget: true,
       });
       parsed = out.json;
       const problem = validate(parsed);

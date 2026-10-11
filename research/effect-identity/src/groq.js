@@ -193,14 +193,14 @@ export class GroqClient {
     if (!this.apiKey) throw new Error("GroqClient: no GROQ_API_KEY available (checked apps/api/.env and .env).");
   }
 
-  async chat({ system, prompt, temperature = 0, maxTokens = 2048, model }) {
+  async chat({ system, prompt, temperature = 0, maxTokens = 2048, model, rawBudget = false }) {
     const messages = [];
     if (system) messages.push({ role: "system", content: system });
     messages.push({ role: "user", content: prompt });
     // Reasoning models burn completion tokens on a scratchpad before the
     // answer; budget for both or the answer is truncated away entirely.
     const spec = JUDGE_MODELS[model ?? this.model];
-    const factor = model ? (spec?.reasoningFactor ?? 1) : this.reasoningFactor;
+    const factor = rawBudget ? 1 : (model ? (spec?.reasoningFactor ?? 1) : this.reasoningFactor);
     const budget = Math.min(spec?.maxCompletionTokens ?? 32_000, Math.ceil(maxTokens * factor));
     const maxAttempts = 8;
     for (let attempt = 1; ; attempt++) {
