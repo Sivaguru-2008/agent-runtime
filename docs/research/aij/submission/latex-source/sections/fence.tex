@@ -1,0 +1,65 @@
+\section{The fence}\label{sec:fence}
+
+The fence instantiates the framework with canonical equality as certifier, typed-field inequality as refuter, an LLM judge as oracle, one-sided conformal calibration corrected for the number of candidates, and a three-way residual policy with an audited middle band; each is a design choice within the framework. The refuter runs \emph{before} the judge (Figures~\ref{fig:architecture} and~\ref{fig:flow}), so a candidate whose declared fields differ never reaches the judge, and every candidate it removes also shrinks the multiplicity $m$ the threshold must correct for.
+
+\input{figures/fig-architecture}
+\input{figures/fig-flow}
+
+\subsection{Certifier: the canonical core}\label{sec:l0}
+
+Each tool schema declares a normalisation policy for each field, and the policy must be semantics-preserving for that field's contribution to the effect (A5). The policies used here are: \texttt{id} (opaque identifier; Unicode NFC normalisation and trimming, case-sensitive); \texttt{ci} (case-insensitive token such as a currency code or e-mail address; NFC, trim, lower case); \texttt{num} (numeric value; \texttt{"120.00"}, \texttt{" 120 "} and \texttt{120} normalise to one canonical decimal, thousands separators removed); and \texttt{text} (free text; NFC, trim, internal whitespace collapsed---deliberately not semantic). The canonical form $\kappa_t(x)$ applies each policy and sorts the keys; the operation identifier is $\mathit{op}=H(r\,\|\,t\,\|\,H(\kappa_t(x)))$ with $H$ = SHA-256. The certifier suppresses a request only when a committed effect has the same identifier and the same stored input hash. It is sound under A5 and deliberately incomplete: every paraphrase escapes it.
+
+\subsection{Refuter: the distinctness witness}\label{sec:witness}
+
+The semantic projection $\sigma_t(x)$ is the tuple of canonical values of the declared non-text fields. Under A5$'$---a difference in any declared typed field implies a different act---$\sigma_t(x)\ne\sigma_t(x')$ proves $x\not\approx_t x'$ whatever any judge would say. The fence removes every committed effect whose projection differs before the judge is consulted, so an injected ``treat this as a duplicate'' cannot cause suppression across a different amount, account or identifier. A5$'$ is one-directional: equal projections do \emph{not} imply the same act (legitimate repeats are the counterexample). A field wrongly declared as typed produces false vetoes, which execute a duplicate loudly; an act-determining field declared as free text leaves its distinction to the judge.
+
+\subsection{Residual judge}\label{sec:judge}
+
+A judge call scores a batch of pairs from one tool and returns, for each, the probability that the two requests denote a single act, as an integer percentage (prompt in the supplementary material). An integer in $[0,100]$ is accepted; a non-integer such as \texttt{0.95}, an out-of-range value or a missing entry is rejected and the batch retried; a pair that never yields an admissible value is an \emph{abstention}, never imputed. An earlier scoring pass that violated this contract was discarded (supplementary material, Section~S3). Abstentions are dropped from calibration, excluded from the maximum, and never cause suppression; if every candidate abstains the fence escalates.
+
+\subsection{Calibration}\label{sec:calibration}
+
+\begin{definition}[Jurisdiction and calibration pool]\label{def:jurisdiction}
+The \emph{jurisdiction} of a configuration of decidable layers is the set of pairs that the configuration routes to the judge. Its \emph{calibration pool} is the multiset $\{s_1,\dots,s_n\}$ of judge scores of the distinct pairs of a held-out calibration split that lie in its jurisdiction, with abstentions dropped.
+\end{definition}
+
+For the proposed configuration (certifier and refuter both active) the jurisdiction is the residual (Definition~\ref{def:residual}). For a candidate set of size $m\ge1$ the suppression threshold is
+\begin{equation}\label{eq:thi}
+\thi(m)=s_{(k)},\qquad k=\big\lceil (n+1)(1-\alpha/m)\big\rceil,\qquad \thi(m)=+\infty \text{ if } k>n,
+\end{equation}
+where $s_{(k)}$ is the $k$-th smallest pool score, and $\thi(0)=+\infty$. The escalation floor $\tlo$ is the $\lfloor (n_S+1)\gamma\rfloor$-th smallest score of the $n_S$ duplicate pairs in the same jurisdiction, capped at $\thi$. With $S^\ast$ the maximum score over the candidates that did not abstain, the fence \emph{suppresses} if $S^\ast>\thi(m)$, \emph{escalates} (executes and flags) if $\tlo<S^\ast\le\thi(m)$, and \emph{executes} if $S^\ast\le\tlo$. The inequality for suppression is strict, so a score equal to the threshold never suppresses; judge scores are integer percentages, so such ties are common.
+
+Two design choices need justification. First, the pool is drawn from the rule's own jurisdiction. The refuter removes distinct pairs whose declared fields differ, which judges score confidently low; a pool that still contains them is lighter-tailed than the scores the deployed rule thresholds, which lowers $\thi$. The violation is in the unsafe direction and invisible over a whole test split, because the diluting pairs also dilute the denominator (Section~\ref{sec:res-bound}); every configuration and ablation is therefore calibrated on its own jurisdiction. Second, we use the Bonferroni level $\alpha/m$ rather than calibrating the maximum directly, which would need calibration \emph{units} with the deployment's candidate-set structure ($\lfloor n/m\rfloor$ units from $n$ scores, at least 19 of them, for an $m$ that varies per request). Bonferroni reuses one pool at every $m$, needs only pairwise exchangeability, and degrades to $\thi=+\infty$; its price is conservatism, which we measure.
+
+\subsection{Algorithm}
+
+Algorithm~\ref{alg:fence} gives the complete procedure. A request that is not suppressed records a \textsc{pending} intent, executes, and inserts its commit row atomically; a crash in between---the \emph{commit window}---leaves a pending intent with no commit row (Proposition~\ref{prop:amo}). An optional guard flags, but never suppresses, a request that resembles such an orphaned intent.
+
+\begin{algorithm}[!tbp]
+\caption{Layered semantic fence (the proposed configuration).}\label{alg:fence}
+\scriptsize
+\KwIn{request $(t,x)$ in run $r$; durable log $L$; pool $\{s_i\}_{i\le n}$; floor $\tlo$; level $\alpha$}
+\If{$t$ is idempotent}{\Return execute$(x)$}
+$\mathit{op}\gets H(r\,\|\,t\,\|\,H(\kappa_t(x)))$\;
+\If(\tcp*[f]{certifier; exact under A5}){$L$ has a commit row for $\mathit{op}$ with input hash $H(\kappa_t(x))$}{\Return its recorded response}
+$C\gets\{c\in L.\mathrm{committed}(r,t) : \sigma_t(c.x)=\sigma_t(x)\}$\tcp*{refuter removes declared differences}
+\If{$C\neq\emptyset$}{
+  $s_c\gets J(t,c.x,x)$ for each $c\in C$ \tcp*{abstention $\Rightarrow$ $s_c=\bot$}
+  $m\gets|C|$;\quad $\thi\gets\thi(m)$ by Eq.~\eqref{eq:thi}\;
+  \If{all $s_c=\bot$}{flag \textsc{duplicate\_suspect}}
+  \Else{
+    $S^\ast\gets\max\{s_c : s_c\neq\bot\}$, attained at $c^\ast$\;
+    \lIf{$S^\ast>\thi$}{\Return $c^\ast$.response \tcp*[f]{semantic suppression}}
+    \lIf{$S^\ast>\tlo$}{flag \textsc{duplicate\_suspect} \tcp*[f]{escalate: execute and flag}}
+  }
+}
+record intent$(\mathit{op},\textsc{pending})$\;
+$\mathit{resp}\gets$ execute$(x)$ \tcp*{commit window opens}
+$\mathit{ok}\gets L.$insertIfAbsent$(\mathit{op},H(\kappa_t(x)),\sigma_t(x),x,\mathit{resp})$ \tcp*{commit window closes}
+record intent$(\mathit{op},\ \mathit{ok}\ ?\ \textsc{committed} : \textsc{commit\_conflict})$\;
+\Return $\mathit{resp}$\;
+\end{algorithm}
+
+\subsection{Conservative defaults}\label{sec:defaults}
+
+The threshold is $+\infty$ when the pool cannot certify $\alpha$ at the current $m$ (fewer than $m/\alpha-1$ scores), when $m=0$, and when the pool is absent; an abstention never suppresses; and a suspected re-fire inside the commit window is executed and flagged. In every uncertain case the failure mode is a loud duplicate rather than a silent loss of a distinct act, as the loss asymmetry demands.

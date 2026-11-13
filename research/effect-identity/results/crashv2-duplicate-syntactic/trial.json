@@ -1,0 +1,32 @@
+{
+  "trial": 47,
+  "arm": "duplicate",
+  "projection": "declared",
+  "seedInput": {
+    "amount_text": "$780.00",
+    "beneficiary_text": "Marlow Freight",
+    "reference": "Shipment 88213 — installment 1 of 2"
+  },
+  "crashInput": {
+    "amount_text": "usd 780",
+    "beneficiary_text": "Marlow Freight",
+    "reference": "shp 88213 — installment 1 of 2"
+  },
+  "replayInput": {
+    "amount_text": "Seven Hundred Eighty US Dollars",
+    "beneficiary_text": "Marlow Freight",
+    "reference": "Shipment #88213 — installment 1 of 2"
+  },
+  "actOf": {
+    "seed": "act1",
+    "crash": "act1",
+    "replay": "act1"
+  },
+  "crashPoint": "after_local_commit",
+  "thresholds": {
+    "tHi": 0.8,
+    "tLo": 0.8
+  },
+  "judgeModel": "openai/gpt-oss-120b",
+  "windowGuard": true
+}

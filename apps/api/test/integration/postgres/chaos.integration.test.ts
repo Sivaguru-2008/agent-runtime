@@ -112,14 +112,14 @@ describe.skipIf(!harness)("transaction abort during composite write", () => {
         payloadExtras: { execution: { id: exec, agentId: agent } }
       }));
 
-      // Same id (same step → same deterministic id) → duplicate primary key.
-      await expect(
-        store.append(makeEvent({
-          type: "EXECUTION_FAILED",
-          executionId: exec, seed, step: 0,
-          payloadExtras: { execution: { id: exec, agentId: agent } }
-        }))
-      ).rejects.toThrow();
+      const second = makeEvent({
+        type: "EXECUTION_FAILED",
+        executionId: exec, seed, step: 0,
+        payloadExtras: { execution: { id: exec, agentId: agent } }
+      });
+      second.id = first.id;
+
+      await expect(store.append(second)).rejects.toThrow();
 
       // Verify no link rows reference a non-existent event sequence.
       const orphans = await harness!.pg.query<{ count: string }>(

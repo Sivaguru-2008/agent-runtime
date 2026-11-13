@@ -155,6 +155,19 @@ export class OutboxDispatcher {
          select id
            from event_outbox
           where id in (select id from ordered_candidates)
+            -- Re-assert eligibility *inside* the FOR UPDATE select. In READ
+            -- COMMITTED, when SKIP LOCKED reaches a row a competing worker has
+            -- already claimed-and-committed (so it is no longer locked, just
+            -- re-stamped PROCESSING with a future visible_after), Postgres
+            -- runs EvalPlanQual against the latest row version using THIS
+            -- select's qualifiers. Without the predicate here the only
+            -- qualifier is the id membership test, which still matches, so
+            -- the loser of the race re-claims and re-delivers the row --
+            -- breaking exactly-once into double delivery. Repeating the
+            -- eligibility predicate makes EvalPlanQual exclude the row whose
+            -- visible_after was just bumped into the future by the winner.
+            and visible_after <= $1
+            and (status = 'PENDING' or status = 'PROCESSING')
             for update skip locked
        )
        update event_outbox

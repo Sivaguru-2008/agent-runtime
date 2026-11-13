@@ -1,0 +1,28 @@
+{
+  "phase": "crash",
+  "pid": 9996,
+  "scorer": "lexical-offline",
+  "mode": "semantic",
+  "crashPoint": "after_local_commit",
+  "reachedCrashPoint": true,
+  "events": [
+    {
+      "type": "ESCALATED",
+      "tool": "wire_money",
+      "operationId": "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e",
+      "suspectOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 0.75,
+      "m": 1,
+      "pid": 9996
+    },
+    {
+      "type": "COMMITTED",
+      "tool": "wire_money",
+      "operationId": "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e",
+      "pid": 9996
+    }
+  ],
+  "judgeCalls": 0,
+  "judgeTokens": 0,
+  "judgeLatencyMs": 0
+}

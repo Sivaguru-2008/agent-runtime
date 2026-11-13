@@ -1,0 +1,5 @@
+Retrying LLM agents paraphrase irreversible calls, so content hashes miss duplicates.
+A schema-fixed certifier and refuter leave only a residual for an LLM judge.
+A conformal rule on the max over m candidates bounds silent wrong suppression by α.
+The bound needs a jurisdiction-matched pool; a wider pool hides its own violation.
+Refining the schema shrinks the calibration budget: an exact refinement dilemma.

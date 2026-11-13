@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-08-19T03:36:28.576Z",
+  "pairs": 570,
+  "models": {
+    "openai_gpt_oss_120b": {
+      "model": "openai/gpt-oss-120b",
+      "family": "gpt-oss",
+      "calls": 10,
+      "meanCallLatencyMs": 1766,
+      "inputTokens": 10378,
+      "outputTokens": 6363,
+      "batchSize": 6,
+      "temperature": 0,
+      "scoredPairs": 570,
+      "abstentions": 0,
+      "parse": {
+        "batchRetries": 0,
+        "transportFailures": 0,
+        "byStatus": {
+          "ok": 55,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousZeroOne": 0
+      }
+    }
+  }
+}

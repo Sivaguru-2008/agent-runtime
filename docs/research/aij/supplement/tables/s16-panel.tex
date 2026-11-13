@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Model panel (Channel M), preregistered collection: agreement with the construction per stratum over 117 fully annotated items. A stratum is contested when the interval's upper bound falls below 0.80. Stratum names follow the main text; the extension-corpus attack categories are pooled with the corpus category of the same kind.}\label{tab:s16a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrll@{}}
+\toprule
+Stratum & $n$ & agreement with construction & contested \\
+\midrule
+mechanical reformat (S1) & 12 & 100.0\%~[75.8--100.0] & no \\
+paraphrase (S2) & 10 & 100.0\%~[72.2--100.0] & no \\
+loose-schema value rewrite (S3) & 12 & 100.0\%~[75.8--100.0] & no \\
+adversarial paraphrase (S4) & 12 & 100.0\%~[75.8--100.0] & no \\
+near-miss field mutation (D1) & 14 & 92.9\%~[68.5--98.7] & no \\
+legitimate repeats (D2) & 12 & 50.0\%~[25.4--74.6] & yes \\
+hand-specified semantic difference (D3) & 8 & 87.5\%~[52.9--97.8] & no \\
+typed-field injection (D4a) & 12 & 100.0\%~[75.8--100.0] & no \\
+prose-only injection (D4b) & 11 & 45.5\%~[21.3--72.0] & yes \\
+encoding-level attack & 11 & 100.0\%~[74.1--100.0] & no \\
+mis-declared field policy & 3 & 100.0\%~[43.9--100.0] & no \\
+\bottomrule
+\end{tabular}}
+\end{table}

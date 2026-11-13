@@ -11,6 +11,9 @@ coverage/
 
 *.log
 .logs/
+_dev*.log
+_dev*.out.log
+_dev*.err.log
 
 *.tsbuildinfo
 
@@ -44,3 +47,21 @@ out/
 .pnpm-store/
 .yarn/
 .pnp.*
+
+# Research paper binaries and draft files (large — keep source in docs/research/)
+*.docx
+effect-identity-v2*
+how --stat *
+
+# Local scratch / temp work
+scratch/
+
+# Compiled LaTeX artifacts (keep .tex source, not build outputs)
+*.aux
+*.bbl
+*.blg
+*.out
+*.spl
+
+# Env helper text file (contains local-only DB config)
+apps/api/.env.txt

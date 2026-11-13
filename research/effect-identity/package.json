@@ -1,0 +1,17 @@
+{
+  "name": "effect-identity-research",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Research apparatus for the Semantic Effect Identity paper: layered identity (canonical core + conformally calibrated semantic layer + auditable escalation), paraphrase/adversarial-retry corpus, and experiments.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "corpus": "node src/corpus/generate.js",
+    "score": "node src/experiments/score.js",
+    "experiments": "node src/experiments/run.js",
+    "crash-replay": "node src/experiments/crashReplay.js"
+  }
+}

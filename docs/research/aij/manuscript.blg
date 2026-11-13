@@ -1,0 +1,59 @@
+This is BibTeX, Version 0.99e
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: manuscript.aux
+Reallocating 'name_of_file' (item size: 1) to 15 items.
+The style file: elsarticle-num.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--empty pages in yao2023react
+Warning--empty pages in schick2023toolformer
+Warning--empty pages in zheng2023judge
+Warning--empty pages in gill2025meancache
+Warning--empty pages in yuan2024rjudge
+Warning--empty pages in ruan2024toolemu
+Warning--empty pages in debenedetti2024agentdojo
+Warning--empty pages in quach2023clm
+Warning--empty pages in ren2023knowno
+Warning--empty pages in angelopoulos2024crc
+You've used 67 entries,
+            2952 wiz_defined-function locations,
+            1073 strings with 19756 characters,
+and the built_in function-call counts, 21566 in all, are:
+= -- 1999
+> -- 916
+< -- 10
++ -- 350
+- -- 283
+* -- 1581
+:= -- 2883
+add.period$ -- 116
+call.type$ -- 67
+change.case$ -- 99
+chr.to.int$ -- 0
+cite$ -- 77
+duplicate$ -- 644
+empty$ -- 2400
+format.name$ -- 329
+if$ -- 5583
+int.to.chr$ -- 0
+int.to.str$ -- 67
+missing$ -- 45
+newline$ -- 259
+num.names$ -- 67
+pop$ -- 512
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 1454
+stack$ -- 0
+substring$ -- 734
+swap$ -- 214
+text.length$ -- 10
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 10
+while$ -- 124
+width$ -- 69
+write$ -- 663
+(There were 10 warnings)

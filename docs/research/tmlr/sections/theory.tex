@@ -1,0 +1,49 @@
+\section{Analysis}\label{sec:theory}
+
+The tools are standard---split-conformal calibration, the union bound, order statistics---and so are most of the arguments. What the section establishes is what their composition guarantees to an agent deciding under irreversibility, and under which conditions. Assumptions are numbered as in Table~\ref{tab:assumptions} (Appendix~\ref{app:extra}): A2 and A5/A5$'$ make the decidable layers sound; A6 is the statistical assumption below; A1--A4 and A7 concern storage and scheduling and are needed only for fence-level at-most-once (Appendix~\ref{app:guarantees}).
+
+\begin{proposition}[Decidable layers]\label{prop:sound}
+Under A2 (pure canonicalisation, collision-free hash) and A5, every certifier suppression is correct. Under A5$'$, no judge output can suppress a request whose declared typed fields differ from those of every committed effect.
+\end{proposition}
+
+\subsection{A bound on the deployed statistic}\label{sec:bound}
+
+A pairwise bound $P(s_i>\hat t)\le\alpha$ does not control $P(\max_i s_i>\hat t)$: thresholding the maximum of $m$ scores gives the fence $m$ chances to cross.
+
+\begin{theorem}[Multiplicity-corrected wrong-suppression bound]\label{thm:bound}
+Let the pool be drawn from the rule's jurisdiction (Definition~\ref{def:jurisdiction}) and $\thi(m)$ be given by Eq.~\eqref{eq:thi}. Suppose (A6) that, conditionally on $m$, the judge score of any comparison between a request and a candidate denoting a different act is exchangeable with the pool. Then for every request $x$ distinct from every member of its candidate set $C$, $|C|=m$,
+\[ P\big(S^\ast(x,C)>\thi(m)\big)\le\alpha \]
+for every $m\ge0$, with no assumption on the score distribution or on the dependence among the $m$ comparisons.
+\end{theorem}
+
+\begin{proof}
+Condition on $m$. If $m=0$ or $\thi(m)=+\infty$ the probability is 0. Otherwise let $\beta=\alpha/m$ and $k=\lceil(n+1)(1-\beta)\rceil\le n$. For each candidate $c_i$, its score $s'_i$ is a distinct-pair score, so by A6 its rank among $s_1,\dots,s_n,s'_i$ is uniform (ties broken at random), and $s'_i>s_{(k)}$ requires rank at least $k+1$: $P(s'_i>s_{(k)})\le(n+1-k)/(n+1)\le\beta$. The union bound, which needs no independence, gives $P(\max_is'_i>s_{(k)})\le m\beta=\alpha$. Abstentions only remove candidates from the maximum while $\thi$ uses the full $m$.
+\end{proof}
+
+The probability is joint over the pool and the request, so the bound is \emph{marginal}: a particular pool can exceed $\alpha$, and nothing is claimed under distribution shift, including injection. Two conditions make it fragile in practice, and both are measured in Section~\ref{sec:results}. First, \emph{jurisdiction matching}: A6 compares the pool with the scores the deployed rule thresholds, which the layers in front of the judge decide. A pool drawn from a wider population satisfies A6 only by coincidence; if the extra pairs score lower, the threshold falls and the bound fails while the whole-split rate still looks acceptable. Second, \emph{a stationary judge}: A6 needs the pool and the deployed comparisons to be scored by the same process. A judge whose scores vary from call to call still satisfies it if that variation affects pool and test pairs alike, but then the realised rate of any single scoring run is itself a random draw.
+
+\subsection{The calibration budget and the refinement dilemma}\label{sec:dilemma}
+
+\begin{proposition}[Calibration budget; refinement dilemma]\label{prop:dilemma}
+For pool size $n$ and level $\alpha$: (a) $\thi(m)$ is finite iff $m\le\alpha(n+1)$, so the largest certifiable candidate-set size is $m^\ast=\lfloor\alpha(n+1)\rfloor$; (b) when finite, $\thi(m)$ is the $\rho$-th largest pool score with $\rho=\lfloor(n+1)\alpha/m\rfloor$; (c) if $(\kappa',\sigma')$ refines $(\kappa,\sigma)$ on the same calibration split, the refined pool is a sub-multiset of the original, so $n'\le n$, $m^{\ast\prime}\le m^\ast$ and $\rho'\le\rho$.
+\end{proposition}
+
+At $\alpha=0.05$ and $m=1$ the declared pool of the primary judge ($n=142$) places $\thi$ at the 7th largest score, the refined pool ($n=49$) at the 2nd largest, and any pool with $n\le18$ at $+\infty$. Whether the refined threshold is also numerically higher depends on whether the judge scores the removed pairs lower than those that remain (Section~\ref{sec:res-refinement}). Demanding validity within each kind of difference is a second refinement, of the calibration population rather than of the schema, and pays the same price:
+
+\begin{corollary}[Class-conditional budget]\label{cor:mondrian}
+Partition the jurisdiction into classes $c=1,\dots,K$ by a function of the request, with $n_c$ pool scores in class $c$, and let $t_c(m)$ be Eq.~\eqref{eq:thi} on the class-$c$ pool. (a) If A6 holds within each class, $P(S^\ast>t_c(m)\mid c)\le\alpha$ for every $c$. (b) Every class is certifiable at $m$ iff $\min_cn_c\ge\lceil m/\alpha\rceil-1$, which requires $n\ge K(\lceil m/\alpha\rceil-1)$. (c) If the class is not observable when the fence decides, thresholding at $\max_ct_c(m)$ satisfies (a) for every class simultaneously.
+\end{corollary}
+
+\subsection{The standard bound is attained}\label{sec:tight}
+
+The union bound is classically sharp when nothing is known about the dependence among events \citep{frechet1935,ruschendorf1982maxsums,galambos1996bonferroni}; sharper bounds need pairwise intersection probabilities \citep{hunter1976union,worsley1982bonferroni} that a fence does not have, and Bonferroni merging is precise under arbitrary dependence \citep{vovk2020averaging,vovk2022admissible}. The narrower question is whether that worst case is reachable by the \emph{deployed} statistic under A6, and whether any rule a fence can audit does better. Scale-free rules---those that commute with every increasing rescaling of the judge's uncalibrated scores---are exactly the order-statistic thresholds (Lemma~\ref{lem:scalefree}, a characterisation of a known type \citep{ovchinnikov1997invariant,marichal2002order}).
+
+\begin{theorem}[The standard bound is attained by the deployed statistic]\label{thm:tight}
+Let $\mathcal{Q}_{n,m}$ be the laws under which, for each $i$, the pool and $s'_i$ are $n+1$ i.i.d.\ continuous draws, with arbitrary dependence among $s'_1,\dots,s'_m$ (every such law satisfies A6). For every rank $k$, $\sup_{\mathcal{Q}_{n,m}}P(\max_is'_i>s_{(k)})=\mathbb{E}[\min\{1,mB\}]$ with $B\sim\mathrm{Beta}(n+1-k,k)$, and the supremum is attained.
+\end{theorem}
+
+\begin{corollary}[What cannot be improved]\label{cor:tight}
+Over $\mathcal{Q}_{n,m}$: (a) no constant below $\alpha$ bounds wrong suppression for all pool sizes; (b) the Bonferroni level $\alpha/m$ is the largest per-candidate level valid for every pool size; (c) beyond the budget ($m>\alpha(n+1)$) the most conservative finite threshold, the pool maximum, has worst case exactly $\frac{m}{n+1}\big(1-(1-\frac1m)^{n+1}\big)$, which exceeds $\alpha$ for every pool with $n+1<4.8\times10^8$ at $\alpha=0.05$ (the margin is $\delta_{0.05}<1.1\times10^{-10}$), so switching semantic suppression off beyond the budget is forced rather than conservative.
+\end{corollary}
+
+For every configuration in this paper the gap between worst case and bound is below $10^{-10}$ (4.895\% for the declared pool, 4.000\% for the refined pool, 4.975\% at $n=200$ for $m=1,2,5,10$), and one rank lower the worst case already exceeds $\alpha$ (5.594\% and 6.000\%). Under the attaining law an uncorrected threshold suppresses 49.7\% of distinct requests at $m=10$ and 99.9\% at $m=50$, against 38.3\% and 89.0\% in our i.i.d.\ simulation, where the corrected rule gives 3.7\% at $m=10$. Proofs and the numerical checks (a direct simulation agrees with the exact values in all eight configurations, the budget condition holds with no exception up to $n+1=10^6$, and the equality in (c) agrees with the general rank-$k$ computation to within $10^{-12}$ over 4,000 pairs $(n,m)$ and agrees in all six budget configurations by simulation) are in Appendices~\ref{app:proofs} and~\ref{app:s21}. The result concerns deterministic rules; a coin-tossing rule beyond the budget is valid but cannot be audited.

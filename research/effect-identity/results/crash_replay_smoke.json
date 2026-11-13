@@ -1,0 +1,2250 @@
+{
+  "generatedAt": "2026-08-15T10:16:02.059Z",
+  "live": false,
+  "nTrials": 16,
+  "judge": "lexical-offline",
+  "judgeFamily": "llama",
+  "paraphrasePool": {
+    "generator": "handwritten",
+    "family": "handwritten",
+    "size": 6,
+    "rejected": 0
+  },
+  "crossFamily": true,
+  "thresholds": {
+    "tHi": 0.9,
+    "tLo": 0.6499999999999999,
+    "source": "layered_lexical_alpha_0.05",
+    "judge": "llama-3.3-70b-versatile"
+  },
+  "crashPoints": [
+    "before_fence",
+    "after_L0",
+    "after_witness",
+    "after_judge",
+    "before_external_effect",
+    "during_external_commit_window",
+    "after_external_effect_before_local_commit",
+    "after_local_commit"
+  ],
+  "commitWindowPoints": [
+    "during_external_commit_window",
+    "after_external_effect_before_local_commit"
+  ],
+  "byCrashPoint": {
+    "before_fence": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "doubleFireRate": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "meanWiredUSD": 1170,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_L0": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "doubleFireRate": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "meanWiredUSD": 1170,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_witness": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_judge": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "before_external_effect": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 2,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "crashPointReached": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "pendingOrphanTrials": 1,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "during_external_commit_window": {
+      "isCommitWindow": true,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 2,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "pendingOrphanTrials": 2,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_external_effect_before_local_commit": {
+      "isCommitWindow": true,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 2,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "pendingOrphanTrials": 2,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    },
+    "after_local_commit": {
+      "isCommitWindow": false,
+      "syntactic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 2340,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      },
+      "semantic": {
+        "nTrials": 2,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1950,
+        "crashPointReached": {
+          "value": 1,
+          "successes": 2,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.34238022750665303,
+            "hi": 1
+          }
+        },
+        "suppressionTrials": {
+          "value": 0.5,
+          "successes": 1,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.09453120573423074,
+            "hi": 0.9054687942657693
+          }
+        },
+        "windowSuspectFlagged": {
+          "value": 0,
+          "successes": 0,
+          "n": 2,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.6576197724933469
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 1,
+        "meanJudgeCalls": 0,
+        "meanJudgeTokens": 0
+      }
+    }
+  },
+  "overall": {
+    "syntactic": {
+      "nTrials": 16,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 16,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.1936076805344365
+        }
+      },
+      "meanWiredUSD": 2047.5,
+      "totalWiredUSD": 32760,
+      "windowSuspectFlagged": {
+        "value": 0,
+        "successes": 0,
+        "n": 16,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.1936076805344365
+        }
+      }
+    },
+    "semantic": {
+      "nTrials": 16,
+      "exactlyOnceRate": {
+        "value": 0.125,
+        "successes": 2,
+        "n": 16,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.03497748774324047,
+          "hi": 0.36022827265758695
+        }
+      },
+      "meanWiredUSD": 1706.25,
+      "totalWiredUSD": 27300,
+      "windowSuspectFlagged": {
+        "value": 0.3125,
+        "successes": 5,
+        "n": 16,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.14164643854782039,
+          "hi": 0.5559564416525933
+        }
+      }
+    }
+  },
+  "defensibleOnly": {
+    "syntactic": {
+      "nTrials": 12,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.24249400665524085
+        }
+      },
+      "meanWiredUSD": 1950,
+      "totalWiredUSD": 23400,
+      "windowSuspectFlagged": {
+        "value": 0,
+        "successes": 0,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.24249400665524085
+        }
+      }
+    },
+    "semantic": {
+      "nTrials": 12,
+      "exactlyOnceRate": {
+        "value": 0.16666666666666666,
+        "successes": 2,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.04696514218385378,
+          "hi": 0.4480308622529734
+        }
+      },
+      "meanWiredUSD": 1495,
+      "totalWiredUSD": 17940,
+      "windowSuspectFlagged": {
+        "value": 0.08333333333333333,
+        "successes": 1,
+        "n": 12,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.014865094404917095,
+          "hi": 0.35387991114111694
+        }
+      }
+    }
+  },
+  "commitWindowOnly": {
+    "syntactic": {
+      "nTrials": 4,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 4,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.4898908364545973
+        }
+      },
+      "meanWiredUSD": 2340,
+      "totalWiredUSD": 9360,
+      "windowSuspectFlagged": {
+        "value": 0,
+        "successes": 0,
+        "n": 4,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.4898908364545973
+        }
+      }
+    },
+    "semantic": {
+      "nTrials": 4,
+      "exactlyOnceRate": {
+        "value": 0,
+        "successes": 0,
+        "n": 4,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.4898908364545973
+        }
+      },
+      "meanWiredUSD": 2340,
+      "totalWiredUSD": 9360,
+      "windowSuspectFlagged": {
+        "value": 1,
+        "successes": 4,
+        "n": 4,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.5101091635454027,
+          "hi": 1
+        }
+      }
+    }
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 25188,
+            "crash": 27736,
+            "replay": 4140
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 25580,
+            "crash": 10772,
+            "replay": 23284
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 16988,
+            "crash": 26308,
+            "replay": 14076
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 10484,
+            "crash": 26040,
+            "replay": 8952
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "paraphraseA": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 12944,
+            "crash": 32924,
+            "replay": 33188
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 22000,
+            "crash": 26356,
+            "replay": 7992
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "paraphraseA": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 31356,
+            "crash": 33140,
+            "replay": 34476
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 32692,
+            "crash": 30924,
+            "replay": 17300
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 4,
+      "paraphraseA": {
+        "amount_text": "seven hundred and eighty USD",
+        "beneficiary_text": "MARLOW-FREIGHT",
+        "reference": "88213 shipment"
+      },
+      "paraphraseB": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 5740,
+            "crash": 29796,
+            "replay": 6184
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 32620,
+            "crash": 32952,
+            "replay": 6008
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 5,
+      "paraphraseA": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 12340,
+            "crash": 31440,
+            "replay": 21576
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 26200,
+            "crash": 14448,
+            "replay": 26912
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 6,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 27592,
+            "crash": 29600,
+            "replay": 4016
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 10868,
+            "crash": 3788,
+            "replay": 31152
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 7,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred and eighty USD",
+        "beneficiary_text": "MARLOW-FREIGHT",
+        "reference": "88213 shipment"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33052,
+            "crash": 13272,
+            "replay": 31020
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 1316,
+            "crash": 23300,
+            "replay": 21140
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 8,
+      "paraphraseA": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33120,
+            "crash": 31748,
+            "replay": 25504
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 33196,
+            "crash": 13924,
+            "replay": 34528
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 9,
+      "paraphraseA": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 25136,
+            "crash": 27324,
+            "replay": 33544
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 32284,
+            "crash": 25816,
+            "replay": 8152
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": true,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 10,
+      "paraphraseA": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 30032,
+            "crash": 3212,
+            "replay": 21392
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 27072,
+            "crash": 21964,
+            "replay": 1244
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 11,
+      "paraphraseA": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": false,
+          "pids": {
+            "seed": 31188,
+            "crash": 6280,
+            "replay": 31816
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 20060,
+            "crash": 28828,
+            "replay": 28752
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 12,
+      "paraphraseA": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 4508,
+            "crash": 30852,
+            "replay": 3272
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 16496,
+            "crash": 2600,
+            "replay": 34808
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 13,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 792,
+            "crash": 18324,
+            "replay": 21744
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 956,
+            "crash": 23236,
+            "replay": 13380
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 14,
+      "paraphraseA": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 17288,
+            "crash": 27932,
+            "replay": 17100
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 12080,
+            "crash": 23284,
+            "replay": 16988
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": true,
+          "pendingOrphans": 1,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    },
+    {
+      "trial": 15,
+      "paraphraseA": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "paraphraseB": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.9,
+        "tLo": 0.6499999999999999
+      },
+      "judgeModel": "llama-3.3-70b-versatile",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 16840,
+            "crash": 13864,
+            "replay": 17748
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": false,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "lexical-offline",
+          "reachedCrashPoint": true,
+          "pids": {
+            "seed": 30664,
+            "crash": 33468,
+            "replay": 34448
+          },
+          "wiresSent": 3,
+          "totalWiredUSD": 2340,
+          "receiptsSent": 1,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalated": true,
+          "windowSuspectFlagged": false,
+          "pendingOrphans": 0,
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        }
+      }
+    }
+  ]
+}

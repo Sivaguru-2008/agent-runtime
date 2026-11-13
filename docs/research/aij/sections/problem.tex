@@ -1,0 +1,88 @@
+\section{Problem formulation}\label{sec:problem}
+
+\subsection{System model and terminology}\label{sec:terms}
+
+A \emph{logical run} carries an identifier $r$ chosen by the application and reused across every retry, crash and replay of that run. Within a run, an agent emits \emph{requests} $c=(t,x)$: a tool $t$ and a structured input $x\in X_t$. A tool is \emph{irreversible} if executing it twice for one intended action is a defect (a charge, a wire, an email, a ticket); only irreversible tools are fenced. Executing a request produces an \emph{effect} and a \emph{response}, and the fence records a \emph{commit row} for each executed request in a durable log. Table~\ref{tab:terms} fixes the vocabulary.
+
+\begin{table}[!tbp]
+\centering\small
+\caption{Terminology. Each term is used only in the sense given here.}\label{tab:terms}
+\begin{tabularx}{\linewidth}{@{}p{3.8cm}X@{}}
+\toprule
+Term & Meaning \\
+\midrule
+operation identifier & the content address $\mathit{op}=H(r\,\|\,t\,\|\,H(\kappa_t(x)))$ of a request \\
+committed effect & an executed request whose commit row is in the durable log of run $r$ \\
+effect identity & ground-truth sameness of intended acts, $x\approx_t x'$ (Definition~\ref{def:identity}) \\
+duplicate & a request $x$ with $x\approx_t c$ for some committed effect $c$ \\
+candidate & a committed effect of $(r,t)$ that survives the refuter; $C$ is the candidate set and $m=|C|$ \\
+certifier / refuter & a decidable relation that proves sameness / difference (Definitions~\ref{def:certifier}--\ref{def:refuter}) \\
+residual & pairs that neither the certifier nor the refuter settles (Definition~\ref{def:residual}) \\
+judge & a stochastic scorer $J(t,x,x')\in[0,1]$, here an LLM; never trusted as a probability \\
+calibration pool & judge scores of distinct pairs drawn from the deciding rule's jurisdiction (Definition~\ref{def:jurisdiction}) \\
+wrong suppression & suppressing a request that is distinct from every committed effect (Definition~\ref{def:errors}) \\
+at-most-once & fence-level commitment of each recognised effect at most once (guarantee B) \\
+exactly-once & external application of each intended act exactly once (guarantee C); never used unqualified \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Ground-truth identity}
+
+Let $A_t$ be the unobservable space of intended actions of tool $t$ and $\llbracket\cdot\rrbracket_t:X_t\to A_t$ map an input to the act it denotes. The agent, and any adversary, control $x$; the denotation is fixed by the world.
+
+\begin{definition}[Effect identity]\label{def:identity}
+$x\approx_t x'$ if and only if $\llbracket x\rrbracket_t=\llbracket x'\rrbracket_t$.
+\end{definition}
+
+Corpus construction and annotation apply an operational criterion phrased in the vocabulary of the loss.
+
+\begin{definition}[Operational identity test]\label{def:operational}
+A pair counts as the same act if, had the fence already committed $x'$ and then silently returned the recorded response of $x'$ in place of executing $x$, nothing the world was owed would fail to happen; it counts as different if that substitution would drop a payment, message, record or other owed effect.
+\end{definition}
+
+\begin{proposition}\label{prop:equivalence}
+If every input denotes exactly one atomic act and the recorded response of an executed request is determined by the act it performed, the operational test coincides with Definition~\ref{def:identity} and is therefore an equivalence relation.
+\end{proposition}
+
+The proof is in \ref{app:proofs}; the conditions hold for every tool evaluated here. For calls that bundle several effects the test can be asymmetric, and only Proposition~\ref{prop:lattice} uses the equivalence structure.
+
+\subsection{The fence and its two errors}
+
+\begin{definition}[Fence]\label{def:fence}
+Given a request $(t,x)$ in run $r$ and the set $\mathcal{C}_{r,t}$ of effects already committed for $(r,t)$, a fence returns \SUP{} (return the recorded response of a committed effect without executing), \EXE{} (execute and commit), or \ESC{} (execute, commit, and durably flag the request as a suspected duplicate).
+\end{definition}
+
+\begin{definition}[Errors]\label{def:errors}
+The \emph{wrong-suppression} event is $\{\text{decision}=\SUP\}\cap\{x\not\approx_t c\ \text{for every } c\in\mathcal{C}_{r,t}\}$. The \emph{duplicate-escape} event is $\{\text{decision}\in\{\EXE,\ESC\}\}\cap\{x\approx_t c\ \text{for some } c\in\mathcal{C}_{r,t}\}$; it is \emph{silent} if the decision is \EXE{} and \emph{flagged} if it is \ESC.
+\end{definition}
+
+We report wrong suppression $\WS=P(\SUP\mid\text{distinct})$, deduplication $P(\SUP\mid\text{duplicate})$, silent escape $P(\EXE\mid\text{duplicate})$ and friction $P(\ESC\mid\text{distinct})$. The design objective is a strict priority,
+\begin{equation}\label{eq:objective}
+\text{minimise } P(\EXE\mid\text{duplicate}) \quad\text{subject to}\quad \WS\le\alpha ,
+\end{equation}
+because wrong suppression is undetectable when it happens, a silent escape is not, and a flagged escape is recoverable by reconciliation. Accuracy and F1 weight the two errors symmetrically and are not reported.
+
+When a duplicate is suppressed the fence returns the response of the matched candidate. If $m\ge2$ and a distinct candidate outscores the true match, no owed act is dropped but the returned response belongs to a different act. This \emph{response-attribution error} is not a wrong suppression; it cannot occur when $m\le1$, the regime of our corpus, and we measure it on multi-candidate units in Section~\ref{sec:res-bound}.
+
+\subsection{Threat model}\label{sec:threat}
+
+Duplication arises from retries, crashes and paraphrasing replays under the same run identifier. The adversary injects text into the agent's context---a tool result, a retrieved document, a user-supplied field~\cite{greshake2023injection}---aiming at \emph{forced suppression} (a distinct act silently dropped) or \emph{forced execution} (a duplicate fired twice). It controls request text but neither the declared semantics of typed fields nor the durable log. We assume storage with atomic insert-if-absent; we do not assume reliable networks or the ability to retract an accepted effect.
+
+\subsection{Three guarantees, kept apart}\label{sec:guarantees}
+
+The phrase ``exactly-once'' conflates three distinct system properties that fail independently (Table~\ref{tab:guarantees}): (A) effect-identity recognition, deciding whether two candidate requests denote the same real-world act; (B) fence-level at-most-once commitment, preventing the same recognised effect from committing repeatedly in the durable log; and (C) external exactly-once execution, ensuring an external service realises the intended act exactly once across process crashes. The mechanism establishes a bounded identity-recognition and fence-commitment layer (guarantees A and B); exactly-once external execution (guarantee C) remains outside the mechanism's local contract and requires downstream provider idempotency keys complete for identity (Proposition~\ref{prop:compose}).
+
+\begin{table}[!tbp]
+\centering\small
+\caption{The three guarantees and their status. Assumptions A1--A8 are listed in Table~\ref{tab:assumptions}.}\label{tab:guarantees}
+\begin{tabularx}{\linewidth}{@{}p{3.4cm}Xp{2.2cm}@{}}
+\toprule
+Guarantee & Status in this work & Result \\
+\midrule
+(A) Identity recognition: does the fence decide correctly whether a request and a committed effect denote the same act? & Exact on certified and refuted pairs under A5 and A5$'$. On the residual, wrong suppression is bounded by $\alpha$ for the deployed statistic under A6, marginally over calibration draws. Zero error in both directions is impossible on overlapping score distributions. & Prop.~\ref{prop:sound}, Thm.~\ref{thm:bound}, Prop.~\ref{prop:impossible} \\
+(B) Fence-level at-most-once: given correct identity, does the fence commit each effect at most once? & Holds under A1--A4 and A7 (no concurrent dispatch per identity). Without A7 at most one commit row exists and concurrent duplicates are observable, not prevented. & Prop.~\ref{prop:amo} \\
+(C) External exactly-once: does the provider apply each intended act exactly once, across process death? & \emph{Not provided by the mechanism.} Obtainable only by composition with a provider idempotency key that is paraphrase-invariant and complete for identity (A8, A5$''$). & Props.~\ref{prop:compose}, \ref{prop:structure} \\
+\bottomrule
+\end{tabularx}
+\end{table}

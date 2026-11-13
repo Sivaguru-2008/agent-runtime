@@ -1,0 +1,5368 @@
+{
+  "generatedAt": "2026-08-18T03:02:17.873Z",
+  "live": true,
+  "judge": "openai/gpt-oss-120b",
+  "judgeFamily": "gpt-oss",
+  "projection": "declared",
+  "arms": [
+    "duplicate",
+    "distinct"
+  ],
+  "nTrialsPerArm": 8,
+  "paraphrasePool": {
+    "generator": "llama-3.3-70b-versatile",
+    "family": "llama",
+    "size": 53,
+    "rejected": 2
+  },
+  "crossFamily": true,
+  "thresholds": {
+    "tHi": 0.8,
+    "tLo": 0.8,
+    "nCalDiff": 117,
+    "certifiableM": 5,
+    "source": "residual_calibration:openai_gpt_oss_120b_a0.05_residualOnly"
+  },
+  "crashPoints": [
+    "before_fence",
+    "after_L0",
+    "after_witness",
+    "after_judge",
+    "before_external_effect",
+    "during_external_commit_window",
+    "after_external_effect_before_local_commit",
+    "after_local_commit"
+  ],
+  "commitWindowPoints": [
+    "during_external_commit_window",
+    "after_external_effect_before_local_commit"
+  ],
+  "byArm": {
+    "duplicate": {
+      "byCrashPoint": {
+        "before_fence": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 1,
+            "meanJudgeLatencyMs": 915,
+            "judgeScoreSample": [
+              0.98
+            ]
+          }
+        },
+        "after_L0": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 1,
+            "meanJudgeLatencyMs": 971,
+            "judgeScoreSample": [
+              0.9
+            ]
+          }
+        },
+        "after_witness": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 1,
+            "meanJudgeLatencyMs": 1615,
+            "judgeScoreSample": [
+              0.96
+            ]
+          }
+        },
+        "after_judge": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 1894,
+            "judgeScoreSample": [
+              0.98,
+              0.95
+            ]
+          }
+        },
+        "before_external_effect": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 2058,
+            "judgeScoreSample": [
+              0.95,
+              0.98
+            ]
+          }
+        },
+        "during_external_commit_window": {
+          "isCommitWindow": true,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 2730,
+            "judgeScoreSample": [
+              0.96,
+              0.97
+            ]
+          }
+        },
+        "after_external_effect_before_local_commit": {
+          "isCommitWindow": true,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 3040,
+            "judgeScoreSample": [
+              0.98,
+              0.95
+            ]
+          }
+        },
+        "after_local_commit": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": null,
+            "meanExternalEffects": 1,
+            "totalWiredUSD": 780,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 3364,
+            "judgeScoreSample": [
+              0.95,
+              0.95
+            ]
+          }
+        }
+      },
+      "overall": {
+        "syntactic": {
+          "nTrials": 8,
+          "correctFinalState": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          },
+          "missedLegitimateEffect": null,
+          "meanExternalEffects": 2.625,
+          "totalWiredUSD": 16380,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "pendingOrphanTrials": 3,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 8,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 0,
+          "meanJudgeLatencyMs": 0,
+          "judgeScoreSample": []
+        },
+        "semantic": {
+          "nTrials": 8,
+          "correctFinalState": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "missedLegitimateEffect": null,
+          "meanExternalEffects": 1,
+          "totalWiredUSD": 6240,
+          "suppressionTrials": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "pendingOrphanTrials": 0,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 8,
+          "semanticRetryTrials": 8,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 1.625,
+          "meanJudgeLatencyMs": 2073.375,
+          "judgeScoreSample": [
+            0.98,
+            0.9,
+            0.96,
+            0.98,
+            0.95,
+            0.95,
+            0.98,
+            0.96,
+            0.97,
+            0.98,
+            0.95,
+            0.95,
+            0.95
+          ]
+        }
+      },
+      "outsideWindow": {
+        "syntactic": {
+          "nTrials": 6,
+          "correctFinalState": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 1,
+            "successes": 6,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6096657120978346,
+              "hi": 1
+            }
+          },
+          "missedLegitimateEffect": null,
+          "meanExternalEffects": 2.5,
+          "totalWiredUSD": 11700,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "pendingOrphanTrials": 1,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 6,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 0,
+          "meanJudgeLatencyMs": 0,
+          "judgeScoreSample": []
+        },
+        "semantic": {
+          "nTrials": 6,
+          "correctFinalState": {
+            "value": 1,
+            "successes": 6,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6096657120978346,
+              "hi": 1
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "missedLegitimateEffect": null,
+          "meanExternalEffects": 1,
+          "totalWiredUSD": 4680,
+          "suppressionTrials": {
+            "value": 1,
+            "successes": 6,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6096657120978346,
+              "hi": 1
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "pendingOrphanTrials": 0,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 6,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6096657120978346,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 6,
+          "semanticRetryTrials": 6,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 1.5,
+          "meanJudgeLatencyMs": 1802.8333333333333,
+          "judgeScoreSample": [
+            0.98,
+            0.9,
+            0.96,
+            0.98,
+            0.95,
+            0.95,
+            0.98,
+            0.95,
+            0.95
+          ]
+        }
+      },
+      "insideWindow": {
+        "syntactic": {
+          "nTrials": 2,
+          "correctFinalState": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 1,
+            "successes": 2,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.34238022750665303,
+              "hi": 1
+            }
+          },
+          "missedLegitimateEffect": null,
+          "meanExternalEffects": 3,
+          "totalWiredUSD": 4680,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "pendingOrphanTrials": 2,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 2,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 0,
+          "meanJudgeLatencyMs": 0,
+          "judgeScoreSample": []
+        },
+        "semantic": {
+          "nTrials": 2,
+          "correctFinalState": {
+            "value": 1,
+            "successes": 2,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.34238022750665303,
+              "hi": 1
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "missedLegitimateEffect": null,
+          "meanExternalEffects": 1,
+          "totalWiredUSD": 1560,
+          "suppressionTrials": {
+            "value": 1,
+            "successes": 2,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.34238022750665303,
+              "hi": 1
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "pendingOrphanTrials": 0,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 2,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.34238022750665303,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 2,
+          "semanticRetryTrials": 2,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 2,
+          "meanJudgeLatencyMs": 2885,
+          "judgeScoreSample": [
+            0.96,
+            0.97,
+            0.98,
+            0.95
+          ]
+        }
+      }
+    },
+    "distinct": {
+      "byCrashPoint": {
+        "before_fence": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 1,
+            "meanJudgeLatencyMs": 2426,
+            "judgeScoreSample": [
+              0.05
+            ]
+          }
+        },
+        "after_L0": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 1,
+            "meanJudgeLatencyMs": 938,
+            "judgeScoreSample": [
+              0.05
+            ]
+          }
+        },
+        "after_witness": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 1,
+            "meanJudgeLatencyMs": 2173,
+            "judgeScoreSample": [
+              0.05
+            ]
+          }
+        },
+        "after_judge": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 2615,
+            "judgeScoreSample": [
+              0.05,
+              0.05
+            ]
+          }
+        },
+        "before_external_effect": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 3,
+            "meanJudgeLatencyMs": 2736,
+            "judgeScoreSample": [
+              0.05,
+              0.05
+            ]
+          }
+        },
+        "during_external_commit_window": {
+          "isCommitWindow": true,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 3,
+            "meanJudgeLatencyMs": 3236,
+            "judgeScoreSample": [
+              0.05,
+              0.05
+            ]
+          }
+        },
+        "after_external_effect_before_local_commit": {
+          "isCommitWindow": true,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 1,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 3,
+            "meanJudgeLatencyMs": 2713,
+            "judgeScoreSample": [
+              0.05,
+              0.1
+            ]
+          }
+        },
+        "after_local_commit": {
+          "isCommitWindow": false,
+          "syntactic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 3,
+            "totalWiredUSD": 2340,
+            "suppressionTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "crossProcessSuppressions": 0,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 0,
+            "meanJudgeLatencyMs": 0,
+            "judgeScoreSample": []
+          },
+          "semantic": {
+            "nTrials": 1,
+            "correctFinalState": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "duplicateExternalEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "missedLegitimateEffect": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "meanExternalEffects": 2,
+            "totalWiredUSD": 1560,
+            "suppressionTrials": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "escalationTrials": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "windowFlagged": {
+              "value": 0,
+              "successes": 0,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0,
+                "hi": 0.7934506856227626
+              }
+            },
+            "pendingOrphanTrials": 0,
+            "commitConflictTrials": 0,
+            "atMostOneCommitRowPerAct": {
+              "value": 1,
+              "successes": 1,
+              "n": 1,
+              "basis": "measured",
+              "ci95": {
+                "lo": 0.20654931437723745,
+                "hi": 1
+              }
+            },
+            "crossProcessSuppressions": 1,
+            "semanticRetryTrials": 1,
+            "lexicalRetryTrials": 0,
+            "meanJudgeCalls": 2,
+            "meanJudgeLatencyMs": 2092,
+            "judgeScoreSample": [
+              0.05,
+              0.05,
+              0.95
+            ]
+          }
+        }
+      },
+      "overall": {
+        "syntactic": {
+          "nTrials": 8,
+          "correctFinalState": {
+            "value": 0.375,
+            "successes": 3,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.13684428582359737,
+              "hi": 0.6942576053973728
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "missedLegitimateEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "meanExternalEffects": 2.625,
+          "totalWiredUSD": 16380,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "pendingOrphanTrials": 3,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 0.625,
+            "successes": 5,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.3057423946026273,
+              "hi": 0.8631557141764027
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 8,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 0,
+          "meanJudgeLatencyMs": 0,
+          "judgeScoreSample": []
+        },
+        "semantic": {
+          "nTrials": 8,
+          "correctFinalState": {
+            "value": 0.75,
+            "successes": 6,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.40927543031016883,
+              "hi": 0.9285207872478909
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "missedLegitimateEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "meanExternalEffects": 2.25,
+          "totalWiredUSD": 14040,
+          "suppressionTrials": {
+            "value": 0.125,
+            "successes": 1,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.02241749145005667,
+              "hi": 0.4708881822128535
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "windowFlagged": {
+            "value": 0.125,
+            "successes": 1,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.02241749145005667,
+              "hi": 0.4708881822128535
+            }
+          },
+          "pendingOrphanTrials": 3,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 1,
+          "semanticRetryTrials": 8,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 2,
+          "meanJudgeLatencyMs": 2366.125,
+          "judgeScoreSample": [
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.1,
+            0.05,
+            0.05,
+            0.95
+          ]
+        }
+      },
+      "outsideWindow": {
+        "syntactic": {
+          "nTrials": 6,
+          "correctFinalState": {
+            "value": 0.5,
+            "successes": 3,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.18761630648265054,
+              "hi": 0.8123836935173494
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "missedLegitimateEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "meanExternalEffects": 2.5,
+          "totalWiredUSD": 11700,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "pendingOrphanTrials": 1,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 0.5,
+            "successes": 3,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.18761630648265054,
+              "hi": 0.8123836935173494
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 6,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 0,
+          "meanJudgeLatencyMs": 0,
+          "judgeScoreSample": []
+        },
+        "semantic": {
+          "nTrials": 6,
+          "correctFinalState": {
+            "value": 1,
+            "successes": 6,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6096657120978346,
+              "hi": 1
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "missedLegitimateEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "meanExternalEffects": 2,
+          "totalWiredUSD": 9360,
+          "suppressionTrials": {
+            "value": 0.16666666666666666,
+            "successes": 1,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.03005336974830658,
+              "hi": 0.5635028221864702
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.39033428790216534
+            }
+          },
+          "windowFlagged": {
+            "value": 0.16666666666666666,
+            "successes": 1,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.03005336974830658,
+              "hi": 0.5635028221864702
+            }
+          },
+          "pendingOrphanTrials": 1,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 6,
+            "n": 6,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6096657120978346,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 1,
+          "semanticRetryTrials": 6,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 1.6666666666666667,
+          "meanJudgeLatencyMs": 2163.3333333333335,
+          "judgeScoreSample": [
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.05,
+            0.95
+          ]
+        }
+      },
+      "insideWindow": {
+        "syntactic": {
+          "nTrials": 2,
+          "correctFinalState": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "missedLegitimateEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "meanExternalEffects": 3,
+          "totalWiredUSD": 4680,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "pendingOrphanTrials": 2,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 2,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.34238022750665303,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 2,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 0,
+          "meanJudgeLatencyMs": 0,
+          "judgeScoreSample": []
+        },
+        "semantic": {
+          "nTrials": 2,
+          "correctFinalState": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "duplicateExternalEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "missedLegitimateEffect": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "meanExternalEffects": 3,
+          "totalWiredUSD": 4680,
+          "suppressionTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "escalationTrials": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "windowFlagged": {
+            "value": 0,
+            "successes": 0,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.6576197724933469
+            }
+          },
+          "pendingOrphanTrials": 2,
+          "commitConflictTrials": 0,
+          "atMostOneCommitRowPerAct": {
+            "value": 1,
+            "successes": 2,
+            "n": 2,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.34238022750665303,
+              "hi": 1
+            }
+          },
+          "crossProcessSuppressions": 0,
+          "semanticRetryTrials": 2,
+          "lexicalRetryTrials": 0,
+          "meanJudgeCalls": 3,
+          "meanJudgeLatencyMs": 2974.5,
+          "judgeScoreSample": [
+            0.05,
+            0.05,
+            0.05,
+            0.1
+          ]
+        }
+      }
+    }
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment#88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "$780",
+        "beneficiary_text": "the Marlow Freight company",
+        "reference": "shipment no. 88213 — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 2
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.98
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.98
+          ],
+          "retryClasses": [
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 1,
+          "judgeTokens": 635,
+          "judgeLatencyMs": 915
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "Seven Hundred And Eighty Dollars",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment #88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Group",
+        "reference": "pertaining to shipment 88213 — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 2
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.9
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.9
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 1,
+          "judgeTokens": 650,
+          "judgeLatencyMs": 971
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "$780 US",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "88213 shipment — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 3
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 3,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.96
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.96
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 1,
+          "judgeTokens": 670,
+          "judgeLatencyMs": 1615
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780 USD",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780 US$",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "88213 shipment — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 3
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 3,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.98,
+            0.95
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 2,
+          "judgeTokens": 1373,
+          "judgeLatencyMs": 1894
+        }
+      }
+    },
+    {
+      "trial": 4,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "relating to shipment 88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "$780",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "related to shipment 88213 — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 2
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 2,
+          "suppressionLayers": [
+            "L1",
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95,
+            0.98
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.95,
+            0.98
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 2,
+          "judgeTokens": 1331,
+          "judgeLatencyMs": 2058
+        }
+      }
+    },
+    {
+      "trial": 5,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780.00 US Dollars",
+        "beneficiary_text": "Marlow Freight Ltd.",
+        "reference": "Shipment No. 88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780 us dollars",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "re: shipment 88213 — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 3
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 2,
+          "suppressionLayers": [
+            "L1",
+            "L1"
+          ],
+          "suppressionScores": [
+            0.96,
+            0.97
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.96,
+            0.97
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 2,
+          "judgeTokens": 1320,
+          "judgeLatencyMs": 2730
+        }
+      }
+    },
+    {
+      "trial": 6,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780$",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment#88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "Seven Hundred And Eighty Dollars",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment #88213 — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 3
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 2,
+          "suppressionLayers": [
+            "L1",
+            "L1"
+          ],
+          "suppressionScores": [
+            0.98,
+            0.95
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.98,
+            0.95
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 2,
+          "judgeTokens": 1365,
+          "judgeLatencyMs": 3040
+        }
+      }
+    },
+    {
+      "trial": 7,
+      "arm": "duplicate",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "Shipment ID 88213 — installment 1 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780 USD",
+        "beneficiary_text": "Marlow Freight Company",
+        "reference": "for shipment #88213 — installment 1 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act1",
+        "replay": "act1"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 3
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 3,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 1,
+          "externalByAct": {
+            "act1": 1
+          },
+          "totalWiredUSD": 780,
+          "localCommits": 1,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 2,
+          "suppressionLayers": [
+            "L1",
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95,
+            0.95
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.95,
+            0.95
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 2,
+          "judgeTokens": 1343,
+          "judgeLatencyMs": 3364
+        }
+      }
+    },
+    {
+      "trial": 0,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780 dollars us",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "shipment no 88213 — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780 US$",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "88213 shipment — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "before_fence",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05
+          ],
+          "retryClasses": [
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 1,
+          "judgeTokens": 679,
+          "judgeLatencyMs": 2426
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "Marlow Freight Limited",
+        "reference": "88213 shipment payment — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780.00 US Dollars",
+        "beneficiary_text": "Marlow Freight Ltd.",
+        "reference": "Shipment No. 88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "after_L0",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 1,
+          "judgeTokens": 731,
+          "judgeLatencyMs": 938
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "Seven hundred and eighty US dollars",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "88213 — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780 Dollars (United States)",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment Number: 88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "after_witness",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 3,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 1,
+          "judgeTokens": 784,
+          "judgeLatencyMs": 2173
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780 dollars exactly",
+        "beneficiary_text": "Marlow Freight Co",
+        "reference": "covering shipment 88213 — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780.00 USD",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "Related to shipment # 88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "after_judge",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 0,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": false,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 3,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05,
+            0.05
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 2,
+          "judgeTokens": 1511,
+          "judgeLatencyMs": 2615
+        }
+      }
+    },
+    {
+      "trial": 4,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "seven hundred eighty dollars united states",
+        "beneficiary_text": "The Marlow Freight Company",
+        "reference": "shipment number: 88213 — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780.00 USD",
+        "beneficiary_text": "Marlow Freight Corporation",
+        "reference": "Shipment Number:88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "before_external_effect",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": true,
+          "judgeScores": [
+            0.05,
+            0.05
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 3,
+          "judgeTokens": 2073,
+          "judgeLatencyMs": 2736
+        }
+      }
+    },
+    {
+      "trial": 5,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213 — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "780 Dollars (United States)",
+        "beneficiary_text": "Marlow Freight International",
+        "reference": "Shipment Number: 88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "during_external_commit_window",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05,
+            0.05
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 3,
+          "judgeTokens": 2198,
+          "judgeLatencyMs": 3236
+        }
+      }
+    },
+    {
+      "trial": 6,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780 dollars us",
+        "beneficiary_text": "Marlow Freight LLC",
+        "reference": "shipment no 88213 — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow Freight Inc.",
+        "reference": "relating to shipment 88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "after_external_effect_before_local_commit",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 2,
+          "pendingOrphans": 1,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05,
+            0.1
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 3,
+          "judgeTokens": 2121,
+          "judgeLatencyMs": 2713
+        }
+      }
+    },
+    {
+      "trial": 7,
+      "arm": "distinct",
+      "projection": "declared",
+      "seedInput": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      },
+      "crashInput": {
+        "amount_text": "780 usd",
+        "beneficiary_text": "marlow freight",
+        "reference": "88213 shipment — installment 2 of 2"
+      },
+      "replayInput": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213 — installment 2 of 2"
+      },
+      "actOf": {
+        "seed": "act1",
+        "crash": "act2",
+        "replay": "act2"
+      },
+      "crashPoint": "after_local_commit",
+      "thresholds": {
+        "tHi": 0.8,
+        "tLo": 0.8
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "windowGuard": true,
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 3,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 2
+          },
+          "totalWiredUSD": 2340,
+          "localCommits": 3,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 0,
+          "suppressionLayers": [],
+          "suppressionScores": [],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": false,
+          "judgeCalls": 0,
+          "judgeTokens": 0,
+          "judgeLatencyMs": 0
+        },
+        "semantic": {
+          "mode": "semantic",
+          "exitCodes": {
+            "seed": 0,
+            "crash": 1,
+            "replay": 0
+          },
+          "scorer": "groq:openai/gpt-oss-120b",
+          "reachedCrashPoint": true,
+          "externalEffects": 2,
+          "externalByAct": {
+            "act1": 1,
+            "act2": 1
+          },
+          "totalWiredUSD": 1560,
+          "localCommits": 2,
+          "pendingOrphans": 0,
+          "commitConflicts": 0,
+          "suppressions": 1,
+          "suppressionLayers": [
+            "L1"
+          ],
+          "suppressionScores": [
+            0.95
+          ],
+          "escalations": 0,
+          "escalationScores": [],
+          "windowSuspectFlagged": false,
+          "judgeScores": [
+            0.05,
+            0.05,
+            0.95
+          ],
+          "retryClasses": [
+            "crash:semantic",
+            "replay:semantic"
+          ],
+          "crossProcess": true,
+          "judgeCalls": 2,
+          "judgeTokens": 1587,
+          "judgeLatencyMs": 2092
+        }
+      }
+    }
+  ]
+}

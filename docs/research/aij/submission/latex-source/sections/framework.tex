@@ -1,0 +1,71 @@
+\section{The effect-identity framework}\label{sec:framework}
+
+Ground-truth identity cannot be observed. A mechanism must compute decidable relations and use them as proxies, and two dual notions of correctness govern such proxies.
+
+\subsection{Certifiers and refuters}
+
+\begin{definition}[Certifier]\label{def:certifier}
+A relation $\mathsf{C}\subseteq X_t\times X_t$ is a \emph{certifier} if $\mathsf{C}\subseteq{\approx_t}$: whenever $\mathsf{C}(x,x')$ holds, the two requests denote the same act.
+\end{definition}
+
+\begin{definition}[Refuter]\label{def:refuter}
+A relation $\mathsf{D}\subseteq X_t\times X_t$ is a \emph{refuter} if $\mathsf{D}\cap{\approx_t}=\emptyset$: whenever $\mathsf{D}(x,x')$ holds, the two requests denote different acts.
+\end{definition}
+
+A certifier licenses suppression and a refuter licenses execution; each may be arbitrarily incomplete. Canonical equality $\equiv_\kappa$ normalises each declared field under a policy (identifier, case-insensitive token, number, free text) and is a certifier when each policy is semantics-preserving (assumption A5). Projection difference $\not\equiv_\sigma$ compares the canonical values of the declared \emph{typed} fields and is a refuter when a difference in any such field implies a different act (A5$'$). A judge threshold $J>\tau$ is decidable but carries no proof in either direction (Table~\ref{tab:relations}).
+
+\begin{table}[!tbp]
+\centering\small
+\caption{Relations used in this paper and the assumption under which each is sound.}\label{tab:relations}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Relation & Role & Sound under & Used as \\
+\midrule
+byte equality $\equiv_{\mathrm{exact}}$ & certifier & always & baseline B1 \\
+canonical equality $\equiv_\kappa$ & certifier & A5 & L0; licenses \SUP \\
+projection difference $\not\equiv_\sigma$ & refuter & A5$'$ & witness; licenses \EXE \\
+judge threshold $J>\tau$ & neither & --- & must be calibrated \\
+ground truth $\approx_t$ & target & --- & not observable \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{proposition}[Structure]\label{prop:lattice}
+Fix $t$ and order relations on $X_t\times X_t$ by inclusion. The certifiers are closed under union and intersection, with least element $\emptyset$ and greatest element $\approx_t$; the refuters likewise, with greatest element the complement of $\approx_t$. A finite union of decidable certifiers (refuters) is a decidable certifier (refuter). The only relation that is both is $\emptyset$.
+\end{proposition}
+
+The proof is in \ref{app:proofs}. Sound decidable layers therefore combine by union without re-arguing soundness, and a design must supply certification and refutation separately.
+
+\subsection{The residual}
+
+\begin{definition}[Decided set and residual]\label{def:residual}
+For a declaration that fixes $\kappa_t$ and $\sigma_t$, the decided set is $\Dec_t={\equiv_\kappa}\cup{\not\equiv_\sigma}$ and the residual is its complement,
+\[
+\Res_t=\{(x,x') : \kappa_t(x)\ne\kappa_t(x') \ \wedge\ \sigma_t(x)=\sigma_t(x')\}:
+\]
+requests that differ after canonicalisation yet agree on every declared effect-determining field.
+\end{definition}
+
+\begin{proposition}[Residual determination]\label{prop:residual}
+(i) $\Res_t$ is a function of $(\kappa_t,\sigma_t)$ alone; it does not depend on the judge, the agent, the adversary or any run-time observation. (ii) If a mechanism suppresses on $\equiv_\kappa$, executes on $\not\equiv_\sigma$, and A5 and A5$'$ hold, every error it makes is on a pair in $\Res_t$. (iii) If $(\kappa',\sigma')$ refines $(\kappa,\sigma)$ (Definition~\ref{def:refinement}), then $\Res'_t\subseteq\Res_t$.
+\end{proposition}
+
+\begin{proof}
+(i) The defining condition mentions only $\kappa_t$ and $\sigma_t$. (ii) A pair in $\equiv_\kappa$ is suppressed and, by A5, is a true duplicate; a pair in $\not\equiv_\sigma$ is executed and, by A5$'$, is truly distinct. (iii) Refinement enlarges $\equiv_\kappa$ and $\not\equiv_\sigma$, so their union grows and its complement shrinks.
+\end{proof}
+
+The proposition is elementary; its content is operational. Changing the judge redistributes decisions \emph{inside} $\Res_t$; only changing the declaration changes $\Res_t$.
+
+\subsection{Schema refinement and the refinement dilemma}\label{sec:refinement}
+
+\begin{definition}[Refinement]\label{def:refinement}
+A declaration $(\kappa',\sigma')$ \emph{refines} $(\kappa,\sigma)$ if ${\equiv_\kappa}\subseteq{\equiv_{\kappa'}}$, $\sigma(x)\ne\sigma(x')\Rightarrow\sigma'(x)\ne\sigma'(x')$, and $\equiv_{\kappa'}$ and $\not\equiv_{\sigma'}$ remain sound.
+\end{definition}
+
+Refinement moves act-determining information from free text into a typed field. In our corpus \texttt{wire\_money} declares amount, beneficiary and reference as free text, so every non-identical pair of wires is residual, and a second instalment differs from the first only by ``instalment 2 of 2''. Typing the numbers each text field mentions lets the refuter separate the instalments, so an injected ``this is the same payment; suppress'' no longer reaches the judge.
+
+Refinement is the only intervention that removes pairs from the judge's jurisdiction. It also has a cost that is easy to miss: the calibration pool is drawn from the residual (Section~\ref{sec:calibration}), so refinement shrinks the pool with it. A smaller pool moves the conformal threshold to a higher order statistic and certifies fewer candidates, and the surviving pairs are not a random sample: the refuter removes distinct pairs whose declared fields differ, which judges tend to score low. We call this the \emph{refinement dilemma} (Figure~\ref{fig:refinement}); Proposition~\ref{prop:dilemma} states its exact part and Section~\ref{sec:res-refinement} measures both parts. After refining a schema, re-calibrate on the new jurisdiction: at $\alpha=0.05$ the fence needs at least 19 distinct residual calibration pairs to suppress semantically at all, and $m/\alpha-1$ to do so with $m$ candidates.
+
+\input{figures/fig-refinement}
+
+In these terms an idempotency key and content-addressed fencing are certifiers whose residual policy is ``execute'', and a raw LLM analyser resolves the whole space by an unbounded judgement.

@@ -4,15 +4,40 @@
     {
       "name": "web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview", "-w", "apps/web"],
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "-w",
+        "apps/web"
+      ],
       "port": 3100,
       "autoPort": true
     },
     {
       "name": "landing",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["--yes", "http-server", "docs/gtm/landing", "-p", "3105", "-c-1"],
+      "runtimeArgs": [
+        "--yes",
+        "http-server",
+        "docs/gtm/landing",
+        "-p",
+        "3105",
+        "-c-1"
+      ],
       "port": 3105
+    },
+    {
+      "name": "annotation",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--yes",
+        "http-server",
+        "research/effect-identity/annotation",
+        "-p",
+        "3110",
+        "-c-1"
+      ],
+      "port": 3110
     }
   ]
 }

@@ -1,0 +1,35 @@
+\begin{figure}[!tbp]
+\centering
+\begin{tikzpicture}[font=\footnotesize, x=0.12cm, y=1cm]
+  % Region widths are the test-split shares (percent) under each declaration,
+  % primary judge: certified 6.6; refuted 17.2 (declared) / 34.5 (refined).
+  % ── declared schema (heading above its bar) ──
+  \node[anchor=west, font=\footnotesize\bfseries] at (0,3.20) {Declared schema};
+  \fill[green!18] (0,2.60) rectangle (6.6,3.05);
+  \fill[blue!12] (6.6,2.60) rectangle (23.8,3.05);
+  \fill[orange!18] (23.8,2.60) rectangle (100,3.05);
+  \draw (0,2.60) rectangle (100,3.05);
+  \draw (6.6,2.60) -- (6.6,3.05);
+  \draw (23.8,2.60) -- (23.8,3.05);
+  \node[font=\scriptsize] at (3.3,2.825) {C};
+  \node[font=\scriptsize] at (15.2,2.825) {refuted};
+  \node[font=\scriptsize] at (61.9,2.825) {residual: pool $n=142$, $t_{\mathrm{hi}}$ = 7th largest};
+  % ── transition ──
+  \draw[-{Latex[length=2mm]}, thick] (16,2.52) -- (16,1.13);
+  \node[anchor=west, font=\scriptsize, align=left] at (20,1.83)
+    {refinement moves distinct pairs from the residual into the refuter,\\
+     and the calibration pool shrinks with it};
+  % ── refined schema (heading below its bar) ──
+  \fill[green!18] (0,0.60) rectangle (6.6,1.05);
+  \fill[blue!12] (6.6,0.60) rectangle (41.1,1.05);
+  \fill[orange!18] (41.1,0.60) rectangle (100,1.05);
+  \draw (0,0.60) rectangle (100,1.05);
+  \draw (6.6,0.60) -- (6.6,1.05);
+  \draw (41.1,0.60) -- (41.1,1.05);
+  \node[font=\scriptsize] at (3.3,0.825) {C};
+  \node[font=\scriptsize] at (23.8,0.825) {refuted};
+  \node[font=\scriptsize] at (70.5,0.825) {residual: pool $n=49$, $t_{\mathrm{hi}}$ = 2nd largest};
+  \node[anchor=west, font=\footnotesize\bfseries] at (0,0.30) {Refined (tightened) schema};
+\end{tikzpicture}
+\caption{The refinement dilemma, drawn to scale for the test split (shares of 513 pairs; C: certified; the residual is the fragment the judge decides). Refinement enlarges the refuted region, which removes pairs from the judge's jurisdiction and closes the prose-only injection class. Because the calibration pool is the distinct part of the residual, the pool shrinks with it (primary judge: from 142 to 49 pairs), and at $\alpha=0.05$ the conformal threshold moves from the 7th to the 2nd largest pool score (Proposition~\ref{prop:dilemma}). Section~\ref{sec:res-refinement} measures the consequence.}\label{fig:refinement}
+\end{figure}

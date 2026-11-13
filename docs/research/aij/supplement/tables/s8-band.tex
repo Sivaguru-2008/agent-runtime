@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Score distribution and escalation band, $\alpha=0.05$. ``At extremes'' counts scores $\le0.02$ or $\ge0.98$ among non-certified pairs. Ties are residual duplicate test pairs whose score equals $\thi$ exactly; a strict inequality never suppresses them.}\label{tab:s8a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+Judge & $\thi$ & $\tlo$ & distinct values & SAME at extremes & DIFF at extremes & suppressed & tied at $\thi$ \\
+\midrule
+GPT-OSS-120B & 0.80 & 0.80 & 24 & 9.8\%~[7.5--12.7] & 4.1\%~[2.7--6.2] & 232/247 & 10 \\
+GPT-OSS-20B & 0.95 & 0.00 & 6 & 83.7\%~[80.2--86.7] & 87.2\%~[84.0--89.8] & 198/247 & 40 \\
+Qwen3.6-27B & 0.95 & 0.95 & 8 & 88.9\%~[85.8--91.4] & 89.5\%~[86.5--91.9] & 216/240 & 24 \\
+\bottomrule
+\end{tabular}}
+\end{table}

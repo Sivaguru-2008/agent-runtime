@@ -1,0 +1,28 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Crash and paraphrased replay across eight crash points, 48 trials per arm, judge openai/gpt-oss-120b, paraphrase pool written by llama-3.3-70b-versatile. \emph{Correct} means the correct final number of external effects: one wire in the duplicate arm, two in the distinct arm.}\label{tab:s15}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Arm & crash point & syntactic correct & semantic correct & crash point reached & window flagged \\
+\midrule
+duplicate & before\_fence & 0/6 & 6/6 & 6/6 & 0/6 \\
+duplicate & after\_L0 & 0/6 & 6/6 & 6/6 & 0/6 \\
+duplicate & after\_witness & 0/6 & 6/6 & 6/6 & 0/6 \\
+duplicate & after\_judge & 0/6 & 6/6 & 6/6 & 0/6 \\
+duplicate & before\_external\_effect & 0/6 & 6/6 & 0/6 & 0/6 \\
+duplicate & during\_external\_commit\_window & 0/6 & 6/6 & 0/6 & 0/6 \\
+duplicate & after\_external\_effect\_before\_local\_commit & 0/6 & 5/6 & 0/6 & 0/6 \\
+duplicate & after\_local\_commit & 0/6 & 6/6 & 0/6 & 0/6 \\
+distinct & before\_fence & 6/6 & 6/6 & 6/6 & 0/6 \\
+distinct & after\_L0 & 6/6 & 6/6 & 6/6 & 0/6 \\
+distinct & after\_witness & 0/6 & 6/6 & 6/6 & 0/6 \\
+distinct & after\_judge & 0/6 & 6/6 & 6/6 & 0/6 \\
+distinct & before\_external\_effect & 6/6 & 6/6 & 6/6 & 5/6 \\
+distinct & during\_external\_commit\_window & 0/6 & 0/6 & 6/6 & 5/6 \\
+distinct & after\_external\_effect\_before\_local\_commit & 0/6 & 0/6 & 6/6 & 6/6 \\
+distinct & after\_local\_commit & 0/6 & 6/6 & 6/6 & 0/6 \\
+\bottomrule
+\end{tabular}}
+\end{table}

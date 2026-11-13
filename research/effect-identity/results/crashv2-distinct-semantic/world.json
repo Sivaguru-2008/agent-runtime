@@ -1,0 +1,29 @@
+{
+  "wires": [
+    {
+      "wireId": "wire_001",
+      "pid": 40412,
+      "phase": "seed",
+      "amountUSD": 780,
+      "act": "act1",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213 — installment 1 of 2"
+      }
+    },
+    {
+      "wireId": "wire_002",
+      "pid": 32292,
+      "phase": "crash",
+      "amountUSD": 780,
+      "act": "act2",
+      "input": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213 — installment 2 of 2"
+      }
+    }
+  ],
+  "receipts": []
+}

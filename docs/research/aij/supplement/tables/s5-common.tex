@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Common-subset comparison: the 1041 pairs all three judges scored (499 calibration, 499 test, 43 attack), each judge calibrated on the common calibration split.}\label{tab:s5b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrllll@{}}
+\toprule
+Judge & $\thi$ & wrong suppression & dedup & silent escape & flagged escape \\
+\midrule
+GPT-OSS-120B & 0.80 & 1.8\%~[0.7--4.4] & 94.5\%~[91.1--96.6] & 5.5\%~[3.4--8.9] & 0.0\%~[0.0--1.4] \\
+GPT-OSS-20B & 0.95 & 1.3\%~[0.5--3.8] & 82.0\%~[77.0--86.1] & 2.2\%~[1.0--4.7] & 15.8\%~[12.0--20.6] \\
+Qwen3.6-27B & 0.95 & 0.9\%~[0.2--3.2] & 91.2\%~[87.2--94.0] & 8.8\%~[6.0--12.8] & 0.0\%~[0.0--1.4] \\
+\bottomrule
+\end{tabular}}
+\end{table}

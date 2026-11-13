@@ -38,6 +38,31 @@ import { canAccessAllTenants, type TenantContext } from "./tenantContext.js";
 export const SYSTEM_TENANT_ID = "system";
 
 /**
+ * Resolve an execution's owning tenant from ANY authoritative per-execution
+ * table, not just the `executions` summary row. A stuck or orphaned execution
+ * may have a cognition graph, checkpoints, or a dead-letter entry while its
+ * `executions` row was never written or was pruned — and the operator console
+ * exists precisely to diagnose those. Matching is dash-insensitive because
+ * `executions.id` is a dashed uuid while cognition_graphs/checkpoints/dead-
+ * letters store the dashless 32-hex form of the same id.
+ *
+ * Still tenant-safe: this only ever resolves to the tenant that genuinely owns
+ * a record for the id, so a cross-tenant probe still denies.
+ */
+const EXECUTION_TENANT_BROAD_SQL = `
+  select tenant_id from (
+    select tenant_id from executions             where replace(id::text, '-', '')     = replace($1, '-', '')
+    union all
+    select tenant_id from cognition_graphs       where replace(execution_id, '-', '') = replace($1, '-', '')
+    union all
+    select tenant_id from execution_checkpoints  where replace(execution_id, '-', '') = replace($1, '-', '')
+    union all
+    select tenant_id from execution_dead_letters where replace(execution_id, '-', '') = replace($1, '-', '')
+  ) s
+  where tenant_id is not null
+  limit 1`;
+
+/**
  * Thrown when a resource is owned by a different tenant. Mapped to HTTP 403
  * by the route error handler — NEVER 404 (which would leak existence).
  */
@@ -103,11 +128,33 @@ export class TenantGuard {
   }
 
   async resolveExecutionTenant(executionId: string): Promise<string | null> {
-    return this.lookup(
-      "execution",
-      executionId,
-      "select tenant_id from executions where id = $1"
-    );
+    // Fast path: the executions primary key (uuid). Uses the PK index and
+    // covers the common case where the summary row exists.
+    const direct = await this.tryResolveExecutionByPk(executionId);
+    if (direct !== undefined) return direct;
+    // Orphan / format-variant path: resolve the tenant from any per-execution
+    // table (cognition graph, checkpoints, dead-letter) when the summary row is
+    // absent — the case the operator console hits when diagnosing a stuck run.
+    return this.lookup("execution", executionId, EXECUTION_TENANT_BROAD_SQL);
+  }
+
+  /**
+   * Indexed PK lookup that returns `undefined` (rather than throwing) when the
+   * row is missing, the tenant is null, or the id is malformed, so the caller
+   * can fall back to the broad resolver. Never decides access on its own.
+   */
+  private async tryResolveExecutionByPk(executionId: string): Promise<string | undefined> {
+    try {
+      const { rows } = await this.opts.db.query<{ tenant_id: string | null }>(
+        "select tenant_id from executions where id = $1",
+        [executionId]
+      );
+      return rows[0]?.tenant_id ?? undefined;
+    } catch {
+      // 22P02 (non-uuid id) or any transient error: let the broad resolver,
+      // which carries the canonical throw/permit semantics, decide.
+      return undefined;
+    }
   }
 
   async resolveCognitionTenant(cognitionId: string): Promise<string | null> {

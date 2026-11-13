@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Beyond the budget ($m>\alpha(n+1)$): the worst case of the most conservative finite threshold, the pool maximum, at $\alpha=0.05$. Every entry exceeds $\alpha$, so no finite scale-free threshold is valid. The grid check covers every $n+1\le10^6$ at $\alpha=0.05$ and $\alpha=0.01$ (0 exceptions at $\alpha=0.05$, 0 exceptions at $\alpha=0.01$). The closed form is an equality (Corollary~\ref{M-cor:tight}(c)); it was checked against the general rank-$k$ computation at $k=n$ over 4,000 pairs $(n,m)$ with $n\le400$ (largest absolute difference $0$), and against a direct simulation of the attaining law (200,000 draws per row, last column).}\label{tab:s21b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}rrrll@{}}
+\toprule
+$n$ & $m$ & $\alpha(n+1)$ & worst case of the pool maximum & simulated ($z$) \\
+\midrule
+200 & 11 & 10.05 & 5.473\% & 5.540\% (1.31) \\
+200 & 25 & 10.05 & 12.434\% & 12.399\% (-0.47) \\
+200 & 50 & 10.05 & 24.447\% & 24.585\% (1.43) \\
+142 & 8 & 7.15 & 5.594\% & 5.679\% (1.63) \\
+49 & 3 & 2.50 & 6.000\% & 6.036\% (0.68) \\
+18 & 1 & 0.95 & 5.263\% & 5.282\% (0.39) \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,30 @@
+{
+  "phase": "replay",
+  "pid": 12824,
+  "scorer": "lexical-offline",
+  "mode": "semantic",
+  "crashPoint": "after_local_commit",
+  "reachedCrashPoint": false,
+  "events": [
+    {
+      "type": "SUPPRESSED",
+      "layer": "L1",
+      "tool": "wire_money",
+      "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+      "matchedOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 0.95,
+      "m": 2,
+      "tHi": 0.9,
+      "pid": 12824
+    },
+    {
+      "type": "COMMITTED",
+      "tool": "send_receipt",
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "pid": 12824
+    }
+  ],
+  "judgeCalls": 0,
+  "judgeTokens": 0,
+  "judgeLatencyMs": 0
+}

@@ -1,0 +1,140 @@
+{
+  "generatedAt": "2026-08-15T10:07:37.040Z",
+  "rngSeed": 20260712,
+  "generation": {
+    "generators": [
+      "handwritten-authors",
+      "llama-3.3-70b-versatile",
+      "openai/gpt-oss-120b",
+      "qwen/qwen3.6-27b"
+    ],
+    "perGenerator": {
+      "handwritten-authors": {
+        "s2Kept": 68,
+        "s2Dropped": 0,
+        "s4Kept": 0,
+        "s4Dropped": 0
+      },
+      "llama-3.3-70b-versatile": {
+        "s2Dropped": 8,
+        "s4Dropped": 19,
+        "s2Kept": 60,
+        "s4Kept": 49,
+        "s2TransportDropped": 0,
+        "s4TransportDropped": 0
+      },
+      "openai/gpt-oss-120b": {
+        "s2Dropped": 9,
+        "s4Dropped": 6,
+        "s2Kept": 59,
+        "s4Kept": 62,
+        "s2TransportDropped": 0,
+        "s4TransportDropped": 0
+      },
+      "qwen/qwen3.6-27b": {
+        "s2Dropped": 2,
+        "s4Dropped": 6,
+        "s2Kept": 66,
+        "s4Kept": 52,
+        "s2TransportDropped": 0,
+        "s4TransportDropped": 0
+      }
+    }
+  },
+  "counts": {
+    "S1_mechanical": {
+      "total": 68,
+      "cal": 34,
+      "test": 34,
+      "attack": 0,
+      "label": "SAME"
+    },
+    "S3_loose_value": {
+      "total": 15,
+      "cal": 7,
+      "test": 8,
+      "attack": 0,
+      "label": "SAME"
+    },
+    "D1_near_miss": {
+      "total": 251,
+      "cal": 125,
+      "test": 126,
+      "attack": 0,
+      "label": "DIFF"
+    },
+    "D2_legit_repeat": {
+      "total": 150,
+      "cal": 75,
+      "test": 75,
+      "attack": 0,
+      "label": "DIFF"
+    },
+    "D3_semantic_diff": {
+      "total": 10,
+      "cal": 5,
+      "test": 5,
+      "attack": 0,
+      "label": "DIFF"
+    },
+    "D4a_field_injection": {
+      "total": 20,
+      "cal": 0,
+      "test": 0,
+      "attack": 20,
+      "label": "DIFF"
+    },
+    "D4b_text_injection": {
+      "total": 25,
+      "cal": 0,
+      "test": 0,
+      "attack": 25,
+      "label": "DIFF"
+    },
+    "S2_paraphrase": {
+      "total": 253,
+      "cal": 126,
+      "test": 127,
+      "attack": 0,
+      "label": "SAME"
+    },
+    "S4_adversarial": {
+      "total": 163,
+      "cal": 81,
+      "test": 82,
+      "attack": 0,
+      "label": "SAME"
+    }
+  },
+  "byGenerator": {
+    "handwritten-authors": {
+      "total": 68,
+      "cal": 34,
+      "test": 34,
+      "attack": 0
+    },
+    "llama-3.3-70b-versatile": {
+      "total": 109,
+      "cal": 54,
+      "test": 55,
+      "attack": 0
+    },
+    "openai/gpt-oss-120b": {
+      "total": 121,
+      "cal": 60,
+      "test": 61,
+      "attack": 0
+    },
+    "qwen/qwen3.6-27b": {
+      "total": 118,
+      "cal": 59,
+      "test": 59,
+      "attack": 0
+    }
+  },
+  "totals": {
+    "pairs": 955,
+    "same": 499,
+    "diff": 456
+  }
+}

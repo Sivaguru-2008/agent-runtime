@@ -1,0 +1,21 @@
+{
+  "wires": [
+    {
+      "wireId": "wire_001",
+      "pid": 35240,
+      "amountUSD": 780,
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213"
+      }
+    }
+  ],
+  "receipts": [
+    {
+      "messageId": "rcpt_001",
+      "pid": 22296,
+      "to": "ops@example.com"
+    }
+  ]
+}

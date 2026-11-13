@@ -1,0 +1,366 @@
+{
+  "$comment": [
+    "THE reproducibility configuration. Every decision that could change a reported",
+    "number is recorded here rather than living in a script's default argument, so",
+    "that 'we used alpha = 0.05' is checkable rather than assertable. `verify.js`",
+    "reads this file and fails the build when the artifact and this record disagree.",
+    "",
+    "Two things are deliberately NOT here. Model weights are not ours to pin, so the",
+    "judge identifiers are recorded with the date they were reached and the paper",
+    "says that a re-run against a silently updated endpoint is a different",
+    "experiment. And the human annotation labels do not exist yet: the study is",
+    "PENDING, and the config records its design so that the absence is legible."
+  ],
+  "artifactVersion": "2.0.0",
+  "generatedFor": "Effect Identity for Non-Deterministic Agents",
+  "runtime": {
+    "node": ">=20.11.0",
+    "dependencies": "none"
+  },
+  "corpora": {
+    "v1": {
+      "file": "corpus/pairs.jsonl",
+      "scores": "corpus/scores.jsonl",
+      "nPairs": 1066,
+      "rngSeed": 20260712,
+      "generatedAt": "2026-08-15T10:07:37.040Z",
+      "toolTable": "src/tools.js",
+      "status": "FROZEN + ADDITIVE GROWTH",
+      "frozenBecause": [
+        "It is the record the previously reported results rest on.",
+        "Two of its four generator arms (llama-3.3-70b-versatile, and the",
+        "llama-3.1-8b-instant used by the multi-candidate experiment) are no longer",
+        "reachable on this key, so regenerating would silently produce a different",
+        "corpus under the same name.",
+        "Growth is APPENDED under its own seed and manifest; the original 955 remain byte-identical."
+      ],
+      "splits": {
+        "cal": 508,
+        "test": 513,
+        "attack": 45,
+        "method": "50/50 stratified by (category, generator), fixed seed; attack categories held out of calibration entirely"
+      },
+      "growth": {
+        "manifest": "corpus/growth-manifest.json",
+        "seed": 20260824,
+        "reason": "Task 4 - S3 (the motivating example) and D3 carried named qualitative claims at n=8 and n=5 test pairs",
+        "newPairs": 111,
+        "existingPairsModified": 0,
+        "categories": {
+          "S3_loose_value": "15 -> 75",
+          "D3_semantic_diff": "10 -> 61"
+        },
+        "note": "Additive only. Every original id, pair content, split and score is unchanged, which is why the frozen annotation sheet still verifies against the grown corpus."
+      }
+    },
+    "v2ext": {
+      "file": "corpus/pairs-v2ext.jsonl",
+      "scores": "corpus/scores-v2ext.jsonl",
+      "rngSeed": 20260818,
+      "toolTable": "src/toolsV2.js",
+      "status": "ADDITIVE",
+      "note": "Strictly additive to v1. Never merged into corpus/pairs.jsonl; analyses report v1, the extension, and their union separately.",
+      "splitMethod": "deterministic alternation within each (category, tool, generator) stratum; attack categories are split='attack' and never enter calibration"
+    },
+    "ladder": {
+      "file": "corpus/ladder.jsonl",
+      "scores": "corpus/scores-ladder.jsonl",
+      "definition": "src/corpus/schemaLevels.js",
+      "levels": [
+        "L1_loose",
+        "L2_moderate",
+        "L3_strict"
+      ],
+      "note": "One act family declared three ways. Every pair exists at every level, so level comparisons are paired item-by-item."
+    }
+  },
+  "judges": {
+    "reachedOn": "2026-08-18",
+    "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+    "temperature": 0,
+    "batchSize": 10,
+    "maxAttemptsPerBatch": 3,
+    "promptModule": "src/judge.js",
+    "promptExport": "JUDGE_SYSTEM",
+    "scoreField": "p_same_pct",
+    "scoreContract": "integer 0-100 only; 0.95 is REJECTED rather than rescaled; out-of-range values are rejected rather than clamped; a pair that never receives an admissible value is recorded as null (abstention) and never imputed",
+    "models": {
+      "openai/gpt-oss-120b": {
+        "family": "gpt-oss",
+        "role": "primary"
+      },
+      "openai/gpt-oss-20b": {
+        "family": "gpt-oss",
+        "role": "reported"
+      },
+      "qwen/qwen3.6-27b": {
+        "family": "qwen",
+        "role": "cross-family"
+      },
+      "allam-2-7b": {
+        "family": "allam",
+        "role": "cross-family candidate"
+      },
+      "llama-3.3-70b-versatile": {
+        "family": "llama",
+        "role": "v1 only — endpoint no longer available on this key"
+      },
+      "llama-3.1-8b-instant": {
+        "family": "llama",
+        "role": "v1 multi-candidate experiment only — endpoint no longer available on this key"
+      }
+    },
+    "admission": {
+      "module": "src/judgeAdmission.js",
+      "minCoverage": 0.8,
+      "minDistinctValues": 2,
+      "minAuc": 0.6,
+      "rationale": "Coverage alone is insufficient. A judge that answers every pair with the same number has 100% coverage, produces a threshold equal to that constant, suppresses nothing under the strict inequality, and therefore reports 0% wrong-suppression and 0% deduplication — the same fake-perfect row an abstaining judge produces. Both routes are closed."
+    }
+  },
+  "calibration": {
+    "module": "src/conformal.js",
+    "alphaReported": [
+      0.01,
+      0.05
+    ],
+    "alphaPrimary": 0.05,
+    "gamma": 0.05,
+    "thresholdConstruction": "t_hi(m) = ceil((n+1)(1 - alpha/m))-th smallest calibration score; +Infinity when that index exceeds n",
+    "multiplicity": "Bonferroni over the candidate set (union bound, valid under arbitrary dependence). Direct set-conformal calibration is implemented for comparison.",
+    "escalationFloor": "t_lo = floor((n+1)*gamma)-th smallest SAME-pair score, capped at t_hi",
+    "poolRule": "MUST be drawn from the configuration's own jurisdiction — the pairs its layers actually route to the judge. Enforced in src/evaluate.js:jurisdictionFilter.",
+    "abstentions": "dropped from the pool; excluded from the max; can never suppress"
+  },
+  "canonicalisation": {
+    "module": "src/canonicalize.js",
+    "policies": {
+      "id": "NFC + trim, case-SENSITIVE",
+      "ci": "NFC + trim + lowercase",
+      "num": "numeric normal form; thousands separators stripped; trailing zeros dropped",
+      "text": "NFC + trim + internal whitespace collapse; deliberately NOT semantic"
+    },
+    "operationId": "H(runId || tool || H(canonical(input)))",
+    "witnessProjections": {
+      "declared": "canonical values of all non-text fields",
+      "tightened": "the above plus the numeric magnitudes each free-text field mentions"
+    }
+  },
+  "statistics": {
+    "module": "src/stats.js",
+    "intervalMethod": "Wilson score, 95%",
+    "intervalRationale": "Wald collapses to zero width at p=0 and p=1, which is exactly where the headline rates sit",
+    "pairedTest": "exact two-sided McNemar over discordant items",
+    "multipleComparisons": "Holm-Bonferroni, applied WITHIN a family (liveness and safety corrected separately)",
+    "reliability": [
+      "Fleiss kappa",
+      "Cohen kappa pairwise",
+      "Krippendorff alpha (nominal)"
+    ],
+    "zeroReporting": "rates that are zero by construction are marked and distinguished from zeros that are sample estimates"
+  },
+  "experiments": {
+    "corpusV1": "node src/corpus/generate.js",
+    "corpusV2": "node src/corpus/generateV2.js --generator openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.6-27b",
+    "ladderOnly": "node src/corpus/generateV2.js --offline --only ladder",
+    "scoreV1": "node src/experiments/score.js --judges openai/gpt-oss-120b,openai/gpt-oss-20b,qwen/qwen3.6-27b",
+    "scoreV2": "node src/experiments/scoreV2.js --pairs corpus/pairs-v2ext.jsonl --out corpus/scores-v2ext-<judge>.jsonl --judges <judge>",
+    "mergeScores": "node src/experiments/mergeScores.js --tag pairs-v2ext --out corpus/scores-v2ext.jsonl",
+    "baselineMatrix": "node src/experiments/baselineMatrix.js --corpus v1|v2ext|union",
+    "schemaLadder": "node src/experiments/schemaLadder.js",
+    "attackMatrix": "node src/experiments/attackMatrix.js --corpus v1|v2ext|union",
+    "conformalAudit": "node src/experiments/conformalAudit.js --corpus v1",
+    "crashReplayV2": "node src/experiments/crashReplayV2.js --trials 48 --arms duplicate,distinct --judge openai/gpt-oss-120b",
+    "annotationExport": "node src/experiments/annotation.js --export",
+    "annotationIngest": "node src/experiments/annotation.js --ingest --responses-dir annotation/preregistered-collection --channel M",
+    "annotationFreezeCheck": "node src/experiments/annotationFreeze.js",
+    "multiCandidate": "node src/experiments/multiCandidate.js --K 50 --units-diff 40 --units-same 20 --judge llama-3.1-8b-instant",
+    "nonLlmBaseline": "node src/experiments/nonLlmBaseline.js",
+    "seedSplit": "node src/experiments/seedSplit.js",
+    "sensitivity": "node src/experiments/sensitivity.js",
+    "thresholdSweep": "node src/experiments/thresholdSweep.js",
+    "weakJudge": "node src/experiments/weakJudge.js",
+    "crossFamily": "node src/experiments/crossFamily.js",
+    "aijAnalyses": "node src/experiments/aijAnalyses.js",
+    "classConditional": "node src/experiments/classConditional.js",
+    "multiCandidateLive": "node src/experiments/multiCandidateLive.js --score && node src/experiments/multiCandidateLive.js --evaluate",
+    "channelHTargeted": "node src/experiments/channelHTargeted.js --analyze",
+    "scoringStability": "node src/experiments/scoringStability.js --score && node src/experiments/scoringStability.js --evaluate",
+    "report": "node src/experiments/report.js > results/REPORT.md",
+    "verify": "node src/experiments/verify.js",
+    "checkPaper": "node src/experiments/checkPaper.js",
+    "buildPaper": "node ../../docs/research/aij/build.mjs"
+  },
+  "crashReplay": {
+    "trialsPerArm": 48,
+    "arms": [
+      "duplicate",
+      "distinct"
+    ],
+    "crashPoints": [
+      "before_fence",
+      "after_L0",
+      "after_witness",
+      "after_judge",
+      "before_external_effect",
+      "during_external_commit_window",
+      "after_external_effect_before_local_commit",
+      "after_local_commit"
+    ],
+    "commitWindowPoints": [
+      "during_external_commit_window",
+      "after_external_effect_before_local_commit"
+    ],
+    "rngSeed": 20260818,
+    "paraphrasePoolGenerator": "llama-3.3-70b-versatile",
+    "crossFamilyRequired": true,
+    "crossFamilyRationale": "a judge scoring paraphrases written by its own family is partly measuring self-recognition",
+    "thresholdSource": "results/residual_calibration.json -> <judge>_a0.05_residualOnly (the jurisdiction-matched hardened configuration)",
+    "providerIdempotency": "ABSENT BY DESIGN — the mock provider presents no idempotency key, so the commit window stays open and measurable rather than being closed by an assumption"
+  },
+  "labelValidation": {
+    "$comment": "Two channels. H is human annotators and was NEVER COLLECTED. M is a panel of language models and ran. They are never pooled and never described interchangeably.",
+    "harness": "src/experiments/annotation.js",
+    "preregistration": "annotation/PREREGISTRATION.md (written and committed before any judgement was collected)",
+    "freeze": "annotation/FREEZE.json — 154 items, sheet hash 66a174e1392093c14e911d6130b235b3d4af3b8116c0a81ef27830174a249a9c, export seed 20260818; re-checked by annotationFreezeCheck",
+    "strata": 11,
+    "perStratumTarget": 15,
+    "annotators": 3,
+    "adjudication": "majority of 3; ties and UNSURE-dominated items go to a fourth independent adjudicator, never to a coin flip",
+    "reliability": [
+      "Fleiss kappa",
+      "Krippendorff alpha",
+      "per-stratum agreement",
+      "adjudication rate"
+    ],
+    "blinding": "annotators see the two calls only; no labels, predictions, thresholds, attack flags; presentation order and A/B assignment randomised per annotator by the instrument",
+    "channelM": {
+      "status": "COMPLETE",
+      "whatItIs": "a blinded panel of language models — NOT a human study, and never to be reported as one",
+      "ranAt": "2026-08-25",
+      "panel": "groq/compound, groq/compound-mini, qwen/qwen3.6-27b; adjudicator openai/gpt-oss-safeguard-20b; openai/gpt-oss-120b barred as the judge whose scores the re-derivation uses",
+      "responsesAnalysed": "annotation/preregistered-collection (earliest committed state, 117 fully annotated items)",
+      "result": "results/human_annotation.json",
+      "publishedOriginal": "results/human_annotation.published-20260825.json (116 items; preserved verbatim for comparison)",
+      "disclosedDefects": [
+        "93 of the 154 sheet items come from an extension corpus whose judge scores were never persisted; in the preregistered 'as executed' re-derivation they abstain, escalate, and so enter the wrong-suppression denominator without being able to enter its numerator. 12 of the 14 label flips are such items. Both 'as executed' and 'scored only' forms are reported.",
+        "The published figures are not exactly reproducible from any committed state of the response files: the analysis ran against live files. See annotation/RESPONSE-PROVENANCE.md."
+      ]
+    },
+    "channelH": {
+      "status": "NOT COLLECTED",
+      "protocol": "annotation/CHANNEL-H-PROTOCOL.md",
+      "whatRemains": "recruit 3 independent annotators and 1 adjudicator; collect responses-<name>.csv into a directory of its own; commit it; then run annotation.js --ingest --responses-dir <dir> --channel H",
+      "mustNotBeClaimed": "No manuscript may describe the existing evidence as human validation; verify.js fails the build if one does."
+    }
+  },
+  "cost": {
+    "source": "results/aij_analyses.json -> A8_cost, computed by aijAnalyses.js from the judge session metadata in results/judge_meta-*.json",
+    "denominator": "tokens of a scoring session divided by the pairs scored IN THAT SESSION",
+    "priorDefect": "an earlier cost model divided one session's tokens by every pair ever scored, understating cost by roughly an order of magnitude (5,431 tokens per 1,000 dispatches reported; ~140,000 measured for the primary judge). Corrected 2026-09.",
+    "batching": "judges are called in batches of 10 pairs, so the system prompt is amortised over the batch; per-comparison figures inherit that batching and would be higher at batch size 1",
+    "callsPer1000Dispatches": "follows from the judge's jurisdiction: 762 calls per 1,000 dispatches under the declared schema (76.2% residual), 589 under the refined one (58.9%)"
+  },
+  "assertions": {
+    "enforcedBy": "src/experiments/verify.js",
+    "list": [
+      "calibration and test splits share no pair id",
+      "attack pairs never appear in the calibration split",
+      "every stored score is null or an exact integer percent in [0,1]",
+      "no score was clamped into range",
+      "abstentions are stored as null and are absent from every calibration pool",
+      "no abstention results in a SUPPRESS decision",
+      "every judge reported with rates satisfies the admission rule",
+      "candidate-set multiplicity never exceeds the certified capacity without the threshold becoming +Infinity",
+      "every configuration's calibration pool is drawn from its own jurisdiction",
+      "labels are exactly SAME or DIFF",
+      "the human-annotation result file does not claim COMPLETE while no responses exist"
+    ]
+  },
+  "classConditional": {
+    "$comment": "AIJ revision Phase 2. Offline; persisted scores only. Mondrian over DIFF categories is an oracle analysis (category is label-defined); the deployable class-valid rule is the maximum per-category threshold. Reweighting shifts the RESIDUAL distinct test mix toward D3, remaining weight split D1:D2 in observed ratio.",
+    "alpha": 0.05,
+    "classes": [
+      "D1_near_miss",
+      "D2_legit_repeat",
+      "D3_semantic_diff"
+    ],
+    "observablePartition": "tool",
+    "d3Shares": [
+      0.13,
+      0.25,
+      0.5
+    ],
+    "bootstrapReplicates": 10000,
+    "seed": 20260926,
+    "output": "results/class_conditional.json"
+  },
+  "multiCandidateLive": {
+    "$comment": [
+      "AIJ revision Phase 3. PREPARED, NOT RUN. Units are built from corpus v1: one per residual TEST pair; dispatch = pair.b, candidate 1 = pair.a (true match for SAME units, labelled distinct act for DIFF units); candidates 2..mMax drawn without replacement by a seeded Fisher-Yates shuffle from corpus inputs of the same tool that share the dispatch projection, are outside its SAME-class, and are known distinct (different seed act, or linked by a DIFF label). Thresholds from the deployed configuration jurisdiction-matched pool; uncorrected t(alpha) vs Bonferroni t(alpha/m)."
+    ],
+    "status": "PREPARED — scoring not executed",
+    "seed": 20260926,
+    "mValues": [
+      1,
+      2,
+      5,
+      10
+    ],
+    "judge": "openai/gpt-oss-120b",
+    "judgeKey": "openai_gpt_oss_120b",
+    "batchSize": 10,
+    "temperature": 0,
+    "alpha": 0.05,
+    "gamma": 0.05,
+    "unitsFile": "corpus/multi-candidate-live-units.json",
+    "scoresFile": "corpus/multi-candidate-live-scores.json",
+    "output": "results/multi_candidate_live.json",
+    "commands": {
+      "build": "node src/experiments/multiCandidateLive.js",
+      "score": "node src/experiments/multiCandidateLive.js --score",
+      "evaluate": "node src/experiments/multiCandidateLive.js --evaluate"
+    }
+  },
+  "channelHTargeted": {
+    "status": "PREPARED — not collected",
+    "scope": "targeted follow-up on the two strata contested by the model panel; NOT the preregistered 154-item study",
+    "strata": [
+      "diff_text_only",
+      "attack_text"
+    ],
+    "nTargetItems": 30,
+    "catchTrials": [
+      "IT013",
+      "IT022",
+      "IT108"
+    ],
+    "annotators": 3,
+    "adjudicators": 1,
+    "packet": "annotation/channel-h-targeted/",
+    "materialsSource": "annotation/preregistered-collection/ (INSTRUCTIONS.md hash-checked against FREEZE.json; instrument.html with its item list reduced to the packet)",
+    "contestedRule": "Wilson 95% upper bound of agreement < 0.80; with 15 items per stratum, contested at <= 8 agreeing",
+    "output": "results/channel_h_targeted.json",
+    "commands": {
+      "build": "node src/experiments/channelHTargeted.js --build",
+      "analyze": "node src/experiments/channelHTargeted.js --analyze",
+      "selfTest": "node src/experiments/channelHTargeted.js --self-test"
+    }
+  },
+  "scoringStability": {
+    "$comment": "TMLR revision. Every residual pair of corpus v1 (cal+test) re-scored once by the primary judge in batches of ten from one seeded shuffle, so pool and test share a scoring context; compared with the persisted scoring (and the multi-candidate run as a third scoring of the test pairs).",
+    "seed": 20260930,
+    "judge": "openai/gpt-oss-120b",
+    "judgeKey": "openai_gpt_oss_120b",
+    "batchSize": 10,
+    "temperature": 0,
+    "alpha": 0.05,
+    "gamma": 0.05,
+    "scoresFile": "corpus/scores-stability-r1.json",
+    "output": "results/scoring_stability.json",
+    "commands": {
+      "score": "node src/experiments/scoringStability.js --score",
+      "evaluate": "node src/experiments/scoringStability.js --evaluate"
+    }
+  }
+}

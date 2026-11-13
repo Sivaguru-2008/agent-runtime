@@ -1,0 +1,12 @@
+{
+  "model": "qwen/qwen3.6-27b",
+  "attempted": 1066,
+  "answered": 1041,
+  "total": 1066,
+  "pct": 97.7,
+  "abstentions": 0,
+  "batchesWithViolations": 0,
+  "probabilityScaleBatches": 0,
+  "elapsedSec": 264,
+  "updatedAt": "2026-08-25T04:21:29.440Z"
+}

@@ -1,0 +1,22 @@
+\section{Discussion}\label{sec:discussion}
+
+\subsection{What the evidence supports}
+
+The most robust finding is an asymmetry between the two error directions. Wrong suppression stayed below $\alpha$ across three judges (1.7\%, 1.3\%, 0.9\%), three labellings (1.7\%, 1.9\%, 2.2\%) and the mean over 200 seed-level splits (2.7\%, 2.2\%, 1.8\%), while deduplication moved from 94.7\% to 82.6\% across judges, to 27.6\% across labellings, and to 69.0\% or 12.1\% under refinement. That is what a bound on one direction and none on the other looks like from outside, not evidence of greater accuracy; part of the stability is conservatism (Section~\ref{sec:res-components}), and it holds only for a jurisdiction-matched pool and as an average over the kinds of difference the pool mixes (Sections~\ref{sec:res-bound} and~\ref{sec:res-class}).
+
+The second finding is that semantic retry safety is not solely an LLM-judging problem: the declared schema determines the judge's jurisdiction. Every benign wrong suppression we observed, and all but one label disagreement of the model panel, fell on a pair whose distinguishing information lives only in free text. That is partly true by construction (Proposition~\ref{prop:residual}): typed-field distinctions are settled before the judge and therefore cannot be overridden by injected prose in those fields, whereas distinctions left in free text remain within the residual judge jurisdiction. Moving act-determining information into typed fields removes cases from that jurisdiction and closes corresponding attack paths, while simultaneously changing the calibration population and statistical budget---the schema refinement dilemma.
+
+\subsection{Practical guidance}
+
+\begin{enumerate}[(1),leftmargin=*,itemsep=1pt]
+\item Declare every act-determining field as typed where possible; an effect-determining field left in free text is a known exposure to the judge and to injection.
+\item Calibrate each configuration on its own jurisdiction, and recalibrate whenever a layer, the judge or the schema changes.
+\item Size the pool for the candidate budget: at $\alpha=0.05$, 19 distinct residual pairs to suppress semantically at all and $m/\alpha-1$ for $m$ candidates (199 for $m=10$), per class if a per-class guarantee is needed.
+\item Check how many duplicate scores tie with $\thi$ on a coarse grid; ties decide whether a missed duplicate is flagged or silent.
+\item Prefer a verified postcondition where one exists~\cite{mansoor2026verified}, and a provider key derived from a projection complete for identity where the schema permits (Proposition~\ref{prop:compose}).
+\item Log and sample semantic suppressions for audit: the bound is marginal, and a wrong suppression leaves no trace otherwise.
+\end{enumerate}
+
+\subsection{Beyond duplication}
+
+Effect identity is one instance of a recurring shape in agent safety: a binary decision with sharply asymmetric consequences, no complete decidable procedure, and a stochastic model as the only general-purpose decider. The recipe---find a decidable certifier and refuter, name the residual, calibrate the deployed statistic on the residual in the safety-critical direction only, make the undecided band auditable, report the budget---transferred to action authorisation (Section~\ref{sec:res-authz}); content release and other gatekeeping decisions remain open.

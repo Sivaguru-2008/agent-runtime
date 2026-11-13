@@ -1,0 +1,237 @@
+{
+  "generatedAt": "2026-09-01T15:22:11.074Z",
+  "corpus": "v1",
+  "judge": "openai_gpt_oss_120b",
+  "alpha": 0.05,
+  "nPairs": 1066,
+  "nCal": 508,
+  "nTest": 513,
+  "nAttack": 45,
+  "abstentions": 0,
+  "seedProvenanceSharing": {
+    "value": 0.8284600389863548,
+    "successes": 425,
+    "n": 513,
+    "basis": "measured",
+    "ci95": {
+      "lo": 0.7934268397434595,
+      "hi": 0.8586106356729896
+    }
+  },
+  "checks": [
+    {
+      "name": "calibration/test separation",
+      "passed": true,
+      "detail": "0 pair ids in both splits"
+    },
+    {
+      "name": "attack split excluded from calibration",
+      "passed": true,
+      "detail": "0 attack pairs in the calibration split"
+    },
+    {
+      "name": "seed-level provenance sharing measured (not a pass/fail)",
+      "passed": true,
+      "detail": "425/513 test pairs share a seed act with some calibration pair (82.8%)"
+    },
+    {
+      "name": "all scores are null or within [0,1]",
+      "passed": true,
+      "detail": "0 out-of-range or non-numeric scores"
+    },
+    {
+      "name": "every score is an exact integer percent (no rescaling occurred)",
+      "passed": true,
+      "detail": "0 scores are not multiples of 0.01 — the signature of a probability-scale reply being divided by 100"
+    },
+    {
+      "name": "abstentions are excluded from the calibration pool",
+      "passed": true,
+      "detail": "0 abstained residual DIFF calibration pairs were dropped; pool n = 142"
+    },
+    {
+      "name": "an abstention can never cause suppression",
+      "passed": true,
+      "detail": "0 abstained residual pairs; decisions: []"
+    },
+    {
+      "name": "threshold is the ceil((n+1)(1-alpha))-th order statistic, +Inf when uncertifiable",
+      "passed": true,
+      "detail": "all cases correct"
+    },
+    {
+      "name": "t_hi(m) is monotone non-decreasing in m",
+      "passed": true,
+      "detail": "monotone over m in 1..20"
+    },
+    {
+      "name": "t_hi(1) equals the pairwise threshold",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "t_hi(0) is +Infinity (an empty candidate set cannot suppress)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "past the budget m > alpha(n+1) the threshold is +Infinity",
+      "passed": true,
+      "detail": "budget m <= 10 at n=200, alpha=0.05; needs n >= 219 to go further"
+    },
+    {
+      "name": "Monte-Carlo: the corrected rule holds at every m",
+      "passed": true,
+      "detail": "m=1:5.0% m=2:5.7% m=5:4.5% m=10:3.7% m=25:0.0% m=50:0.0%"
+    },
+    {
+      "name": "Monte-Carlo: the UNCORRECTED rule violates the level (if this fails, the correction is untested)",
+      "passed": true,
+      "detail": "m=1:5.0% m=2:11.2% m=5:22.9% m=10:38.3% m=25:70.3% m=50:89.0%"
+    },
+    {
+      "name": "the jurisdiction-matched pool is not larger than the mismatched one",
+      "passed": true,
+      "detail": "matched n=142, mismatched n=230"
+    }
+  ],
+  "monteCarlo": [
+    {
+      "m": 1,
+      "uncorrected": 0.0495,
+      "corrected": 0.0495
+    },
+    {
+      "m": 2,
+      "uncorrected": 0.112,
+      "corrected": 0.057
+    },
+    {
+      "m": 5,
+      "uncorrected": 0.2295,
+      "corrected": 0.045
+    },
+    {
+      "m": 10,
+      "uncorrected": 0.3825,
+      "corrected": 0.037
+    },
+    {
+      "m": 25,
+      "uncorrected": 0.7035,
+      "corrected": 0
+    },
+    {
+      "m": 50,
+      "uncorrected": 0.8905,
+      "corrected": 0
+    }
+  ],
+  "resample": {
+    "rows": [
+      {
+        "n": 10,
+        "reps": 300,
+        "pInfinite": 1,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "shareExceedingAlpha": null,
+        "certifiableM": 0
+      },
+      {
+        "n": 20,
+        "reps": 300,
+        "pInfinite": 0,
+        "mean": 0.027916666666666656,
+        "median": 0.013888888888888888,
+        "p95": 0.13194444444444445,
+        "max": 0.13194444444444445,
+        "shareExceedingAlpha": 0.09666666666666666,
+        "certifiableM": 1
+      },
+      {
+        "n": 30,
+        "reps": 300,
+        "pInfinite": 0,
+        "mean": 0.017569444444444443,
+        "median": 0.013888888888888888,
+        "p95": 0.04861111111111111,
+        "max": 0.13194444444444445,
+        "shareExceedingAlpha": 0.03666666666666667,
+        "certifiableM": 1
+      },
+      {
+        "n": 50,
+        "reps": 300,
+        "pInfinite": 0,
+        "mean": 0.02083333333333327,
+        "median": 0.013888888888888888,
+        "p95": 0.04861111111111111,
+        "max": 0.0763888888888889,
+        "shareExceedingAlpha": 0.013333333333333334,
+        "certifiableM": 2
+      },
+      {
+        "n": 100,
+        "reps": 300,
+        "pInfinite": 0,
+        "mean": 0.028726851851851816,
+        "median": 0.027777777777777776,
+        "p95": 0.04861111111111111,
+        "max": 0.13194444444444445,
+        "shareExceedingAlpha": 0.02,
+        "certifiableM": 5
+      },
+      {
+        "n": 205,
+        "unavailable": true,
+        "poolAvailable": 142
+      }
+    ],
+    "nCalResidualDiff": 142,
+    "nCalResidualSame": 244,
+    "nTestResidualDiff": 144
+  },
+  "jurisdiction": {
+    "mismatchedPool": {
+      "n": 230,
+      "tHi": 0.2,
+      "wsOverResidual": {
+        "value": 0.04861111111111111,
+        "successes": 7,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.023743988255155446,
+          "hi": 0.09693568416564162
+        }
+      }
+    },
+    "matchedPool": {
+      "n": 142,
+      "tHi": 0.8,
+      "wsOverResidual": {
+        "value": 0.027777777777777776,
+        "successes": 4,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.01085411795640967,
+          "hi": 0.06924153934534726
+        }
+      }
+    }
+  },
+  "interpretation": {
+    "guarantees": "For a candidate distinct from every one of the m committed candidates, P(SUPPRESS) <= alpha, marginally over draws of the calibration pool and the test point jointly, conditional on m, under exchangeability (A6).",
+    "doesNotGuarantee": [
+      "That the rate realised on any particular calibration draw is <= alpha. The resampling table below shows the realised rate's upper tail at every pool size tested.",
+      "Anything about pairs the certifier or refuter settles: those are exact under A5/A5', not bounded.",
+      "Anything under distribution shift. The attack split is excluded from calibration and the bound is not claimed there.",
+      "Anything about the duplicate-escape direction, which is governed by gamma and is not a conformal guarantee of the same kind.",
+      "That more calibration data lowers the error rate. It buys multiplicity budget (larger certifiable m), not accuracy."
+    ]
+  }
+}

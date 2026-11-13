@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Threshold sweep on the residual test split. The ``best safe fixed'' threshold is selected using test labels and is therefore not available to a deployment; the bootstrap columns compare the conformal rule with a cross-validated fixed threshold over 500 resamples.}\label{tab:s12a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrlrrrr@{}}
+\toprule
+Judge & AUC & safe region & safe fraction & conformal $\tau$ & conformal dedup & best safe dedup \\
+\midrule
+GPT-OSS-120B & 0.995 & $[0.20,1.00]$ & 80\% & 0.80 & 93.9\% & 100.0\% \\
+GPT-OSS-20B & 0.971 & $[0.10,1.00]$ & 90\% & 0.95 & 80.2\% & 97.2\% \\
+Qwen3.6-27B & 0.991 & $[0.05,1.00]$ & 95\% & 0.95 & 90.0\% & 100.0\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

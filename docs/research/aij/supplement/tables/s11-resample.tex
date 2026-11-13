@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Realised wrong suppression over 300 resampled calibration pools per size, evaluated on the fixed residual test pairs (primary judge, $\alpha=0.05$). The mean is flat in $n$; the tail and the exceedance share are not.}\label{tab:s11a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}rrrrrrr@{}}
+\toprule
+pool $n$ & $P(\thi=+\infty)$ & mean & median & p95 & max & share above $\alpha$ \\
+\midrule
+10 & 100\% & --- & --- & --- & --- & --- \\
+20 & 0\% & 2.8\% & 1.4\% & 13.2\% & 13.2\% & 9.7\% \\
+30 & 0\% & 1.8\% & 1.4\% & 4.9\% & 13.2\% & 3.7\% \\
+50 & 0\% & 2.1\% & 1.4\% & 4.9\% & 7.6\% & 1.3\% \\
+100 & 0\% & 2.9\% & 2.8\% & 4.9\% & 13.2\% & 2.0\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

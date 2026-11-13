@@ -1,0 +1,70 @@
+{
+  "name": "agent-fence",
+  "version": "0.1.0",
+  "description": "Idempotency fence for AI agents: suppress duplicate side effects (charges, emails, writes) on retry and replay.",
+  "keywords": [
+    "ai-agents",
+    "idempotency",
+    "exactly-once",
+    "durable-execution",
+    "side-effect-suppression",
+    "agents",
+    "retry",
+    "dedup",
+    "langchain",
+    "openai",
+    "anthropic"
+  ],
+  "license": "MIT",
+  "author": "Sivaguru",
+  "homepage": "https://github.com/Sivaguru-2008/agent-runtime/tree/main/agent-fence",
+  "bugs": {
+    "url": "https://github.com/Sivaguru-2008/agent-runtime/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sivaguru-2008/agent-runtime.git",
+    "directory": "agent-fence"
+  },
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo": "tsx examples/duplicate-charge.ts",
+    "demo:crash": "tsx examples/crash-retry.ts",
+    "example:openai": "tsx examples/openai-agent.ts",
+    "example:anthropic": "tsx examples/anthropic-agent.ts",
+    "example:langchain": "tsx examples/langchain-agent.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.9.3",
+    "@types/pg": "^8.20.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^12.10.1",
+    "pg": "^8.21.0"
+  }
+}

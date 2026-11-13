@@ -1,0 +1,28 @@
+\section{Scope, limitations and broader impact}\label{sec:limitations}
+
+Each scope boundary and operational assumption of the paper is stated here in full; elsewhere it appears as a cross-reference.
+
+\subsection{Scope boundaries and assumptions}
+
+\paragraph{Semantic assumptions and schema dependencies}
+The decidable layers are sound under the condition that declared field normalisation and projection policies preserve intended semantics (A5, A5$'$); semantic mis-declarations are not detected automatically. Deduplication and residual handling depend on the underlying judge model, and models served via external endpoints may change over time, requiring recalibration to maintain valid calibration pools.
+
+\paragraph{Statistical assumptions} Theorem~\ref{thm:bound} requires exchangeability (A6) between the pool and deployed comparisons within the rule's jurisdiction; it cannot be verified at run time and is violated by injection and drift. The bound is marginal over calibration draws: under seed-level resplitting 10.5\% of splits exceed $\alpha$ on the primary judge (Section~\ref{sec:res-bound}), and hand-specified semantic differences (D3) reach 6.5\% under the pooled threshold (Section~\ref{sec:res-class}).
+
+\paragraph{Operational and durable-store assumptions}
+The mechanism guarantees fence-level at-most-once commitment under the crash-atomic insert-if-absent model (A1--A4). Concurrent dispatch for the same logical operation (A7) requires external serialisation or per-operation leases; without concurrency control, concurrent executions remain observable via recorded conflicts rather than strictly prevented. The research implementation uses a local file-backed log.
+
+\paragraph{Evaluation corpus and labels} The corpora are constructed, with labels fixed by construction under Definition~\ref{def:operational}. A blinded model panel contested two strata; a targeted three-annotator human follow-up on those strata agreed with the construction on all 30 items (Section~\ref{sec:res-labels}). The full 154-item human study was not collected and is released as a replication instrument. The preregistered wrong-suppression rule triggered on the audit subset (Section~\ref{sec:res-labels}). Deduplication, unlike wrong suppression, depends on the labelling.
+
+\paragraph{Candidate multiplicity} The corpus has $m = 1$; multiplicity is tested only in simulation and a 60-unit live study (Section~\ref{sec:res-bound}). Retries under a fresh run identifier or a different tool are out of scope.
+
+\paragraph{Adversarial text} Prose-only injection remains in the judge's jurisdiction (84.0\% on the primary judge; Section~\ref{sec:res-attack}); no bound is claimed under injection, and the remedy is to type act-determining fields (Section~\ref{sec:res-refinement}).
+
+\paragraph{External execution} Guarantee (C) is outside the mechanism's contract (Section~\ref{sec:guarantees}, Proposition~\ref{prop:compose}).
+
+\paragraph{Operating budget and cost}
+The judge is consulted on 76.2\% of dispatches, at about 184 tokens per comparison in batches of ten. Operating points are governed by $\alpha$: selecting a stricter level of $\alpha=0.01$ prioritises safety over autonomy, yielding 22.1\% deduplication and routing 64.8\% of duplicates to flagged review.
+
+\subsection{Ethics and broader impact}
+
+The mechanism is meant to reduce harm from irreversible agent actions, and its two failure modes carry different ethical weight. Wrongly suppressing a legitimate action---a refund never issued, a message never sent---is silent, and the person affected may never learn of it; the design bounds this error but does not eliminate it. Executing an unintended duplicate is visible and recoverable, and the design deliberately tolerates more of it. Adversaries can target both directions; the refuter removes forced suppression whenever the distinction is typed, which is a reason to type act-determining fields rather than to trust a better judge. The injection templates are standard in the literature and released for defensive evaluation. Human oversight enters through the escalation band and audit; a band that emits more flags than reviewers can handle is not a safety mechanism~\cite{turan2026oversight}, so the fence records every semantic suppression with the matched effect, score, $m$ and threshold. We do not recommend the mechanism as the only safeguard for financial or safety-critical agent operations. The corpora are synthetic and contain no personal data.

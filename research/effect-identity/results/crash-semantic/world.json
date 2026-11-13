@@ -1,0 +1,33 @@
+{
+  "wires": [
+    {
+      "wireId": "wire_001",
+      "pid": 35264,
+      "phase": "seed",
+      "amountUSD": 780,
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213"
+      }
+    },
+    {
+      "wireId": "wire_002",
+      "pid": 9996,
+      "phase": "crash",
+      "amountUSD": 780,
+      "input": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213"
+      }
+    }
+  ],
+  "receipts": [
+    {
+      "messageId": "rcpt_001",
+      "pid": 12824,
+      "to": "ops@example.com"
+    }
+  ]
+}

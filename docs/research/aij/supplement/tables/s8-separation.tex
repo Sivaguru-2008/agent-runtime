@@ -1,0 +1,30 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Per-tool score separation on residual test pairs. ``Separable'' means $\max$ over distinct pairs $<\min$ over duplicate pairs, so a single threshold achieves zero error in both directions on that tool.}\label{tab:s8b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llrrrrl@{}}
+\toprule
+Judge & Tool & $n$ SAME & $n$ DIFF & max DIFF & min SAME & separable \\
+\midrule
+GPT-OSS-120B & charge\_card & 70 & 53 & 0.30 & 0.40 & yes \\
+GPT-OSS-120B & post\_refund & 31 & 20 & 0.90 & 0.85 & no \\
+GPT-OSS-120B & transfer\_funds & 40 & 20 & 0.90 & 0.70 & no \\
+GPT-OSS-120B & send\_email & 34 & 13 & 0.15 & 0.60 & yes \\
+GPT-OSS-120B & create\_ticket & 12 & 12 & 0.10 & 0.80 & yes \\
+GPT-OSS-120B & wire\_money & 60 & 26 & 0.10 & 0.75 & yes \\
+GPT-OSS-20B & charge\_card & 70 & 53 & 1.00 & 0.95 & no \\
+GPT-OSS-20B & post\_refund & 31 & 20 & 0.95 & 0.95 & no \\
+GPT-OSS-20B & transfer\_funds & 40 & 20 & 1.00 & 0.10 & no \\
+GPT-OSS-20B & send\_email & 34 & 13 & 0.05 & 0.00 & no \\
+GPT-OSS-20B & create\_ticket & 12 & 12 & 0.05 & 0.95 & yes \\
+GPT-OSS-20B & wire\_money & 60 & 26 & 0.05 & 0.00 & no \\
+Qwen3.6-27B & charge\_card & 67 & 51 & 1.00 & 0.95 & no \\
+Qwen3.6-27B & post\_refund & 30 & 20 & 1.00 & 0.95 & no \\
+Qwen3.6-27B & transfer\_funds & 38 & 19 & 0.05 & 0.95 & yes \\
+Qwen3.6-27B & send\_email & 33 & 13 & 0.95 & 0.95 & no \\
+Qwen3.6-27B & create\_ticket & 12 & 12 & 0.95 & 0.95 & no \\
+Qwen3.6-27B & wire\_money & 60 & 26 & 0.05 & 0.95 & yes \\
+\bottomrule
+\end{tabular}}
+\end{table}

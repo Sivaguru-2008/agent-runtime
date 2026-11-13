@@ -1,0 +1,30 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Per-tool calibration under the jurisdiction-matched pool. Tools with fewer than 19 residual distinct calibration pairs cannot certify $\alpha=0.05$ and receive $\thi=+\infty$ (no semantic suppression).}\label{tab:s9a}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+Judge & Tool & pool $n$ & $\thi$ & certifiable at $\alpha=0.05$ \\
+\midrule
+GPT-OSS-120B & charge\_card & 38 & 0.20 & yes \\
+GPT-OSS-120B & post\_refund & 28 & 0.90 & yes \\
+GPT-OSS-120B & transfer\_funds & 28 & 0.95 & yes \\
+GPT-OSS-120B & send\_email & 13 & $+\infty$ & no \\
+GPT-OSS-120B & create\_ticket & 6 & $+\infty$ & no \\
+GPT-OSS-120B & wire\_money & 29 & 0.80 & yes \\
+GPT-OSS-20B & charge\_card & 38 & 1.00 & yes \\
+GPT-OSS-20B & post\_refund & 28 & 1.00 & yes \\
+GPT-OSS-20B & transfer\_funds & 28 & 1.00 & yes \\
+GPT-OSS-20B & send\_email & 13 & $+\infty$ & no \\
+GPT-OSS-20B & create\_ticket & 6 & $+\infty$ & no \\
+GPT-OSS-20B & wire\_money & 29 & 0.10 & yes \\
+Qwen3.6-27B & charge\_card & 37 & 0.05 & yes \\
+Qwen3.6-27B & post\_refund & 28 & 1.00 & yes \\
+Qwen3.6-27B & transfer\_funds & 26 & 1.00 & yes \\
+Qwen3.6-27B & send\_email & 13 & $+\infty$ & no \\
+Qwen3.6-27B & create\_ticket & 6 & $+\infty$ & no \\
+Qwen3.6-27B & wire\_money & 29 & 0.95 & yes \\
+\bottomrule
+\end{tabular}}
+\end{table}

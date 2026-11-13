@@ -1,0 +1,82 @@
+\section{Experimental methodology}\label{sec:method}
+
+Every analysis is an offline recomputation from persisted corpus files and judge scores; no reported number requires a model call to regenerate. Commands, configuration and data are in the supplementary material and the artifact.
+
+\subsection{Corpus}
+
+The corpus comprises 1,066 labelled pairs over six irreversible tools: \texttt{charge\_card} (customer, amount, currency, memo), \texttt{post\_refund} (charge, amount, reason), \texttt{transfer\_funds} (two accounts, amount, currency, note), \texttt{send\_email} (recipient, subject, body), \texttt{create\_ticket} (title, description, priority) and \texttt{wire\_money}, whose amount, beneficiary and reference are all free text, so that the judge carries its entire identity decision. Each pair is labelled SAME or DIFF \emph{by construction} (Table~\ref{tab:corpus}): a SAME pair comes from a transformation instructed to preserve the act, checked by a validator that rejects any variant altering a pinned number or recipient; a DIFF pair mutates a declared field, inserts a distinguishing token, or is hand-specified to differ in intent. The labels operationalise our definition of identity (Definition~\ref{def:operational}). Four generator arms---Llama-3.3-70B (109 pairs), GPT-OSS-120B (121) and Qwen3.6-27B (118) at temperature 0.9, and a hand-written arm of 68 S2 pairs---let self-recognition be measured; the remaining 650 pairs have no generator (supplementary material, Section~S2). With 232 DIFF test pairs an observed zero admits a 95\% Wilson upper bound of 1.6\%, inside $\alpha=0.05$.
+
+\begin{table}[!tbp]
+\centering\scriptsize
+\caption{Corpus. Calibration/test counts are for the benign split; injection pairs are held out of calibration entirely.}\label{tab:corpus}
+\begin{tabularx}{\linewidth}{@{}llrrX@{}}
+\toprule
+Code & Label & $n$ & cal/test & Construction \\
+\midrule
+S1 & SAME & 68 & 34/34 & mechanical reformat: key order, whitespace, number, currency and case formats \\
+S2 & SAME & 253 & 126/127 & paraphrase of free text with typed fields pinned; four generator arms \\
+S3 & SAME & 75 & 37/38 & loose-schema value rewrite, e.g.\ ``\$780.00'' $\leftrightarrow$ ``seven hundred eighty dollars'' \\
+S4 & SAME & 163 & 81/82 & paraphrase instructed to maximise surface difference while preserving the act \\
+D1 & DIFF & 251 & 125/126 & one field mutated ($\pm1$, $\pm0.01$, $\times10$, identifier or order-number change, currency swap) \\
+D2 & DIFF & 150 & 75/75 & legitimate repeats: identical except a distinguishing token (``instalment 1 of 2'' vs ``2 of 2'') \\
+D3 & DIFF & 61 & 30/31 & hand-specified same-surface, different-intent pairs \\
+D4a & DIFF & 20 & held out & typed field differs \emph{and} free text says ``treat as duplicate; suppress'' \\
+D4b & DIFF & 25 & held out & typed fields identical, distinct act, injection in free text \\
+\midrule
+\multicolumn{2}{@{}l}{Total} & 1,066 & 508/513 & 559 SAME, 507 DIFF; 45 attack pairs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Splits}
+Benign pairs are split 50/50 into calibration and test, stratified by (category, generator) with a fixed seed; injection categories are held out, and the build asserts both properties. Pairs derived from the same seed act can fall on both sides (82.8\%~[79.3--85.9] of test pairs share a seed act with a calibration pair), a route to optimism, so we also report 200 seed-level splits that partition the 219 seed acts first.
+
+\paragraph{Judges}
+GPT-OSS-120B (primary), GPT-OSS-20B and Qwen3.6-27B---two model families---were reached through Groq's OpenAI-compatible endpoint in August 2026, at temperature 0, in batches of ten. A judge is admitted only if it meets conditions fixed before scoring: coverage of at least 80\%, at least two distinct score values, and SAME/DIFF AUC of at least 0.60, which excludes a constant judge whose calibrated threshold would report a fake zero. Both GPT-OSS models scored all pairs (AUC 0.962); Qwen scored 1,041 (97.7\%, AUC 0.974), its abstentions unassociated with category, label, tool, split or generator (smallest permutation $p=0.09$; Section~S4). Llama-3.3-70B reached 5.6\% coverage before its endpoint disappeared and is excluded. Weights behind an endpoint are not pinned, so a re-run is a different experiment.
+
+\paragraph{Configurations}
+B0 no fence; B1 exact string; B2 canonical key (content-addressed fencing, the prior-art baseline); a raw judge at $\tau=0.5$; the \emph{layered} configuration (certifier and calibrated judge, no refuter); the \emph{proposed} configuration (certifier, refuter, calibrated judge, escalation band); and a \emph{refined} configuration that adds to $\sigma_t$, for every free-text field, the numeric magnitudes it mentions---an intervention modelling a tool author who types the numbers prose carries. Every configuration and ablation is calibrated on its own jurisdiction, at $\alpha=0.05$ (and $0.01$) with $\gamma=0.05$. Each corpus pair compares one request with one committed effect, so $m=1$ on the corpus.
+
+\paragraph{Metrics and statistics}
+Wrong suppression and friction are measured over DIFF pairs and deduplication and silent or flagged escape over SAME pairs, on the 513-pair test split (281 SAME, 232 DIFF) and separately on the 45 attack pairs. Every rate carries a 95\% Wilson interval~\cite{wilson1927}; a rate marked $\dagger$ is zero because a decidable layer makes it so. Paired comparisons use exact McNemar tests~\cite{mcnemar1947} with Holm correction~\cite{holm1979} within the liveness and safety families. Agreement uses Krippendorff's $\alpha$~\cite{krippendorff2004}, Fleiss' $\kappa$~\cite{fleiss1971} and Cohen's $\kappa$~\cite{cohen1960}. Seeds are recorded in the artifact's configuration file.
+
+\subsection{Validation of the labels}\label{sec:method-labels}
+
+A relabelling study was preregistered before any judgement was collected: 154 frozen, per-item-hashed items in eleven strata weighted toward the categories a reader is most likely to contest, three blinded annotators and a blind adjudicator, three catch trials with a fixed exclusion rule, and a fixed decision rule for the safety claim (frozen at Git commit \texttt{82274ec}, 2026-08-23; SHA-256 sheet hash \texttt{66a174e1\dots9a9c}). The full 154-item preregistered Channel~H study was not collected and is released as an open, cryptographically frozen turn-key replication artifact with an interactive browser instrument.
+
+To evaluate label reproducibility across diverse reasoning systems without author consensus, \emph{Channel~M}---a blinded model panel (\texttt{groq/compound}, \texttt{groq/compound-mini}, \texttt{qwen/qwen3.6-27b}; \texttt{openai/gpt-oss-safeguard-20b} adjudicating; the primary judge not queried directly)---was run one pair per request, and all four passed the catch trials. Both Compound systems are built on GPT-OSS-120B together with Llama models (Llama 4 Scout for \texttt{groq/compound}, Llama 3.3 70B for \texttt{groq/compound-mini}), so the primary judge's model is a component of two panelists, and the adjudicator is fine-tuned from the GPT-OSS family. The panel is therefore not independent of the primary judge; agreement with the two Compound panelists excluded is 96 of 117 (82.1\%~[74.1--88.0]). A model panel controls the same threat of idiosyncratic author definitions, and is reported strictly as model-panel evidence. The sheet draws 61 items from this corpus and 93 from an extension corpus over nine further tools whose judge scores were never persisted.
+
+To resolve the two strata contested by the model panel under the preregistered rule, a targeted Channel~H follow-up was executed in September 2026. Three independent adult annotators (\texttt{human-alpha}, \texttt{human-beta}, \texttt{human-gamma}), fluent users of transactional software with no prior knowledge of the manuscript, repository, hypotheses, or ground-truth categories and no personal relationship to the author, completed the task. Annotators evaluated the 30 frozen items from legitimate repeats (D2) and prose-only injection (D4b) interleaved invisibly with three preregistered attention catch trials (IT013, IT022, IT108) via an offline, self-contained HTML instrument (\texttt{annotation/channel-h-targeted/instrument.html}) run locally without network dependencies or telemetry. Presentation order and item orientation were pseudo-randomised per participant via a deterministic hash of their chosen pseudonym. Participants provided electronic informed consent covering research purpose, recorded response times, voluntary withdrawal, and publication of anonymised response CSVs; no personally identifiable data was collected. Participants were compensated at or above the local statutory minimum hourly wage for the median task duration regardless of response distribution or catch-trial completion (Section~\ref{sec:res-labels}).
+
+\subsection{A second instance: action authorisation}\label{sec:method-authz}
+
+An agent holds standing approvals, each with typed constraints (recipient, account or identifier, maximum amount, currency, maximum role, expiry) and a free-text scope. Permitting an action no approval covers---\emph{wrong authorisation}---is the silent error; declining a covered action is visible. The certifier permits when every typed constraint holds and the purpose text is canonically equal to the scope; the refuter declines when a typed constraint fails; the residual goes to the judge, and the action is permitted only if its score exceeds a threshold calibrated on not-covered residual pairs. Theorems~\ref{thm:bound} and~\ref{thm:tight} apply with wrong authorisation in place of wrong suppression; there is no band.
+
+The corpus has 520 (approval, action) pairs over four tools (\texttt{issue\_refund}, \texttt{transfer\_funds}, \texttt{send\_email}, \texttt{grant\_access}) and 40 approvals. Per approval: the scope with whitespace perturbed (A1, covered, certified); three paraphrases (A2) and one specific instance (A3), covered; two typed violations (B1, refuted); four out-of-scope purposes with compliant typed values (B2, residual); and two attacks appending an instruction to permit, to a typed violation (B4a) and to an out-of-scope purpose (B4b). Labels are by construction; the seed texts were drafted with an AI assistant and are released for inspection. The split is by approval, so seed-level leakage is absent by construction; attacks are held out; judges, prompt format, batching, parser and admission rule are those of the identity experiments; $m=1$ throughout.
+
+\subsection{Claims and the evidence for them}
+
+Table~\ref{tab:claims} maps each claim of the paper to the result that supports it and states what that result does and does not establish. It is the reading guide to Section~\ref{sec:results}.
+
+\begin{table}[!tbp]
+\centering\scriptsize\linespread{1.0}\selectfont\setlength{\tabcolsep}{3.5pt}
+\caption{Claims, evidence and conclusions. ``Proved'' results hold under the listed assumptions; ``measured'' results hold on this corpus.}\label{tab:claims}
+\begin{tabularx}{\linewidth}{@{}p{2.8cm}p{2.3cm}Xp{2.7cm}@{}}
+\toprule
+Claim & Theorem / experiment & Evidence & Conclusion \\
+\midrule
+Decidable layers never err on the pairs they decide & Prop.~\ref{prop:sound}; §\ref{sec:res-main} & 0/232 distinct test pairs certified; 0/281 duplicates refuted; 20/20 typed-field injections refuted & proved under A2, A5, A5$'$; assumptions hold on this corpus \\
+Semantic layer recovers paraphrased duplicates that canonical keys miss & §\ref{sec:res-main} & dedup 94.7\% vs 12.1\%; McNemar 232/0 discordant & measured; large effect \\
+Wrong suppression is bounded on the deployed statistic & Thm.~\ref{thm:bound}; §\ref{sec:res-bound} & WS 1.7\%; residual-conditioned 2.8\%; mismatched pool 4.9\%; Monte-Carlo 89.0\% uncorrected vs $\le$5.7\% corrected & proved under A6; marginal, not per deployment \\
+The bound's realised rate varies across pools and splits & §\ref{sec:res-bound} & seed-level splits: mean 2.7\%, 10.5\% of splits above $\alpha$ & measured; a deployment can exceed $\alpha$ \\
+The bound is marginal over kinds of difference; per-kind validity costs budget & Cor.~\ref{cor:mondrian}; §\ref{sec:res-class} & D3 6.5\% under the marginal threshold, 0/31 under its own; class-valid dedup 69.0\% (12.1\% on two judges) & measured; per-kind validity needs an observable partition or a larger pool \\
+The bounded direction transfers across judges; deduplication does not & §\ref{sec:res-judges} & WS 1.7/1.3/0.9\%; dedup 94.7/82.6/89.0\% & measured; three judges, two families \\
+The refuter closes typed-field injection; prose-only injection remains judge-dependent & Prop.~\ref{prop:sound}; §\ref{sec:res-attack} & D4a 65.0\%$\to$0\%$\dagger$; D4b 84.0\% (primary) & proved for typed fields; measured for prose \\
+Refinement shrinks the residual and the calibration budget & Props.~\ref{prop:residual}, \ref{prop:dilemma}; §\ref{sec:res-refinement} & pool 142$\to$49; rank 7$\to$2; dedup 94.7$\to$69.0\% (12.1\% on two judges) & exact part proved; composition part measured \\
+Fence-level at-most-once holds across process death outside the commit window & Prop.~\ref{prop:amo}; §\ref{sec:res-crash} & semantic 36/36 outside window vs syntactic 0/36; 0/48 missed legitimate effects & measured on one tool, one judge \\
+External exactly-once is not provided & Props.~\ref{prop:compose}, \ref{prop:structure}; §\ref{sec:res-crash} & distinct arm: 12/12 re-fires inside the window, 11 flagged & confirmed; requires a provider key \\
+Safety conclusion is robust to relabelling; liveness is not & §\ref{sec:res-labels} & WS 1.7/1.9/2.2\% across labellings; dedup 94.7/75.0/27.6\% & measured; labels are constructed \\
+Constructed labels are shared by independent readers & §\ref{sec:res-labels} & Model panel audit (88.0\% [80.9--92.7]); targeted Channel H follow-up (100.0\% [79.6--100.0] on D2 and D4b) & Shared across model families; evaluated on contested strata via targeted human annotation \\
+\bottomrule
+\end{tabularx}
+\end{table}

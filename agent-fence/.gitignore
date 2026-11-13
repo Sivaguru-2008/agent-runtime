@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.db
+*.db-wal
+*.db-shm
+.agent-fence-demo.db*
+agent-fence.db*
+*.tgz

@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Weak-judge transition: Gaussian noise added to the primary judge's scores (calibration and test alike, so exchangeability is preserved). As separation degrades the safe fixed-threshold region collapses, while the conformal threshold rises and keeps realised wrong suppression below $\alpha$ by suppressing less.}\label{tab:s12b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}rrlrrr@{}}
+\toprule
+$\sigma$ & AUC & safe region & safe fraction & conformal $\thi$ & conformal dedup \\
+\midrule
+0.00 & 0.995 & width 0.80 & 80\% & 0.80 & 93.9\% \\
+0.10 & 0.988 & width 0.67 & 68\% & 0.74 & 92.1\% \\
+0.20 & 0.983 & width 0.49 & 50\% & 0.69 & 84.9\% \\
+0.30 & 0.960 & width 0.33 & 34\% & 0.76 & 70.0\% \\
+0.40 & 0.916 & width 0.19 & 19\% & 0.88 & 50.5\% \\
+0.55 & 0.843 & width 0.03 & 4\% & 0.99 & 6.8\% \\
+0.75 & 0.764 & empty & 1\% & 1.00 & 0.0\% \\
+1.05 & 0.690 & empty & 1\% & 1.00 & 0.0\% \\
+1.60 & 0.623 & empty & 1\% & 1.00 & 0.0\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

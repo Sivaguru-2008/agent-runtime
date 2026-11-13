@@ -1,0 +1,42 @@
+\section{Related work}\label{sec:related}
+
+\paragraph{Identity by position, token and content}
+At-most-once and exactly-once processing are classical systems problems, with a long lineage in remote procedure calls~\cite{birrell1984rpc}, stream processing~\cite{carbone2017flink}, transactions and sagas~\cite{gray1993transaction,garcia1987sagas}. Durable-execution engines replay a recorded history under a determinism contract~\cite{temporal2026docs,restate2026docs}, whose checkpoint--resume semantics now have a machine-checked conformance contract~\cite{resume2026contract}; payment interfaces de-duplicate retries by a client-chosen idempotency key~\cite{stripe2026idempotency}; fencing tokens with idempotent writes are standard practice~\cite{kleppmann2017ddia}. All identify an effect by position, by token or by content after syntactic normalisation, and all are correct when a retry is a faithful replay. A re-synthesising agent's retry is a fresh text with the same intent, so it receives a fresh identifier, token and hash. We keep content-addressed commitment as the certifier and add a bounded semantic layer.
+
+\paragraph{Reliability runtimes for LLM agents}
+Atomix commits effects only when per-resource frontiers show that no earlier conflicting work can arrive~\cite{atomix2026}; CoAgent orders concurrent agents and repairs conflicts with saga-style inverses~\cite{lyu2026coagent}; LogAct exposes actions on a shared log before they execute~\cite{balakrishnan2026logact}; semantic isolation levels constrain how a durable AI workflow's resources may change beneath it~\cite{mozafari2026transaction}; and verified tool calls add postcondition checks and idempotency keys to a tool wrapper~\cite{mansoor2026verified}. These take the identity of an effect as given or rely on an observable postcondition, which, where it exists, beats any judge score. Yin~\cite{yin2026invariants} proves execution fidelity for agents moving value on public ledgers, where identity is fixed by the rendered transaction rather than decided across paraphrase.
+
+\paragraph{Semantic replay in agents}
+ACRFence~\cite{zheng2026acrfence} observes that LLM agents re-synthesise subtly different requests after checkpoint--restore, names the resulting semantic rollback attacks, and proposes that an analyser LLM classify each post-restore call as equivalent to a logged call or not; the attacks are validated, but the mitigation is not implemented and its misclassification and evasion are left open. CapLease~\cite{xu2026caplease} names semantic replay in authorisation and binds an authenticated confirmation to a canonical action consumed through transactional transitions. The problem and the idea of consulting a model are prior work; we add a procedure with a stated bound on its safety-critical error, robustness to injected text on declared fields, and a measured cost.
+
+\paragraph{Duplicate detection and semantic caching}
+Record linkage decides whether two records denote one entity~\cite{elmagarmid2007duplicate}; semantic textual similarity whether two texts mean the same~\cite{cer2017sts}; LLM-assisted pipelines remove near-duplicate documents~\cite{fang2026semhash}; and semantic caches return a stored response for a similar query~\cite{gill2025meancache}. The last is structurally closest to a fence, but its errors are cheap and roughly symmetric. Here one error is irreversible and silent, which is why we bound one direction rather than report accuracy or F1.
+
+\paragraph{LLM judges and prompt injection}
+LLM judges are biased, contaminated and self-preferring~\cite{zheng2023judge,wang2023fair,ye2024justice,chen2024humans,li2025leakage}, persuadable~\cite{hwang2025persuasion}, and blind to some agent-action risks~\cite{yuan2024rjudge,ruan2024toolemu}. Indirect prompt injection steers agents through text in their context~\cite{greshake2023injection,debenedetti2024agentdojo}; capability gates admit confused-deputy failures~\cite{zuvic2026confused}; and design-pattern defences constrain what untrusted text can influence~\cite{beurerkellner2025patterns}. We take the judge to be an uncalibrated, manipulable oracle, bound its error on the benign distribution by calibration, and remove from its jurisdiction every pair whose distinction is declared in a typed field---a decision the attacker's text cannot reach, in the sense of~\cite{beurerkellner2025patterns}.
+
+\paragraph{Conformal prediction and multiplicity}
+Split-conformal prediction gives distribution-free finite-sample guarantees under exchangeability~\cite{vovk2005alrw,lei2018distribution,angelopoulos2023gentle}; Mondrian conformal prediction conditions them on a partition~\cite{vovk2005alrw}. Language-model applications include generation and factuality~\cite{quach2023clm,mohri2024factuality}, robot planners that ask for help~\cite{ren2023knowno} and intervals on judge scores~\cite{sheng2025judgeconformal}; risk control bounds expected losses~\cite{angelopoulos2024crc,angelopoulos2021ltt}, and conformal p-values support multiple testing~\cite{bates2023outliers}. Known failure modes include non-exchangeable generation, distribution shift~\cite{ulmer2024nonexchangeable,lin2025domainshift} and marginal under-coverage of a minority class~\cite{tursunbadalov2026minority}, which has the shape of our class-conditional finding. Our use is deliberately simple. What differs is the object: a control decision with an irreversible consequence, whose deployed statistic is a maximum over a variable-size candidate set, and whose calibration population must match a jurisdiction that changes whenever decidable layers change.
+
+\paragraph{Schemas and types}
+Typed schemas have formal semantics~\cite{pezoa2016jsonschema} and provenance asks why and where a result came from~\cite{buneman2001provenance}; tool interfaces use schemas for syntactic validation, and we repurpose them as the carrier of the refuter (Proposition~\ref{prop:residual}).
+
+Table~\ref{tab:positioning} summarises the comparison. We know of no prior work that pairs a sound certifier with a sound refuter, judges only the remainder, and calibrates the deployed statistic on a jurisdiction-matched pool; we expect precedents for each component.
+
+\begin{table}[!tbp]
+\centering\scriptsize\setlength{\tabcolsep}{3.5pt}
+\caption{Positioning. ``Not stated'' means we found no statement in the cited work, not that the property fails.}\label{tab:positioning}
+\begin{tabularx}{\linewidth}{@{}p{3.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+ & Idempotency key & Canonical hash & Raw LLM judge & ACRFence~/ CapLease & This work \\
+\midrule
+Survives non-deterministic control flow & no & yes & yes & yes & yes \\
+Recognises paraphrased arguments & no & no & yes & analyser LLM / canonical action & residual judge \\
+Error bound on suppression & exact on token & exact, incomplete & none & not stated & exact on decided pairs; $\le\alpha$ on residual under A6 \\
+Typed-field distinctions immune to injected text & n/a & n/a & no & not stated & yes (refuter) \\
+Multiple committed candidates analysed & n/a & n/a & no & not stated & yes, with budget \\
+Undecided cases & execute & execute & threshold & fork (ACRFence) & escalate: execute and flag \\
+Implemented and evaluated & yes & yes & --- & attacks evaluated; mitigation not implemented~\cite{zheng2026acrfence} / yes & yes \\
+\bottomrule
+\end{tabularx}
+\end{table}

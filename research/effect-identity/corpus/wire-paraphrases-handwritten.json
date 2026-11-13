@@ -1,0 +1,37 @@
+{
+  "generator": "handwritten",
+  "generatedAt": "2026-08-15T10:15:53.134Z",
+  "pool": [
+    {
+      "amount_text": "seven hundred eighty dollars",
+      "beneficiary_text": "MARLOW FREIGHT",
+      "reference": "shipment #88213"
+    },
+    {
+      "amount_text": "USD 780",
+      "beneficiary_text": "Marlow Freight Ltd",
+      "reference": "ref: shipment 88213"
+    },
+    {
+      "amount_text": "780.00 US dollars",
+      "beneficiary_text": "marlow freight",
+      "reference": "for shipment no. 88213"
+    },
+    {
+      "amount_text": "$780",
+      "beneficiary_text": "Marlow  Freight",
+      "reference": "Shipment number 88213"
+    },
+    {
+      "amount_text": "seven hundred and eighty USD",
+      "beneficiary_text": "MARLOW-FREIGHT",
+      "reference": "88213 shipment"
+    },
+    {
+      "amount_text": "780 dollars exactly",
+      "beneficiary_text": "Marlow Freight Co",
+      "reference": "covering shipment 88213"
+    }
+  ],
+  "rejected": 0
+}

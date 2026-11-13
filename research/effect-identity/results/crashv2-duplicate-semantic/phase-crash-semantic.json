@@ -1,0 +1,40 @@
+{
+  "phase": "crash",
+  "pid": 13568,
+  "scorer": "groq:openai/gpt-oss-120b",
+  "mode": "semantic",
+  "projection": "declared",
+  "crashPoint": "after_local_commit",
+  "reachedCrashPoint": false,
+  "events": [
+    {
+      "type": "SUPPRESSED",
+      "layer": "L1",
+      "tool": "wire_money",
+      "operationId": "26ca6f02d5ffa1e927e459753cba653f4c14f48ddca64842d4e9b6271bb4bf75",
+      "matchedOperationId": "eb69c49d5927427dee456065c836a9c45beb9da51503657367b934b3a11e2085",
+      "score": 0.97,
+      "m": 1,
+      "tHi": 0.8,
+      "pid": 13568
+    }
+  ],
+  "decisions": [
+    {
+      "kind": "retry_class",
+      "retry": "semantic"
+    },
+    {
+      "kind": "judge_scores",
+      "scores": [
+        0.97
+      ]
+    }
+  ],
+  "judgeCalls": 1,
+  "judgeTokens": 630,
+  "judgeLatencyMs": 1118,
+  "judgeAbstentions": 0,
+  "judgeTransportFailures": 0,
+  "judgeBatchAttempts": 1
+}

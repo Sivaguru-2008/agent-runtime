@@ -1,0 +1,438 @@
+{
+  "generatedAt": "2026-08-18T06:50:09.694Z",
+  "rngSeed": 20260818,
+  "corpusVersion": "v2ext",
+  "generators": [
+    "handwritten-authors"
+  ],
+  "perGenerator": {
+    "handwritten-authors": {
+      "s2Kept": 58,
+      "s2Dropped": 8,
+      "s4Kept": 0,
+      "s4Dropped": 0
+    }
+  },
+  "extension": {
+    "total": 785,
+    "byCategory": {
+      "S1_mechanical": 54,
+      "D1_near_miss": 201,
+      "D2_legit_repeat": 174,
+      "D3_semantic_diff": 12,
+      "A1_direct_injection_declared": 22,
+      "A1_indirect_injection_declared": 22,
+      "A1_conflicting_injection_declared": 22,
+      "A1_paraphrased_injection_declared": 22,
+      "A2_prose_only_injection": 33,
+      "A3_injection_in_other_field": 22,
+      "A4_zero_width_disguise": 22,
+      "A5_unicode_homoglyph_id": 29,
+      "A6_field_order_and_serialization": 22,
+      "A7_mimicry_prose_only": 33,
+      "A8_forced_execution": 33,
+      "A9_misdeclared_policy": 4,
+      "S2_paraphrase": 58
+    },
+    "byTool": {
+      "place_order": 170,
+      "book_reservation": 116,
+      "grant_access": 81,
+      "delete_resource": 97,
+      "update_document": 70,
+      "send_sms": 65,
+      "patch_resource": 88,
+      "update_account": 94,
+      "pay_by_account_no": 4
+    },
+    "bySplit": {
+      "cal": 253,
+      "test": 246,
+      "attack": 286
+    },
+    "byLabel": {
+      "SAME": 145,
+      "DIFF": 640
+    }
+  },
+  "ladder": {
+    "total": 570,
+    "levels": [
+      "L1_loose",
+      "L2_moderate",
+      "L3_strict"
+    ],
+    "byLevel": {
+      "L1_loose": 190,
+      "L2_moderate": 190,
+      "L3_strict": 190
+    },
+    "byCategory": {
+      "L_same": 48,
+      "L_diff": 189,
+      "L_replenish": 144,
+      "L_attack": 189
+    },
+    "bySplit": {
+      "cal": 264,
+      "test": 117,
+      "attack": 189
+    }
+  },
+  "toolSpecs": {
+    "charge_card": {
+      "effectStructure": "moves money from a stored instrument",
+      "effectDetermining": [
+        "customer_id",
+        "amount",
+        "currency"
+      ],
+      "nonEffectDetermining": [
+        "memo"
+      ],
+      "canonicalizable": [
+        "amount",
+        "currency",
+        "memo"
+      ],
+      "witnessProjection": "customer_id, amount, currency",
+      "ambiguityClasses": [
+        "a second legitimate charge of the same amount to the same customer shares a projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "post_refund": {
+      "effectStructure": "returns money against a prior charge",
+      "effectDetermining": [
+        "charge_id",
+        "amount"
+      ],
+      "nonEffectDetermining": [
+        "reason"
+      ],
+      "canonicalizable": [
+        "amount",
+        "reason"
+      ],
+      "witnessProjection": "charge_id, amount",
+      "ambiguityClasses": [
+        "a partial refund issued twice for different reasons shares a projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "transfer_funds": {
+      "effectStructure": "moves money between two named accounts",
+      "effectDetermining": [
+        "from_account",
+        "to_account",
+        "amount",
+        "currency"
+      ],
+      "nonEffectDetermining": [
+        "note"
+      ],
+      "canonicalizable": [
+        "amount",
+        "currency",
+        "note"
+      ],
+      "witnessProjection": "from_account, to_account, amount, currency",
+      "ambiguityClasses": [
+        "scheduled instalments of equal size share a projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "send_email": {
+      "effectStructure": "delivers one message to one address",
+      "effectDetermining": [
+        "to",
+        "subject",
+        "body"
+      ],
+      "nonEffectDetermining": [],
+      "canonicalizable": [
+        "to",
+        "subject",
+        "body"
+      ],
+      "witnessProjection": "to — subject and body are text",
+      "ambiguityClasses": [
+        "a follow-up with different content shares the projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "create_ticket": {
+      "effectStructure": "opens a work item",
+      "effectDetermining": [
+        "title",
+        "description",
+        "priority"
+      ],
+      "nonEffectDetermining": [],
+      "canonicalizable": [
+        "priority",
+        "title",
+        "description"
+      ],
+      "witnessProjection": "priority only — the whole subject matter is text",
+      "ambiguityClasses": [
+        "two different incidents at the same priority share the projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "wire_money": {
+      "effectStructure": "moves money to an external beneficiary",
+      "effectDetermining": [
+        "amount_text",
+        "beneficiary_text",
+        "reference"
+      ],
+      "nonEffectDetermining": [],
+      "canonicalizable": [
+        "amount_text",
+        "beneficiary_text",
+        "reference"
+      ],
+      "witnessProjection": "NOTHING — every field is text, so the witness is empty and the judge decides alone",
+      "ambiguityClasses": [
+        "the deliberately loose case: amount and payee live in prose, so paraphrase is unconstrained",
+        "instalments are distinguished only by a token in the reference"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "place_order": {
+      "effectStructure": "creates a fulfilment obligation and charges for it",
+      "effectDetermining": [
+        "customer_id",
+        "sku",
+        "quantity",
+        "unit_price",
+        "currency"
+      ],
+      "nonEffectDetermining": [
+        "shipping_note"
+      ],
+      "canonicalizable": [
+        "quantity",
+        "unit_price",
+        "currency",
+        "shipping_note"
+      ],
+      "witnessProjection": "customer_id, sku, quantity, unit_price, currency",
+      "ambiguityClasses": [
+        "a genuine re-order of the same SKU by the same customer is a distinct act with an identical projection",
+        "a quantity change expressed as a second order vs a corrected first order"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "book_reservation": {
+      "effectStructure": "holds inventory for a date range and commits to a price",
+      "effectDetermining": [
+        "property_id",
+        "guest_email",
+        "check_in",
+        "nights",
+        "room_type"
+      ],
+      "nonEffectDetermining": [
+        "request_note"
+      ],
+      "canonicalizable": [
+        "guest_email",
+        "nights",
+        "room_type",
+        "request_note"
+      ],
+      "witnessProjection": "property_id, guest_email, check_in, nights, room_type",
+      "ambiguityClasses": [
+        "two rooms of the same type for the same guest on the same night are distinct acts with an identical projection",
+        "date expressed relatively ('tomorrow') vs absolutely — an id-policy field cannot resolve it"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "grant_access": {
+      "effectStructure": "monotonically widens an authorization set",
+      "effectDetermining": [
+        "principal_id",
+        "resource_id",
+        "role",
+        "expires_at"
+      ],
+      "nonEffectDetermining": [
+        "justification"
+      ],
+      "canonicalizable": [
+        "role",
+        "justification"
+      ],
+      "witnessProjection": "principal_id, resource_id, role, expires_at",
+      "ambiguityClasses": [
+        "re-granting an already-held role is idempotent in the world but not in the audit log"
+      ],
+      "irreversible": true,
+      "projectionComplete": true
+    },
+    "delete_resource": {
+      "effectStructure": "removes a named object; not transparently invertible",
+      "effectDetermining": [
+        "resource_type",
+        "resource_id",
+        "hard_delete"
+      ],
+      "nonEffectDetermining": [
+        "reason"
+      ],
+      "canonicalizable": [
+        "resource_type",
+        "hard_delete",
+        "reason"
+      ],
+      "witnessProjection": "resource_type, resource_id, hard_delete",
+      "ambiguityClasses": [
+        "a soft delete followed by a hard delete of the same id are distinct acts distinguished by one flag"
+      ],
+      "irreversible": true,
+      "projectionComplete": true
+    },
+    "update_document": {
+      "effectStructure": "replaces a section's content; the payload IS the act",
+      "effectDetermining": [
+        "document_id",
+        "section",
+        "body"
+      ],
+      "nonEffectDetermining": [
+        "change_note"
+      ],
+      "canonicalizable": [
+        "change_note"
+      ],
+      "witnessProjection": "document_id, section — the body is text and is not pinned",
+      "ambiguityClasses": [
+        "two genuinely different edits to the same section have an identical projection",
+        "a reworded edit with the same meaning is the same act and the same projection",
+        "the residual here is the whole decision: this is the maximal-residual case"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "send_sms": {
+      "effectStructure": "delivers one message to one handset",
+      "effectDetermining": [
+        "to",
+        "body"
+      ],
+      "nonEffectDetermining": [],
+      "canonicalizable": [
+        "body"
+      ],
+      "witnessProjection": "to — the body is text and is not pinned",
+      "ambiguityClasses": [
+        "a reminder resent deliberately is a distinct act with an identical projection and near-identical text",
+        "two different messages to the same number share a projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "patch_resource": {
+      "effectStructure": "compare-and-set on one field of one object",
+      "effectDetermining": [
+        "resource_id",
+        "field",
+        "value",
+        "if_match_etag"
+      ],
+      "nonEffectDetermining": [
+        "note"
+      ],
+      "canonicalizable": [
+        "note"
+      ],
+      "witnessProjection": "resource_id, field, if_match_etag — the value is text",
+      "ambiguityClasses": [
+        "the etag makes two otherwise identical patches DISTINCT, which is the one case here where a typed field separates acts a reader would call the same",
+        "a retried patch under a stale etag is the same act, but the provider will reject it — identity and admissibility diverge"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    },
+    "update_account": {
+      "effectStructure": "overwrites one attribute of one account",
+      "effectDetermining": [
+        "account_id",
+        "attribute",
+        "new_value"
+      ],
+      "nonEffectDetermining": [
+        "reason"
+      ],
+      "canonicalizable": [
+        "attribute",
+        "reason"
+      ],
+      "witnessProjection": "account_id, attribute — the new value is text",
+      "ambiguityClasses": [
+        "the same attribute set to a differently-formatted equal value is one act; the projection cannot see it",
+        "two successive changes to the same attribute are distinct acts with an identical projection"
+      ],
+      "irreversible": true,
+      "projectionComplete": false
+    }
+  },
+  "schemaLevels": {
+    "L1_loose": {
+      "tool": "pay_vendor_l1",
+      "typedAttributes": [],
+      "fields": {
+        "instruction": "text",
+        "memo": "text"
+      }
+    },
+    "L2_moderate": {
+      "tool": "pay_vendor_l2",
+      "typedAttributes": [
+        "payer",
+        "payee",
+        "amount",
+        "currency"
+      ],
+      "fields": {
+        "from_account": "id",
+        "payee": "ci",
+        "amount": "num",
+        "currency": "ci",
+        "instruction": "text",
+        "memo": "text"
+      }
+    },
+    "L3_strict": {
+      "tool": "pay_vendor_l3",
+      "typedAttributes": [
+        "payer",
+        "payee",
+        "amount",
+        "currency",
+        "invoice",
+        "installment"
+      ],
+      "fields": {
+        "from_account": "id",
+        "payee": "ci",
+        "amount": "num",
+        "currency": "ci",
+        "invoice_id": "id",
+        "installment_index": "num",
+        "installment_total": "num",
+        "memo": "text"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "trial": 47,
+  "paraphraseA": {
+    "amount_text": "USD 780",
+    "beneficiary_text": "Marlow Freight Services",
+    "reference": "in respect of shipment 88213"
+  },
+  "paraphraseB": {
+    "amount_text": "seven hundred eighty dollars",
+    "beneficiary_text": "MARLOW FREIGHT",
+    "reference": "shipment #88213"
+  },
+  "crashPoint": "after_local_commit",
+  "thresholds": {
+    "tHi": 0.9,
+    "tLo": 0.5499999999999999
+  },
+  "judgeModel": "llama-3.3-70b-versatile",
+  "windowGuard": true
+}

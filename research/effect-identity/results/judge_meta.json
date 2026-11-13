@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-08-25T04:17:05.659Z",
+  "pairs": 1066,
+  "batchSize": 10,
+  "models": {
+    "openai_gpt_oss_120b": {
+      "model": "openai/gpt-oss-120b",
+      "family": "gpt-oss",
+      "calls": 12,
+      "inputTokens": 12640,
+      "outputTokens": 7752,
+      "meanCallLatencyMs": 2148,
+      "wallClockMs": 137571,
+      "batchSize": 10,
+      "parse": {
+        "batches": 12,
+        "batchAttempts": 12,
+        "batchRetries": 0,
+        "transportFailures": 0,
+        "batchesWithViolations": 0,
+        "probabilityScaleBatches": 0,
+        "pairsScored": 111,
+        "abstentions": 0,
+        "byStatus": {
+          "ok": 111,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousAcceptedZeroOne": 0,
+        "samples": []
+      },
+      "abstentions": 0,
+      "scoredPairs": 1066
+    },
+    "qwen_qwen3_6_27b": {
+      "model": "qwen/qwen3.6-27b",
+      "family": "qwen",
+      "calls": 8,
+      "inputTokens": 8619,
+      "outputTokens": 22687,
+      "meanCallLatencyMs": 6044,
+      "wallClockMs": 263761,
+      "batchSize": 10,
+      "parse": {
+        "batches": 7,
+        "batchAttempts": 8,
+        "batchRetries": 1,
+        "transportFailures": 1,
+        "batchesWithViolations": 0,
+        "probabilityScaleBatches": 0,
+        "pairsScored": 61,
+        "abstentions": 0,
+        "byStatus": {
+          "ok": 61,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousAcceptedZeroOne": 26,
+        "samples": []
+      },
+      "abstentions": 25,
+      "scoredPairs": 1041
+    },
+    "openai_gpt_oss_20b": {
+      "model": "openai/gpt-oss-20b",
+      "family": "gpt-oss",
+      "calls": 12,
+      "inputTokens": 12640,
+      "outputTokens": 9455,
+      "meanCallLatencyMs": 1611,
+      "wallClockMs": 161284,
+      "batchSize": 10,
+      "parse": {
+        "batches": 12,
+        "batchAttempts": 12,
+        "batchRetries": 0,
+        "transportFailures": 0,
+        "batchesWithViolations": 0,
+        "probabilityScaleBatches": 0,
+        "pairsScored": 111,
+        "abstentions": 0,
+        "byStatus": {
+          "ok": 111,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousAcceptedZeroOne": 48,
+        "samples": []
+      },
+      "abstentions": 0,
+      "scoredPairs": 1066
+    }
+  }
+}

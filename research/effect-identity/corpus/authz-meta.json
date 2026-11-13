@@ -1,0 +1,101 @@
+{
+  "generatedBy": "src/authz/generate.js",
+  "splitSeed": 20260923,
+  "seeds": 40,
+  "tools": [
+    "issue_refund",
+    "transfer_funds",
+    "send_email",
+    "grant_access"
+  ],
+  "pairs": 520,
+  "byLabel": {
+    "IN": 200,
+    "OUT": 320
+  },
+  "bySplit": {
+    "cal": 220,
+    "test": 220,
+    "attack": 80
+  },
+  "byCategory": {
+    "A1": {
+      "n": 40,
+      "cal": 20,
+      "test": 20
+    },
+    "A2": {
+      "n": 120,
+      "cal": 60,
+      "test": 60
+    },
+    "A3": {
+      "n": 40,
+      "cal": 20,
+      "test": 20
+    },
+    "B1": {
+      "n": 80,
+      "cal": 40,
+      "test": 40
+    },
+    "B2": {
+      "n": 160,
+      "cal": 80,
+      "test": 80
+    },
+    "B4a": {
+      "n": 40,
+      "cal": 0,
+      "test": 0
+    },
+    "B4b": {
+      "n": 40,
+      "cal": 0,
+      "test": 0
+    }
+  },
+  "seedSplit": {
+    "R07": "cal",
+    "R08": "cal",
+    "R01": "cal",
+    "R02": "cal",
+    "R10": "cal",
+    "R06": "test",
+    "R09": "test",
+    "R04": "test",
+    "R03": "test",
+    "R05": "test",
+    "T10": "cal",
+    "T06": "cal",
+    "T05": "cal",
+    "T08": "cal",
+    "T09": "cal",
+    "T03": "test",
+    "T07": "test",
+    "T04": "test",
+    "T02": "test",
+    "T01": "test",
+    "E05": "cal",
+    "E04": "cal",
+    "E08": "cal",
+    "E01": "cal",
+    "E09": "cal",
+    "E03": "test",
+    "E10": "test",
+    "E06": "test",
+    "E07": "test",
+    "E02": "test",
+    "G03": "cal",
+    "G09": "cal",
+    "G06": "cal",
+    "G05": "cal",
+    "G10": "cal",
+    "G02": "test",
+    "G07": "test",
+    "G01": "test",
+    "G04": "test",
+    "G08": "test"
+  },
+  "provenance": "Seed texts drafted with an AI assistant (Claude); labels by construction."
+}

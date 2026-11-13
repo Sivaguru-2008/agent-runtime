@@ -1,0 +1,9 @@
+{
+  "model": "llama-3.3-70b-versatile",
+  "calls": 41,
+  "inputTokens": 30935,
+  "outputTokens": 3571,
+  "meanCallLatencyMs": 438,
+  "wallClockMs": 1789734,
+  "pairsPerCall": 6
+}

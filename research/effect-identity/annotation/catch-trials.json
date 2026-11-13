@@ -1,0 +1,21 @@
+{
+  "declaredIn": "annotation/PREREGISTRATION.md §4",
+  "rule": "an annotator failing ANY catch trial is dropped in full; UNSURE counts as a failure",
+  "trials": [
+    {
+      "item": "IT013",
+      "expect": "SAME",
+      "why": "purely presentational difference (key order / whitespace / case only)"
+    },
+    {
+      "item": "IT022",
+      "expect": "SAME",
+      "why": "purely presentational difference (key order / whitespace / case only)"
+    },
+    {
+      "item": "IT108",
+      "expect": "DIFF",
+      "why": "single numeric field 'nights' differs by a factor of 2.00"
+    }
+  ]
+}

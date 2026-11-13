@@ -1,0 +1,2751 @@
+{
+  "generatedAt": "2026-09-01T15:22:30.611Z",
+  "judge": "openai_gpt_oss_120b",
+  "alpha": 0.05,
+  "gamma": 0.05,
+  "levels": [
+    "L1_loose",
+    "L2_moderate",
+    "L3_strict"
+  ],
+  "schemaLevels": {
+    "L1_loose": [],
+    "L2_moderate": [
+      "payer",
+      "payee",
+      "amount",
+      "currency"
+    ],
+    "L3_strict": [
+      "payer",
+      "payee",
+      "amount",
+      "currency",
+      "invoice",
+      "installment"
+    ]
+  },
+  "fixed": {
+    "L1_loose": {
+      "level": "L1_loose",
+      "typedAttributes": [],
+      "poolCondition": "fixed",
+      "calibration": {
+        "tHi": 1,
+        "tLo": 0,
+        "nCalDiff": 32,
+        "nCalSame": 8,
+        "certifiableM": 1,
+        "poolIsResidual": true,
+        "nPool": 32,
+        "nNatural": 32,
+        "nReplenished": 0
+      },
+      "requiredForM1": 19,
+      "certifiableM": 1,
+      "coverage": {
+        "certifier": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "refuter": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "residual": {
+          "value": 1,
+          "successes": 102,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9637055378535367,
+            "hi": 1
+          }
+        },
+        "judgeCallRate": {
+          "value": 1,
+          "successes": 102,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9637055378535367,
+            "hi": 1
+          }
+        }
+      },
+      "test": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 31,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.889744604539564,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "residualTest": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 31,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.889744604539564,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "attackFailure": {
+        "value": 0,
+        "successes": 0,
+        "n": 63,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.05747119958885172
+        }
+      },
+      "attackByMutation": {
+        "amount": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "amount_cents": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "payee": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "payer": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "currency": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "invoice": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "installment": {
+          "n": 7,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 7,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6456695649333126,
+              "hi": 1
+            }
+          }
+        },
+        "cost_centre": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        }
+      },
+      "designCheck": [],
+      "decisionsById": {
+        "LAD_L1_loose_same_0002": "ESCALATE",
+        "LAD_L1_loose_same_0026": "ESCALATE",
+        "LAD_L1_loose_diff_0027": "ESCALATE",
+        "LAD_L1_loose_diff_0028": "ESCALATE",
+        "LAD_L1_loose_diff_0029": "ESCALATE",
+        "LAD_L1_loose_diff_0030": "ESCALATE",
+        "LAD_L1_loose_diff_0031": "ESCALATE",
+        "LAD_L1_loose_diff_0032": "ESCALATE",
+        "LAD_L1_loose_diff_0033": "ESCALATE",
+        "LAD_L1_loose_diff_0034": "ESCALATE",
+        "LAD_L1_loose_same_0050": "ESCALATE",
+        "LAD_L1_loose_same_0074": "ESCALATE",
+        "LAD_L1_loose_diff_0075": "ESCALATE",
+        "LAD_L1_loose_diff_0076": "ESCALATE",
+        "LAD_L1_loose_diff_0077": "ESCALATE",
+        "LAD_L1_loose_diff_0078": "ESCALATE",
+        "LAD_L1_loose_diff_0079": "ESCALATE",
+        "LAD_L1_loose_diff_0080": "ESCALATE",
+        "LAD_L1_loose_diff_0081": "ESCALATE",
+        "LAD_L1_loose_diff_0082": "ESCALATE",
+        "LAD_L1_loose_same_0098": "ESCALATE",
+        "LAD_L1_loose_same_0122": "ESCALATE",
+        "LAD_L1_loose_diff_0123": "ESCALATE",
+        "LAD_L1_loose_diff_0124": "ESCALATE",
+        "LAD_L1_loose_diff_0125": "ESCALATE",
+        "LAD_L1_loose_diff_0126": "ESCALATE",
+        "LAD_L1_loose_diff_0127": "ESCALATE",
+        "LAD_L1_loose_diff_0128": "ESCALATE",
+        "LAD_L1_loose_diff_0129": "ESCALATE",
+        "LAD_L1_loose_diff_0130": "ESCALATE",
+        "LAD_L1_loose_same_0146": "ESCALATE",
+        "LAD_L1_loose_same_0170": "ESCALATE",
+        "LAD_L1_loose_diff_0171": "ESCALATE",
+        "LAD_L1_loose_diff_0172": "ESCALATE",
+        "LAD_L1_loose_diff_0173": "ESCALATE",
+        "LAD_L1_loose_diff_0174": "ESCALATE",
+        "LAD_L1_loose_diff_0175": "ESCALATE",
+        "LAD_L1_loose_diff_0176": "ESCALATE",
+        "LAD_L1_loose_diff_0177": "ESCALATE"
+      }
+    },
+    "L2_moderate": {
+      "level": "L2_moderate",
+      "typedAttributes": [
+        "payer",
+        "payee",
+        "amount",
+        "currency"
+      ],
+      "poolCondition": "fixed",
+      "calibration": {
+        "tHi": null,
+        "tLo": 0,
+        "nCalDiff": 12,
+        "nCalSame": 8,
+        "certifiableM": 0,
+        "poolIsResidual": true,
+        "nPool": 12,
+        "nNatural": 12,
+        "nReplenished": 0
+      },
+      "requiredForM1": 19,
+      "certifiableM": 0,
+      "coverage": {
+        "certifier": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "refuter": {
+          "value": 0.5882352941176471,
+          "successes": 60,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.49121758750151573,
+            "hi": 0.6788480956491085
+          }
+        },
+        "residual": {
+          "value": 0.4117647058823529,
+          "successes": 42,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.32115190435089147,
+            "hi": 0.5087824124984842
+          }
+        },
+        "judgeCallRate": {
+          "value": 0.4117647058823529,
+          "successes": 42,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.32115190435089147,
+            "hi": 0.5087824124984842
+          }
+        }
+      },
+      "test": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 0.3548387096774194,
+          "successes": 11,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.21116659093865403,
+            "hi": 0.5305204593563113
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "residualTest": {
+        "nSame": 8,
+        "nDiff": 11,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 11,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.2588329669680317
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 11,
+          "n": 11,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7411670330319684,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "attackFailure": {
+        "value": 0,
+        "successes": 0,
+        "n": 63,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.05747119958885172
+        }
+      },
+      "attackByMutation": {
+        "amount": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "amount_cents": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payee": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payer": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "currency": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "invoice": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "installment": {
+          "n": 7,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 7,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6456695649333126,
+              "hi": 1
+            }
+          }
+        },
+        "cost_centre": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        }
+      },
+      "designCheck": [],
+      "decisionsById": {
+        "LAD_L2_moderate_same_0192": "ESCALATE",
+        "LAD_L2_moderate_same_0216": "ESCALATE",
+        "LAD_L2_moderate_diff_0217": "EXECUTE",
+        "LAD_L2_moderate_diff_0218": "EXECUTE",
+        "LAD_L2_moderate_diff_0219": "EXECUTE",
+        "LAD_L2_moderate_diff_0220": "EXECUTE",
+        "LAD_L2_moderate_diff_0221": "EXECUTE",
+        "LAD_L2_moderate_diff_0222": "ESCALATE",
+        "LAD_L2_moderate_diff_0223": "ESCALATE",
+        "LAD_L2_moderate_diff_0224": "ESCALATE",
+        "LAD_L2_moderate_same_0240": "ESCALATE",
+        "LAD_L2_moderate_same_0264": "ESCALATE",
+        "LAD_L2_moderate_diff_0265": "EXECUTE",
+        "LAD_L2_moderate_diff_0266": "EXECUTE",
+        "LAD_L2_moderate_diff_0267": "EXECUTE",
+        "LAD_L2_moderate_diff_0268": "EXECUTE",
+        "LAD_L2_moderate_diff_0269": "EXECUTE",
+        "LAD_L2_moderate_diff_0270": "ESCALATE",
+        "LAD_L2_moderate_diff_0271": "ESCALATE",
+        "LAD_L2_moderate_diff_0272": "ESCALATE",
+        "LAD_L2_moderate_same_0288": "ESCALATE",
+        "LAD_L2_moderate_same_0312": "ESCALATE",
+        "LAD_L2_moderate_diff_0313": "EXECUTE",
+        "LAD_L2_moderate_diff_0314": "EXECUTE",
+        "LAD_L2_moderate_diff_0315": "EXECUTE",
+        "LAD_L2_moderate_diff_0316": "EXECUTE",
+        "LAD_L2_moderate_diff_0317": "EXECUTE",
+        "LAD_L2_moderate_diff_0318": "ESCALATE",
+        "LAD_L2_moderate_diff_0319": "ESCALATE",
+        "LAD_L2_moderate_diff_0320": "ESCALATE",
+        "LAD_L2_moderate_same_0336": "ESCALATE",
+        "LAD_L2_moderate_same_0360": "ESCALATE",
+        "LAD_L2_moderate_diff_0361": "EXECUTE",
+        "LAD_L2_moderate_diff_0362": "EXECUTE",
+        "LAD_L2_moderate_diff_0363": "EXECUTE",
+        "LAD_L2_moderate_diff_0364": "EXECUTE",
+        "LAD_L2_moderate_diff_0365": "EXECUTE",
+        "LAD_L2_moderate_diff_0366": "ESCALATE",
+        "LAD_L2_moderate_diff_0367": "ESCALATE"
+      }
+    },
+    "L3_strict": {
+      "level": "L3_strict",
+      "typedAttributes": [
+        "payer",
+        "payee",
+        "amount",
+        "currency",
+        "invoice",
+        "installment"
+      ],
+      "poolCondition": "fixed",
+      "calibration": {
+        "tHi": null,
+        "tLo": 0,
+        "nCalDiff": 4,
+        "nCalSame": 8,
+        "certifiableM": 0,
+        "poolIsResidual": true,
+        "nPool": 4,
+        "nNatural": 4,
+        "nReplenished": 0
+      },
+      "requiredForM1": 19,
+      "certifiableM": 0,
+      "coverage": {
+        "certifier": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "refuter": {
+          "value": 0.803921568627451,
+          "successes": 82,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7164524743574987,
+            "hi": 0.8693293231613177
+          }
+        },
+        "residual": {
+          "value": 0.19607843137254902,
+          "successes": 20,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.13067067683868222,
+            "hi": 0.28354752564250124
+          }
+        },
+        "judgeCallRate": {
+          "value": 0.19607843137254902,
+          "successes": 20,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.13067067683868222,
+            "hi": 0.28354752564250124
+          }
+        }
+      },
+      "test": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 0.12903225806451613,
+          "successes": 4,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.05134284374629146,
+            "hi": 0.2885240625630643
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "residualTest": {
+        "nSame": 8,
+        "nDiff": 4,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 4,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.4898908364545973
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 4,
+          "n": 4,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.5101091635454027,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "attackFailure": {
+        "value": 0,
+        "successes": 0,
+        "n": 63,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.05747119958885172
+        }
+      },
+      "attackByMutation": {
+        "amount": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "amount_cents": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payee": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payer": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "currency": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "invoice": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "installment": {
+          "n": 7,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          }
+        },
+        "cost_centre": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        }
+      },
+      "designCheck": [],
+      "decisionsById": {
+        "LAD_L3_strict_same_0382": "ESCALATE",
+        "LAD_L3_strict_same_0406": "ESCALATE",
+        "LAD_L3_strict_diff_0407": "EXECUTE",
+        "LAD_L3_strict_diff_0408": "EXECUTE",
+        "LAD_L3_strict_diff_0409": "EXECUTE",
+        "LAD_L3_strict_diff_0410": "EXECUTE",
+        "LAD_L3_strict_diff_0411": "EXECUTE",
+        "LAD_L3_strict_diff_0412": "EXECUTE",
+        "LAD_L3_strict_diff_0413": "EXECUTE",
+        "LAD_L3_strict_diff_0414": "ESCALATE",
+        "LAD_L3_strict_same_0430": "ESCALATE",
+        "LAD_L3_strict_same_0454": "ESCALATE",
+        "LAD_L3_strict_diff_0455": "EXECUTE",
+        "LAD_L3_strict_diff_0456": "EXECUTE",
+        "LAD_L3_strict_diff_0457": "EXECUTE",
+        "LAD_L3_strict_diff_0458": "EXECUTE",
+        "LAD_L3_strict_diff_0459": "EXECUTE",
+        "LAD_L3_strict_diff_0460": "EXECUTE",
+        "LAD_L3_strict_diff_0461": "EXECUTE",
+        "LAD_L3_strict_diff_0462": "ESCALATE",
+        "LAD_L3_strict_same_0478": "ESCALATE",
+        "LAD_L3_strict_same_0502": "ESCALATE",
+        "LAD_L3_strict_diff_0503": "EXECUTE",
+        "LAD_L3_strict_diff_0504": "EXECUTE",
+        "LAD_L3_strict_diff_0505": "EXECUTE",
+        "LAD_L3_strict_diff_0506": "EXECUTE",
+        "LAD_L3_strict_diff_0507": "EXECUTE",
+        "LAD_L3_strict_diff_0508": "EXECUTE",
+        "LAD_L3_strict_diff_0509": "EXECUTE",
+        "LAD_L3_strict_diff_0510": "ESCALATE",
+        "LAD_L3_strict_same_0526": "ESCALATE",
+        "LAD_L3_strict_same_0550": "ESCALATE",
+        "LAD_L3_strict_diff_0551": "EXECUTE",
+        "LAD_L3_strict_diff_0552": "EXECUTE",
+        "LAD_L3_strict_diff_0553": "EXECUTE",
+        "LAD_L3_strict_diff_0554": "EXECUTE",
+        "LAD_L3_strict_diff_0555": "EXECUTE",
+        "LAD_L3_strict_diff_0556": "EXECUTE",
+        "LAD_L3_strict_diff_0557": "ESCALATE"
+      }
+    }
+  },
+  "replenished": {
+    "L1_loose": {
+      "level": "L1_loose",
+      "typedAttributes": [],
+      "poolCondition": "replenished(n=52)",
+      "calibration": {
+        "tHi": 1,
+        "tLo": 0,
+        "nCalDiff": 52,
+        "nCalSame": 8,
+        "certifiableM": 2,
+        "poolIsResidual": true,
+        "nPool": 52,
+        "nNatural": 32,
+        "nReplenished": 20
+      },
+      "requiredForM1": 19,
+      "certifiableM": 2,
+      "coverage": {
+        "certifier": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "refuter": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "residual": {
+          "value": 1,
+          "successes": 102,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9637055378535367,
+            "hi": 1
+          }
+        },
+        "judgeCallRate": {
+          "value": 1,
+          "successes": 102,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.9637055378535367,
+            "hi": 1
+          }
+        }
+      },
+      "test": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 31,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.889744604539564,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "residualTest": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 31,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.889744604539564,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "attackFailure": {
+        "value": 0,
+        "successes": 0,
+        "n": 63,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.05747119958885172
+        }
+      },
+      "attackByMutation": {
+        "amount": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "amount_cents": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "payee": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "payer": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "currency": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "invoice": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "installment": {
+          "n": 7,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 7,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6456695649333126,
+              "hi": 1
+            }
+          }
+        },
+        "cost_centre": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        }
+      },
+      "designCheck": [],
+      "decisionsById": {
+        "LAD_L1_loose_same_0002": "ESCALATE",
+        "LAD_L1_loose_same_0026": "ESCALATE",
+        "LAD_L1_loose_diff_0027": "ESCALATE",
+        "LAD_L1_loose_diff_0028": "ESCALATE",
+        "LAD_L1_loose_diff_0029": "ESCALATE",
+        "LAD_L1_loose_diff_0030": "ESCALATE",
+        "LAD_L1_loose_diff_0031": "ESCALATE",
+        "LAD_L1_loose_diff_0032": "ESCALATE",
+        "LAD_L1_loose_diff_0033": "ESCALATE",
+        "LAD_L1_loose_diff_0034": "ESCALATE",
+        "LAD_L1_loose_same_0050": "ESCALATE",
+        "LAD_L1_loose_same_0074": "ESCALATE",
+        "LAD_L1_loose_diff_0075": "ESCALATE",
+        "LAD_L1_loose_diff_0076": "ESCALATE",
+        "LAD_L1_loose_diff_0077": "ESCALATE",
+        "LAD_L1_loose_diff_0078": "ESCALATE",
+        "LAD_L1_loose_diff_0079": "ESCALATE",
+        "LAD_L1_loose_diff_0080": "ESCALATE",
+        "LAD_L1_loose_diff_0081": "ESCALATE",
+        "LAD_L1_loose_diff_0082": "ESCALATE",
+        "LAD_L1_loose_same_0098": "ESCALATE",
+        "LAD_L1_loose_same_0122": "ESCALATE",
+        "LAD_L1_loose_diff_0123": "ESCALATE",
+        "LAD_L1_loose_diff_0124": "ESCALATE",
+        "LAD_L1_loose_diff_0125": "ESCALATE",
+        "LAD_L1_loose_diff_0126": "ESCALATE",
+        "LAD_L1_loose_diff_0127": "ESCALATE",
+        "LAD_L1_loose_diff_0128": "ESCALATE",
+        "LAD_L1_loose_diff_0129": "ESCALATE",
+        "LAD_L1_loose_diff_0130": "ESCALATE",
+        "LAD_L1_loose_same_0146": "ESCALATE",
+        "LAD_L1_loose_same_0170": "ESCALATE",
+        "LAD_L1_loose_diff_0171": "ESCALATE",
+        "LAD_L1_loose_diff_0172": "ESCALATE",
+        "LAD_L1_loose_diff_0173": "ESCALATE",
+        "LAD_L1_loose_diff_0174": "ESCALATE",
+        "LAD_L1_loose_diff_0175": "ESCALATE",
+        "LAD_L1_loose_diff_0176": "ESCALATE",
+        "LAD_L1_loose_diff_0177": "ESCALATE"
+      }
+    },
+    "L2_moderate": {
+      "level": "L2_moderate",
+      "typedAttributes": [
+        "payer",
+        "payee",
+        "amount",
+        "currency"
+      ],
+      "poolCondition": "replenished(n=52)",
+      "calibration": {
+        "tHi": 1,
+        "tLo": 0,
+        "nCalDiff": 52,
+        "nCalSame": 8,
+        "certifiableM": 2,
+        "poolIsResidual": true,
+        "nPool": 52,
+        "nNatural": 12,
+        "nReplenished": 40
+      },
+      "requiredForM1": 19,
+      "certifiableM": 2,
+      "coverage": {
+        "certifier": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "refuter": {
+          "value": 0.5882352941176471,
+          "successes": 60,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.49121758750151573,
+            "hi": 0.6788480956491085
+          }
+        },
+        "residual": {
+          "value": 0.4117647058823529,
+          "successes": 42,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.32115190435089147,
+            "hi": 0.5087824124984842
+          }
+        },
+        "judgeCallRate": {
+          "value": 0.4117647058823529,
+          "successes": 42,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.32115190435089147,
+            "hi": 0.5087824124984842
+          }
+        }
+      },
+      "test": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 0.3548387096774194,
+          "successes": 11,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.21116659093865403,
+            "hi": 0.5305204593563113
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "residualTest": {
+        "nSame": 8,
+        "nDiff": 11,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 11,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.2588329669680317
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 11,
+          "n": 11,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7411670330319684,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "attackFailure": {
+        "value": 0,
+        "successes": 0,
+        "n": 63,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.05747119958885172
+        }
+      },
+      "attackByMutation": {
+        "amount": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "amount_cents": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payee": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payer": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "currency": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "invoice": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        },
+        "installment": {
+          "n": 7,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 7,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6456695649333126,
+              "hi": 1
+            }
+          }
+        },
+        "cost_centre": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        }
+      },
+      "designCheck": [],
+      "decisionsById": {
+        "LAD_L2_moderate_same_0192": "ESCALATE",
+        "LAD_L2_moderate_same_0216": "ESCALATE",
+        "LAD_L2_moderate_diff_0217": "EXECUTE",
+        "LAD_L2_moderate_diff_0218": "EXECUTE",
+        "LAD_L2_moderate_diff_0219": "EXECUTE",
+        "LAD_L2_moderate_diff_0220": "EXECUTE",
+        "LAD_L2_moderate_diff_0221": "EXECUTE",
+        "LAD_L2_moderate_diff_0222": "ESCALATE",
+        "LAD_L2_moderate_diff_0223": "ESCALATE",
+        "LAD_L2_moderate_diff_0224": "ESCALATE",
+        "LAD_L2_moderate_same_0240": "ESCALATE",
+        "LAD_L2_moderate_same_0264": "ESCALATE",
+        "LAD_L2_moderate_diff_0265": "EXECUTE",
+        "LAD_L2_moderate_diff_0266": "EXECUTE",
+        "LAD_L2_moderate_diff_0267": "EXECUTE",
+        "LAD_L2_moderate_diff_0268": "EXECUTE",
+        "LAD_L2_moderate_diff_0269": "EXECUTE",
+        "LAD_L2_moderate_diff_0270": "ESCALATE",
+        "LAD_L2_moderate_diff_0271": "ESCALATE",
+        "LAD_L2_moderate_diff_0272": "ESCALATE",
+        "LAD_L2_moderate_same_0288": "ESCALATE",
+        "LAD_L2_moderate_same_0312": "ESCALATE",
+        "LAD_L2_moderate_diff_0313": "EXECUTE",
+        "LAD_L2_moderate_diff_0314": "EXECUTE",
+        "LAD_L2_moderate_diff_0315": "EXECUTE",
+        "LAD_L2_moderate_diff_0316": "EXECUTE",
+        "LAD_L2_moderate_diff_0317": "EXECUTE",
+        "LAD_L2_moderate_diff_0318": "ESCALATE",
+        "LAD_L2_moderate_diff_0319": "ESCALATE",
+        "LAD_L2_moderate_diff_0320": "ESCALATE",
+        "LAD_L2_moderate_same_0336": "ESCALATE",
+        "LAD_L2_moderate_same_0360": "ESCALATE",
+        "LAD_L2_moderate_diff_0361": "EXECUTE",
+        "LAD_L2_moderate_diff_0362": "EXECUTE",
+        "LAD_L2_moderate_diff_0363": "EXECUTE",
+        "LAD_L2_moderate_diff_0364": "EXECUTE",
+        "LAD_L2_moderate_diff_0365": "EXECUTE",
+        "LAD_L2_moderate_diff_0366": "ESCALATE",
+        "LAD_L2_moderate_diff_0367": "ESCALATE"
+      }
+    },
+    "L3_strict": {
+      "level": "L3_strict",
+      "typedAttributes": [
+        "payer",
+        "payee",
+        "amount",
+        "currency",
+        "invoice",
+        "installment"
+      ],
+      "poolCondition": "replenished(n=52)",
+      "calibration": {
+        "tHi": 1,
+        "tLo": 0,
+        "nCalDiff": 52,
+        "nCalSame": 8,
+        "certifiableM": 2,
+        "poolIsResidual": true,
+        "nPool": 52,
+        "nNatural": 4,
+        "nReplenished": 48
+      },
+      "requiredForM1": 19,
+      "certifiableM": 2,
+      "coverage": {
+        "certifier": {
+          "value": 0,
+          "successes": 0,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.03629446214646319
+          }
+        },
+        "refuter": {
+          "value": 0.803921568627451,
+          "successes": 82,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7164524743574987,
+            "hi": 0.8693293231613177
+          }
+        },
+        "residual": {
+          "value": 0.19607843137254902,
+          "successes": 20,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.13067067683868222,
+            "hi": 0.28354752564250124
+          }
+        },
+        "judgeCallRate": {
+          "value": 0.19607843137254902,
+          "successes": 20,
+          "n": 102,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.13067067683868222,
+            "hi": 0.28354752564250124
+          }
+        }
+      },
+      "test": {
+        "nSame": 8,
+        "nDiff": 31,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "friction": {
+          "value": 0.12903225806451613,
+          "successes": 4,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.05134284374629146,
+            "hi": 0.2885240625630643
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "residualTest": {
+        "nSame": 8,
+        "nDiff": 4,
+        "wrongSuppression": {
+          "value": 0,
+          "successes": 0,
+          "n": 4,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.4898908364545973
+          }
+        },
+        "friction": {
+          "value": 1,
+          "successes": 4,
+          "n": 4,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.5101091635454027,
+            "hi": 1
+          }
+        },
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "silentEscape": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "flaggedEscape": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "attackFailure": {
+        "value": 0,
+        "successes": 0,
+        "n": 63,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.05747119958885172
+        }
+      },
+      "attackByMutation": {
+        "amount": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "amount_cents": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payee": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "payer": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "currency": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "invoice": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          }
+        },
+        "installment": {
+          "n": 7,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          },
+          "reachedJudge": {
+            "value": 0,
+            "successes": 0,
+            "n": 7,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.3543304350666875
+            }
+          }
+        },
+        "cost_centre": {
+          "n": 8,
+          "failure": {
+            "value": 0,
+            "successes": 0,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0,
+              "hi": 0.32440756488388023
+            }
+          },
+          "reachedJudge": {
+            "value": 1,
+            "successes": 8,
+            "n": 8,
+            "basis": "measured",
+            "ci95": {
+              "lo": 0.6755924351161198,
+              "hi": 1
+            }
+          }
+        }
+      },
+      "designCheck": [],
+      "decisionsById": {
+        "LAD_L3_strict_same_0382": "ESCALATE",
+        "LAD_L3_strict_same_0406": "ESCALATE",
+        "LAD_L3_strict_diff_0407": "EXECUTE",
+        "LAD_L3_strict_diff_0408": "EXECUTE",
+        "LAD_L3_strict_diff_0409": "EXECUTE",
+        "LAD_L3_strict_diff_0410": "EXECUTE",
+        "LAD_L3_strict_diff_0411": "EXECUTE",
+        "LAD_L3_strict_diff_0412": "EXECUTE",
+        "LAD_L3_strict_diff_0413": "EXECUTE",
+        "LAD_L3_strict_diff_0414": "ESCALATE",
+        "LAD_L3_strict_same_0430": "ESCALATE",
+        "LAD_L3_strict_same_0454": "ESCALATE",
+        "LAD_L3_strict_diff_0455": "EXECUTE",
+        "LAD_L3_strict_diff_0456": "EXECUTE",
+        "LAD_L3_strict_diff_0457": "EXECUTE",
+        "LAD_L3_strict_diff_0458": "EXECUTE",
+        "LAD_L3_strict_diff_0459": "EXECUTE",
+        "LAD_L3_strict_diff_0460": "EXECUTE",
+        "LAD_L3_strict_diff_0461": "EXECUTE",
+        "LAD_L3_strict_diff_0462": "ESCALATE",
+        "LAD_L3_strict_same_0478": "ESCALATE",
+        "LAD_L3_strict_same_0502": "ESCALATE",
+        "LAD_L3_strict_diff_0503": "EXECUTE",
+        "LAD_L3_strict_diff_0504": "EXECUTE",
+        "LAD_L3_strict_diff_0505": "EXECUTE",
+        "LAD_L3_strict_diff_0506": "EXECUTE",
+        "LAD_L3_strict_diff_0507": "EXECUTE",
+        "LAD_L3_strict_diff_0508": "EXECUTE",
+        "LAD_L3_strict_diff_0509": "EXECUTE",
+        "LAD_L3_strict_diff_0510": "ESCALATE",
+        "LAD_L3_strict_same_0526": "ESCALATE",
+        "LAD_L3_strict_same_0550": "ESCALATE",
+        "LAD_L3_strict_diff_0551": "EXECUTE",
+        "LAD_L3_strict_diff_0552": "EXECUTE",
+        "LAD_L3_strict_diff_0553": "EXECUTE",
+        "LAD_L3_strict_diff_0554": "EXECUTE",
+        "LAD_L3_strict_diff_0555": "EXECUTE",
+        "LAD_L3_strict_diff_0556": "EXECUTE",
+        "LAD_L3_strict_diff_0557": "ESCALATE"
+      }
+    }
+  },
+  "monotone": [
+    {
+      "step": "L1_loose -> L2_moderate",
+      "residualFrom": 1,
+      "residualTo": 0.4117647058823529,
+      "residualShrinks": true,
+      "jurisdictionFrom": 1,
+      "jurisdictionTo": 0.4117647058823529,
+      "jurisdictionShrinks": true,
+      "attackFrom": 0,
+      "attackTo": 0,
+      "attackFalls": true,
+      "poolFrom": 32,
+      "poolTo": 12
+    },
+    {
+      "step": "L2_moderate -> L3_strict",
+      "residualFrom": 0.4117647058823529,
+      "residualTo": 0.19607843137254902,
+      "residualShrinks": true,
+      "jurisdictionFrom": 0.4117647058823529,
+      "jurisdictionTo": 0.19607843137254902,
+      "jurisdictionShrinks": true,
+      "attackFrom": 0,
+      "attackTo": 0,
+      "attackFalls": true,
+      "poolFrom": 12,
+      "poolTo": 4
+    }
+  ],
+  "monotoneHolds": true,
+  "commonPoolSize": 52,
+  "dilemma": [
+    {
+      "level": "L1_loose",
+      "fixed": {
+        "n": 32,
+        "tHi": 1,
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "ws": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "flagged": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "replenished": {
+        "n": 52,
+        "tHi": 1,
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "ws": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "flagged": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "dedupRecovered": 0
+    },
+    {
+      "level": "L2_moderate",
+      "fixed": {
+        "n": 12,
+        "tHi": null,
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "ws": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "flagged": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "replenished": {
+        "n": 52,
+        "tHi": 1,
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "ws": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "flagged": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "dedupRecovered": 0
+    },
+    {
+      "level": "L3_strict",
+      "fixed": {
+        "n": 4,
+        "tHi": null,
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "ws": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "flagged": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "replenished": {
+        "n": 52,
+        "tHi": 1,
+        "dedup": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "ws": {
+          "value": 0,
+          "successes": 0,
+          "n": 31,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.11025539546043596
+          }
+        },
+        "flagged": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        }
+      },
+      "dedupRecovered": 0
+    }
+  ],
+  "replenishTest": {
+    "replenishedOnly": 0,
+    "fixedOnly": 0,
+    "b": 0,
+    "c": 0,
+    "n": 0,
+    "p": 1
+  },
+  "designCheckClean": true
+}

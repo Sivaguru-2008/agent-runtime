@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Token Jaccard",
+    "residualAuc": 0.23207658569500675,
+    "conformalTau": 0.9655172413793104,
+    "residualWS": 0,
+    "residualDedup": 0.04048582995951417,
+    "systemWS": 0,
+    "systemDedup": 0.15658362989323843
+  },
+  {
+    "name": "Char 3-gram Cosine",
+    "residualAuc": 0.1442729419703104,
+    "conformalTau": 0.9880316175176489,
+    "residualWS": 0.020833333333333332,
+    "residualDedup": 0,
+    "systemWS": 0.01293103448275862,
+    "systemDedup": 0.12099644128113879
+  },
+  {
+    "name": "Levenshtein Ratio",
+    "residualAuc": 0.10100371120107962,
+    "conformalTau": 0.9947089947089947,
+    "residualWS": 0.013888888888888888,
+    "residualDedup": 0,
+    "systemWS": 0.008620689655172414,
+    "systemDedup": 0.12099644128113879
+  }
+]

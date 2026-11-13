@@ -1,0 +1,147 @@
+{
+  "committed": {
+    "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490": {
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213"
+      },
+      "canonical": "{\"amount_text\":\"$780.00\",\"beneficiary_text\":\"Marlow Freight\",\"reference\":\"Shipment 88213\"}",
+      "semProjection": "{}",
+      "inputHash": "e1e39ad46ce4cdd5e769f134e668d764efe5e3f263d8450be89e42f103897253",
+      "response": {
+        "wireId": "wire_001",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 35264,
+      "committedAt": "2026-08-16T12:30:15.411Z"
+    },
+    "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e": {
+      "operationId": "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e",
+      "runId": "order-88213",
+      "tool": "wire_money",
+      "input": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213"
+      },
+      "canonical": "{\"amount_text\":\"USD 780\",\"beneficiary_text\":\"Marlow Freight Services\",\"reference\":\"in respect of shipment 88213\"}",
+      "semProjection": "{}",
+      "inputHash": "dab4bcfe0e0c8d7a2145163098c6f3361e8fd8af4e19f8f8c73dbbad33a8625e",
+      "response": {
+        "wireId": "wire_002",
+        "status": "SENT",
+        "amountUSD": 780
+      },
+      "pid": 9996,
+      "committedAt": "2026-08-16T12:30:15.485Z"
+    },
+    "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c": {
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "runId": "order-88213",
+      "tool": "send_receipt",
+      "input": {
+        "to": "ops@example.com",
+        "note": "wire sent for shipment 88213"
+      },
+      "canonical": "{\"note\":\"wire sent for shipment 88213\",\"to\":\"ops@example.com\"}",
+      "semProjection": "{\"to\":\"ops@example.com\"}",
+      "inputHash": "98b782d7a5fb364500b61326e44efe6590195a7af42679bdc3d5dff70d947be4",
+      "response": {
+        "messageId": "rcpt_001",
+        "status": "SENT"
+      },
+      "pid": 12824,
+      "committedAt": "2026-08-16T12:30:15.557Z"
+    }
+  },
+  "intents": [
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "status": "PENDING",
+      "input": {
+        "amount_text": "$780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment 88213"
+      },
+      "semProjection": "{}",
+      "at": "2026-08-16T12:30:15.408Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "status": "COMMITTED",
+      "at": "2026-08-16T12:30:15.411Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e",
+      "status": "PENDING",
+      "input": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Services",
+        "reference": "in respect of shipment 88213"
+      },
+      "semProjection": "{}",
+      "at": "2026-08-16T12:30:15.483Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e",
+      "status": "COMMITTED",
+      "at": "2026-08-16T12:30:15.486Z"
+    },
+    {
+      "tool": "wire_money",
+      "runId": "order-88213",
+      "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+      "status": "SUPPRESSED",
+      "layer": "L1",
+      "matchedOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 0.95,
+      "m": 2,
+      "tHi": 0.9,
+      "at": "2026-08-16T12:30:15.553Z"
+    },
+    {
+      "tool": "send_receipt",
+      "runId": "order-88213",
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "status": "PENDING",
+      "input": {
+        "to": "ops@example.com",
+        "note": "wire sent for shipment 88213"
+      },
+      "semProjection": "{\"to\":\"ops@example.com\"}",
+      "at": "2026-08-16T12:30:15.556Z"
+    },
+    {
+      "tool": "send_receipt",
+      "runId": "order-88213",
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "status": "COMMITTED",
+      "at": "2026-08-16T12:30:15.558Z"
+    }
+  ],
+  "flags": [
+    {
+      "type": "DUPLICATE_SUSPECT",
+      "tool": "wire_money",
+      "operationId": "e5b6a5d3e760cc3def34a1925fe3d38046f08ad1a552ae64d8faa99bd9f4e69e",
+      "suspectOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 0.75,
+      "m": 1,
+      "tHi": 0.9,
+      "at": "2026-08-16T12:30:15.482Z"
+    }
+  ]
+}

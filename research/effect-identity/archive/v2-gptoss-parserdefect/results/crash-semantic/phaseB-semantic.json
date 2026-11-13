@@ -1,0 +1,21 @@
+{
+  "pid": 22296,
+  "scorer": "groq:openai/gpt-oss-120b",
+  "events": [
+    {
+      "type": "SUPPRESSED",
+      "layer": "L1",
+      "tool": "wire_money",
+      "operationId": "0b4716f847d824bbf823110b2c77206524357a0066b75ee907c610c1421f7d0d",
+      "matchedOperationId": "3e4a37058ef0a8808a45366ad922b9195af30a910f480e58e25e955709079490",
+      "score": 0.99,
+      "pid": 22296
+    },
+    {
+      "type": "COMMITTED",
+      "tool": "send_receipt",
+      "operationId": "b036a015267aa9282dbdd87a0c80ab9366fc9f1e5159e9df2fa07dc5946eb84c",
+      "pid": 22296
+    }
+  ]
+}

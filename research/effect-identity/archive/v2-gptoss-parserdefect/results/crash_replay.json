@@ -1,0 +1,1810 @@
+{
+  "generatedAt": "2026-08-13T14:45:58.187Z",
+  "live": true,
+  "nTrials": 30,
+  "judge": "openai/gpt-oss-120b",
+  "paraphrasePool": {
+    "generator": "openai/gpt-oss-120b",
+    "size": 52,
+    "rejected": 1
+  },
+  "thresholds": {
+    "tHi": 0.1,
+    "tLo": 0.009000000000000001,
+    "source": "layered_openai_gpt_oss_120b_alpha_0.05",
+    "judge": "openai/gpt-oss-120b"
+  },
+  "crashPoints": [
+    "pre_dispatch",
+    "pre_commit_window",
+    "post_commit"
+  ],
+  "byCrashPoint": {
+    "pre_dispatch": {
+      "syntactic": {
+        "nTrials": 10,
+        "exactlyOnceRate": {
+          "value": 1,
+          "successes": 10,
+          "n": 10,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7224672001371107,
+            "hi": 1
+          }
+        },
+        "doubleFireRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 10,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.2775327998628892
+          }
+        },
+        "meanWiredUSD": 780,
+        "suppressionRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 10,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.2775327998628892
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0
+      },
+      "semantic": {
+        "nTrials": 10,
+        "exactlyOnceRate": {
+          "value": 1,
+          "successes": 10,
+          "n": 10,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7224672001371107,
+            "hi": 1
+          }
+        },
+        "doubleFireRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 10,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.2775327998628892
+          }
+        },
+        "meanWiredUSD": 780,
+        "suppressionRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 10,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.2775327998628892
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0
+      }
+    },
+    "pre_commit_window": {
+      "syntactic": {
+        "nTrials": 12,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 12,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.24249400665524085
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 12,
+          "n": 12,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7575059933447592,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "suppressionRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 12,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.24249400665524085
+          }
+        },
+        "pendingOrphanTrials": 12,
+        "crossProcessSuppressions": 0
+      },
+      "semantic": {
+        "nTrials": 12,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 12,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.24249400665524085
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 12,
+          "n": 12,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.7575059933447592,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "suppressionRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 12,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.24249400665524085
+          }
+        },
+        "pendingOrphanTrials": 12,
+        "crossProcessSuppressions": 0
+      }
+    },
+    "post_commit": {
+      "syntactic": {
+        "nTrials": 8,
+        "exactlyOnceRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "doubleFireRate": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        },
+        "meanWiredUSD": 1560,
+        "suppressionRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 0
+      },
+      "semantic": {
+        "nTrials": 8,
+        "exactlyOnceRate": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        },
+        "doubleFireRate": {
+          "value": 0,
+          "successes": 0,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0,
+            "hi": 0.32440756488388023
+          }
+        },
+        "meanWiredUSD": 780,
+        "suppressionRate": {
+          "value": 1,
+          "successes": 8,
+          "n": 8,
+          "basis": "measured",
+          "ci95": {
+            "lo": 0.6755924351161198,
+            "hi": 1
+          }
+        },
+        "pendingOrphanTrials": 0,
+        "crossProcessSuppressions": 8
+      }
+    }
+  },
+  "overall": {
+    "syntactic": {
+      "nTrials": 30,
+      "exactlyOnceRate": {
+        "value": 0.3333333333333333,
+        "successes": 10,
+        "n": 30,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.19230498083676134,
+          "hi": 0.5121994835545616
+        }
+      },
+      "meanWiredUSD": 1300,
+      "totalWiredUSD": 39000
+    },
+    "semantic": {
+      "nTrials": 30,
+      "exactlyOnceRate": {
+        "value": 0.6,
+        "successes": 18,
+        "n": 30,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.42320360253322475,
+          "hi": 0.7540937188319815
+        }
+      },
+      "meanWiredUSD": 1092,
+      "totalWiredUSD": 32760
+    }
+  },
+  "defensibleOnly": {
+    "syntactic": {
+      "nTrials": 18,
+      "exactlyOnceRate": {
+        "value": 0.5555555555555556,
+        "successes": 10,
+        "n": 18,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.33716415642042774,
+          "hi": 0.7544048187299437
+        }
+      },
+      "meanWiredUSD": 1126.6666666666667
+    },
+    "semantic": {
+      "nTrials": 18,
+      "exactlyOnceRate": {
+        "value": 1,
+        "successes": 18,
+        "n": 18,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.8241207763533425,
+          "hi": 1
+        }
+      },
+      "meanWiredUSD": 780
+    }
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "paraphrase": {
+        "amount_text": "US dollars 780",
+        "beneficiary_text": "Marlow Freight (Shipping)",
+        "reference": "Shipment: 88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32512,
+            "processB": 26856
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 23324,
+            "processB": 35928
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "paraphrase": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Ref: 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 10444,
+            "processB": 812
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32824,
+            "processB": 26184
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 2,
+      "paraphrase": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 23976,
+            "processB": 33116
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 17464,
+            "processB": 14848
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.98,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 3,
+      "paraphrase": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow  Freight",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34320,
+            "processB": 32560
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 16536,
+            "processB": 30412
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.98,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 4,
+      "paraphrase": {
+        "amount_text": "seven hundred eighty USD",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Reference 88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32576,
+            "processB": 32788
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 35308,
+            "processB": 36428
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 5,
+      "paraphrase": {
+        "amount_text": "780.00 US dollars",
+        "beneficiary_text": "marlow freight",
+        "reference": "for shipment no. 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 21216,
+            "processB": 31388
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34592,
+            "processB": 35104
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 6,
+      "paraphrase": {
+        "amount_text": "USD 780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment #: 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 25168,
+            "processB": 24404
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34728,
+            "processB": 31472
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 7,
+      "paraphrase": {
+        "amount_text": "Seven hundred eighty (780) USD",
+        "beneficiary_text": "MarlowFreight",
+        "reference": "Shipment (88213)"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 11468,
+            "processB": 32388
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36788,
+            "processB": 23932
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 8,
+      "paraphrase": {
+        "amount_text": "Seven hundred eighty dollars",
+        "beneficiary_text": "Marlow Freight Co.",
+        "reference": "Ref 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 33060,
+            "processB": 35596
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 25636,
+            "processB": 36472
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 9,
+      "paraphrase": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "For shipment 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 35912,
+            "processB": 34676
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36816,
+            "processB": 24436
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 10,
+      "paraphrase": {
+        "amount_text": "780 US dollars",
+        "beneficiary_text": "Marlow FREIGHT",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36312,
+            "processB": 28996
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 14144,
+            "processB": 8912
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 11,
+      "paraphrase": {
+        "amount_text": "$ 780",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment‑88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 19684,
+            "processB": 34928
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36136,
+            "processB": 23332
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 12,
+      "paraphrase": {
+        "amount_text": "Seven hundred eighty USD",
+        "beneficiary_text": "Marlow freight",
+        "reference": "Ref 88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 33908,
+            "processB": 14000
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 9140,
+            "processB": 33168
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.95,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 13,
+      "paraphrase": {
+        "amount_text": "Seven hundred eighty dollars",
+        "beneficiary_text": "Marlow Freight Co.",
+        "reference": "Ref 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36800,
+            "processB": 34940
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 33856,
+            "processB": 32540
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 14,
+      "paraphrase": {
+        "amount_text": "780 US dollars",
+        "beneficiary_text": "Marlow Freight Ltd.",
+        "reference": "Shipment number 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34100,
+            "processB": 14800
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 13576,
+            "processB": 33200
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 15,
+      "paraphrase": {
+        "amount_text": "780 US dollars",
+        "beneficiary_text": "Marlow FREIGHT",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 35960,
+            "processB": 26612
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32400,
+            "processB": 36336
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 16,
+      "paraphrase": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment No 88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32884,
+            "processB": 32004
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 29932,
+            "processB": 23844
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.98,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 17,
+      "paraphrase": {
+        "amount_text": "US$780",
+        "beneficiary_text": "Marlow FREIGHT",
+        "reference": "Shipment #88213."
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 33380,
+            "processB": 15260
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 29848,
+            "processB": 27500
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 18,
+      "paraphrase": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow freight",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 24476,
+            "processB": 33708
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 9164,
+            "processB": 23324
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.98,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 19,
+      "paraphrase": {
+        "amount_text": "780 US dollars",
+        "beneficiary_text": "Marlow FREIGHT",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 33756,
+            "processB": 32264
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 20164,
+            "processB": 32984
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.98,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 20,
+      "paraphrase": {
+        "amount_text": "seven hundred eighty USD",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Reference 88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34896,
+            "processB": 31660
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 15632,
+            "processB": 34580
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.97,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    },
+    {
+      "trial": 21,
+      "paraphrase": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight.",
+        "reference": "Shipment No. 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 29716,
+            "processB": 3836
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 10692,
+            "processB": 23648
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 22,
+      "paraphrase": {
+        "amount_text": "US$ 780",
+        "beneficiary_text": "Marlow FREIGHT",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 35472,
+            "processB": 25004
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32772,
+            "processB": 34760
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 23,
+      "paraphrase": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow Freight Ltd",
+        "reference": "ref: shipment 88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 35464,
+            "processB": 30308
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 21216,
+            "processB": 34592
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 24,
+      "paraphrase": {
+        "amount_text": "USD 780",
+        "beneficiary_text": "Marlow freight",
+        "reference": "Shipment #88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 21164,
+            "processB": 35552
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32632,
+            "processB": 28120
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 25,
+      "paraphrase": {
+        "amount_text": "$780",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment – 88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 32352,
+            "processB": 12292
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34312,
+            "processB": 21772
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 26,
+      "paraphrase": {
+        "amount_text": "USD 780.00",
+        "beneficiary_text": "Marlow Freight",
+        "reference": "Shipment #: 88213"
+      },
+      "crashPoint": "pre_dispatch",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 21844,
+            "processB": 32660
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34140,
+            "processB": 30300
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 27,
+      "paraphrase": {
+        "amount_text": "seven hundred eighty US dollars",
+        "beneficiary_text": "Marlow freight",
+        "reference": "Ref #88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36804,
+            "processB": 30888
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 33140,
+            "processB": 20876
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 28,
+      "paraphrase": {
+        "amount_text": "780 US dollars",
+        "beneficiary_text": "Marlow Freight (carrier)",
+        "reference": "Shipment No. 88213"
+      },
+      "crashPoint": "pre_commit_window",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 36796,
+            "processB": 32204
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 24024,
+            "processB": 13012
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 1,
+          "crossProcess": false
+        }
+      }
+    },
+    {
+      "trial": 29,
+      "paraphrase": {
+        "amount_text": "seven hundred eighty dollars",
+        "beneficiary_text": "MARLOW FREIGHT",
+        "reference": "shipment #88213"
+      },
+      "crashPoint": "post_commit",
+      "thresholds": {
+        "tHi": 0.1,
+        "tLo": 0.009000000000000001
+      },
+      "judgeModel": "openai/gpt-oss-120b",
+      "modes": {
+        "syntactic": {
+          "mode": "syntactic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 34736,
+            "processB": 8912
+          },
+          "wiresSent": 2,
+          "totalWiredUSD": 1560,
+          "receiptsSent": 1,
+          "suppressed": false,
+          "suppressionLayer": null,
+          "suppressionScore": null,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": false
+        },
+        "semantic": {
+          "mode": "semantic",
+          "scorer": "groq:openai/gpt-oss-120b",
+          "pids": {
+            "processA": 35240,
+            "processB": 22296
+          },
+          "wiresSent": 1,
+          "totalWiredUSD": 780,
+          "receiptsSent": 1,
+          "suppressed": true,
+          "suppressionLayer": "L1",
+          "suppressionScore": 0.99,
+          "escalated": false,
+          "pendingOrphans": 0,
+          "crossProcess": true
+        }
+      }
+    }
+  ]
+}

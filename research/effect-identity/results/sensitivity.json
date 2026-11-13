@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-09-01T15:22:30.446Z",
+  "alpha": 0.05,
+  "judge": "openai_gpt_oss_120b",
+  "labelSensitivity": {
+    "asConstructed": {
+      "tHi": 0.8,
+      "nCalDiff": 142,
+      "nSame": 281,
+      "nDiff": 232,
+      "wrongSuppression": {
+        "value": 0.017241379310344827,
+        "successes": 4,
+        "n": 232,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.006724744395396217,
+          "hi": 0.04348465848018965
+        }
+      },
+      "dedup": {
+        "value": 0.9466192170818505,
+        "successes": 266,
+        "n": 281,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9138049373482748,
+          "hi": 0.967387010759261
+        }
+      },
+      "silentEscape": {
+        "value": 0.05338078291814947,
+        "successes": 15,
+        "n": 281,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.0326129892407388,
+          "hi": 0.08619506265172501
+        }
+      },
+      "friction": {
+        "value": 0,
+        "successes": 0,
+        "n": 232,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0,
+          "hi": 0.016288310121142503
+        }
+      }
+    },
+    "d2AsSame": {
+      "tHi": 0.8,
+      "nCalDiff": 67,
+      "nSame": 356,
+      "nDiff": 157,
+      "wrongSuppression": {
+        "value": 0.01910828025477707,
+        "successes": 3,
+        "n": 157,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.00651947883433197,
+          "hi": 0.054667847448659365
+        }
+      },
+      "dedup": {
+        "value": 0.75,
+        "successes": 267,
+        "n": 356,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.7025119068967931,
+          "hi": 0.7921503829442891
+        }
+      },
+      "silentEscape": {
+        "value": 0.14325842696629212,
+        "successes": 51,
+        "n": 356,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.11066959316281712,
+          "hi": 0.1834639932437287
+        }
+      },
+      "friction": {
+        "value": 0.09554140127388536,
+        "successes": 15,
+        "n": 157,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.05875600076095311,
+          "hi": 0.1516465849207681
+        }
+      }
+    },
+    "s4AsDiff": {
+      "tHi": 0.95,
+      "nCalDiff": 223,
+      "nSame": 199,
+      "nDiff": 314,
+      "wrongSuppression": {
+        "value": 0.022292993630573247,
+        "successes": 7,
+        "n": 314,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.010839789340053512,
+          "hi": 0.04529341268743636
+        }
+      },
+      "dedup": {
+        "value": 0.27638190954773867,
+        "successes": 55,
+        "n": 199,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.2189282228961298,
+          "hi": 0.3423054592246767
+        }
+      },
+      "silentEscape": {
+        "value": 0.12060301507537688,
+        "successes": 24,
+        "n": 199,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.08239896697090487,
+          "hi": 0.17317728022282314
+        }
+      },
+      "friction": {
+        "value": 0.20382165605095542,
+        "successes": 64,
+        "n": 314,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.16297017558497257,
+          "hi": 0.2518324096720712
+        }
+      }
+    }
+  },
+  "wrongSuppressionByCategory": {
+    "D1_near_miss": 1,
+    "D2_legit_repeat": 1,
+    "D3_semantic_diff": 2
+  },
+  "paired": {
+    "dedup: hardened vs canonical baseline": {
+      "hardened": 232,
+      "baselineL0": 0,
+      "b": 232,
+      "c": 0,
+      "n": 232,
+      "p": 0,
+      "holmAdjusted": 0
+    },
+    "dedup: layered vs hardened": {
+      "layered": 15,
+      "hardened": 0,
+      "b": 15,
+      "c": 0,
+      "n": 15,
+      "p": 0.0001,
+      "holmAdjusted": 0.0004
+    },
+    "wrong-suppression: hardened vs layered": {
+      "hardened": 4,
+      "layered": 0,
+      "b": 4,
+      "c": 0,
+      "n": 4,
+      "p": 0.125,
+      "holmAdjusted": 0.25
+    },
+    "dedup: hardened vs raw tau=0.5": {
+      "hardened": 0,
+      "rawTau05": 14,
+      "b": 0,
+      "c": 14,
+      "n": 14,
+      "p": 0.0001,
+      "holmAdjusted": 0.0004
+    },
+    "dedup: 120B vs 20B (hardened)": {
+      "hardened": 46,
+      "hardened20B": 12,
+      "b": 46,
+      "c": 12,
+      "n": 58,
+      "p": 0,
+      "holmAdjusted": 0
+    },
+    "wrong-suppression: 120B vs 20B (hardened)": {
+      "hardened": 3,
+      "hardened20B": 4,
+      "b": 3,
+      "c": 4,
+      "n": 7,
+      "p": 1,
+      "holmAdjusted": 1
+    }
+  },
+  "familySize": 6
+}

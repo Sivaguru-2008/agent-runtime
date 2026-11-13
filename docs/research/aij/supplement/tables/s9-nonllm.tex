@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Non-LLM similarity baselines through the identical conformal pipeline. An AUC below 0.5 means the score orders duplicates \emph{below} distinct pairs on the residual: surface similarity is anti-correlated with identity there.}\label{tab:s9c}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Scorer & residual AUC & conformal $\tau$ & residual dedup & system dedup \\
+\midrule
+Token Jaccard & 0.232 & 0.966 & 4.0\% & 15.7\% \\
+Char 3-gram Cosine & 0.144 & 0.988 & 0.0\% & 12.1\% \\
+Levenshtein Ratio & 0.101 & 0.995 & 0.0\% & 12.1\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

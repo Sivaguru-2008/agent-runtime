@@ -237,7 +237,7 @@ export async function startTracing(opts: TracingStartOptions): Promise<TracingSt
     toString: () => "ErrorPriority(ParentBased(TraceIdRatioBased))"
   };
 
-  let spanProcessor: import("@opentelemetry/sdk-trace-base").SpanProcessor | undefined;
+  let spanProcessor: import("@opentelemetry/sdk-trace-base").SpanProcessor;
   if (endpoint) {
     const { OTLPTraceExporter } = await import("@opentelemetry/exporter-trace-otlp-http");
     const rawExporter = new OTLPTraceExporter({
@@ -281,6 +281,13 @@ export async function startTracing(opts: TracingStartOptions): Promise<TracingSt
       scheduledDelayMillis: 1_000,
       exportTimeoutMillis: 15_000
     });
+  } else {
+    spanProcessor = {
+      forceFlush: async () => {},
+      onStart: () => {},
+      onEnd: () => {},
+      shutdown: async () => {}
+    };
   }
 
   sdk = new NodeSDK({

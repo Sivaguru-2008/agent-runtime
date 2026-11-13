@@ -1,0 +1,181 @@
+\section{Results}\label{sec:results}
+
+Benign rates are on the held-out test split (281 duplicate and 232 distinct pairs), attack rates on the 45 held-out injection pairs, each with a 95\% Wilson interval; $\dagger$ marks a zero that follows from a decidable layer. Unless stated otherwise the judge is GPT-OSS-120B and $\alpha=0.05$. Caveats common to all results are stated once, in Section~\ref{sec:limitations}.
+
+\subsection{Does the fence recover paraphrased duplicates, and at what cost?}\label{sec:res-main}
+
+\paragraph{Question} How much of the paraphrase gap left by canonical keys does a calibrated semantic layer close, and at what cost in the safety-critical direction?
+
+\paragraph{Method} The baselines of Section~\ref{sec:method} against the proposed configuration on identical test items, each calibrated on its own jurisdiction, with exact McNemar tests over discordant items.
+
+\paragraph{Result} The decidable layers settle 122 of 513 test decisions without a model call---the certifier 34 (6.6\%~[4.8--9.1]) and the refuter 88 (17.2\%~[14.1--20.7])---leaving 76.2\%~[72.3--79.7] for the judge (Table~\ref{tab:main}, Figure~\ref{fig:main}). Canonical keys deduplicate 12.1\%~[8.8--16.4] with no wrong suppression; the proposed configuration deduplicates 94.7\%~[91.4--96.7] at 1.7\%~[0.7--4.3] wrong suppression, with 5.3\%~[3.3--8.6] of duplicates escaping silently (232 discordant items to 0, $p<10^{-60}$). All four wrong suppressions are residual pairs: one near-miss, one legitimate repeat and two hand-specified semantic differences. Mechanical and loose-schema rewrites are fully deduplicated (34 of 34; 38 of 38, 100.0\%~[90.8--100.0]); benign and adversarial paraphrase reach 92.9\%~[87.1--96.2] and 92.7\%~[84.9--96.6].
+
+\begin{table}[!tbp]
+\centering\scriptsize\setlength{\tabcolsep}{3.5pt}
+\caption{Main comparison on the test split. Pool $n$ is the size of each configuration's own calibration pool. B0 and B1 never suppress; the canonical key suppresses only the mechanical fragment. Flagged escape is 0.0\%~[0.0--1.3] for every row except the proposed configuration at $\alpha=0.01$ (64.8\%~[59.0--70.1]) and the refined schema (17.8\%~[13.8--22.7]); friction is 0.0\%~[0.0--1.6] except in those two rows, where it is 0.9\%~[0.2--3.1].}\label{tab:main}
+\begin{tabular}{@{}lrrlll@{}}
+\toprule
+Configuration & $n$ & $\thi$ & wrong suppression & dedup & silent escape \\
+\midrule
+B0 no fence & --- & --- & 0.0\%~[0.0--1.6] & 0.0\%~[0.0--1.3] & 100.0\%~[98.7--100.0] \\
+B1 exact string & --- & --- & 0.0\%~[0.0--1.6] & 0.0\%~[0.0--1.3] & 100.0\%~[98.7--100.0] \\
+B2 canonical key & --- & --- & 0.0\%$\dagger$~[0.0--1.6] & 12.1\%~[8.8--16.4] & 87.9\%~[83.6--91.2] \\
+raw judge $\tau=0.5$ & --- & 0.50 & 2.2\%~[0.9--4.9] & 99.6\%~[98.0--99.9] & 0.4\%~[0.1--2.0] \\
+layered (no refuter) & 230 & 0.20 & 3.4\%~[1.8--6.7] & 100.0\%~[98.7--100.0] & 0.0\%~[0.0--1.3] \\
+\textbf{proposed}, $\alpha=0.05$ & 142 & 0.80 & \textbf{1.7\%~[0.7--4.3]} & \textbf{94.7\%~[91.4--96.7]} & 5.3\%~[3.3--8.6] \\
+\textbf{proposed}, $\alpha=0.01$ & 142 & 0.95 & 0.0\%~[0.0--1.6] & 22.1\%~[17.6--27.3] & 13.2\%~[9.7--17.6] \\
+refined schema & 49 & 0.90 & 0.0\%~[0.0--1.6] & 69.0\%~[63.4--74.2] & 13.2\%~[9.7--17.6] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{figures/fig-main}
+
+\paragraph{Interpretation} The fence goes from catching one duplicate in eight to nine in ten, with its cost visible. A hand-set threshold ($\tau=0.5$) deduplicates more and differs in wrong suppression by one discordant item ($p=1.0$); calibration adds a bound that needs no tuning on labels, and the refuter adds robustness on typed fields (Section~\ref{sec:res-attack}), not lower benign wrong suppression (four discordant items, Holm $p=0.625$).
+
+\paragraph{Limitation} $\alpha$ moves the operating point more than any other choice: at $\alpha=0.01$ deduplication is 22.1\% and 64.8\% of duplicates go to review.
+
+\subsection{Is wrong suppression bounded for the statistic the fence deploys?}\label{sec:res-bound}
+
+\paragraph{Question} Does the deployed rule behave as Theorem~\ref{thm:bound} says, does the jurisdiction condition matter, and does the multiplicity correction?
+
+\paragraph{Method} (i) The proposed configuration calibrated on its own jurisdiction and on the wider non-canonical pool, with wrong suppression measured over the residual, the population the bound governs. (ii) A Monte-Carlo simulation with exchangeable continuous scores ($n=200$, 2,000 replications per $m$), uncorrected against corrected. (iii) 60 live units with $K=50$ nested candidates scored by Llama-3.1-8B-Instant. (iv) Resampled pools and 200 seed-level splits. (v) Multi-candidate units built from the corpus and scored by the primary judge: one unit per residual test pair, whose partner is the true match (duplicate units) or a labelled distinct act, plus up to nine further candidates that share the request's projection and are known distinct from it and from each other (Section~S10); thresholds from the deployed pool ($n=\mclPoolN$, certifiable $m\le\mclCertM$).
+
+\paragraph{Result} (i) With the matched pool ($n=142$, $\thi=0.80$) residual wrong suppression is 2.8\%~[1.1--6.9]; with the wider pool ($n=230$, $\thi=0.20$) it is 4.9\%~[2.4--9.7], while the rate over the whole test split stays at 3.0\%~[1.5--6.1], below $\alpha$. The second judge behaves the same way (2.1\%~[0.7--5.9] against 4.9\%~[2.4--9.7]). (ii) The uncorrected rule reaches 5.0\%, 11.2\%, 22.9\%, 38.3\%, 70.3\% and 89.0\% at $m=1,2,5,10,25,50$; the corrected rule gives 5.0\%, 5.7\% (within Monte-Carlo error), 4.5\%, 3.7\%, 0.0\% and 0.0\%, the zeros being the budget switching semantic suppression off (Figure~\ref{fig:multiplicity}). (iii) The live judge's scores take two values, so the result does not depend on the calibrated value: at $m=50$ the uncorrected rule wrongly suppresses 65.0\%~[43.3--81.9] of held-out distinct units and the corrected rule 0.0\%~[0.0--16.1], which also stops deduplicating because its pool of 205 certifies only $m\le10$. (iv) Resampling leaves the mean realised rate flat in pool size while the tail and the share of pools above $\alpha$ fall (Section~S11); seed-level resplitting raises the mean on every judge---1.7\% to 2.7\%, 1.3\% to 2.2\%, 0.9\% to 1.8\%---with 10.5\%, 1.0\% and 11.0\% of splits above $\alpha$. (v) On the corpus-derived units scored by the primary judge, the added candidates did not produce the failure the correction guards against: wrong suppression of distinct units is \mclWSUncTwo{} under both rules at $m=2$ ($n=\mclNDiffTwo$) and \mclWSUncFive{} under both at $m=5$ and $m=10$ ($n=\mclNDiffFive$), because the extra candidates are acts from other seeds that the judge scores low. The correction therefore only costs deduplication here: \mclDedupUncFive{} uncorrected against \mclDedupBonFive{} corrected at $m=5$, and none at $m=10$, beyond the budget. Response attribution is rarely wrong: the returned response belongs to a different act for \mclAttrCountUncTwo{} suppressed duplicates at $m=2$ and \mclAttrCountUncFive{} at $m=5$ (ties counted as errors). Re-scoring exposed a stability problem instead. Scored again in a different batch at temperature 0, only \mclDriftIdenticalCount{} corpus partners received their persisted score; most changes are small (\mclDriftLarge{} move by 0.2 or more; mean \mclDriftSigned), but \mclCrossedUp{} distinct pairs crossed the 0.80 threshold upward and \mclCrossedDown{} downward, so the same 144 distinct residual pairs give \mclMOneFresh{} wrong suppression at $m=1$ against \mclMOnePersisted{} with the persisted scores.
+
+\input{figures/fig-multiplicity}
+
+\paragraph{Interpretation} A pool from outside the jurisdiction roughly doubles the rate the bound governs while the whole-split rate stays under $\alpha$, so the violation is invisible unless one conditions on the residual. The correction is necessary and pays for safety by switching off beyond its budget; the theorem is marginal and depends on jurisdiction-matched exchangeability, so realised rates can vary across calibration draws.
+
+\paragraph{Limitation} The simulation uses synthetic scores and the saturated-judge experiment purpose-built units. The admitted-judge units are built from the corpus, reach $m\ge5$ only on two tools, and contain no hard multi-candidate cases, so they measure the correction's cost, not its benefit. The re-scoring result means the judge is noisy at temperature 0, so the realised rate of a single scoring run varies; the headline run may be at the favourable end (Section~\ref{sec:limitations}).
+
+\subsection{Is the bound valid within each kind of difference?}\label{sec:res-class}
+
+\paragraph{Question} The distinct pairs in the jurisdiction mix three kinds of difference we chose: near-miss mutations (D1), legitimate repeats (D2) and hand-specified semantic differences (D3). Does the bound hold within each, and what does per-kind validity cost?
+
+\paragraph{Method} Offline, from the persisted scores: each category's wrong suppression under the deployed threshold and under a Mondrian threshold on its own residual calibration pool (Corollary~\ref{cor:mondrian}). The category is label-defined, so a per-category threshold is an oracle; the rule valid for every category without knowing which applies is $\max_c t_c$. We also calibrate per tool, a partition the fence can observe, and reweight the residual distinct test mix toward D3.
+
+\paragraph{Result} On the primary judge the deployed threshold ($\thi=0.80$, pool 142, certifiable $m\le7$) gives 0.8\%~[0.1--4.4] on D1, 1.3\%~[0.2--7.2] on D2 and 6.5\%~[1.8--20.7] on D3. The per-category pools hold 37, 75 and 30 scores: each is certifiable at $m=1$, but only D2 beyond it. D3's Mondrian threshold is its pool's largest score, 0.90, and removes both D3 errors (0.0\%~[0.0--11.0]). Which category carries the excess depends on the judge: on GPT-OSS-20B and Qwen it is legitimate repeats, at 4.0\%~[1.4--11.1] and 2.7\%~[0.7--9.2]. The class-valid rule removes every benign wrong suppression on all three judges (0.0\%~[0.0--1.6]) at a cost in deduplication: 94.7\% falls to 69.0\%~[63.4--74.2] on the primary judge and to the canonical-only 12.1\%~[8.8--16.4] on the other two. Calibrating per tool gives 0.4\%~[0.1--2.4] wrong suppression and 67.6\%~[61.9--72.8] deduplication on the primary judge, with two of six tools below the 19-pair budget. Reweighting moves the primary judge's residual rate from 2.8\%~[0.7--5.6] at the observed D3 share (20.8\%) to 4.2\%~[0.4--9.3] at 50\% and 6.7\%~[1.8--21.3] on D3 alone (Section~S23).
+
+\paragraph{Interpretation} The marginal guarantee is an average over a mix, and the mix is ours. No per-category rate is significantly above $\alpha$, but the theorem gives no reason to expect any to be below it, and on the primary judge D3's point estimate is not. Per-kind validity costs what Corollary~\ref{cor:mondrian} predicts: partitioning divides the budget, pushes each class threshold up the ranks and, when the classes cannot be observed, charges every request the most conservative one. This is the refinement dilemma applied to the calibration population rather than to the schema.
+
+\paragraph{Limitation} Thirty to seventy-five calibration pairs per category; a deployment's kinds of difference are unknown.
+
+\subsection{Does the bounded direction transfer across judges?}\label{sec:res-judges}
+
+\paragraph{Question} Is the behaviour a property of the mechanism or of one model?
+
+\paragraph{Method} Three admitted judges from two families, each calibrated on its own pool, on the full test split and on the 499 test pairs all three scored; deduplication by paraphrase-generator arm; overlap of the judges' errors.
+
+\paragraph{Result} Wrong suppression is 1.7\%~[0.7--4.3], 1.3\%~[0.4--3.7] and 0.9\%~[0.2--3.1], all below $\alpha$, against deduplication of 94.7\%~[91.4--96.7], 82.6\%~[77.7--86.6] and 89.0\%~[84.8--92.1] and silent escape from 2.1\%~[1.0--4.6] to 8.5\%~[5.8--12.4] (Table~\ref{tab:judges}); the common subset gives the same picture. The judges' wrong suppressions are four, three and two pairs with \emph{no pair in common}. The primary judge deduplicates 91.2\%~[77.0--97.0] of the hand-written arm, 96.4\%~[87.7--99.0] of the Llama arm, 91.8\%~[82.2--96.4] of its own family's arm and 91.5\%~[81.6--96.3] of the Qwen arm.
+
+\begin{table}[!tbp]
+\centering\scriptsize\setlength{\tabcolsep}{3.5pt}
+\caption{Three judges, each calibrated on its own jurisdiction, $\alpha=0.05$. The two GPT-OSS models share a family; Qwen is a second family. Wrong suppression is below $\alpha$ for all three; deduplication and silent escape are governed by nothing.}\label{tab:judges}
+\begin{tabular}{@{}lrrlll@{}}
+\toprule
+Judge & coverage & $\thi$ & wrong suppression & dedup & silent escape \\
+\midrule
+GPT-OSS-120B (primary) & 100\% & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 5.3\%~[3.3--8.6] \\
+GPT-OSS-20B & 100\% & 0.95 & 1.3\%~[0.4--3.7] & 82.6\%~[77.7--86.6] & 2.1\%~[1.0--4.6] \\
+Qwen3.6-27B & 97.7\% & 0.95 & 0.9\%~[0.2--3.1] & 89.0\%~[84.8--92.1] & 8.5\%~[5.8--12.4] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation} The bounded direction stays bounded on every judge we could admit; the unbounded direction moves twelve points. Disjoint error sets are what Proposition~\ref{prop:residual} predicts: a different oracle redistributes error within the residual rather than removing it. There is no sign of self-recognition, though with 34 hand-written test pairs an advantage under about ten points would not be visible.
+
+\paragraph{Limitation} The disjointness rests on nine errors in total.
+
+\subsection{Adversarial injection: typed fields against prose}\label{sec:res-attack}
+
+\paragraph{Question} Under prompt injection aimed at the fence, what does the refuter remove, and what remains?
+
+\paragraph{Method} The 45 held-out attack pairs are distinct acts, so every suppression is wrong. D4a differs in a typed field and carries text asserting a duplicate; D4b has identical typed fields and is distinguished only by prose. Injection is a deliberate shift, so Theorem~\ref{thm:bound} does not apply.
+
+\paragraph{Result} The raw primary judge wrongly suppresses 65.0\%~[43.3--81.9] of D4a and the calibrated layer without the refuter 70.0\%~[48.1--85.5]; the refuter drives D4a to 0.0\%$\dagger$~[0.0--16.1] on every judge (Figure~\ref{fig:adversarial}). On D4b the refuter is silent and the outcome is the judge's: 84.0\%~[65.3--93.6] for the primary judge, 28.0\%~[14.3--47.6] for GPT-OSS-20B and 24.0\%~[11.5--43.4] for Qwen. A \texttt{min} ensemble tracks the more robust judge (28.0\%~[14.3--47.6]) and a \texttt{mean} ensemble falls between (44.0\%~[26.7--62.9]). Under the refined declaration every judge's D4b rate is 0.0\%$\dagger$~[0.0--13.3].
+
+\input{figures/fig-adversarial}
+
+\paragraph{Interpretation} The injection experiment demonstrates the value of jurisdiction decomposition: typed-field injection is eliminated before judging, whereas prose-only manipulation remains inside the residual LLM jurisdiction where the primary judge wrongly suppresses 84.0\% of attack pairs. The result shows that schema design and judge calibration address different parts of the attack surface: the architectural remedy for prose vulnerability is schema refinement---moving distinguishing attributes into typed fields---rather than relying on judge prompt tuning.
+
+\paragraph{Limitation} Evaluated on forty-five constructed attack pairs using standard injection templates; adversaries with knowledge of declared typed projections will specifically target free-text residual fields.
+
+\subsection{The refinement dilemma, measured and decomposed}\label{sec:res-refinement}
+
+\paragraph{Question} Refinement shrinks the calibration pool (Proposition~\ref{prop:dilemma}). What does that cost, and is the cost the pool's size or its composition?
+
+\paragraph{Method} The refined declaration types, for every free-text field, the numeric magnitudes it mentions; both declarations are calibrated on their own jurisdictions. A size-only counterfactual draws 5,000 random subsets of the declared pool at the refined pool's size and evaluates the refined configuration with each threshold.
+
+\paragraph{Result} Refinement closes prose-only injection on every judge and drives benign wrong suppression to 0.0\%~[0.0--1.6], while judge jurisdiction falls from 76.2\%~[72.3--79.7] to 58.9\%~[54.6--63.0] (Table~\ref{tab:refinement}). Deduplication falls from 94.7\%~[91.4--96.7] to 69.0\%~[63.4--74.2] on the primary judge, and from 82.6\%~[77.7--86.6] and 89.0\%~[84.8--92.1] to the canonical-only 12.1\%~[8.8--16.4] on the other two, whose refined thresholds sit at a score of 1.0. No duplicate is falsely vetoed (0 of 281); on the primary judge 72 duplicates stop being suppressed, 50 of them flagged. In the size-only counterfactual mean deduplication is 88.4\%, and the observed 69.0\% lies at its 11.6th percentile; for the two saturated judges a size-only draw reaches the ceiling in 43.9\% and 41.9\% of cases. Removed pairs are easier: 2.2\% of removed and 10.2\% of retained pairs score at or above 0.8 for both GPT-OSS judges. A three-level schema ladder over a separate act family confirms the monotone part: the residual falls from 100.0\%~[96.4--100.0] to 41.2\%~[32.1--50.9] to 19.6\%~[13.1--28.4], and the calibrated layer suppresses nothing at any level (Section~S13).
+
+\begin{table}[!tbp]
+\centering\scriptsize\setlength{\tabcolsep}{2.2pt}
+\caption{Declared against refined declarations, $\alpha=0.05$. The rank is the position of the threshold from the top of the pool (Proposition~\ref{prop:dilemma}b); $\thi=1.00$ with a strict inequality means no semantic suppression.}\label{tab:refinement}
+\begin{tabular}{@{}llrrrlll@{}}
+\toprule
+Judge & declaration & pool $n$ & rank & $\thi$ & wrong suppression & dedup & D4b injection \\
+\midrule
+GPT-OSS-120B & declared & 142 & 7 & 0.80 & 1.7\%~[0.7--4.3] & 94.7\%~[91.4--96.7] & 84.0\%~[65.3--93.6] \\
+ & refined & 49 & 2 & 0.90 & 0.0\%~[0.0--1.6] & 69.0\%~[63.4--74.2] & 0.0\%$\dagger$~[0.0--13.3] \\
+GPT-OSS-20B & declared & 142 & 7 & 0.95 & 1.3\%~[0.4--3.7] & 82.6\%~[77.7--86.6] & 28.0\%~[14.3--47.6] \\
+ & refined & 49 & 2 & 1.00 & 0.0\%~[0.0--1.6] & 12.1\%~[8.8--16.4] & 0.0\%$\dagger$~[0.0--13.3] \\
+Qwen3.6-27B & declared & 139 & 6 & 0.95 & 0.9\%~[0.2--3.1] & 89.0\%~[84.8--92.1] & 24.0\%~[11.5--43.4] \\
+ & refined & 48 & 2 & 1.00 & 0.0\%~[0.0--1.6] & 12.1\%~[8.8--16.4] & 0.0\%$\dagger$~[0.0--13.3] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation} Refinement is a trade: zero wrong suppression, one injection class closed and 23\% less oracle load, paid for in the recoverable direction. Both components are real: the threshold moves from the 7th to the 2nd largest score, and the surviving pool is enriched in the pairs the judge finds hardest. This demonstrates that schema design is part of the statistical specification of the mechanism.
+
+\paragraph{Limitation} The refined projection types the numbers prose mentions, not the concepts; the composition component is a property of these judges on this corpus.
+
+\subsection{Process death and paraphrased replay}\label{sec:res-crash}
+
+\paragraph{Question} Does the mechanism hold across real process death, and where does it stop holding?
+
+\paragraph{Method} Three operating-system processes share a directory: one commits a wire, a second is killed at one of eight crash points, and a third replays the run with a paraphrase from a pool written by a different model family from the judge. In the \emph{duplicate} arm the replay is the same act (correct: one wire); in the \emph{distinct} arm it is a second instalment distinguished only in prose (correct: two wires). 48 trials per arm, both fence modes on identical draws.
+
+\paragraph{Result} In the duplicate arm the content-addressed fence reaches the correct final state in 0.0\%~[0.0--7.4] of trials and the semantic fence in 97.9\%~[89.1--99.6], including 36 of 36 outside the commit window; every replay was canonically different, so all suppressions came from the calibrated layer. In the distinct arm the semantic fence missed no legitimate effect (0.0\%~[0.0--7.4]). Inside the commit window it re-fired in all 12 trials, flagging 11 (91.7\%~[64.6--98.5]). Per-point results and cost are in Section~S15.
+
+\paragraph{Interpretation} At-most-once commitment holds across process death outside the commit window, including where content-addressed fencing cannot help, without dropping a legitimate act; inside the window the failure is made observable but not prevented, as Proposition~\ref{prop:amo} predicts. This separates guarantee (B) from (C).
+
+\paragraph{Limitation} One tool, one paraphrase pool, one judge; the provider has no idempotency key by design.
+
+\subsection{How much do the conclusions depend on our labels?}\label{sec:res-labels}
+
+\paragraph{Question} Do the conclusions survive defensible relabellings, and do independent readers agree with the construction?
+
+\paragraph{Method} (i) The headline re-derived with legitimate repeats treated as the same act, and with adversarial paraphrases treated as distinct (assuming our validator failed). (ii) The preregistered relabelling study on Channel M (Section~\ref{sec:method-labels}).
+
+\paragraph{Result} (i) Wrong suppression is 1.7\%~[0.7--4.3], 1.9\%~[0.7--5.5] and 2.2\%~[1.1--4.5] under the three labellings, all inside $\alpha$; deduplication is 94.7\%~[91.4--96.7], 75.0\%~[70.3--79.2] and 27.6\%~[21.9--34.2]. (ii) The panel agrees with the construction on 103 of 117 fully annotated items (88.0\%~[80.9--92.7]; Krippendorff's $\alpha=0.829$, Fleiss' $\kappa=0.829$; no item needed adjudication). Two strata are contested under the preregistered rule (upper bound below 0.80): legitimate repeats at 50.0\%~[25.4--74.6], pre-declared as the likeliest to be contested, and prose-only injection at 45.5\%~[21.3--72.0]. Thirteen of the fourteen label flips are residual pairs; the fourteenth is refuter-decided and executed whatever its label. Dropping the panelist that is also a reported judge raises agreement to 91.7\%~[85.0--95.6]. Dropping the two Compound panelists gives 82.1\%~[74.1--88.0].
+
+The preregistered re-derivation gives 9.9\%~[4.9--19.0] wrong suppression under constructed labels and 10.5\%~[4.9--21.1] under panel labels, which \emph{triggers} the preregistered rule: the panel-label estimate exceeds both the constructed one and $\alpha$. Two defects in that computation are reported with it. First, 93 of the 154 items come from an extension corpus whose scores were never persisted, so they can escalate but never be suppressed; they enter the denominator without being able to enter the numerator, and 12 of the 14 flips are such items. Second, the subset is deliberately adversarial (seven of eleven strata are distinct or attack strata). On the 51 annotated items the primary judge actually scored, wrong suppression is 4 of 22 distinct items under constructed labels and 3 of 20 under panel labels; on the benign ones it falls from 1 of 14 to 0 of 12, and the remaining errors are prose-only injections, where no bound is claimed.
+
+\paragraph{Interpretation} The safety conclusion does not depend on our definition of identity; the liveness conclusion does (94.7\% to 27.6\%). The model panel's disagreements fall on pairs whose distinguishing information lives only in free text. Whether human readers would contest the same strata is unknown: no human annotation was collected. The trigger appears to be an artefact of the unscored items, but the rule was fixed in advance so that we could not reason our way out of it, and we report it as triggered.
+
+\paragraph{Limitation} This is a model panel, not a human study, and it is not independent of the primary judge; the human instruments are released unrun (Section~\ref{sec:limitations}).
+
+\subsection{What each component contributes, and what it costs}\label{sec:res-components}
+
+\paragraph{Question} Which layers earn their place, and what does the mechanism cost?
+
+\paragraph{Method} Single-layer ablations, each calibrated on its own jurisdiction; a sweep over fixed thresholds; token and latency accounting from the scoring sessions.
+
+\paragraph{Result} On the primary judge, removing the certifier changes no rate, and removing the escalation band changes nothing because the band is empty ($\tlo=\thi=0.80$). On GPT-OSS-20B, whose band is not empty, removing it turns 15.3\%~[11.6--20.0] of duplicates from flagged into silent escapes; the band is driven by ties, not graded confidence (40 of 43 duplicates in it score exactly at the threshold). Removing the refuter raises deduplication to 100.0\% and wrong suppression to 3.4\%~[1.8--6.7]. The conformal threshold sits deep inside the 80--95\% of the fixed-threshold range that is safe on the test set, giving up 6--20 points of deduplication against the best fixed threshold, which needs test labels to find; against a cross-validated fixed threshold it exceeds $\alpha$ on 29.2\% of bootstrap resamples against 39.6\%. The judge is consulted on 76.2\% of dispatches at about 184 tokens per comparison in batches of ten (Section~S17).
+
+\paragraph{Interpretation} The certifier's value is a guarantee, not a rate; the band matters only when ties leave $\tlo<\thi$; and at $m=1$ calibration buys a label-free threshold, a correction valid at $m>1$ and safe shutdown rather than accuracy.
+
+\paragraph{Limitation} Single-split accounting at $m=1$ with batched API calls; unbatched dispatch latency and live multi-candidate costs are not measured.
+
+\subsection{A second instance: action authorisation}\label{sec:res-authz}
+
+\paragraph{Question} Does the recipe transfer to action authorisation, where the decision is whether an action lies within what a user approved?
+
+\paragraph{Method} The 520-pair corpus of Section~\ref{sec:method-authz}, split by approval (220 benign test pairs; 80 attack pairs held out), under exact scope matching, a raw judge, a calibrated judge without the refuter, and the layered rule, on the three judges at $\alpha=0.05$ and $0.01$.
+
+\paragraph{Result} The certifier permits 9.1\%~[6.0--13.6] of test pairs and the refuter denies 18.2\%~[13.6--23.8], routing 72.7\%~[66.5--78.2] to the judge. On the primary judge ($n=80$, $\thi=0.40$) exact scope matching permits 20.0\%~[13.3--28.9] of covered actions at 0.0\%~[0.0--3.1] wrong authorisation; the layered rule raises autonomy to 100.0\%~[96.3--100.0] at 5.0\%~[2.3--10.5] wrong authorisation (80 discordant items to 0, $p=1.7\times10^{-24}$). The other judges give 1.7\%~[0.5--5.9] and 0.8\%~[0.1--4.6]. The refuter drives the typed-violation attack to 0.0\%~[0.0--8.8] on every judge; on the free-text scope attack the judges permit 15.0\%~[7.1--29.1], 12.5\%~[5.5--26.1] and 0.0\%~[0.0--8.8]. At $\alpha=0.01$ the pool of 80 is below the budget of 99, so $\thi=+\infty$ and the rule falls back to exact scope (Section~S22).
+
+\paragraph{Interpretation} The decomposition transfers intact, including the refuter's closure of typed-field injection and safe shutdown beyond the budget.
+
+\paragraph{Limitation} Drafted seeds and constructed labels, with no independent annotation.

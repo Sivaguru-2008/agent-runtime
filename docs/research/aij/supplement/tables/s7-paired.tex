@@ -1,0 +1,25 @@
+\begin{table}[htbp]
+\centering\footnotesize\setlength{\tabcolsep}{3.5pt}
+\caption{Exact McNemar tests over discordant items, Holm-corrected within family (liveness and safety corrected separately).}\label{tab:s7b}
+%% Scale down only when the natural width exceeds the text block.
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{%
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Family & Comparison & discordant & exact $p$ & Holm \\
+\midrule
+dedup & B8\_full vs B2\_content\_addressed & 232 & 2.9e-70 & 2.3e-69 \\
+dedup & B8\_full vs B5\_certifier\_judge & 15 & 6.1e-5 & 3.7e-4 \\
+dedup & B8\_full vs B7\_decidable\_only & 232 & 2.9e-70 & 2.3e-69 \\
+dedup & B8\_full vs B3\_raw\_judge & 14 & 1.2e-4 & 4.9e-4 \\
+dedup & B8\_full vs B4\_calibrated\_judge & 15 & 6.1e-5 & 3.7e-4 \\
+dedup & B8\_full vs B6\_refuter\_judge & 0 & 1.0e+0 & 1.0e+0 \\
+dedup & B8\_full vs B9\_full\_no\_band & 0 & 1.0e+0 & 1.0e+0 \\
+dedup & B8\_full vs B10\_full\_no\_calibration & 14 & 1.2e-4 & 4.9e-4 \\
+WS & B8\_full vs B3\_raw\_judge & 1 & 1.000 & 1.000 \\
+WS & B8\_full vs B4\_calibrated\_judge & 4 & 0.125 & 0.625 \\
+WS & B8\_full vs B5\_certifier\_judge & 4 & 0.125 & 0.625 \\
+WS & B8\_full vs B10\_full\_no\_calibration & 1 & 1.000 & 1.000 \\
+WS & B8\_full vs B12\_corrected\_multiplicity\_m5 & 4 & 0.125 & 0.625 \\
+\bottomrule
+\end{tabular}}
+\end{table}

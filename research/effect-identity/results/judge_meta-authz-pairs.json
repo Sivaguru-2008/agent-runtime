@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-09-24T17:22:45.640Z",
+  "pairs": 520,
+  "models": {
+    "qwen_qwen3_8_27b": {
+      "model": "qwen/qwen3.8-27b",
+      "family": "qwen",
+      "calls": 52,
+      "meanCallLatencyMs": 1406,
+      "inputTokens": 83608,
+      "outputTokens": 8800,
+      "batchSize": 10,
+      "temperature": 0,
+      "scoredPairs": 520,
+      "abstentions": 0,
+      "parse": {
+        "batchRetries": 0,
+        "transportFailures": 0,
+        "byStatus": {
+          "ok": 520,
+          "ok_pct_suffix": 0,
+          "missing": 0,
+          "not_a_number": 0,
+          "non_integer": 0,
+          "out_of_range": 0
+        },
+        "ambiguousZeroOne": 93
+      }
+    }
+  }
+}

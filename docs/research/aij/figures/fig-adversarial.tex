@@ -1,0 +1,40 @@
+\begin{figure}[!tbp]
+\centering
+%% Two panels of equal size with one shared legend underneath. Each series is
+%% encoded twice, by hue and by fill pattern, so the bars stay distinguishable
+%% in greyscale and in print.
+\pgfplotsset{attackpanel/.style={
+  width=0.40\linewidth, height=5.2cm, ybar, bar width=5pt, ymin=0, ymax=100,
+  symbolic x coords={120B,20B,Qwen}, xtick=data, enlarge x limits=0.3,
+  ymajorgrids, grid style={gray!20},
+  tick label style={font=\scriptsize}, label style={font=\footnotesize}, title style={font=\footnotesize},
+  error bars/y dir=both, error bars/y explicit},
+  /pgfplots/raw/.style={fill=gray!60, postaction={pattern=north east lines, pattern color=black!45}},
+  /pgfplots/cal/.style={fill=orange!60, postaction={pattern=horizontal lines, pattern color=black!45}},
+  /pgfplots/hard/.style={fill=blue!55, postaction={pattern=crosshatch, pattern color=black!30}},
+  /pgfplots/tight/.style={fill=green!55!black, postaction={pattern=dots, pattern color=white}}}
+\begin{tikzpicture}[baseline]
+\begin{axis}[attackpanel, title={D4a: injection across a typed-field difference},
+  ylabel={wrong suppression (\%)},
+  legend style={font=\scriptsize, draw=none, legend columns=4, column sep=6pt},
+  legend to name=advlegend]
+\addplot[raw] table[x=judge, y=raw, y error minus=rawm, y error plus=rawp] {figures/data/D4a.dat};
+\addplot[cal] table[x=judge, y=cal, y error minus=calm, y error plus=calp] {figures/data/D4a.dat};
+\addplot[hard] table[x=judge, y=hard, y error minus=hardm, y error plus=hardp] {figures/data/D4a.dat};
+\addplot[tight] table[x=judge, y=tight, y error minus=tightm, y error plus=tightp] {figures/data/D4a.dat};
+\legend{raw judge $\tau{=}0.5$, calibrated (no refuter), proposed, refined}
+\end{axis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}[baseline]
+\begin{axis}[attackpanel, title={D4b: injection where only prose distinguishes}]
+\addplot[raw] table[x=judge, y=raw, y error minus=rawm, y error plus=rawp] {figures/data/D4b.dat};
+\addplot[cal] table[x=judge, y=cal, y error minus=calm, y error plus=calp] {figures/data/D4b.dat};
+\addplot[hard] table[x=judge, y=hard, y error minus=hardm, y error plus=hardp] {figures/data/D4b.dat};
+\addplot[tight] table[x=judge, y=tight, y error minus=tightm, y error plus=tightp] {figures/data/D4b.dat};
+\end{axis}
+\end{tikzpicture}
+
+\vspace{2pt}
+{\hypersetup{linkcolor=black}\ref{advlegend}}
+\caption{Adversarial injection on the 45 held-out attack pairs (all distinct acts; every suppression is wrong), with 95\% Wilson intervals. Calibration offers no protection under deliberate shift. The refuter removes D4a on every judge by construction (the zeros are logical, not estimated). On D4b the typed fields agree, the refuter is silent, and the outcome is whatever the judge does, until the refined declaration types the distinguishing numbers. Theorem~\ref{thm:bound} does not apply to this split.}\label{fig:adversarial}
+\end{figure}

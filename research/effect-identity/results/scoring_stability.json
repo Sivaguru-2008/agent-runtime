@@ -1,0 +1,214 @@
+{
+  "generatedAt": "2026-09-30T08:30:46.018Z",
+  "judge": "openai/gpt-oss-120b",
+  "alpha": 0.05,
+  "scoringMeta": {
+    "judge": "openai/gpt-oss-120b",
+    "batchSize": 10,
+    "temperature": 0,
+    "seed": 20260930,
+    "lastRun": "2026-09-30",
+    "scored": 777,
+    "inputTokens": 89285,
+    "outputTokens": 53795
+  },
+  "nResidual": 777,
+  "nCal": 386,
+  "nTest": 391,
+  "conditions": {
+    "matchedPersisted": {
+      "tHi": 0.8,
+      "poolN": 142,
+      "residualWrongSuppression": {
+        "value": 0.027777777777777776,
+        "successes": 4,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.01085411795640967,
+          "hi": 0.06924153934534726
+        }
+      },
+      "residualDedup": {
+        "value": 0.9392712550607287,
+        "successes": 232,
+        "n": 247,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9022325285149025,
+          "hi": 0.9628557269122652
+        }
+      }
+    },
+    "matchedFresh": {
+      "tHi": 0.8,
+      "poolN": 142,
+      "residualWrongSuppression": {
+        "value": 0.041666666666666664,
+        "successes": 6,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.01923388666249415,
+          "hi": 0.08791778071862287
+        }
+      },
+      "residualDedup": {
+        "value": 0.9635627530364372,
+        "successes": 238,
+        "n": 247,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9322133422830445,
+          "hi": 0.9807138950110632
+        }
+      }
+    },
+    "mismatched": {
+      "tHi": 0.8,
+      "poolN": 142,
+      "residualWrongSuppression": {
+        "value": 0.041666666666666664,
+        "successes": 6,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.01923388666249415,
+          "hi": 0.08791778071862287
+        }
+      },
+      "residualDedup": {
+        "value": 0.9635627530364372,
+        "successes": 238,
+        "n": 247,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9322133422830445,
+          "hi": 0.9807138950110632
+        }
+      }
+    },
+    "mismatchedReverse": {
+      "tHi": 0.8,
+      "poolN": 142,
+      "residualWrongSuppression": {
+        "value": 0.027777777777777776,
+        "successes": 4,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.01085411795640967,
+          "hi": 0.06924153934534726
+        }
+      },
+      "residualDedup": {
+        "value": 0.9392712550607287,
+        "successes": 232,
+        "n": 247,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.9022325285149025,
+          "hi": 0.9628557269122652
+        }
+      }
+    },
+    "mismatchedThirdScoring": {
+      "tHi": 0.8,
+      "poolN": 142,
+      "residualWrongSuppression": {
+        "value": 0.05555555555555555,
+        "successes": 8,
+        "n": 144,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.028416607888748446,
+          "hi": 0.10579106957172865
+        }
+      },
+      "residualDedup": {
+        "value": 0.9919028340080972,
+        "successes": 245,
+        "n": 247,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.970962733607108,
+          "hi": 0.9977766491984299
+        }
+      }
+    }
+  },
+  "agreement": {
+    "freshVsPersisted": {
+      "n": 777,
+      "identical": {
+        "value": 0.44272844272844275,
+        "successes": 344,
+        "n": 777,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.40816980787093987,
+          "hi": 0.4778505884660877
+        }
+      },
+      "largeChange": {
+        "value": 0.05791505791505792,
+        "successes": 45,
+        "n": 777,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.04356270078459862,
+          "hi": 0.07661721251357974
+        }
+      },
+      "meanSignedDiff": 0.010592020592020595
+    },
+    "freshVsMultiCandidateRun": {
+      "n": 391,
+      "identical": {
+        "value": 0.4296675191815857,
+        "successes": 168,
+        "n": 391,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.38151921170672837,
+          "hi": 0.4791843725514368
+        }
+      },
+      "largeChange": {
+        "value": 0.043478260869565216,
+        "successes": 17,
+        "n": 391,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.027320276350687917,
+          "hi": 0.06851935237958365
+        }
+      },
+      "meanSignedDiff": -0.0006649616368286303
+    },
+    "persistedVsMultiCandidateRun": {
+      "n": 391,
+      "identical": {
+        "value": 0.41687979539641945,
+        "successes": 163,
+        "n": 391,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.36904986417928537,
+          "hi": 0.4663270990349098
+        }
+      },
+      "largeChange": {
+        "value": 0.043478260869565216,
+        "successes": 17,
+        "n": 391,
+        "basis": "measured",
+        "ci95": {
+          "lo": 0.027320276350687917,
+          "hi": 0.06851935237958365
+        }
+      },
+      "meanSignedDiff": -0.016112531969309434
+    }
+  }
+}
